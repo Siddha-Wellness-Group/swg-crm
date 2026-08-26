@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SWG CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F6F1E7;
+    --parchment:#EFE8D8;
+    --surface:#FFFFFF;
+    --ink:#2A2820;
+    --ink-soft:#7A7462;
+    --border:#DED4BE;
+    --amber:#A8703C;
+    --amber-soft:#EADFC8;
+    --sage:#5B6B4C;
+    --sage-soft:#E1E6D5;
+    --clay:#9C5B48;
+    --clay-soft:#F0DDD5;
+    --ochre:#B98A2E;
+    --ochre-soft:#F1E3C4;
+    --umber:#6F4A30;
+    --umber-soft:#E4D6C8;
+    --olive:#748047;
+    --olive-soft:#E4E8D3;
+    --rust:#A6472B;
+    --rust-soft:#F0DBD2;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:'Work Sans',sans-serif;font-size:14px;}
+  .display{font-family:'Fraunces',serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  #app{display:flex;min-height:100vh;}
+
+  /* Sidebar */
+  .sidebar{width:200px;background:var(--parchment);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:22px 16px;flex-shrink:0;}
+  .brand{font-size:19px;font-weight:600;letter-spacing:0.3px;margin-bottom:2px;}
+  .brand-sub{font-size:10.5px;color:var(--ink-soft);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:28px;}
+  .navlink{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:6px;color:var(--ink-soft);cursor:pointer;margin-bottom:2px;font-size:13.5px;font-weight:500;transition:background .15s,color .15s;}
+  .navlink:hover{background:rgba(42,40,32,0.06);}
+  .navlink.active{color:#fff;}
+  .navlink .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .navlink[data-view="dashboard"] .dot{background:var(--ink);}
+  .navlink[data-view="dashboard"] .dot{background:var(--ink);}
+  .navlink[data-view="home"] .dot{background:var(--amber);}
+  .navlink[data-view="contacts"] .dot{background:var(--amber);}
+  .navlink[data-view="leads"] .dot{background:var(--ochre);}
+  .navlink[data-view="customers"] .dot{background:var(--sage);}
+  .navlink[data-view="distributors"] .dot{background:var(--umber);}
+  .navlink[data-view="suppliers"] .dot{background:var(--clay);}
+  .navlink[data-view="deals"] .dot{background:var(--ochre);}
+  .navlink[data-view="orders"] .dot{background:var(--umber);}
+  .navlink[data-view="tasks"] .dot{background:var(--olive);}
+  .navlink[data-view="invoices"] .dot{background:var(--rust);}
+  .navlink[data-view="products"] .dot{background:var(--sage);}
+  .navlink[data-view="dashboard"].active{background:var(--ink);}
+  .navlink[data-view="home"].active{background:var(--amber);}
+  .navlink[data-view="contacts"].active{background:var(--amber);}
+  .navlink[data-view="leads"].active{background:var(--ochre);}
+  .navlink[data-view="customers"].active{background:var(--sage);}
+  .navlink[data-view="distributors"].active{background:var(--umber);}
+  .navlink[data-view="suppliers"].active{background:var(--clay);}
+  .navlink[data-view="deals"].active{background:var(--ochre);}
+  .navlink[data-view="orders"].active{background:var(--umber);}
+  .navlink[data-view="tasks"].active{background:var(--olive);}
+  .navlink[data-view="invoices"].active{background:var(--rust);}
+  .navlink[data-view="products"].active{background:var(--sage);}
+  .navlink.hidden-role{display:none;}
+  .sidebar-foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--border);}
+  .foot-label{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+  select#viewingAs{width:100%;padding:7px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--ink);font-family:inherit;font-size:12.5px;}
+  .reset-btn{margin-top:10px;font-size:11px;color:var(--clay);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;}
+
+  /* Main */
+  main{flex:1;padding:28px 34px;overflow-y:auto;}
+  .topbar{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px;}
+  .topbar h1{font-size:24px;margin:0;font-weight:500;display:flex;align-items:center;gap:10px;}
+  .topbar h1 .accent-dot{width:11px;height:11px;border-radius:50%;background:var(--accent, var(--ink));}
+  .topbar .sub{color:var(--ink-soft);font-size:12.5px;margin-top:3px;}
+  .btn{background:var(--accent, var(--amber));color:#fff;border:none;padding:9px 16px;border-radius:6px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:opacity .15s;}
+  .btn:hover{opacity:.88;}
+  .btn.secondary{background:transparent;color:var(--ink-soft);border:1px solid var(--border);}
+  .btn.danger{background:var(--clay);}
+
+  /* Cards / stats */
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 18px;}
+  .stat-card .num{font-family:'Fraunces',serif;font-size:28px;font-weight:600;}
+  .stat-card .lbl{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.6px;margin-top:2px;}
+  .stat-card.amber .num{color:var(--amber);}
+  .stat-card.sage .num{color:var(--sage);}
+  .stat-card.clay .num{color:var(--clay);}
+  .stat-card.ochre .num{color:var(--ochre);}
+  .stat-card.umber .num{color:var(--umber);}
+  .stat-card.olive .num{color:var(--olive);}
+  .stat-card.rust .num{color:var(--rust);}
+
+  .section-title{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin:26px 0 10px;}
+
+  /* Filters */
+  .filters{display:flex;gap:6px;margin-bottom:14px;}
+  .filter-chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-size:12px;cursor:pointer;color:var(--ink-soft);}
+  .filter-chip.active{background:var(--accent, var(--ink));color:#fff;border-color:var(--accent, var(--ink));}
+
+  /* Table */
+  table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.6px;color:var(--ink-soft);padding:10px 14px;border-bottom:1px solid var(--border);background:var(--parchment);}
+  td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  .ledger-no{color:var(--accent, var(--amber));font-size:11px;}
+  .row-actions{display:flex;gap:10px;}
+  .row-actions span{cursor:pointer;color:var(--ink-soft);font-size:12px;text-decoration:underline;}
+  .row-actions span:hover{color:var(--ink);}
+
+  .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;}
+  .badge.supplier{background:var(--clay-soft);color:var(--clay);}
+  .badge.distributor{background:var(--ochre-soft);color:var(--ochre);}
+  .badge.customer{background:var(--sage-soft);color:var(--sage);}
+  .badge.marketing{background:var(--umber-soft);color:var(--umber);}
+  .badge.pending{background:var(--amber-soft);color:var(--amber);}
+  .badge.shipped{background:#E4E1D6;color:var(--ink-soft);}
+  .badge.delivered{background:var(--sage-soft);color:var(--sage);}
+  .badge.cancelled{background:var(--clay-soft);color:var(--clay);}
+  .badge.open{background:var(--amber-soft);color:var(--amber);}
+  .badge.done{background:var(--sage-soft);color:var(--sage);}
+  .badge.unpaid{background:var(--amber-soft);color:var(--amber);}
+  .badge.paid{background:var(--sage-soft);color:var(--sage);}
+  .badge.overdue{background:var(--clay-soft);color:var(--clay);}
+  .badge.muted{background:#E4E1D6;color:var(--ink-soft);}
+
+  .empty{padding:40px 20px;text-align:center;color:var(--ink-soft);border:1px dashed var(--border);border-radius:8px;background:var(--surface);}
+  .empty .display{font-size:17px;color:var(--ink);margin-bottom:4px;}
+
+  /* Kanban */
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:start;}
+  .kcol{background:var(--parchment);border-radius:8px;padding:10px;min-height:120px;border-top:3px solid var(--accent, var(--amber));}
+  .kcol-head{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink-soft);padding:2px 4px 10px;}
+  .kcard{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:10px 11px;margin-bottom:9px;position:relative;}
+  .kcard .ledger-no{position:absolute;top:8px;right:10px;}
+  .kcard .ktitle{font-weight:500;font-size:13px;margin-bottom:4px;padding-right:36px;}
+  .kcard .kcontact{font-size:11.5px;color:var(--ink-soft);margin-bottom:6px;}
+  .kcard .kval{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--amber);margin-bottom:8px;}
+  .kcard .kfoot{display:flex;justify-content:space-between;align-items:center;gap:6px;}
+  .kcard select{font-size:11px;padding:3px 4px;border-radius:5px;border:1px solid var(--border);font-family:inherit;background:var(--surface);}
+  .kcard .kowner{font-size:10.5px;color:var(--ink-soft);}
+  .kcard .kdel{cursor:pointer;color:var(--clay);font-size:11px;}
+
+  /* Modal */
+  .overlay{display:none;position:fixed;inset:0;background:rgba(42,40,32,0.4);align-items:center;justify-content:center;z-index:50;}
+  .overlay.show{display:flex;}
+  .modal{background:var(--surface);border-radius:10px;padding:24px 26px;width:420px;max-width:90vw;max-height:86vh;overflow-y:auto;}
+  .modal h2{margin:0 0 16px;font-size:17px;font-weight:500;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;}
+  .field input,.field select,.field textarea{width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);font-family:inherit;font-size:13px;background:var(--cream);color:var(--ink);}
+  .field textarea{resize:vertical;min-height:56px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
+
+  .loading{padding:60px;text-align:center;color:var(--ink-soft);}
+  .shared-note{font-size:11px;color:var(--ink-soft);margin-top:14px;line-height:1.5;}
+
+  /* Dashboard hello + donut */
+  .hello{margin-bottom:22px;}
+  .hello .hi{font-size:30px;font-weight:500;margin:0;}
+  .hello .sub2{color:var(--ink-soft);font-size:13px;margin-top:4px;}
+  .donut-wrap{display:flex;align-items:center;gap:34px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-bottom:24px;flex-wrap:wrap;}
+  .donut{width:220px;height:220px;border-radius:50%;flex-shrink:0;position:relative;}
+  .donut-hole{position:absolute;top:50%;left:50%;width:128px;height:128px;background:var(--surface);border-radius:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .donut-hole .dnum{font-family:'Fraunces',serif;font-size:30px;font-weight:600;color:var(--ink);}
+  .donut-hole .dlbl{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.6px;margin-top:2px;text-align:center;}
+  .legend{display:flex;flex-direction:column;gap:9px;min-width:170px;}
+  .legend-row{display:flex;align-items:center;gap:9px;font-size:13px;cursor:pointer;padding:3px 4px;border-radius:5px;}
+  .legend-row:hover{background:var(--cream);}
+  .legend-swatch{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .legend-name{flex:1;color:var(--ink);}
+  .legend-count{font-family:'IBM Plex Mono',monospace;color:var(--ink-soft);font-size:12px;}
+  .donut-empty{color:var(--ink-soft);font-size:13px;}
+
+  /* Login screen */
+  .login-screen{position:fixed;inset:0;background:var(--cream);display:flex;align-items:center;justify-content:center;overflow:hidden;z-index:100;}
+  .login-card{position:relative;z-index:2;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px 30px;width:320px;box-shadow:0 12px 32px rgba(42,40,32,0.14);text-align:center;}
+  .login-card .brand-sub{text-align:center;}
+  .login-card .login-message{font-size:18px;color:var(--ink);margin:14px 0 22px;line-height:1.35;}
+  .login-card .field{text-align:left;margin-bottom:14px;}
+  .login-error{color:var(--rust);font-size:12px;margin:-4px 0 10px;text-align:left;}
+  .confetti-container{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;}
+  .confetti-piece{position:absolute;top:-20px;width:8px;height:14px;opacity:.85;border-radius:1px;animation:confetti-fall linear infinite;}
+  @keyframes confetti-fall{0%{transform:translateY(-10vh) rotate(0deg);}100%{transform:translateY(110vh) rotate(360deg);}}
+
+  /* Identity / logout */
+  .identity-name{font-size:13px;font-weight:500;color:var(--ink);padding:6px 0 2px;}
+
+  /* Individual / Company badges */
+  .badge.individual{background:#E4E1D6;color:var(--ink-soft);}
+  .badge.company{background:var(--olive-soft);color:var(--olive);}
+
+  /* Currency picklist + chips */
+  .currency-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+  .currency-opt{display:flex;align-items:center;gap:6px;font-size:12.5px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--cream);cursor:pointer;}
+  .currency-opt input{width:auto;margin:0;}
+  .currency-chip{display:inline-block;background:var(--rust-soft);color:var(--rust);font-family:'IBM Plex Mono',monospace;font-size:10.5px;padding:2px 7px;border-radius:10px;margin:0 3px 3px 0;}
+
+  /* Deal pipeline stepper */
+  .dpipe{display:flex;margin-top:10px;margin-bottom:2px;}
+  .dpipe-step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;}
+  .dpipe-step:not(:first-child)::before{content:'';position:absolute;top:5px;right:50%;width:100%;height:2px;background:var(--border);z-index:0;}
+  .dpipe-step.reached:not(:first-child)::before{background:var(--stepcolor);}
+  .dpipe-dot{width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--border);z-index:1;box-sizing:border-box;}
+  .dpipe-step.reached .dpipe-dot{background:var(--stepcolor);border-color:var(--stepcolor);}
+  .dpipe-step.current .dpipe-dot{box-shadow:0 0 0 2px var(--surface), 0 0 0 4px var(--stepcolor);}
+  .dpipe-label{font-size:8.5px;margin-top:4px;color:var(--ink-soft);text-align:center;line-height:1.2;}
+  .dpipe-step.current .dpipe-label{color:var(--ink);font-weight:600;}
+
+  /* Top navbar */
+  .topnav{display:flex;align-items:center;gap:4px;background:var(--ink);padding:0 22px;height:44px;flex-shrink:0;}
+  .topnav-btn{display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:6px;font-family:'Work Sans',sans-serif;font-size:12.5px;font-weight:500;color:rgba(255,255,255,0.72);background:none;border:none;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
+  .topnav-btn:hover{background:rgba(255,255,255,0.1);color:#fff;}
+  .topnav-btn.tnav-active{background:rgba(255,255,255,0.15);color:#fff;}
+  .topnav-icon{font-size:14px;line-height:1;}
+  .topnav-sep{flex:1;}
+
+  /* Search screen */
+  .search-bar-wrap{display:flex;gap:10px;margin-bottom:20px;}
+  .search-bar-wrap input{flex:1;padding:10px 14px;border-radius:8px;border:1px solid var(--border);font-family:inherit;font-size:14px;background:var(--surface);color:var(--ink);}
+  .search-results-section{margin-bottom:18px;}
+  .search-section-label{font-size:10.5px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin-bottom:6px;}
+  .search-hit{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;margin-bottom:5px;cursor:pointer;}
+  .search-hit:hover{border-color:var(--amber);}
+  .search-hit-type{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--ink-soft);min-width:72px;}
+  .search-hit-name{font-size:13px;font-weight:500;flex:1;}
+  .search-hit-sub{font-size:11.5px;color:var(--ink-soft);}
+  .search-empty{color:var(--ink-soft);font-size:13px;text-align:center;padding:30px;}
+
+  /* Rickroll screen */
+  .rickroll{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:18px;}
+  .rickroll-text{font-family:Arial,sans-serif;font-size:52px;font-weight:700;color:var(--ink);text-align:center;}
+
+  /* Rocket flight on login screen */
+  .rocket{position:absolute;left:-80px;bottom:22vh;font-size:44px;z-index:3;pointer-events:none;transform:rotate(-8deg);opacity:0;filter:drop-shadow(0 4px 8px rgba(42,40,32,0.2));}
+  .rocket.launched{animation:rocket-fly 2.6s cubic-bezier(0.4,0,0.7,1) forwards;}
+  @keyframes rocket-fly{
+    0%{left:-80px;bottom:22vh;opacity:0;transform:rotate(-8deg);}
+    10%{opacity:1;}
+    50%{bottom:60vh;transform:rotate(-4deg);}
+    90%{opacity:1;}
+    100%{left:105vw;bottom:75vh;opacity:0;transform:rotate(2deg);}
+  }
+
+  /* In-app celebration confetti (1s burst) */
+  .celebrate{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden;}
+  .celebrate .cpiece{position:absolute;top:-20px;width:8px;height:14px;opacity:0;border-radius:1px;animation:celebrate-drop 1s ease-out forwards;}
+  @keyframes celebrate-drop{
+    0%{transform:translateY(-10vh) rotate(0deg);opacity:0;}
+    15%{opacity:0.95;}
+    100%{transform:translateY(110vh) rotate(540deg);opacity:0;}
+  }
+
+  /* Follow-up popup after contact created */
+  .followup-modal{text-align:center;}
+  .followup-modal .fu-icon{font-size:40px;margin-bottom:10px;}
+  .followup-modal h2{margin-bottom:6px;}
+  .followup-modal p{color:var(--ink-soft);font-size:13px;margin:0 0 20px;}
+
+  /* Multi-select picklist (replaces checkbox grid) */
+  .ms-wrap{position:relative;}
+  .ms-trigger{width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--cream);color:var(--ink);font-family:inherit;font-size:13px;cursor:pointer;text-align:left;display:flex;justify-content:space-between;align-items:center;}
+  .ms-trigger .ms-arrow{color:var(--ink-soft);font-size:10px;margin-left:6px;}
+  .ms-dropdown{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--surface);border:1px solid var(--border);border-radius:8px;z-index:60;max-height:220px;overflow-y:auto;box-shadow:0 6px 20px rgba(42,40,32,0.12);}
+  .ms-dropdown.open{display:block;}
+  .ms-option{display:flex;align-items:center;gap:9px;padding:9px 12px;cursor:pointer;font-size:13px;transition:background .1s;}
+  .ms-option:hover{background:var(--cream);}
+  .ms-option input[type=checkbox]{accent-color:var(--amber);width:14px;height:14px;margin:0;}
+  .ms-chips{display:flex;flex-wrap:wrap;gap:4px;min-height:16px;}
+
+  /* Welcome screen (post-login) */
+  .welcome-screen{position:fixed;inset:0;background:var(--cream);display:flex;align-items:center;justify-content:center;z-index:90;flex-direction:column;gap:10px;}
+  .welcome-hi{font-family:'Fraunces',serif;font-size:48px;font-weight:600;color:var(--ink);text-align:center;}
+  .welcome-sub{font-family:'Work Sans',sans-serif;font-size:16px;color:var(--ink-soft);}
+
+  /* Rickroll tilt */
+  .rickroll{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:18px;}
+  .rickroll-text{font-family:Arial,sans-serif;font-size:52px;font-weight:700;color:var(--ink);text-align:center;}
+  .rickroll.tilting{animation:tilt-lr 2s ease-in-out;}
+  @keyframes tilt-lr{
+    0%{transform:rotate(0deg);}15%{transform:rotate(-6deg);}40%{transform:rotate(6deg);}
+    65%{transform:rotate(-4deg);}85%{transform:rotate(4deg);}100%{transform:rotate(0deg);}
+  }
+
+  /* Lead status badges (reuse existing 5 stages) */
+  .badge.new{background:var(--amber-soft);color:var(--amber);}
+  .badge.qualified{background:var(--ochre-soft);color:var(--ochre);}
+  .badge.working{background:var(--umber-soft);color:var(--umber);}
+  .badge.converted{background:var(--sage-soft);color:var(--sage);}
+  .badge.disqualified{background:var(--clay-soft);color:var(--clay);}
+</style>
+</head>
+<body>
+<div id="loginScreen" class="login-screen">
+  <div class="confetti-container" id="confettiContainer"></div>
+  <div class="rocket" id="rocket">🚀</div>
+  <div class="login-card">
+    <div class="brand display" style="font-size:20px;">SWG</div>
+    <div class="brand-sub" style="margin-bottom:18px;">CRM Ledger</div>
+    <div class="login-message display">Perfect day to break records.</div>
+    <div class="field">
+      <label>Email</label>
+      <input id="loginEmail" type="email" placeholder="you@siddhayogaweb.com" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <div class="login-error" id="loginError" style="display:none;">Incorrect email or password.</div>
+    <button class="btn" id="loginBtn" style="width:100%;margin-top:6px;">Log in</button>
+  </div>
+</div>
+
+<div id="welcomeScreen" style="display:none;" class="welcome-screen">
+  <div class="welcome-hi display">Good job, <span id="welcomeName"></span> 👏</div>
+  <div class="welcome-sub">Taking you in…</div>
+</div>
+
+<div id="app" style="display:none;">
+  <aside class="sidebar">
+    <div class="brand display">SWG</div>
+    <div class="brand-sub">CRM Ledger</div>
+    <div class="navlink active" data-view="dashboard"><span class="dot"></span>Dashboard</div>
+    <div class="navlink" data-view="home"><span class="dot"></span>Home</div>
+    <div class="navlink" data-view="contacts"><span class="dot"></span>Contacts</div>
+    <div class="navlink" data-view="leads"><span class="dot"></span>Leads</div>
+    <div class="navlink" data-view="customers"><span class="dot"></span>Customers</div>
+    <div class="navlink" data-view="distributors"><span class="dot"></span>Distributors</div>
+    <div class="navlink" data-view="suppliers"><span class="dot"></span>Suppliers</div>
+    <div class="navlink" data-view="deals"><span class="dot"></span>Deals</div>
+    <div class="navlink" data-view="orders"><span class="dot"></span>Orders</div>
+    <div class="navlink" data-view="tasks"><span class="dot"></span>Tasks</div>
+    <div class="navlink" data-view="invoices"><span class="dot"></span>Invoices</div>
+    <div class="navlink" data-view="products"><span class="dot"></span>Products</div>
+    <div class="sidebar-foot">
+      <div id="identityAdmin" style="display:none;">
+        <div class="foot-label">Viewing as</div>
+        <select id="viewingAs">
+          <option>Ariel</option><option>Daniel</option><option>Omri</option>
+          <option>Kfir</option><option>David</option><option>Nishant</option>
+        </select>
+      </div>
+      <div id="identityStatic" style="display:none;">
+        <div class="foot-label">Logged in as</div>
+        <div class="identity-name" id="identityName">—</div>
+      </div>
+      <button class="reset-btn" id="logoutBtn" style="margin-top:10px;">Log out</button>
+      <button class="reset-btn" id="resetBtn">Clear all data</button>
+      <div class="shared-note">Shared with the whole SWG team — everyone sees the same data.</div>
+    </div>
+  </aside>
+  <main id="mainArea" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+    <nav class="topnav">
+      <button class="topnav-btn" id="tn-dashboard"><span class="topnav-icon">📊</span>Dashboard</button>
+      <button class="topnav-btn" id="tn-contacts"><span class="topnav-icon">👥</span>Contacts</button>
+      <button class="topnav-btn" id="tn-home"><span class="topnav-icon">🏠</span>Home</button>
+      <button class="topnav-btn" id="tn-export"><span class="topnav-icon">📤</span>Excel Export</button>
+      <div class="topnav-sep"></div>
+      <button class="topnav-btn" id="tn-search"><span class="topnav-icon">🔍</span>Search</button>
+    </nav>
+    <div style="flex:1;overflow-y:auto;padding:28px 34px;">
+      <div class="topbar">
+        <div>
+          <h1 class="display" id="pageTitle">Dashboard</h1>
+          <div class="sub" id="pageSub">Overview of contacts, deals and orders</div>
+        </div>
+        <button class="btn" id="addBtn" style="display:none;">+ Add</button>
+      </div>
+      <div id="content"><div class="loading">Loading ledger…</div></div>
+    </div>
+  </main>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modalBody"></div>
+</div>
+
+<script>
+const KEYS = { contacts:'crm_contacts', deals:'crm_deals', orders:'crm_orders', customers:'crm_customers', suppliers:'crm_suppliers', tasks:'crm_tasks', invoices:'crm_invoices', leads:'crm_leads', distributors:'crm_distributors', products:'crm_products' };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], products:[], contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false };
+const STAGES = ['Lead','Contacted','Negotiation','Won','Lost'];
+const STAGES_NEW = ['Lead','Contacted','Negotiation','Won']; // creation only — no Lost
+const CTYPES = ['Supplier','Distributor','Customer','Marketing'];
+const ENTITY_KINDS = ['Individual','Company'];
+const CURRENCIES = ['EUR','USD','ILS','THB','JPY','INR','AUD','HKD','CZK'];
+const CURRENCY_SYMBOLS = {EUR:'€', USD:'$', ILS:'₪', THB:'฿', JPY:'¥', INR:'₹', AUD:'A$', HKD:'HK$', CZK:'Kč'};
+const LEAD_STATUS = ['New','Qualified','Working','Converted','Disqualified'];
+const LEAD_STATUS_NEW = ['New','Qualified','Working','Converted']; // no Disqualified on creation
+const LEAD_SOURCES = ['Instagram','TikTok','Referral','Ad','Other'];
+const LEAD_HIDDEN_FOR = ['Kfir','David'];
+const OSTATUS = ['Pending','Shipped','Delivered','Cancelled'];
+const OSTATUS_NEW = ['Pending','Shipped','Delivered']; // no Cancelled on creation
+const TSTATUS = ['Open','Done'];
+const TSTATUS_NEW = ['Open']; // no Done on creation
+const ISTATUS = ['Unpaid','Paid','Overdue'];
+const TEAM = ['Ariel','Daniel','Omri','Kfir','David','Nishant'];
+const LINKTYPES = [
+  {key:'none', label:'— None —'},
+  {key:'contact', label:'Contact'},
+  {key:'customer', label:'Customer'},
+  {key:'supplier', label:'Supplier'},
+  {key:'deal', label:'Deal'},
+  {key:'order', label:'Order'},
+];
+const LINKTYPES_PRIV = [
+  {key:'none', label:'— None —'},
+  {key:'contact', label:'Contact'},
+  {key:'customer', label:'Customer'},
+  {key:'supplier', label:'Supplier'},
+  {key:'deal', label:'Deal'},
+  {key:'order', label:'Order'},
+  {key:'user', label:'Team member'},
+];
+const COUNTRIES = ['Afghanistan','Albania','Algeria','Andorra','Angola','Antigua and Barbuda','Argentina','Armenia','Australia','Austria','Azerbaijan','Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize','Benin','Bhutan','Bolivia','Bosnia and Herzegovina','Botswana','Brazil','Brunei','Bulgaria','Burkina Faso','Burundi','Cabo Verde','Cambodia','Cameroon','Canada','Central African Republic','Chad','Chile','China','Colombia','Comoros','Congo','Costa Rica','Croatia','Cuba','Cyprus','Czech Republic','Denmark','Djibouti','Dominica','Dominican Republic','Ecuador','Egypt','El Salvador','Equatorial Guinea','Eritrea','Estonia','Eswatini','Ethiopia','Fiji','Finland','France','Gabon','Gambia','Georgia','Germany','Ghana','Greece','Grenada','Guatemala','Guinea','Guinea-Bissau','Guyana','Haiti','Honduras','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Jamaica','Japan','Jordan','Kazakhstan','Kenya','Kiribati','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Lesotho','Liberia','Libya','Liechtenstein','Lithuania','Luxembourg','Madagascar','Malawi','Malaysia','Maldives','Mali','Malta','Marshall Islands','Mauritania','Mauritius','Mexico','Micronesia','Moldova','Monaco','Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nauru','Nepal','Netherlands','New Zealand','Nicaragua','Niger','Nigeria','North Korea','North Macedonia','Norway','Oman','Pakistan','Palau','Palestine','Panama','Papua New Guinea','Paraguay','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Rwanda','Saint Kitts and Nevis','Saint Lucia','Saint Vincent and the Grenadines','Samoa','San Marino','Sao Tome and Principe','Saudi Arabia','Senegal','Serbia','Seychelles','Sierra Leone','Singapore','Slovakia','Slovenia','Solomon Islands','Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka','Sudan','Suriname','Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Timor-Leste','Togo','Tonga','Trinidad and Tobago','Tunisia','Turkey','Turkmenistan','Tuvalu','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States','Uruguay','Uzbekistan','Vanuatu','Vatican City','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe'];
+const ACCENTS = {
+  dashboard:'var(--ink)', home:'var(--amber)', contacts:'var(--amber)', leads:'var(--ochre)', customers:'var(--sage)',
+  distributors:'var(--umber)', suppliers:'var(--clay)', deals:'var(--ochre)', orders:'var(--umber)',
+  tasks:'var(--olive)', invoices:'var(--rust)', products:'var(--sage)',
+  search:'var(--ink)', rickroll:'var(--ink)'
+};
+const CONTINENTS = ['Africa','Asia','Europe','North America','South America','Oceania','Middle East'];
+const SUBREGIONS = {
+  'Africa':['North Africa','West Africa','East Africa','Central Africa','Southern Africa'],
+  'Asia':['South Asia','Southeast Asia','East Asia','Central Asia'],
+  'Europe':['Western Europe','Eastern Europe','Northern Europe','Southern Europe'],
+  'North America':['Caribbean','Central America','Northern America'],
+  'South America':['Andean','Southern Cone','Brazil & Neighbors','Northern South America'],
+  'Oceania':['Australia & NZ','Melanesia','Micronesia','Polynesia'],
+  'Middle East':['Levant','Gulf States','Iran & Iraq'],
+};
+const CITIES_BY_COUNTRY = {
+  'Israel':['Tel Aviv','Jerusalem','Haifa','Beer Sheva','Eilat','Netanya','Ashdod','Rishon LeZion','Petah Tikva','Ramat Gan'],
+  'Thailand':['Bangkok','Chiang Mai','Phuket','Pattaya','Hua Hin','Krabi','Koh Samui','Ayutthaya','Chiang Rai','Udon Thani'],
+  'India':['Mumbai','Delhi','Bangalore','Hyderabad','Chennai','Kolkata','Pune','Ahmedabad','Jaipur','Surat'],
+  'United States':['New York','Los Angeles','Chicago','Houston','Phoenix','Philadelphia','San Antonio','San Diego','Dallas','San Jose'],
+  'United Kingdom':['London','Manchester','Birmingham','Leeds','Glasgow','Liverpool','Bristol','Sheffield','Edinburgh','Leicester'],
+  'Germany':['Berlin','Hamburg','Munich','Cologne','Frankfurt','Stuttgart','Düsseldorf','Dortmund','Essen','Leipzig'],
+  'France':['Paris','Lyon','Marseille','Toulouse','Nice','Nantes','Strasbourg','Montpellier','Bordeaux','Lille'],
+  'Italy':['Rome','Milan','Naples','Turin','Palermo','Genoa','Bologna','Florence','Bari','Catania'],
+  'Spain':['Madrid','Barcelona','Valencia','Seville','Zaragoza','Málaga','Murcia','Palma','Las Palmas','Bilbao'],
+  'Japan':['Tokyo','Osaka','Kyoto','Yokohama','Nagoya','Sapporo','Fukuoka','Kobe','Kawasaki','Hiroshima'],
+  'China':['Beijing','Shanghai','Guangzhou','Shenzhen','Chengdu','Tianjin','Wuhan','Chongqing',"Xi'an",'Hangzhou'],
+  'Australia':['Sydney','Melbourne','Brisbane','Perth','Adelaide','Gold Coast','Canberra','Newcastle','Hobart','Darwin'],
+  'Canada':['Toronto','Vancouver','Montreal','Calgary','Edmonton','Ottawa','Winnipeg','Quebec City','Hamilton','Kitchener'],
+  'Brazil':['São Paulo','Rio de Janeiro','Brasília','Salvador','Fortaleza','Belo Horizonte','Manaus','Curitiba','Recife','Porto Alegre'],
+  'Singapore':['Singapore'],
+  'UAE':['Dubai','Abu Dhabi','Sharjah','Ajman','Ras Al Khaimah','Al Ain','Fujairah'],
+  'South Africa':['Johannesburg','Cape Town','Durban','Pretoria','Port Elizabeth','Bloemfontein','Nelspruit','Polokwane'],
+  'Mexico':['Mexico City','Guadalajara','Monterrey','Puebla','Tijuana','León','Juárez','Mérida'],
+  'Turkey':['Istanbul','Ankara','Izmir','Bursa','Antalya','Adana','Gaziantep','Konya','Mersin'],
+  'Saudi Arabia':['Riyadh','Jeddah','Mecca','Medina','Dammam','Taif','Tabuk','Abha','Khobar'],
+  'Poland':['Warsaw','Kraków','Łódź','Wrocław','Poznań','Gdańsk','Szczecin','Katowice'],
+  'Czech Republic':['Prague','Brno','Ostrava','Plzeň','Liberec','Olomouc','České Budějovice'],
+  'Netherlands':['Amsterdam','Rotterdam','The Hague','Utrecht','Eindhoven','Tilburg','Groningen'],
+  'Switzerland':['Zurich','Geneva','Basel','Bern','Lausanne','Winterthur','St. Gallen'],
+  'Austria':['Vienna','Graz','Linz','Salzburg','Innsbruck','Klagenfurt'],
+  'Belgium':['Brussels','Antwerp','Ghent','Charleroi','Liège','Bruges'],
+  'Sweden':['Stockholm','Gothenburg','Malmö','Uppsala','Västerås','Örebro'],
+  'Portugal':['Lisbon','Porto','Braga','Coimbra','Funchal','Setúbal'],
+  'Greece':['Athens','Thessaloniki','Patras','Piraeus','Larissa','Heraklion'],
+  'Russia':['Moscow','Saint Petersburg','Novosibirsk','Yekaterinburg','Kazan','Nizhny Novgorod'],
+  'South Korea':['Seoul','Busan','Incheon','Daegu','Daejeon','Gwangju','Suwon'],
+  'Indonesia':['Jakarta','Surabaya','Bandung','Medan','Bekasi','Semarang','Makassar'],
+  'Malaysia':['Kuala Lumpur','George Town','Johor Bahru','Ipoh','Shah Alam','Petaling Jaya'],
+  'Philippines':['Manila','Quezon City','Caloocan','Davao','Cebu','Zamboanga'],
+  'Pakistan':['Karachi','Lahore','Faisalabad','Rawalpindi','Peshawar','Islamabad'],
+  'Egypt':['Cairo','Alexandria','Giza','Port Said','Suez','Mansoura'],
+  'Nigeria':['Lagos','Kano','Ibadan','Abuja','Port Harcourt','Benin City'],
+  'Argentina':['Buenos Aires','Córdoba','Rosario','Mendoza','La Plata','Tucumán'],
+  'Colombia':['Bogotá','Medellín','Cali','Barranquilla','Cartagena','Bucaramanga'],
+  'Chile':['Santiago','Antofagasta','Viña del Mar','Valparaíso','Temuco','Iquique'],
+};
+const PRIVILEGED = ['Ariel','Daniel'];
+function isPrivileged(){ return PRIVILEGED.includes(state.viewingAs); }
+function isAdmin(){ return state.currentUser === 'Ariel'; }
+function canSeeLeads(){ return !LEAD_HIDDEN_FOR.includes(state.viewingAs); }
+
+const TEAM_EMAILS = {
+  'ariel@siddhayogaweb.com':'Ariel',
+  'daniel@siddhayogaweb.com':'Daniel',
+  'omri@siddhayogaweb.com':'Omri',
+  'kfir@siddhayogaweb.com':'Kfir',
+  'david@siddhayogaweb.com':'David',
+  'nishant@siddhayogaweb.com':'Nishant',
+};
+const APP_PASSWORD = 'siddhayoga';
+
+function uid(){ return 'id_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+async function loadKey(key){
+  try{
+    const r = await window.storage.get(key, true);
+    return r && r.value ? JSON.parse(r.value) : [];
+  }catch(e){ return []; }
+}
+async function saveKey(key, arr){
+  try{ await window.storage.set(key, JSON.stringify(arr), true); }
+  catch(e){ console.error('save failed', key, e); }
+}
+
+async function loadAll(){
+  const [c,d,o,cu,su,ta,inv,le,di,pr] = await Promise.all([
+    loadKey(KEYS.contacts), loadKey(KEYS.deals), loadKey(KEYS.orders),
+    loadKey(KEYS.customers), loadKey(KEYS.suppliers), loadKey(KEYS.tasks), loadKey(KEYS.invoices),
+    loadKey(KEYS.leads), loadKey(KEYS.distributors), loadKey(KEYS.products)
+  ]);
+  state.contacts = c; state.deals = d; state.orders = o;
+  state.customers = cu; state.suppliers = su; state.tasks = ta; state.invoices = inv;
+  state.leads = le; state.distributors = di; state.products = pr;
+  state.loaded = true;
+}
+
+function contactName(id){
+  const c = state.contacts.find(x=>x.id===id);
+  return c ? c.name : '—';
+}
+function customerName(id){
+  const c = state.customers.find(x=>x.id===id);
+  return c ? c.name : '—';
+}
+function orderLabel(id){
+  const o = state.orders.find(x=>x.id===id);
+  return o ? (o.product+' — '+Number(o.amount||0).toLocaleString()) : '—';
+}
+function linkItemsFor(type){
+  if(type==='contact') return state.contacts.map(x=>({id:x.id, label:x.name}));
+  if(type==='customer') return state.customers.map(x=>({id:x.id, label:x.name}));
+  if(type==='supplier') return state.suppliers.map(x=>({id:x.id, label:x.name}));
+  if(type==='deal') return state.deals.map(x=>({id:x.id, label:x.title}));
+  if(type==='order') return state.orders.map(x=>({id:x.id, label:x.product+' — '+contactName(x.contactId)}));
+  if(type==='user') return TEAM.map(t=>({id:t, label:t}));
+  return [];
+}
+
+/* Multi-select picklist builder */
+function msHTML(id, options, selected=[]){
+  const label = selected.length ? selected.map(s=>`${s} (${CURRENCY_SYMBOLS[s]||s})`).join(', ') : 'Select…';
+  return `<div class="ms-wrap" id="${id}_wrap">
+    <button type="button" class="ms-trigger" id="${id}_btn">
+      <span class="ms-chips" id="${id}_label">${esc(label)}</span>
+      <span class="ms-arrow">▾</span>
+    </button>
+    <div class="ms-dropdown" id="${id}_dd">
+      ${options.map(o=>`<label class="ms-option"><input type="checkbox" value="${esc(o)}" ${selected.includes(o)?'checked':''}> ${esc(o)}${CURRENCY_SYMBOLS[o]?' ('+CURRENCY_SYMBOLS[o]+')':''}</label>`).join('')}
+    </div>
+  </div>`;
+}
+function msRead(id){
+  return Array.from(document.querySelectorAll(`#${id}_dd input:checked`)).map(el=>el.value);
+}
+function msInit(id){
+  const btn = document.getElementById(`${id}_btn`);
+  const dd = document.getElementById(`${id}_dd`);
+  const lbl = document.getElementById(`${id}_label`);
+  if(!btn||!dd) return;
+  btn.onclick = (e)=>{ e.preventDefault(); dd.classList.toggle('open'); };
+  document.addEventListener('mousedown', function handler(e){
+    const wrap = document.getElementById(`${id}_wrap`);
+    if(wrap && !wrap.contains(e.target)){ dd.classList.remove('open'); document.removeEventListener('mousedown',handler); }
+  });
+  dd.querySelectorAll('input').forEach(cb=>{
+    cb.onchange = ()=>{
+      const vals = msRead(id);
+      lbl.textContent = vals.length ? vals.map(v=>`${v}${CURRENCY_SYMBOLS[v]?' ('+CURRENCY_SYMBOLS[v]+')':''}`).join(', ') : 'Select…';
+    };
+  });
+}
+
+/* Multi-select for lead sources (no symbols) */
+function msHTMLsrc(id, options, selected=[]){
+  const label = selected.length ? selected.join(', ') : 'Select…';
+  return `<div class="ms-wrap" id="${id}_wrap">
+    <button type="button" class="ms-trigger" id="${id}_btn">
+      <span class="ms-chips" id="${id}_label">${esc(label)}</span>
+      <span class="ms-arrow">▾</span>
+    </button>
+    <div class="ms-dropdown" id="${id}_dd">
+      ${options.map(o=>`<label class="ms-option"><input type="checkbox" value="${esc(o)}" ${selected.includes(o)?'checked':''}> ${esc(o)}</label>`).join('')}
+    </div>
+  </div>`;
+}
+function msReadSrc(id){ return msRead(id); }
+function msInitSrc(id){
+  const btn = document.getElementById(`${id}_btn`);
+  const dd = document.getElementById(`${id}_dd`);
+  const lbl = document.getElementById(`${id}_label`);
+  if(!btn||!dd) return;
+  btn.onclick = (e)=>{ e.preventDefault(); dd.classList.toggle('open'); };
+  document.addEventListener('mousedown', function handler(e){
+    const wrap = document.getElementById(`${id}_wrap`);
+    if(wrap && !wrap.contains(e.target)){ dd.classList.remove('open'); document.removeEventListener('mousedown',handler); }
+  });
+  dd.querySelectorAll('input').forEach(cb=>{
+    cb.onchange = ()=>{
+      const vals = msRead(id);
+      lbl.textContent = vals.length ? vals.join(', ') : 'Select…';
+    };
+  });
+}
+function linkLabel(task){
+  if(!task.linkType || task.linkType==='none') return '—';
+  const items = linkItemsFor(task.linkType);
+  const found = items.find(i=>i.id===task.linkId);
+  const typeLbl = LINKTYPES.find(l=>l.key===task.linkType);
+  return (typeLbl?typeLbl.label:task.linkType) + ': ' + (found?found.label:'—');
+}
+function renderDealPipeline(stage){
+  const order = ['Lead','Contacted','Negotiation'];
+  const isLost = stage === 'Lost';
+  const finalLabel = isLost ? 'Lost' : 'Won';
+  const finalColor = isLost ? 'var(--clay)' : 'var(--sage)';
+  const currentIdx = (stage==='Lost' || stage==='Won') ? 3 : order.indexOf(stage);
+  const steps = [...order, finalLabel];
+  return `<div class="dpipe">${steps.map((label,i)=>{
+    const reached = i <= currentIdx;
+    const current = i === currentIdx;
+    const color = i===3 ? finalColor : 'var(--ochre)';
+    return `<div class="dpipe-step ${reached?'reached':''} ${current?'current':''}" style="--stepcolor:${color};">
+      <span class="dpipe-dot"></span><span class="dpipe-label">${label}</span>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+/* ---------- Rendering ---------- */
+function setActiveNav(){
+  document.querySelectorAll('.navlink').forEach(el=>{
+    el.classList.toggle('active', el.dataset.view===state.view);
+  });
+}
+function updateNavVisibility(){
+  const invLink = document.querySelector('.navlink[data-view="invoices"]');
+  if(invLink) invLink.classList.toggle('hidden-role', !isPrivileged());
+  const leadLink = document.querySelector('.navlink[data-view="leads"]');
+  if(leadLink) leadLink.classList.toggle('hidden-role', !canSeeLeads());
+}
+
+function render(){
+  if(state.view==='invoices' && !isPrivileged()) state.view = 'dashboard';
+  if(state.view==='leads' && !canSeeLeads()) state.view = 'dashboard';
+  updateNavVisibility();
+  setActiveNav();
+  const titleMap = {dashboard:['Dashboard','Overview of the whole ledger'],
+    home:['Home','Your personal space'],
+    contacts:['Contacts','Suppliers, distributors, customers & marketing contacts'],
+    leads:['Leads','Prospects being warmed up before they become customers'],
+    customers:['Customers','Everyone you sell Cinnamor Oregano to'],
+    distributors:['Distributors','Partners who distribute SWG products'],
+    suppliers:['Suppliers','Everyone you source oils and materials from'],
+    deals:['Deals','Pipeline across every stage'],
+    orders:['Orders','Order history and fulfillment status'],
+    tasks:['Tasks','Follow-ups and team to-dos'],
+    invoices:['Invoices','Billing, linked to orders or standalone'],
+    products:['Products','Your product catalog'],
+    search:['Search','Find anything across all tabs'],
+    rickroll:['Excel Export','']};
+  document.getElementById('pageTitle').innerHTML = `<span class="accent-dot"></span>${titleMap[state.view]?titleMap[state.view][0]:state.view}`;
+  document.getElementById('pageSub').textContent = titleMap[state.view]?titleMap[state.view][1]:'';
+  document.getElementById('mainArea').style.setProperty('--accent', ACCENTS[state.view] || 'var(--amber)');
+  const addLabels = {contacts:'contact', leads:'lead', customers:'customer', distributors:'distributor', suppliers:'supplier', deals:'deal', orders:'order', tasks:'task', invoices:'invoice', products:'product'};
+  const addBtn = document.getElementById('addBtn');
+  const noAdd = ['dashboard','home','search','rickroll'];
+  addBtn.style.display = noAdd.includes(state.view) ? 'none' : 'inline-block';
+  addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
+
+  // topnav active highlights
+  document.getElementById('tn-dashboard').classList.toggle('tnav-active', state.view==='dashboard');
+  document.getElementById('tn-home').classList.toggle('tnav-active', state.view==='home');
+  document.getElementById('tn-contacts').classList.toggle('tnav-active', state.view==='contacts');
+  document.getElementById('tn-search').classList.toggle('tnav-active', state.view==='search');
+  document.getElementById('tn-export').classList.toggle('tnav-active', state.view==='rickroll');
+
+  const c = document.getElementById('content');
+  if(state.view==='dashboard') c.innerHTML = renderDashboard();
+  if(state.view==='home') c.innerHTML = renderHome();
+  if(state.view==='contacts') c.innerHTML = renderContacts();
+  if(state.view==='leads') c.innerHTML = renderLeads();
+  if(state.view==='customers') c.innerHTML = renderCustomers();
+  if(state.view==='distributors') c.innerHTML = renderDistributors();
+  if(state.view==='suppliers') c.innerHTML = renderSuppliers();
+  if(state.view==='deals') c.innerHTML = renderDeals();
+  if(state.view==='orders') c.innerHTML = renderOrders();
+  if(state.view==='tasks') c.innerHTML = renderTasks();
+  if(state.view==='invoices') c.innerHTML = renderInvoices();
+  if(state.view==='products') c.innerHTML = renderProducts();
+  if(state.view==='search') c.innerHTML = renderSearch();
+  if(state.view==='rickroll'){ c.innerHTML = renderRickroll(); setTimeout(()=>{ const r=c.querySelector('.rickroll'); if(r){r.classList.add('tilting');setTimeout(()=>r.classList.remove('tilting'),2100);} },50); }
+  attachContentHandlers();
+}
+
+function renderRickroll(){
+  return `<div class="rickroll">
+    <div class="rickroll-text">You got rickrolled 🕺</div>
+    <div style="font-family:Arial,sans-serif;font-size:16px;color:var(--ink-soft);">No Excel export here. Never gonna give you up.</div>
+  </div>`;
+}
+
+function renderHome(){
+  const openTasks = state.tasks.filter(t=>t.status!=='Done' && t.owner===state.viewingAs);
+  const myDeals = state.deals.filter(d=>d.owner===state.viewingAs && d.stage!=='Won' && d.stage!=='Lost');
+  return `
+    <div class="hello" style="margin-bottom:28px;">
+      <p class="hi display">Hello, ${esc(state.viewingAs)} 👋</p>
+      <div class="sub2">Here's your personal snapshot.</div>
+    </div>
+    <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px;">
+      <div class="stat-card amber"><div class="num mono">${openTasks.length}</div><div class="lbl">Your open tasks</div></div>
+      <div class="stat-card sage"><div class="num mono">${myDeals.length}</div><div class="lbl">Your active deals</div></div>
+      <div class="stat-card ochre"><div class="num mono">${myDeals.reduce((s,d)=>s+(Number(d.value)||0),0).toLocaleString()}</div><div class="lbl">Your pipeline value</div></div>
+    </div>
+    ${openTasks.length ? `
+      <div class="section-title">Your open tasks</div>
+      <table><thead><tr><th>Task</th><th>Due</th><th>Status</th></tr></thead><tbody>
+        ${openTasks.slice(0,5).map(t=>`<tr>
+          <td>${esc(t.title)}</td>
+          <td style="font-size:12px;">${t.dueDate?new Date(t.dueDate).toLocaleDateString():'—'}</td>
+          <td><span class="badge ${t.status.toLowerCase()}">${t.status}</span></td>
+        </tr>`).join('')}
+      </tbody></table>` : `<div class="empty"><div class="display">All clear!</div>No open tasks assigned to you.</div>`}
+  `;
+}
+
+function renderSearch(query=''){
+  const q = (query||'').toLowerCase().trim();
+  const sections = [
+    { label:'Contacts', items: state.contacts.map(x=>({name:x.name, sub:x.type+' · '+(x.company||x.email||''), view:'contacts'})) },
+    { label:'Leads', items: state.leads.map(x=>({name:x.name, sub:(x.status||'New')+' · '+((x.sources&&x.sources.join(', '))||''), view:'leads'})) },
+    { label:'Customers', items: state.customers.map(x=>({name:x.name, sub:(x.kind||'')+(x.company?' · '+x.company:'')+(x.country?' · '+x.country:''), view:'customers'})) },
+    { label:'Distributors', items: state.distributors.map(x=>({name:x.name, sub:x.company||x.region||'', view:'distributors'})) },
+    { label:'Suppliers', items: state.suppliers.map(x=>({name:x.name, sub:x.company||'', view:'suppliers'})) },
+    { label:'Deals', items: state.deals.map(x=>({name:x.title, sub:x.stage+' · '+Number(x.value||0).toLocaleString(), view:'deals'})) },
+    { label:'Orders', items: state.orders.map(x=>({name:x.product, sub:contactName(x.contactId)+' · '+x.status, view:'orders'})) },
+    { label:'Tasks', items: state.tasks.map(x=>({name:x.title, sub:(x.owner||'')+(x.dueDate?' · due '+new Date(x.dueDate).toLocaleDateString():''), view:'tasks'})) },
+    { label:'Invoices', items: isPrivileged() ? state.invoices.map(x=>({name:'Invoice for '+customerName(x.customerId), sub:x.status+' · '+Number(x.amount||0).toLocaleString(), view:'invoices'})) : [] },
+    { label:'Products', items: state.products.map(x=>({name:x.name, sub:(x.unit||'')+(x.sizes&&x.sizes.length?' '+x.sizes.join('/'):''), view:'products'})) },
+  ];
+
+  let hits = 0;
+  const rows = sections.map(sec=>{
+    const filtered = q ? sec.items.filter(i=>(i.name+i.sub).toLowerCase().includes(q)) : sec.items;
+    if(!filtered.length) return '';
+    hits += filtered.length;
+    return `<div class="search-results-section">
+      <div class="search-section-label">${esc(sec.label)} (${filtered.length})</div>
+      ${filtered.map(i=>`<div class="search-hit" data-navigate="${i.view}">
+        <span class="search-hit-type">${esc(sec.label.slice(0,8))}</span>
+        <span class="search-hit-name">${esc(i.name||'—')}</span>
+        <span class="search-hit-sub">${esc(i.sub)}</span>
+      </div>`).join('')}
+    </div>`;
+  }).join('');
+
+  const empty = q && !hits ? `<div class="search-empty">No results for "<strong>${esc(q)}</strong>"</div>` : (!q ? `<div class="search-empty">Start typing to search across all tabs…</div>` : '');
+
+  return `<div class="search-bar-wrap">
+    <input id="searchInput" type="text" placeholder="Search contacts, deals, orders, tasks…" value="${esc(query)}" autofocus>
+  </div>
+  ${rows||empty}`;
+}
+
+function renderDashboard(){
+  const openDeals = state.deals.filter(d=>d.stage!=='Won' && d.stage!=='Lost');
+  const openValue = openDeals.reduce((s,d)=>s+(Number(d.value)||0),0);
+  const pendingOrders = state.orders.filter(o=>o.status==='Pending' || o.status==='Shipped');
+  const openTasks = state.tasks.filter(t=>t.status!=='Done');
+  const unpaidInvoices = state.invoices.filter(i=>i.status!=='Paid');
+  const unpaidValue = unpaidInvoices.reduce((s,i)=>s+(Number(i.amount)||0),0);
+  const priv = isPrivileged();
+
+  let secondary = `
+    <div class="stat-card ochre"><div class="num mono">${openValue.toLocaleString()}</div><div class="lbl">Pipeline value</div></div>
+    <div class="stat-card umber"><div class="num mono">${pendingOrders.length}</div><div class="lbl">Orders in flight</div></div>
+    <div class="stat-card olive"><div class="num mono">${openTasks.length}</div><div class="lbl">Open tasks</div></div>`;
+  if(priv) secondary += `<div class="stat-card rust"><div class="num mono">${unpaidValue.toLocaleString()}</div><div class="lbl">Unpaid invoices</div></div>`;
+
+  return `
+    <div class="hello">
+      <p class="hi display">Hello, ${esc(state.viewingAs)}</p>
+      <div class="sub2">Here's where the SWG ledger stands today.</div>
+    </div>
+    ${renderDonut(priv)}
+    <div class="stat-grid" style="grid-template-columns:repeat(${priv?4:3},1fr);">${secondary}</div>
+    <div class="section-title">Recent activity</div>
+    ${renderRecent()}
+  `;
+}
+
+function renderDonut(priv){
+  const showLeads = canSeeLeads();
+  const segs = [
+    {key:'contacts', label:'Contacts', count:state.contacts.length, color:'var(--amber)'},
+  ];
+  if(showLeads) segs.push({key:'leads', label:'Leads', count:state.leads.length, color:'var(--ochre)'});
+  segs.push(
+    {key:'customers', label:'Customers', count:state.customers.length, color:'var(--sage)'},
+    {key:'suppliers', label:'Suppliers', count:state.suppliers.length, color:'var(--clay)'},
+    {key:'deals', label:'Deals', count:state.deals.length, color:'var(--ochre)'},
+    {key:'orders', label:'Orders', count:state.orders.length, color:'var(--umber)'},
+    {key:'tasks', label:'Tasks', count:state.tasks.length, color:'var(--olive)'},
+  );
+  if(priv) segs.push({key:'invoices', label:'Invoices', count:state.invoices.length, color:'var(--rust)'});
+
+  const total = segs.reduce((s,x)=>s+x.count,0);
+  if(!total){
+    return `<div class="donut-wrap"><div class="donut" style="background:var(--parchment);"></div>
+      <div class="legend"><div class="donut-empty">The ledger is empty — add a few contacts, deals or orders and this chart fills in.</div></div></div>`;
+  }
+  let cum = 0;
+  const stops = segs.filter(s=>s.count>0).map(s=>{
+    const start = (cum/total)*360;
+    cum += s.count;
+    const end = (cum/total)*360;
+    return `${s.color} ${start}deg ${end}deg`;
+  }).join(', ');
+
+  const legend = segs.map(s=>`
+    <div class="legend-row" data-navigate="${s.key}">
+      <span class="legend-swatch" style="background:${s.color};"></span>
+      <span class="legend-name">${s.label}</span>
+      <span class="legend-count mono">${s.count}</span>
+    </div>`).join('');
+
+  return `<div class="donut-wrap">
+      <div class="donut" style="background:conic-gradient(${stops});">
+        <div class="donut-hole"><div class="dnum mono">${total}</div><div class="dlbl">Total records</div></div>
+      </div>
+      <div class="legend">${legend}</div>
+    </div>`;
+}
+
+function renderRecent(){
+  const priv = isPrivileged();
+  const showLeads = canSeeLeads();
+  const all = [
+    ...state.contacts.map(x=>({...x,_type:'Contact',_when:x.createdAt,_label:x.name})),
+    ...(showLeads ? state.leads.map(x=>({...x,_type:'Lead',_when:x.createdAt,_label:x.name})) : []),
+    ...state.customers.map(x=>({...x,_type:'Customer',_when:x.createdAt,_label:x.name})),
+    ...state.suppliers.map(x=>({...x,_type:'Supplier',_when:x.createdAt,_label:x.name})),
+    ...state.deals.map(x=>({...x,_type:'Deal',_when:x.createdAt,_label:x.title})),
+    ...state.orders.map(x=>({...x,_type:'Order',_when:x.createdAt,_label:x.product+' — '+contactName(x.contactId)})),
+    ...state.tasks.map(x=>({...x,_type:'Task',_when:x.createdAt,_label:x.title})),
+    ...(priv ? state.invoices.map(x=>({...x,_type:'Invoice',_when:x.createdAt,_label:'Invoice for '+customerName(x.customerId)})) : []),
+  ].sort((a,b)=>b._when-a._when).slice(0,8);
+  if(!all.length) return `<div class="empty"><div class="display">The ledger is empty</div>Add your first contact, deal, order, task or invoice to get started.</div>`;
+  return `<table><tbody>${all.map(x=>`
+    <tr><td class="mono ledger-no">${x._type}</td>
+    <td>${esc(x._label)}</td>
+    <td style="color:var(--ink-soft);font-size:12px;">${new Date(x._when).toLocaleDateString()}</td></tr>
+  `).join('')}</tbody></table>`;
+}
+
+function renderContacts(){
+  const filtered = state.contactFilter==='all' ? state.contacts : state.contacts.filter(c=>c.type===state.contactFilter);
+  const chips = ['all',...CTYPES].map(t=>`<div class="filter-chip ${state.contactFilter===t?'active':''}" data-filter="${t}">${t==='all'?'All':t}</div>`).join('');
+  let rows;
+  if(!filtered.length){
+    rows = `<div class="empty"><div class="display">No contacts yet</div>Add a supplier, distributor, customer or marketing contact.</div>`;
+  } else {
+    rows = `<table><thead><tr><th>No.</th><th>Name</th><th>Company</th><th>Type</th><th>Kind</th><th>Email / Phone</th><th>Owner</th><th></th></tr></thead><tbody>
+    ${filtered.map((c,i)=>`
+      <tr>
+        <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
+        <td>${esc(c.name)}</td>
+        <td>${esc(c.company||'—')}</td>
+        <td><span class="badge ${c.type.toLowerCase()}">${c.type}</span></td>
+        <td><span class="badge ${(c.kind||'Individual').toLowerCase()}">${c.kind||'Individual'}</span></td>
+        <td style="font-size:12px;">${esc(c.email||'')}${c.email&&c.phone?' · ':''}${esc(c.phone||'')}</td>
+        <td style="font-size:12px;color:var(--ink-soft);">${esc(c.owner||'—')}</td>
+        <td class="row-actions"><span data-edit="contacts:${c.id}">edit</span><span data-del="contacts:${c.id}">delete</span></td>
+      </tr>`).join('')}
+    </tbody></table>`;
+  }
+  return `<div class="filters">${chips}</div>${rows}`;
+}
+
+function renderDeals(){
+  return `<div class="kanban">${STAGES.map(stage=>{
+    const items = state.deals.filter(d=>d.stage===stage);
+    return `<div class="kcol">
+      <div class="kcol-head"><span>${stage}</span><span>${items.length}</span></div>
+      ${items.map(d=>`
+        <div class="kcard">
+          <div class="ledger-no mono">#${d.id.slice(-4)}</div>
+          <div class="ktitle">${esc(d.title)}</div>
+          <div class="kcontact">${esc(contactName(d.contactId))}</div>
+          <div class="kval mono">${Number(d.value||0).toLocaleString()}</div>
+          ${(d.currencies&&d.currencies.length)?`<div style="margin-bottom:6px;">${d.currencies.map(c=>`<span class="currency-chip">${esc(c)} (${esc(CURRENCY_SYMBOLS[c]||'')})</span>`).join('')}</div>`:''}
+          ${renderDealPipeline(d.stage)}
+          <div class="kfoot" style="margin-top:8px;">
+            <select data-stage="${d.id}">${STAGES.map(s=>`<option ${s===d.stage?'selected':''}>${s}</option>`).join('')}</select>
+            <span class="kowner">${esc(d.owner||'')}</span>
+          </div>
+          <div style="margin-top:7px;text-align:right;">
+            <span class="kdel" data-del="deals:${d.id}">delete</span>
+          </div>
+        </div>`).join('') || ''}
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderOrders(){
+  if(!state.orders.length) return `<div class="empty"><div class="display">No orders yet</div>Log an order to start tracking fulfillment.</div>`;
+  return `<table><thead><tr><th>No.</th><th>Contact</th><th>Product</th><th>Qty</th><th>Cost</th><th>Currencies</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody>
+  ${state.orders.map((o,i)=>`
+    <tr>
+      <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
+      <td>${esc(contactName(o.contactId))}</td>
+      <td>${esc(o.product)}</td>
+      <td>${esc(o.qty)}</td>
+      <td class="mono">${Number(o.amount||0).toLocaleString()}</td>
+      <td>${(o.currencies&&o.currencies.length) ? o.currencies.map(cur=>`<span class="currency-chip">${esc(cur)} (${esc(CURRENCY_SYMBOLS[cur]||'')})</span>`).join('') : '<span style="color:var(--ink-soft);font-size:12px;">—</span>'}</td>
+      <td><span class="badge ${o.status.toLowerCase()}">${o.status}</span></td>
+      <td style="font-size:12px;color:var(--ink-soft);">${new Date(o.createdAt).toLocaleDateString()}</td>
+      <td class="row-actions"><span data-edit="orders:${o.id}">edit</span><span data-del="orders:${o.id}">delete</span></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderLeads(){
+  if(!state.leads.length) return `<div class="empty"><div class="display">No leads yet</div>Add a prospect to warm up before they become a customer.</div>`;
+  return `<table><thead><tr><th>No.</th><th>Name</th><th>Kind</th><th>Company</th><th>Source</th><th>Email / Phone</th><th>Status</th><th>Owner</th><th></th></tr></thead><tbody>
+  ${state.leads.map((l,i)=>`
+    <tr>
+      <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
+      <td>${esc(l.name)}</td>
+      <td><span class="badge ${(l.kind||'Individual').toLowerCase()}">${l.kind||'Individual'}</span></td>
+      <td>${esc(l.company||'—')}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(l.source||((l.sources&&l.sources.join(', '))||'—'))}</td>
+      <td style="font-size:12px;">${esc(l.email||'')}${l.email&&l.phone?' · ':''}${esc(l.phone||'')}</td>
+      <td><span class="badge ${(l.status||'New').toLowerCase()}">${l.status||'New'}</span></td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(l.owner||'—')}</td>
+      <td class="row-actions"><span data-edit="leads:${l.id}">edit</span><span data-del="leads:${l.id}">delete</span></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderCustomers(){
+  if(!state.customers.length) return `<div class="empty"><div class="display">No customers yet</div>Add the people and businesses who buy from you.</div>`;
+  return `<table><thead><tr><th>No.</th><th>Name</th><th>Kind</th><th>Company</th><th>Email / Phone</th><th>Owner</th><th>Notes</th><th></th></tr></thead><tbody>
+  ${state.customers.map((c,i)=>`
+    <tr>
+      <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
+      <td>${esc(c.name)}</td>
+      <td><span class="badge ${(c.kind||'Individual').toLowerCase()}">${c.kind||'Individual'}</span></td>
+      <td>${esc(c.company||'—')}</td>
+      <td style="font-size:12px;">${esc(c.email||'')}${c.email&&c.phone?' · ':''}${esc(c.phone||'')}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(c.owner||'—')}</td>
+      <td style="font-size:12px;color:var(--ink-soft);max-width:180px;">${esc(c.notes||'')}</td>
+      <td class="row-actions"><span data-edit="customers:${c.id}">edit</span><span data-del="customers:${c.id}">delete</span></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderSuppliers(){
+  if(!state.suppliers.length) return `<div class="empty"><div class="display">No suppliers yet</div>Add who you source oils and materials from.</div>`;
+  return `<table><thead><tr><th>No.</th><th>Name</th><th>Company</th><th>Email / Phone</th><th>Owner</th><th></th></tr></thead><tbody>
+  ${state.suppliers.map((s,i)=>`
+    <tr>
+      <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
+      <td>${esc(s.name)}</td>
+      <td>${esc(s.company||'—')}</td>
+      <td style="font-size:12px;">${esc(s.email||'')}${s.email&&s.phone?' · ':''}${esc(s.phone||'')}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(s.owner||'—')}</td>
+      <td class="row-actions"><span data-edit="suppliers:${s.id}">edit</span><span data-del="suppliers:${s.id}">delete</span></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderDistributors(){
+  if(!state.distributors.length) return `<div class="empty"><div class="display">No distributors yet</div>Add the partners who distribute SWG products.</div>`;
+  return `<table><thead><tr><th>No.</th><th>Name</th><th>Company</th><th>Continents</th><th>Sub-regions</th><th>Email / Phone</th><th>Owner</th><th></th></tr></thead><tbody>
+  ${state.distributors.map((d,i)=>`
+    <tr>
+      <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
+      <td>${esc(d.name)}</td>
+      <td>${esc(d.company||'—')}</td>
+      <td style="font-size:12px;">${(d.continents&&d.continents.length)?d.continents.map(c=>`<span class="currency-chip">${esc(c)}</span>`).join(''):esc(d.region||'—')}</td>
+      <td style="font-size:12px;">${(d.subregions&&d.subregions.length)?d.subregions.map(s=>`<span class="currency-chip">${esc(s)}</span>`).join(''):'—'}</td>
+      <td style="font-size:12px;">${esc(d.email||'')}${d.email&&d.phone?' · ':''}${esc(d.phone||'')}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(d.owner||'—')}</td>
+      <td class="row-actions"><span data-edit="distributors:${d.id}">edit</span><span data-del="distributors:${d.id}">delete</span></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderProducts(){
+  if(!state.products.length) return `<div class="empty"><div class="display">No products yet</div>Add your essential oil products to the catalog.</div>`;
+  return `<table><thead><tr><th>No.</th><th>Name</th><th>Serial No.</th><th>Unit</th><th>Sizes</th><th>Currencies</th><th>Price</th><th>Stock</th><th>Notes</th><th></th></tr></thead><tbody>
+  ${state.products.map((p,i)=>`
+    <tr>
+      <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
+      <td>${esc(p.name)}</td>
+      <td class="mono" style="font-size:12px;">${esc(p.serial||'—')}</td>
+      <td style="font-size:12px;">${esc(p.unit||'—')}</td>
+      <td style="font-size:12px;">${(p.sizes&&p.sizes.length)?p.sizes.map(s=>`<span class="currency-chip">${esc(s)}</span>`).join(''):'—'}</td>
+      <td style="font-size:12px;">${(p.currencies&&p.currencies.length)?p.currencies.map(c=>`<span class="currency-chip">${esc(c)} (${esc(CURRENCY_SYMBOLS[c]||'')})</span>`).join(''):'—'}</td>
+      <td class="mono">${Number(p.price||0).toLocaleString()}</td>
+      <td style="font-size:12px;">${esc(p.stock||'—')}</td>
+      <td style="font-size:12px;color:var(--ink-soft);max-width:140px;">${esc(p.notes||'')}</td>
+      <td class="row-actions"><span data-edit="products:${p.id}">edit</span><span data-del="products:${p.id}">delete</span></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderTasks(){
+  if(!state.tasks.length) return `<div class="empty"><div class="display">No tasks yet</div>Add a follow-up or a general to-do.</div>`;
+  const sorted = [...state.tasks].sort((a,b)=>(a.status==='Done')-(b.status==='Done') || new Date(a.dueDate||0)-new Date(b.dueDate||0));
+  return `<table><thead><tr><th>No.</th><th>Task</th><th>Related to</th><th>Due</th><th>Assignee</th><th>Status</th><th></th></tr></thead><tbody>
+  ${sorted.map((t,i)=>`
+    <tr>
+      <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
+      <td>${esc(t.title)}${t.notes?`<div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px;">${esc(t.notes)}</div>`:''}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(linkLabel(t))}</td>
+      <td style="font-size:12px;">${t.dueDate ? new Date(t.dueDate).toLocaleDateString() : '—'}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(t.owner||'—')}</td>
+      <td><span class="badge ${t.status.toLowerCase()}">${t.status}</span></td>
+      <td class="row-actions"><span data-edit="tasks:${t.id}">edit</span><span data-del="tasks:${t.id}">delete</span></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderInvoices(){
+  if(!state.invoices.length) return `<div class="empty"><div class="display">No invoices yet</div>Generate one from an order or create a standalone invoice.</div>`;
+  return `<table><thead><tr><th>No.</th><th>Customer</th><th>Order</th><th>Amount</th><th>Currencies</th><th>Status</th><th>Due</th><th></th></tr></thead><tbody>
+  ${state.invoices.map((inv,i)=>`
+    <tr>
+      <td class="mono ledger-no">INV-${String(i+1).padStart(3,'0')}</td>
+      <td>${esc(customerName(inv.customerId))}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${inv.orderId ? esc(orderLabel(inv.orderId)) : '— standalone —'}</td>
+      <td class="mono">${Number(inv.amount||0).toLocaleString()}</td>
+      <td>${(inv.currencies&&inv.currencies.length) ? inv.currencies.map(cur=>`<span class="currency-chip">${esc(cur)} (${esc(CURRENCY_SYMBOLS[cur]||'')})</span>`).join('') : '<span style="color:var(--ink-soft);font-size:12px;">—</span>'}</td>
+      <td><span class="badge ${inv.status.toLowerCase()}">${inv.status}</span></td>
+      <td style="font-size:12px;">${inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : '—'}</td>
+      <td class="row-actions"><span data-edit="invoices:${inv.id}">edit</span><span data-del="invoices:${inv.id}">delete</span></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function esc(s){ return String(s??'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+/* ---------- Content event handlers ---------- */
+function attachContentHandlers(){
+  document.querySelectorAll('[data-navigate]').forEach(el=>{
+    el.onclick = ()=>{ state.view = el.dataset.navigate; render(); };
+  });
+  // Live search
+  const si = document.getElementById('searchInput');
+  if(si){
+    si.focus();
+    si.oninput = ()=>{
+      const c = document.getElementById('content');
+      c.innerHTML = renderSearch(si.value);
+      attachContentHandlers();
+    };
+  }
+  document.querySelectorAll('[data-filter]').forEach(el=>{
+    el.onclick = ()=>{ state.contactFilter = el.dataset.filter; render(); };
+  });
+  document.querySelectorAll('[data-edit]').forEach(el=>{
+    el.onclick = ()=>{ const [table,id] = el.dataset.edit.split(':'); openModal(table, id); };
+  });
+  document.querySelectorAll('[data-del]').forEach(el=>{
+    el.onclick = async ()=>{
+      const [table,id] = el.dataset.del.split(':');
+      if(!confirm('Delete this entry?')) return;
+      state[table] = state[table].filter(x=>x.id!==id);
+      await saveKey(KEYS[table], state[table]);
+      render();
+    };
+  });
+  document.querySelectorAll('[data-stage]').forEach(el=>{
+    el.onchange = async ()=>{
+      const deal = state.deals.find(d=>d.id===el.dataset.stage);
+      if(deal){ deal.stage = el.value; await saveKey(KEYS.deals, state.deals); render(); }
+    };
+  });
+}
+
+/* ---------- Modal / forms ---------- */
+function openModal(table, id){
+  const isEdit = !!id;
+  const item = isEdit ? state[table].find(x=>x.id===id) : null;
+  let html = '';
+  if(table==='contacts'){
+    const kind = item ? (item.kind||'Individual') : 'Individual';
+    html = `<h2 class="display">${isEdit?'Edit':'Add'} contact</h2>
+      <div class="field"><label>Name</label><input id="f_name" value="${item?esc(item.name):''}"></div>
+      <div class="field"><label>Individual or company</label><select id="f_kind">${ENTITY_KINDS.map(k=>`<option ${kind===k?'selected':''}>${k}</option>`).join('')}</select></div>
+      <div class="field" id="f_companyWrap" style="${kind==='Individual'?'display:none;':''}"><label>Company</label><input id="f_company" value="${item?esc(item.company||''):''}"></div>
+      <div class="field"><label>Type</label><select id="f_type">${CTYPES.map(t=>`<option ${item&&item.type===t?'selected':''}>${t}</option>`).join('')}</select></div>
+      <div class="field"><label>Email</label><input id="f_email" value="${item?esc(item.email||''):''}"></div>
+      <div class="field"><label>Phone</label><input id="f_phone" value="${item?esc(item.phone||''):''}"></div>
+      <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
+  } else if(table==='deals'){
+    const stagesForModal = isEdit ? STAGES : STAGES_NEW;
+    const selCurr = item && item.currencies ? item.currencies : [];
+    html = `<h2 class="display">${isEdit?'Edit':'Add'} deal</h2>
+      <div class="field"><label>Title</label><input id="f_title" value="${item?esc(item.title):''}"></div>
+      <div class="field"><label>Contact</label><select id="f_contact">${state.contacts.map(c=>`<option value="${c.id}" ${item&&item.contactId===c.id?'selected':''}>${esc(c.name)}</option>`).join('') || '<option value="">No contacts yet</option>'}</select></div>
+      <div class="field"><label>Currencies accepted</label>${msHTML('f_curr_deal', CURRENCIES, selCurr)}</div>
+      <div class="field"><label>Value</label><input id="f_value" type="number" value="${item?item.value:''}"></div>
+      <div class="field"><label>Stage</label><select id="f_stage">${stagesForModal.map(s=>`<option ${item&&item.stage===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
+  } else if(table==='orders'){
+    const selCurr = item && item.currencies ? item.currencies : [];
+    const statusOpts = isEdit ? OSTATUS : OSTATUS_NEW;
+    html = `<h2 class="display">${isEdit?'Edit':'Add'} order</h2>
+      <div class="field"><label>Contact</label><select id="f_contact">${state.contacts.map(c=>`<option value="${c.id}" ${item&&item.contactId===c.id?'selected':''}>${esc(c.name)}</option>`).join('') || '<option value="">No contacts yet</option>'}</select></div>
+      <div class="field"><label>Product</label><input id="f_product" value="${item?esc(item.product):''}" placeholder="e.g. Cinnamor Oregano 10ml"></div>
+      <div class="field"><label>Quantity</label><input id="f_qty" type="number" value="${item?item.qty:1}"></div>
+      <div class="field"><label>Cost</label><input id="f_amount" type="number" value="${item?item.amount:''}"></div>
+      <div class="field"><label>Currencies accepted</label>${msHTML('f_curr_order', CURRENCIES, selCurr)}</div>
+      <div class="field"><label>Status</label><select id="f_status">${statusOpts.map(s=>`<option ${item&&item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>`;
+  } else if(table==='leads'){
+    const kind = item ? (item.kind||'Individual') : 'Individual';
+    const selSrc = item && item.sources ? item.sources : [];
+    const statusOpts = isEdit ? LEAD_STATUS : LEAD_STATUS_NEW;
+    html = `<h2 class="display">${isEdit?'Edit':'Add'} lead</h2>
+      <div class="field"><label>Name</label><input id="f_name" value="${item?esc(item.name):''}"></div>
+      <div class="field"><label>Individual or company</label><select id="f_kind">${ENTITY_KINDS.map(k=>`<option ${kind===k?'selected':''}>${k}</option>`).join('')}</select></div>
+      <div class="field" id="f_companyWrap" style="${kind==='Individual'?'display:none;':''}"><label>Company</label><input id="f_company" value="${item?esc(item.company||''):''}"></div>
+      <div class="field"><label>Source</label><select id="f_source"><option value="">— select —</option>${LEAD_SOURCES.map(s=>`<option ${item&&(item.source===s||(item.sources&&item.sources[0]===s))?'selected':''}>${esc(s)}</option>`).join('')}</select></div>
+      <div class="field"><label>Status</label><select id="f_status">${statusOpts.map(s=>`<option ${item&&item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="field"><label>Email</label><input id="f_email" value="${item?esc(item.email||''):''}"></div>
+      <div class="field"><label>Phone</label><input id="f_phone" value="${item?esc(item.phone||''):''}"></div>
+      <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
+  } else if(table==='customers'){
+    const kind = item ? (item.kind||'Individual') : 'Individual';
+    const isInd = kind === 'Individual';
+    html = `<h2 class="display">${isEdit?'Edit':'Add'} customer</h2>
+      <div class="field"><label>Name</label><input id="f_name" value="${item?esc(item.name):''}"></div>
+      <div class="field"><label>Individual or company</label><select id="f_kind">${ENTITY_KINDS.map(k=>`<option ${kind===k?'selected':''}>${k}</option>`).join('')}</select></div>
+      <div class="field" id="f_companyWrap" style="${isInd?'display:none;':''}"><label>Company</label><input id="f_company" value="${item?esc(item.company||''):''}"></div>
+      <div class="field"><label>Email</label><input id="f_email" value="${item?esc(item.email||''):''}"></div>
+      <div class="field"><label>Phone</label><input id="f_phone" value="${item?esc(item.phone||''):''}"></div>
+      <div id="f_indFields" style="${isInd?'':'display:none;'}">
+        <div class="field"><label>Country</label><select id="f_country"><option value="">— select —</option>${COUNTRIES.map(c=>`<option ${item&&item.country===c?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
+        <div class="field" id="f_cityWrap"><label>City</label><select id="f_city"><option value="">— select country first —</option></select></div>
+        <div class="field"><label>Address</label><input id="f_address" value="${item?esc(item.address||''):''}"></div>
+      </div>
+      <div id="f_compFields" style="${isInd?'display:none;':''}">
+        <div class="field"><label>Address</label><input id="f_address_co" value="${item?esc(item.address||''):''}"></div>
+      </div>
+      <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
+  } else if(table==='suppliers'){
+    html = `<h2 class="display">${isEdit?'Edit':'Add'} supplier</h2>
+      <div class="field"><label>Name</label><input id="f_name" value="${item?esc(item.name):''}"></div>
+      <div class="field"><label>Company</label><input id="f_company" value="${item?esc(item.company||''):''}"></div>
+      <div class="field"><label>Email</label><input id="f_email" value="${item?esc(item.email||''):''}"></div>
+      <div class="field"><label>Phone</label><input id="f_phone" value="${item?esc(item.phone||''):''}"></div>
+      <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
+  } else if(table==='distributors'){
+    const selConts = item && item.continents ? item.continents : [];
+    html = `<h2 class="display">${isEdit?'Edit':'Add'} distributor</h2>
+      <div class="field"><label>Name</label><input id="f_name" value="${item?esc(item.name):''}"></div>
+      <div class="field"><label>Company</label><input id="f_company" value="${item?esc(item.company||''):''}"></div>
+      <div class="field"><label>Continents</label>${msHTMLsrc('f_conts', CONTINENTS, selConts)}</div>
+      <div class="field" id="f_subregWrap"><label>Sub-regions</label><div id="f_subregContent" style="color:var(--ink-soft);font-size:12px;padding:4px 0;">Select a continent first</div></div>
+      <div class="field"><label>Email</label><input id="f_email" value="${item?esc(item.email||''):''}"></div>
+      <div class="field"><label>Phone</label><input id="f_phone" value="${item?esc(item.phone||''):''}"></div>
+      <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
+  } else if(table==='products'){
+    const selSizes = item && item.sizes ? item.sizes : [];
+    const selCurr = item && item.currencies ? item.currencies : [];
+    const SIZES = ['2','5','10','15','20','25','30'];
+    const UNITS = ['ml','g'];
+    html = `<h2 class="display">${isEdit?'Edit':'Add'} product</h2>
+      <div class="field"><label>Name</label><input id="f_name" value="${item?esc(item.name):''}"></div>
+      <div class="field"><label>Serial Number</label><input id="f_serial" type="number" value="${item?esc(item.serial||''):''}" placeholder="e.g. 10042"></div>
+      <div class="field"><label>Unit</label><select id="f_unit">${UNITS.map(u=>`<option ${item&&item.unit===u?'selected':''}>${u}</option>`).join('')}</select></div>
+      <div class="field"><label>Volume / Size</label>${msHTMLsrc('f_sizes_prod', SIZES, selSizes)}</div>
+      <div class="field"><label>Currencies accepted</label>${msHTML('f_curr_prod', CURRENCIES, selCurr)}</div>
+      <div class="field"><label>Price ($)</label><input id="f_price" type="number" value="${item?item.price:''}"></div>
+      <div class="field"><label>Stock</label><input id="f_stock" value="${item?esc(item.stock||''):''}" placeholder="e.g. 240 units"></div>
+      <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
+  } else if(table==='tasks'){
+    const curType = item ? (item.linkType||'none') : 'none';
+    const priv = isPrivileged();
+    const linkTypeList = priv ? LINKTYPES_PRIV : LINKTYPES;
+    const assigneeField = priv
+      ? `<select id="f_owner">${TEAM.map(t=>`<option ${item&&item.owner===t?'selected':(!item&&t===state.viewingAs?'selected':'')}>${t}</option>`).join('')}</select>`
+      : `<select id="f_owner" disabled><option selected>${esc(state.viewingAs)}</option></select>`;
+    const statusOpts = isEdit ? TSTATUS : TSTATUS_NEW;
+    html = `<h2 class="display">${isEdit?'Edit':'Add'} task</h2>
+      <div class="field"><label>Title</label><input id="f_title" value="${item?esc(item.title):''}"></div>
+      <div class="field"><label>Due date</label><input id="f_dueDate" type="date" value="${item&&item.dueDate?item.dueDate:''}"></div>
+      <div class="field"><label>Assignee</label>${assigneeField}</div>
+      <div class="field"><label>Status</label><select id="f_status">${statusOpts.map(s=>`<option ${item&&item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="field"><label>Related to</label><select id="f_linkType">${linkTypeList.map(l=>`<option value="${l.key}" ${curType===l.key?'selected':''}>${l.label}</option>`).join('')}</select></div>
+      <div class="field" id="f_linkIdWrap" style="${curType==='none'?'display:none;':''}"><label>Item</label><select id="f_linkId">${linkItemsFor(curType).map(o=>`<option value="${o.id}" ${item&&item.linkId===o.id?'selected':''}>${esc(o.label)}</option>`).join('')}</select></div>
+      <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
+  } else if(table==='invoices'){
+    const selCurr = item && item.currencies ? item.currencies : [];
+    html = `<h2 class="display">${isEdit?'Edit':'Add'} invoice</h2>
+      <div class="field"><label>Customer</label><select id="f_customer">${state.customers.map(c=>`<option value="${c.id}" ${item&&item.customerId===c.id?'selected':''}>${esc(c.name)}</option>`).join('') || '<option value="">Add a customer first</option>'}</select></div>
+      <div class="field"><label>Link to order (optional)</label><select id="f_order"><option value="">— standalone —</option>${state.orders.map(o=>`<option value="${o.id}" ${item&&item.orderId===o.id?'selected':''}>${esc(orderLabel(o.id))}</option>`).join('')}</select></div>
+      <div class="field"><label>Currencies accepted</label>${msHTML('f_curr_inv', CURRENCIES, selCurr)}</div>
+      <div class="field"><label>Amount</label><input id="f_amount" type="number" value="${item?item.amount:''}"></div>
+      <div class="field"><label>Status</label><select id="f_status">${ISTATUS.map(s=>`<option ${item&&item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="field"><label>Due date</label><input id="f_dueDate" type="date" value="${item&&item.dueDate?item.dueDate:''}"></div>
+      <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
+  }
+  html += `<div class="modal-actions">
+      <button class="btn secondary" id="cancelBtn">Cancel</button>
+      <button class="btn" id="saveBtn">${isEdit?'Save':'Add'}</button>
+    </div>`;
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  document.getElementById('saveBtn').onclick = ()=>saveModal(table, isEdit?id:null);
+
+  // Init multi-select picklists
+  if(table==='deals') msInit('f_curr_deal');
+  if(table==='orders') msInit('f_curr_order');
+  if(table==='invoices') msInit('f_curr_inv');
+  if(table==='products'){ msInitSrc('f_sizes_prod'); msInit('f_curr_prod'); }
+  if(table==='distributors'){
+    const prevItem = item;
+    msInitSrc('f_conts');
+    function refreshSubregs(){
+      const selConts = msReadSrc('f_conts');
+      const content = document.getElementById('f_subregContent');
+      if(!content) return;
+      if(!selConts.length){ content.innerHTML = '<span style="color:var(--ink-soft);font-size:12px;">Select a continent first</span>'; return; }
+      const allSubs = selConts.flatMap(c=>SUBREGIONS[c]||[]);
+      const prevSubs = prevItem && prevItem.subregions ? prevItem.subregions : [];
+      content.innerHTML = msHTMLsrc('f_subs', allSubs, prevSubs);
+      msInitSrc('f_subs');
+    }
+    refreshSubregs();
+    document.getElementById('f_conts_dd').querySelectorAll('input').forEach(cb=>{
+      cb.addEventListener('change', ()=>{ setTimeout(refreshSubregs, 50); });
+    });
+  }
+
+  if(table==='tasks'){
+    document.getElementById('f_linkType').onchange = (e)=>{
+      const type = e.target.value;
+      const wrap = document.getElementById('f_linkIdWrap');
+      wrap.style.display = type==='none' ? 'none' : 'block';
+      const sel = document.getElementById('f_linkId');
+      if(sel) sel.innerHTML = linkItemsFor(type).map(o=>`<option value="${o.id}">${esc(o.label)}</option>`).join('');
+    };
+  }
+  if(table==='invoices'){
+    document.getElementById('f_order').onchange = (e)=>{
+      const ord = state.orders.find(o=>o.id===e.target.value);
+      if(ord) document.getElementById('f_amount').value = ord.amount;
+    };
+  }
+  if(['contacts','leads'].includes(table)){
+    const kindSel = document.getElementById('f_kind');
+    if(kindSel){
+      kindSel.onchange = (e)=>{
+        const wrap = document.getElementById('f_companyWrap');
+        if(wrap) wrap.style.display = e.target.value==='Individual' ? 'none' : 'block';
+        if(e.target.value==='Individual'){
+          const inp = document.getElementById('f_company');
+          if(inp) inp.value = '';
+        }
+      };
+    }
+  }
+  if(table==='customers'){
+    const kindSel = document.getElementById('f_kind');
+    function updateCityOptions(country, currentCity=''){
+      const citySel = document.getElementById('f_city');
+      if(!citySel) return;
+      const cities = CITIES_BY_COUNTRY[country] || [];
+      if(!cities.length){
+        citySel.innerHTML = `<option value="">— type manually —</option>`;
+        citySel.parentElement.querySelector('label').textContent = 'City';
+        // fall back to text input
+        citySel.outerHTML = `<input id="f_city" value="${esc(currentCity)}" placeholder="Enter city name">`;
+      } else {
+        citySel.innerHTML = `<option value="">— select city —</option>` + cities.map(c=>`<option ${c===currentCity?'selected':''}>${esc(c)}</option>`).join('');
+      }
+    }
+    // init city on open
+    const countrySel = document.getElementById('f_country');
+    if(countrySel){
+      if(countrySel.value) updateCityOptions(countrySel.value, item&&item.city||'');
+      countrySel.onchange = (e)=>updateCityOptions(e.target.value, '');
+    }
+    if(kindSel){
+      kindSel.onchange = (e)=>{
+        const isInd = e.target.value === 'Individual';
+        const coWrap = document.getElementById('f_companyWrap');
+        if(coWrap) coWrap.style.display = isInd ? 'none' : 'block';
+        if(isInd){ const inp=document.getElementById('f_company'); if(inp) inp.value=''; }
+        const indF = document.getElementById('f_indFields');
+        const coF = document.getElementById('f_compFields');
+        if(indF) indF.style.display = isInd ? '' : 'none';
+        if(coF) coF.style.display = isInd ? 'none' : '';
+      };
+    }
+  }
+}
+function closeModal(){ document.getElementById('overlay').classList.remove('show'); }
+
+async function saveModal(table, id){
+  const isEdit = !!id;
+  let obj = isEdit ? state[table].find(x=>x.id===id) : { id: uid(), createdAt: Date.now(), owner: state.viewingAs };
+  const readCompany = ()=>{
+    const kind = document.getElementById('f_kind') ? document.getElementById('f_kind').value : 'Company';
+    if(kind==='Individual') return '';
+    const inp = document.getElementById('f_company');
+    return inp ? inp.value.trim() : '';
+  };
+  if(table==='contacts'){
+    obj.name = document.getElementById('f_name').value.trim();
+    if(!obj.name) return alert('Name is required.');
+    obj.kind = document.getElementById('f_kind').value;
+    obj.company = readCompany();
+    obj.type = document.getElementById('f_type').value;
+    obj.email = document.getElementById('f_email').value.trim();
+    obj.phone = document.getElementById('f_phone').value.trim();
+    obj.notes = document.getElementById('f_notes').value.trim();
+  } else if(table==='deals'){
+    obj.title = document.getElementById('f_title').value.trim();
+    if(!obj.title) return alert('Title is required.');
+    obj.contactId = document.getElementById('f_contact').value;
+    obj.currencies = msRead('f_curr_deal');
+    obj.value = Number(document.getElementById('f_value').value)||0;
+    obj.stage = document.getElementById('f_stage').value;
+    obj.notes = document.getElementById('f_notes').value.trim();
+  } else if(table==='orders'){
+    obj.contactId = document.getElementById('f_contact').value;
+    obj.product = document.getElementById('f_product').value.trim();
+    if(!obj.product) return alert('Product is required.');
+    obj.qty = Number(document.getElementById('f_qty').value)||1;
+    obj.amount = Number(document.getElementById('f_amount').value)||0;
+    obj.currencies = msRead('f_curr_order');
+    obj.status = document.getElementById('f_status').value;
+  } else if(table==='customers'){
+    obj.name = document.getElementById('f_name').value.trim();
+    if(!obj.name) return alert('Name is required.');
+    obj.kind = document.getElementById('f_kind').value;
+    obj.company = readCompany();
+    obj.email = document.getElementById('f_email').value.trim();
+    obj.phone = document.getElementById('f_phone').value.trim();
+    if(obj.kind==='Individual'){
+      const co = document.getElementById('f_country'); obj.country = co ? co.value : '';
+      const ci = document.getElementById('f_city'); obj.city = ci ? (ci.value||ci.textContent||'').trim() : '';
+      const ad = document.getElementById('f_address'); obj.address = ad ? ad.value.trim() : '';
+    } else {
+      const ad = document.getElementById('f_address_co'); obj.address = ad ? ad.value.trim() : '';
+      obj.country=''; obj.city='';
+    }
+    obj.notes = document.getElementById('f_notes').value.trim();
+  } else if(table==='suppliers'){
+    obj.name = document.getElementById('f_name').value.trim();
+    if(!obj.name) return alert('Name is required.');
+    obj.company = document.getElementById('f_company').value.trim();
+    obj.email = document.getElementById('f_email').value.trim();
+    obj.phone = document.getElementById('f_phone').value.trim();
+    obj.notes = document.getElementById('f_notes').value.trim();
+  } else if(table==='distributors'){
+    obj.name = document.getElementById('f_name').value.trim();
+    if(!obj.name) return alert('Name is required.');
+    obj.company = document.getElementById('f_company').value.trim();
+    obj.continents = msReadSrc('f_conts');
+    const subEl = document.getElementById('f_subs_dd');
+    obj.subregions = subEl ? msReadSrc('f_subs') : [];
+    obj.email = document.getElementById('f_email').value.trim();
+    obj.phone = document.getElementById('f_phone').value.trim();
+    obj.notes = document.getElementById('f_notes').value.trim();
+  } else if(table==='products'){
+    obj.name = document.getElementById('f_name').value.trim();
+    if(!obj.name) return alert('Name is required.');
+    obj.serial = document.getElementById('f_serial').value.trim();
+    obj.unit = document.getElementById('f_unit').value;
+    obj.sizes = msReadSrc('f_sizes_prod');
+    obj.currencies = msRead('f_curr_prod');
+    obj.price = Number(document.getElementById('f_price').value)||0;
+    obj.stock = document.getElementById('f_stock').value.trim();
+    obj.notes = document.getElementById('f_notes').value.trim();
+  } else if(table==='leads'){
+    obj.name = document.getElementById('f_name').value.trim();
+    if(!obj.name) return alert('Name is required.');
+    obj.kind = document.getElementById('f_kind').value;
+    obj.company = readCompany();
+    obj.sources = [];
+    obj.source = document.getElementById('f_source').value;
+    obj.status = document.getElementById('f_status').value;
+    obj.email = document.getElementById('f_email').value.trim();
+    obj.phone = document.getElementById('f_phone').value.trim();
+    obj.notes = document.getElementById('f_notes').value.trim();
+  } else if(table==='tasks'){
+    obj.title = document.getElementById('f_title').value.trim();
+    if(!obj.title) return alert('Title is required.');
+    obj.dueDate = document.getElementById('f_dueDate').value;
+    obj.owner = document.getElementById('f_owner').value;
+    obj.status = document.getElementById('f_status').value;
+    obj.linkType = document.getElementById('f_linkType').value;
+    const linkSel = document.getElementById('f_linkId');
+    obj.linkId = obj.linkType!=='none' && linkSel ? linkSel.value : null;
+    obj.notes = document.getElementById('f_notes').value.trim();
+  } else if(table==='invoices'){
+    obj.customerId = document.getElementById('f_customer').value;
+    if(!obj.customerId) return alert('Pick a customer (add one under Customers first).');
+    obj.orderId = document.getElementById('f_order').value || null;
+    obj.amount = Number(document.getElementById('f_amount').value)||0;
+    obj.currencies = msRead('f_curr_inv');
+    obj.status = document.getElementById('f_status').value;
+    obj.dueDate = document.getElementById('f_dueDate').value;
+    obj.notes = document.getElementById('f_notes').value.trim();
+  }
+  if(!isEdit) state[table].push(obj);
+  await saveKey(KEYS[table], state[table]);
+  const wasNew = !isEdit;
+  const savedObj = obj;
+  closeModal();
+  render();
+  if(wasNew){
+    if(table==='deals' || table==='leads'){
+      celebrate();
+    }
+    if(table==='contacts'){
+      // Auto-create linked entity based on contact type
+      await autoCreateFromContact(savedObj);
+      showContactFollowup(savedObj);
+    }
+  }
+}
+
+/* ---------- Init ---------- */
+document.querySelectorAll('.navlink').forEach(el=>{
+  el.onclick = ()=>{ state.view = el.dataset.view; render(); };
+});
+// Topnav buttons
+document.getElementById('tn-dashboard').onclick = ()=>{ state.view='dashboard'; render(); };
+document.getElementById('tn-home').onclick = ()=>{ state.view='home'; render(); };
+document.getElementById('tn-contacts').onclick = ()=>{ state.view='contacts'; render(); };
+document.getElementById('tn-export').onclick = ()=>{ state.view='rickroll'; render(); };
+document.getElementById('tn-search').onclick = ()=>{ state.view='search'; render(); };
+document.getElementById('addBtn').onclick = ()=>{
+  const addable = ['contacts','leads','customers','distributors','suppliers','deals','orders','tasks','invoices','products'];
+  if(addable.includes(state.view)) openModal(state.view, null);
+};
+document.getElementById('overlay').onclick = (e)=>{ if(e.target.id==='overlay') closeModal(); };
+document.getElementById('viewingAs').onchange = (e)=>{ state.viewingAs = e.target.value; render(); };
+document.getElementById('resetBtn').onclick = async ()=>{
+  if(!confirm('This clears ALL data for the whole team. Continue?')) return;
+  state.contacts=[]; state.deals=[]; state.orders=[]; state.customers=[]; state.suppliers=[];
+  state.tasks=[]; state.invoices=[]; state.leads=[]; state.distributors=[]; state.products=[];
+  await Promise.all(Object.values(KEYS).map(k=>saveKey(k,[])));
+  render();
+};
+
+/* ---------- Celebration + follow-up ---------- */
+async function autoCreateFromContact(contact){
+  const type = contact.type;
+  if(type === 'Supplier'){
+    const obj = { id:uid(), createdAt:Date.now(), owner:state.viewingAs,
+      name:contact.name, company:contact.company||'',
+      email:contact.email||'', phone:contact.phone||'', notes:contact.notes||'' };
+    state.suppliers.push(obj);
+    await saveKey(KEYS.suppliers, state.suppliers);
+  } else if(type === 'Distributor'){
+    const obj = { id:uid(), createdAt:Date.now(), owner:state.viewingAs,
+      name:contact.name, company:contact.company||'',
+      continents:[], subregions:[],
+      email:contact.email||'', phone:contact.phone||'', notes:contact.notes||'' };
+    state.distributors.push(obj);
+    await saveKey(KEYS.distributors, state.distributors);
+  } else if(type === 'Customer'){
+    const obj = { id:uid(), createdAt:Date.now(), owner:state.viewingAs,
+      name:contact.name, kind:contact.kind||'Individual', company:contact.company||'',
+      email:contact.email||'', phone:contact.phone||'', notes:contact.notes||'' };
+    state.customers.push(obj);
+    await saveKey(KEYS.customers, state.customers);
+  }
+  // Marketing type → no auto-create
+}
+function celebrate(){
+  const colors = ['var(--amber)','var(--sage)','var(--clay)','var(--ochre)','var(--umber)','var(--olive)','var(--rust)'];
+  const wrap = document.createElement('div');
+  wrap.className = 'celebrate';
+  let html = '';
+  for(let i=0;i<60;i++){
+    const left = (Math.random()*100).toFixed(1);
+    const delay = (Math.random()*0.25).toFixed(2);
+    const color = colors[i % colors.length];
+    const skew = Math.random()>0.5 ? 'rotate(15deg)' : 'rotate(-15deg)';
+    html += `<div class="cpiece" style="left:${left}%;background:${color};animation-delay:${delay}s;transform:${skew};"></div>`;
+  }
+  wrap.innerHTML = html;
+  document.body.appendChild(wrap);
+  setTimeout(()=>wrap.remove(), 1200);
+}
+
+function showContactFollowup(contact){
+  const type = contact.type;
+  // For Marketing type, no auto-record created — just close
+  if(type === 'Marketing'){ return; }
+  const tabName = type === 'Supplier' ? 'Suppliers' : type === 'Distributor' ? 'Distributors' : 'Customers';
+  const tabView = type === 'Supplier' ? 'suppliers' : type === 'Distributor' ? 'distributors' : 'customers';
+  const bodyEl = document.getElementById('modalBody');
+  bodyEl.innerHTML = `
+    <div class="followup-modal">
+      <div class="fu-icon">✅</div>
+      <h2 class="display">Done!</h2>
+      <p><strong>${esc(contact.name)}</strong> was added to both <strong>Contacts</strong> and <strong>${esc(tabName)}</strong> automatically.</p>
+      <div class="modal-actions" style="justify-content:center;">
+        <button class="btn secondary" id="fuStay">Stay here</button>
+        <button class="btn" id="fuGo">View in ${esc(tabName)}</button>
+      </div>
+    </div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('fuStay').onclick = closeModal;
+  document.getElementById('fuGo').onclick = ()=>{ closeModal(); state.view=tabView; render(); };
+}
+
+/* ---------- Auth ---------- */
+function spawnConfetti(){
+  const colors = ['var(--amber)','var(--sage)','var(--clay)','var(--ochre)','var(--umber)','var(--olive)','var(--rust)'];
+  const container = document.getElementById('confettiContainer');
+  let html = '';
+  for(let i=0;i<36;i++){
+    const left = (Math.random()*100).toFixed(1);
+    const dur = (4 + Math.random()*3).toFixed(2);
+    const delay = (Math.random()*5).toFixed(2);
+    const color = colors[i % colors.length];
+    const skew = Math.random()>0.5 ? 'rotate(15deg)' : 'rotate(-15deg)';
+    html += `<div class="confetti-piece" style="left:${left}%;background:${color};animation-duration:${dur}s;animation-delay:-${delay}s;transform:${skew};"></div>`;
+  }
+  container.innerHTML = html;
+}
+
+function updateIdentityUI(){
+  const adminBox = document.getElementById('identityAdmin');
+  const staticBox = document.getElementById('identityStatic');
+  if(isAdmin()){
+    adminBox.style.display = 'block';
+    staticBox.style.display = 'none';
+    document.getElementById('viewingAs').value = state.viewingAs;
+  } else {
+    adminBox.style.display = 'none';
+    staticBox.style.display = 'block';
+    document.getElementById('identityName').textContent = state.currentUser;
+  }
+}
+
+async function boot(){
+  document.getElementById('loginScreen').style.display = 'none';
+  // Show welcome screen for 2 seconds
+  const ws = document.getElementById('welcomeScreen');
+  document.getElementById('welcomeName').textContent = state.currentUser;
+  ws.style.display = 'flex';
+  await loadAll();
+  setTimeout(()=>{
+    ws.style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    updateIdentityUI();
+    render();
+  }, 2000);
+}
+
+function attemptLogin(){
+  const emailEl = document.getElementById('loginEmail');
+  const passEl = document.getElementById('loginPassword');
+  const errEl = document.getElementById('loginError');
+  const email = emailEl.value.trim().toLowerCase();
+  const pass = passEl.value;
+  const name = TEAM_EMAILS[email];
+  if(!name || pass !== APP_PASSWORD){
+    errEl.textContent = 'Incorrect email or password.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  state.currentUser = name;
+  state.viewingAs = name;
+  state.view = 'dashboard';
+  boot();
+}
+
+document.getElementById('loginBtn').onclick = attemptLogin;
+document.getElementById('loginPassword').onkeydown = (e)=>{ if(e.key==='Enter') attemptLogin(); };
+document.getElementById('loginEmail').onkeydown = (e)=>{ if(e.key==='Enter') document.getElementById('loginPassword').focus(); };
+document.getElementById('logoutBtn').onclick = ()=>{
+  state.currentUser = null;
+  state.view = 'dashboard';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginError').style.display = 'none';
+};
+
+spawnConfetti();
+setTimeout(()=>{
+  const rocket = document.getElementById('rocket');
+  if(rocket) rocket.classList.add('launched');
+}, 2000);
+
+</script>
+</body>
+</html>
