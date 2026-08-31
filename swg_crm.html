@@ -8,29 +8,76 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
-    --cream:#F6F1E7;
-    --parchment:#EFE8D8;
+    --cream:#F2EEE3;
+    --parchment:#EAE3D2;
     --surface:#FFFFFF;
-    --ink:#2A2820;
-    --ink-soft:#7A7462;
-    --border:#DED4BE;
+    --ink:#23211B;
+    --ink-soft:#736C5B;
+    --border:#DACEB2;
     --amber:#A8703C;
     --amber-soft:#EADFC8;
-    --sage:#5B6B4C;
+    --sage:#55654A;
     --sage-soft:#E1E6D5;
     --clay:#9C5B48;
     --clay-soft:#F0DDD5;
-    --ochre:#B98A2E;
+    --ochre:#AC8029;
     --ochre-soft:#F1E3C4;
     --umber:#6F4A30;
     --umber-soft:#E4D6C8;
-    --olive:#748047;
+    --olive:#6C7A42;
     --olive-soft:#E4E8D3;
     --rust:#A6472B;
     --rust-soft:#F0DBD2;
+    --ink-fixed:#23211B;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --cream:#191712;
+      --parchment:#211E17;
+      --surface:#26231C;
+      --ink:#ECE6D6;
+      --ink-soft:#A69C87;
+      --border:#3B3628;
+      --amber:#CB9A61;
+      --amber-soft:#3A2E1E;
+      --sage:#93A67F;
+      --sage-soft:#28301F;
+      --clay:#C88E76;
+      --clay-soft:#382520;
+      --ochre:#D9A84B;
+      --ochre-soft:#3A2E17;
+      --umber:#B08A63;
+      --umber-soft:#332619;
+      --olive:#A6B27E;
+      --olive-soft:#2C321F;
+      --rust:#D2795A;
+      --rust-soft:#3A2119;
+    }
+  }
+  :root[data-theme="dark"]{
+    --cream:#191712;
+    --parchment:#211E17;
+    --surface:#26231C;
+    --ink:#ECE6D6;
+    --ink-soft:#A69C87;
+    --border:#3B3628;
+    --amber:#CB9A61;
+    --amber-soft:#3A2E1E;
+    --sage:#93A67F;
+    --sage-soft:#28301F;
+    --clay:#C88E76;
+    --clay-soft:#382520;
+    --ochre:#D9A84B;
+    --ochre-soft:#3A2E17;
+    --umber:#B08A63;
+    --umber-soft:#332619;
+    --olive:#A6B27E;
+    --olive-soft:#2C321F;
+    --rust:#D2795A;
+    --rust-soft:#3A2119;
   }
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--cream);color:var(--ink);font-family:'Work Sans',sans-serif;font-size:14px;}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:'Work Sans',sans-serif;font-size:14px;transition:background .15s,color .15s;}
   .display{font-family:'Fraunces',serif;}
   .mono{font-family:'IBM Plex Mono',monospace;}
   #app{display:flex;min-height:100vh;}
@@ -43,8 +90,7 @@
   .navlink:hover{background:rgba(42,40,32,0.06);}
   .navlink.active{color:#fff;}
   .navlink .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-  .navlink[data-view="dashboard"] .dot{background:var(--ink);}
-  .navlink[data-view="dashboard"] .dot{background:var(--ink);}
+  .navlink[data-view="dashboard"] .dot{background:var(--ink-fixed);}
   .navlink[data-view="home"] .dot{background:var(--amber);}
   .navlink[data-view="contacts"] .dot{background:var(--amber);}
   .navlink[data-view="leads"] .dot{background:var(--ochre);}
@@ -56,8 +102,8 @@
   .navlink[data-view="tasks"] .dot{background:var(--olive);}
   .navlink[data-view="invoices"] .dot{background:var(--rust);}
   .navlink[data-view="payments"] .dot{background:var(--rust);}
-  .navlink[data-view="team"] .dot{background:var(--ink);}
-  .navlink[data-view="dashboard"].active{background:var(--ink);}
+  .navlink[data-view="team"] .dot{background:var(--ink-fixed);}
+  .navlink[data-view="dashboard"].active{background:var(--ink-fixed);}
   .navlink[data-view="home"].active{background:var(--amber);}
   .navlink[data-view="contacts"].active{background:var(--amber);}
   .navlink[data-view="leads"].active{background:var(--ochre);}
@@ -69,7 +115,7 @@
   .navlink[data-view="tasks"].active{background:var(--olive);}
   .navlink[data-view="invoices"].active{background:var(--rust);}
   .navlink[data-view="payments"].active{background:var(--rust);}
-  .navlink[data-view="team"].active{background:var(--ink);}
+  .navlink[data-view="team"].active{background:var(--ink-fixed);}
   .navlink.hidden-role{display:none;}
   .sidebar-foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--border);}
   .foot-label{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
@@ -92,6 +138,22 @@
   .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 18px;}
   .stat-card .num{font-family:'Fraunces',serif;font-size:28px;font-weight:600;}
   .stat-card .lbl{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.6px;margin-top:2px;}
+  .stat-delta{display:flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;margin-top:6px;}
+  .stat-delta.up{color:var(--sage);}
+  .stat-delta.down{color:var(--rust);}
+  .stat-delta svg{width:11px;height:11px;flex:none;}
+
+  /* Team cards + avatars */
+  .avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex:none;font-family:'IBM Plex Mono',monospace;}
+  .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;}
+  .team-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;}
+  .team-top{display:flex;align-items:center;gap:11px;}
+  .team-name{font-weight:600;font-size:14.5px;}
+  .team-role{font-size:11.5px;color:var(--ink-soft);}
+  .team-stats{display:flex;gap:16px;border-top:1px solid var(--border);padding-top:10px;}
+  .team-stat b{display:block;font-size:14px;}
+  .team-stat span{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .identity-row{display:flex;align-items:center;gap:8px;}
   .stat-card.amber .num{color:var(--amber);}
   .stat-card.sage .num{color:var(--sage);}
   .stat-card.clay .num{color:var(--clay);}
@@ -105,7 +167,7 @@
   /* Filters */
   .filters{display:flex;gap:6px;margin-bottom:14px;}
   .filter-chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-size:12px;cursor:pointer;color:var(--ink-soft);}
-  .filter-chip.active{background:var(--accent, var(--ink));color:#fff;border-color:var(--accent, var(--ink));}
+  .filter-chip.active{background:var(--accent, var(--ink-fixed));color:#fff;border-color:var(--accent, var(--ink-fixed));}
 
   /* Table */
   table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
@@ -123,7 +185,7 @@
   .badge.customer{background:var(--sage-soft);color:var(--sage);}
   .badge.marketing{background:var(--umber-soft);color:var(--umber);}
   .badge.pending{background:var(--amber-soft);color:var(--amber);}
-  .badge.shipped{background:#E4E1D6;color:var(--ink-soft);}
+  .badge.shipped{background:var(--border);color:var(--ink-soft);}
   .badge.delivered{background:var(--sage-soft);color:var(--sage);}
   .badge.cancelled{background:var(--clay-soft);color:var(--clay);}
   .badge.open{background:var(--amber-soft);color:var(--amber);}
@@ -131,16 +193,18 @@
   .badge.unpaid{background:var(--amber-soft);color:var(--amber);}
   .badge.paid{background:var(--sage-soft);color:var(--sage);}
   .badge.overdue{background:var(--clay-soft);color:var(--clay);}
-  .badge.muted{background:#E4E1D6;color:var(--ink-soft);}
+  .badge.muted{background:var(--border);color:var(--ink-soft);}
 
   .empty{padding:40px 20px;text-align:center;color:var(--ink-soft);border:1px dashed var(--border);border-radius:8px;background:var(--surface);}
   .empty .display{font-size:17px;color:var(--ink);margin-bottom:4px;}
 
   /* Kanban */
   .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:start;}
-  .kcol{background:var(--parchment);border-radius:8px;padding:10px;min-height:120px;border-top:3px solid var(--accent, var(--amber));}
+  .kcol{background:var(--parchment);border-radius:8px;padding:10px;min-height:120px;border-top:3px solid var(--accent, var(--amber));transition:outline .1s;}
+  .kcol.dragover{outline:2px dashed var(--accent, var(--amber));outline-offset:-4px;}
   .kcol-head{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink-soft);padding:2px 4px 10px;}
-  .kcard{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:10px 11px;margin-bottom:9px;position:relative;}
+  .kcard{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:10px 11px;margin-bottom:9px;position:relative;cursor:grab;}
+  .kcard.dragging{opacity:0.4;}
   .kcard .ledger-no{position:absolute;top:8px;right:10px;}
   .kcard .ktitle{font-weight:500;font-size:13px;margin-bottom:4px;padding-right:36px;}
   .kcard .kcontact{font-size:11.5px;color:var(--ink-soft);margin-bottom:6px;}
@@ -163,6 +227,9 @@
 
   .loading{padding:60px;text-align:center;color:var(--ink-soft);}
   .shared-note{font-size:11px;color:var(--ink-soft);margin-top:14px;line-height:1.5;}
+  .theme-toggle{display:flex;gap:2px;background:var(--cream);border:1px solid var(--border);border-radius:7px;padding:2px;margin-bottom:12px;}
+  .theme-toggle button{flex:1;padding:5px 0;border:none;border-radius:5px;background:none;color:var(--ink-soft);font-family:inherit;font-size:11px;font-weight:500;cursor:pointer;}
+  .theme-toggle button.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,0.08);}
 
   /* Dashboard hello + donut */
   .hello{margin-bottom:22px;}
@@ -182,7 +249,7 @@
   .donut-empty{color:var(--ink-soft);font-size:13px;}
   .chart-toggle{display:flex;gap:4px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
   .chart-toggle-btn{padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:var(--cream);font-family:inherit;font-size:11.5px;color:var(--ink-soft);cursor:pointer;}
-  .chart-toggle-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .chart-toggle-btn.active{background:var(--ink-fixed);color:#fff;border-color:var(--ink-fixed);}
   .bar-chart{display:flex;flex-direction:column;gap:10px;flex:1;min-width:280px;}
   .bar-row{display:grid;grid-template-columns:90px 1fr 32px;align-items:center;gap:10px;cursor:pointer;}
   .bar-label{font-size:12.5px;color:var(--ink-soft);}
@@ -191,7 +258,7 @@
   .bar-count{font-size:12px;color:var(--ink-soft);text-align:right;}
 
   /* Toast */
-  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;box-shadow:0 8px 24px rgba(42,40,32,0.25);opacity:0;transition:opacity .25s,transform .25s;z-index:300;max-width:80vw;text-align:center;}
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--ink-fixed);color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,0.3);opacity:0;transition:opacity .25s,transform .25s;z-index:300;max-width:80vw;text-align:center;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
   /* Login screen */
@@ -209,7 +276,7 @@
   .identity-name{font-size:13px;font-weight:500;color:var(--ink);padding:6px 0 2px;}
 
   /* Individual / Company badges */
-  .badge.individual{background:#E4E1D6;color:var(--ink-soft);}
+  .badge.individual{background:var(--border);color:var(--ink-soft);}
   .badge.company{background:var(--olive-soft);color:var(--olive);}
 
   /* Currency picklist + chips */
@@ -230,7 +297,7 @@
   .dpipe-step.current .dpipe-label{color:var(--ink);font-weight:600;}
 
   /* Top navbar */
-  .topnav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:var(--ink);padding:0 22px;height:44px;flex-shrink:0;}
+  .topnav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:var(--ink-fixed);padding:0 22px;height:44px;flex-shrink:0;}
   .topnav-group{display:flex;align-items:center;gap:4px;}
   .topnav-center{display:flex;justify-content:center;}
   .topnav-btn{display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:6px;font-family:'Work Sans',sans-serif;font-size:12.5px;font-weight:500;color:rgba(255,255,255,0.72);background:none;border:none;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
@@ -352,13 +419,18 @@
     <div class="navlink" data-view="payments"><span class="dot"></span>Payments</div>
     <div class="navlink" data-view="team"><span class="dot"></span>Team</div>
     <div class="sidebar-foot">
+      <div class="theme-toggle" id="themeToggle">
+        <button type="button" data-theme-choice="system" title="Match system">Auto</button>
+        <button type="button" data-theme-choice="light" title="Light theme">Light</button>
+        <button type="button" data-theme-choice="dark" title="Dark theme">Dark</button>
+      </div>
       <div id="identityAdmin" style="display:none;">
         <div class="foot-label">Viewing as</div>
         <select id="viewingAs"></select>
       </div>
       <div id="identityStatic" style="display:none;">
         <div class="foot-label">Logged in as</div>
-        <div class="identity-name" id="identityName">—</div>
+        <div class="identity-row" id="identityRow"><div class="identity-name" id="identityName">—</div></div>
       </div>
       <button class="reset-btn" id="logoutBtn" style="margin-top:10px;">Log out</button>
       <button class="reset-btn" id="resetBtn">Clear all data</button>
@@ -448,10 +520,10 @@ const LINKTYPES_PRIV = [
 ];
 const COUNTRIES = ['Afghanistan','Albania','Algeria','Andorra','Angola','Antigua and Barbuda','Argentina','Armenia','Australia','Austria','Azerbaijan','Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize','Benin','Bhutan','Bolivia','Bosnia and Herzegovina','Botswana','Brazil','Brunei','Bulgaria','Burkina Faso','Burundi','Cabo Verde','Cambodia','Cameroon','Canada','Central African Republic','Chad','Chile','China','Colombia','Comoros','Congo','Costa Rica','Croatia','Cuba','Cyprus','Czech Republic','Denmark','Djibouti','Dominica','Dominican Republic','Ecuador','Egypt','El Salvador','Equatorial Guinea','Eritrea','Estonia','Eswatini','Ethiopia','Fiji','Finland','France','Gabon','Gambia','Georgia','Germany','Ghana','Greece','Grenada','Guatemala','Guinea','Guinea-Bissau','Guyana','Haiti','Honduras','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Jamaica','Japan','Jordan','Kazakhstan','Kenya','Kiribati','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Lesotho','Liberia','Libya','Liechtenstein','Lithuania','Luxembourg','Madagascar','Malawi','Malaysia','Maldives','Mali','Malta','Marshall Islands','Mauritania','Mauritius','Mexico','Micronesia','Moldova','Monaco','Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nauru','Nepal','Netherlands','New Zealand','Nicaragua','Niger','Nigeria','North Korea','North Macedonia','Norway','Oman','Pakistan','Palau','Palestine','Panama','Papua New Guinea','Paraguay','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Rwanda','Saint Kitts and Nevis','Saint Lucia','Saint Vincent and the Grenadines','Samoa','San Marino','Sao Tome and Principe','Saudi Arabia','Senegal','Serbia','Seychelles','Sierra Leone','Singapore','Slovakia','Slovenia','Solomon Islands','Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka','Sudan','Suriname','Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Timor-Leste','Togo','Tonga','Trinidad and Tobago','Tunisia','Turkey','Turkmenistan','Tuvalu','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States','Uruguay','Uzbekistan','Vanuatu','Vatican City','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe'];
 const ACCENTS = {
-  dashboard:'var(--ink)', home:'var(--amber)', contacts:'var(--amber)', leads:'var(--ochre)', customers:'var(--sage)',
+  dashboard:'var(--ink-fixed)', home:'var(--amber)', contacts:'var(--amber)', leads:'var(--ochre)', customers:'var(--sage)',
   distributors:'var(--umber)', suppliers:'var(--clay)', deals:'var(--ochre)', orders:'var(--umber)',
-  tasks:'var(--olive)', invoices:'var(--rust)', payments:'var(--rust)', team:'var(--ink)',
-  search:'var(--ink)', rickroll:'var(--ink)'
+  tasks:'var(--olive)', invoices:'var(--rust)', payments:'var(--rust)', team:'var(--ink-fixed)',
+  search:'var(--ink-fixed)', rickroll:'var(--ink-fixed)'
 };
 const CONTINENTS = ['Africa','Asia','Europe','North America','South America','Oceania','Middle East'];
 const SUBREGIONS = {
@@ -958,6 +1030,21 @@ function renderSearch(query=''){
   ${rows||empty}`;
 }
 
+const TREND_UP_PATH = 'M5 15l7-7 7 7';
+const TREND_DOWN_PATH = 'M5 9l7 7 7-7';
+function trendArrow(up){
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="${up?TREND_UP_PATH:TREND_DOWN_PATH}" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+function deltaHTML(text, up){
+  return `<div class="stat-delta ${up?'up':'down'}">${trendArrow(up)}${esc(text)}</div>`;
+}
+function pctDelta(thisPeriod, lastPeriod){
+  if(thisPeriod===0 && lastPeriod===0) return {text:'steady this week', up:true};
+  if(lastPeriod===0) return {text:'new this week', up:true};
+  const pct = Math.round(((thisPeriod-lastPeriod)/lastPeriod)*100);
+  return {text:`${pct>=0?'+':''}${pct}% vs last week`, up:pct>=0};
+}
+
 function renderDashboard(){
   const openDeals = state.deals.filter(d=>d.stage!=='Won' && d.stage!=='Lost');
   const openValue = openDeals.reduce((s,d)=>s+(Number(d.value)||0),0);
@@ -966,11 +1053,28 @@ function renderDashboard(){
   const unpaidValue = unpaidInvoices.reduce((s,i)=>s+(Number(i.amount)||0),0);
   const priv = isPrivileged();
 
+  const now = Date.now(), week = 7*24*60*60*1000;
+  const inRange = (ts,from,to) => ts>=from && ts<to;
+  const dealValInWeek = (from,to) => state.deals.filter(d=>inRange(d.createdAt||0,from,to)).reduce((s,d)=>s+(Number(d.value)||0),0);
+  const pipelineDelta = pctDelta(dealValInWeek(now-week,now), dealValInWeek(now-2*week,now-week));
+
+  const newCustomers = state.customers.filter(c=>inRange(c.createdAt||0, now-week, now)).length;
+  const customerDelta = newCustomers>0
+    ? {text:`${newCustomers} new this week`, up:true}
+    : {text:'no new signups this week', up:false};
+
+  const today = new Date().setHours(0,0,0,0);
+  const overdueTasks = state.tasks.filter(t=>t.status!=='Done' && t.dueDate && new Date(t.dueDate).getTime()<today).length;
+  const taskDelta = overdueTasks>0 ? {text:`${overdueTasks} overdue`, up:false} : {text:'on track', up:true};
+
+  const overdueInvoices = state.invoices.filter(i=>i.status==='Overdue').length;
+  const invoiceDelta = overdueInvoices>0 ? {text:`${overdueInvoices} overdue`, up:false} : {text:'all current', up:true};
+
   let secondary = `
-    <div class="stat-card ochre"><div class="num mono">${openValue.toLocaleString()}</div><div class="lbl">Pipeline value</div></div>
-    <div class="stat-card sage"><div class="num mono">${state.customers.length}</div><div class="lbl">Customers</div></div>
-    <div class="stat-card olive"><div class="num mono">${openTasks.length}</div><div class="lbl">Open tasks</div></div>`;
-  if(priv) secondary += `<div class="stat-card rust"><div class="num mono">${unpaidValue.toLocaleString()}</div><div class="lbl">Unpaid invoices</div></div>`;
+    <div class="stat-card ochre"><div class="num mono">${openValue.toLocaleString()}</div><div class="lbl">Pipeline value</div>${deltaHTML(pipelineDelta.text,pipelineDelta.up)}</div>
+    <div class="stat-card sage"><div class="num mono">${state.customers.length}</div><div class="lbl">Customers</div>${deltaHTML(customerDelta.text,customerDelta.up)}</div>
+    <div class="stat-card olive"><div class="num mono">${openTasks.length}</div><div class="lbl">Open tasks</div>${deltaHTML(taskDelta.text,taskDelta.up)}</div>`;
+  if(priv) secondary += `<div class="stat-card rust"><div class="num mono">${unpaidValue.toLocaleString()}</div><div class="lbl">Unpaid invoices</div>${deltaHTML(invoiceDelta.text,invoiceDelta.up)}</div>`;
 
   return `
     <div class="hello">
@@ -1008,6 +1112,7 @@ const CHART_TYPES = [
   {key:'donut', label:'Donut'},
   {key:'pie', label:'Pie'},
   {key:'bar', label:'Bar'},
+  {key:'revenue', label:'Revenue', priv:true},
 ];
 function loadChartPref(){
   try{
@@ -1019,10 +1124,88 @@ function saveChartPref(type){
   try{ localStorage.setItem('crm_chart_pref', type); }catch(e){}
 }
 
+function applyThemePref(pref){
+  const root = document.documentElement;
+  if(pref==='light' || pref==='dark') root.dataset.theme = pref;
+  else delete root.dataset.theme;
+  document.querySelectorAll('#themeToggle button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.themeChoice===pref);
+  });
+}
+function loadThemePref(){
+  let pref = 'system';
+  try{ pref = localStorage.getItem('crm_theme_pref') || 'system'; }catch(e){}
+  applyThemePref(pref);
+}
+document.querySelectorAll('#themeToggle button').forEach(b=>{
+  b.onclick = ()=>{
+    const pref = b.dataset.themeChoice;
+    try{ localStorage.setItem('crm_theme_pref', pref); }catch(e){}
+    applyThemePref(pref);
+  };
+});
+loadThemePref();
+
+function revenueByMonth(){
+  const months = [];
+  const now = new Date();
+  for(let i=5;i>=0;i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    months.push({key: d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'), label: d.toLocaleDateString(undefined,{month:'short'}), total:0});
+  }
+  const byKey = Object.fromEntries(months.map(m=>[m.key,m]));
+  state.invoices.filter(i=>i.status==='Paid').forEach(inv=>{
+    const d = new Date(inv.createdAt||0);
+    const k = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    if(byKey[k]) byKey[k].total += Number(inv.amount)||0;
+  });
+  return months;
+}
+function renderRevenueChart(){
+  const months = revenueByMonth();
+  const W=520,H=160,padL=8,padR=8,padT=10,padB=22;
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+  const maxV = Math.max(...months.map(m=>m.total), 1) * 1.15;
+  const stepX = months.length>1 ? plotW/(months.length-1) : 0;
+  const pts = months.map((m,i)=>[padL+i*stepX, padT+plotH-(m.total/maxV)*plotH]);
+  const line = pts.map((p,i)=>(i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const area = line + ` L${pts[pts.length-1][0].toFixed(1)},${(padT+plotH).toFixed(1)} L${pts[0][0].toFixed(1)},${(padT+plotH).toFixed(1)} Z`;
+  let grid='';
+  for(let i=0;i<=3;i++){
+    const y = padT + plotH*i/3;
+    grid += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="var(--border)" stroke-width="1"/>`;
+  }
+  const axis = months.map((m,i)=>`<text x="${pts[i][0].toFixed(1)}" y="${H-4}" text-anchor="middle" style="font-size:10px;fill:var(--ink-soft);font-family:'IBM Plex Mono',monospace;">${esc(m.label)}</text>`).join('');
+  const dots = pts.map((p,i)=> i===pts.length-1
+    ? `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="var(--sage)" stroke="var(--surface)" stroke-width="2"/>`
+    : `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.5" fill="var(--surface)" stroke="var(--sage)" stroke-width="1.6"/>`
+  ).join('');
+  const total = months.reduce((s,m)=>s+m.total,0);
+  return `<div style="width:100%;min-width:280px;">
+    <div style="font-size:12px;color:var(--ink-soft);margin-bottom:6px;">${total.toLocaleString()} across the last ${months.length} months · paid invoices</div>
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:160px;">
+      <defs><linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--sage)" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="var(--sage)" stop-opacity="0"/>
+      </linearGradient></defs>
+      ${grid}
+      <path d="${area}" fill="url(#revGrad)"/>
+      <path d="${line}" fill="none" stroke="var(--sage)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      ${dots}${axis}
+    </svg>
+  </div>`;
+}
+
 function renderChart(priv){
   const segs = chartSegments(priv);
   const total = segs.reduce((s,x)=>s+x.count,0);
-  const toggle = `<div class="chart-toggle">${CHART_TYPES.map(c=>`<button type="button" class="chart-toggle-btn ${state.chartType===c.key?'active':''}" data-chart="${c.key}">${c.label}</button>`).join('')}</div>`;
+  const chartType = (state.chartType==='revenue' && !priv) ? 'donut' : state.chartType;
+  const availableTypes = CHART_TYPES.filter(c=>!c.priv || priv);
+  const toggle = `<div class="chart-toggle">${availableTypes.map(c=>`<button type="button" class="chart-toggle-btn ${chartType===c.key?'active':''}" data-chart="${c.key}">${c.label}</button>`).join('')}</div>`;
+
+  if(chartType==='revenue'){
+    return `<div class="donut-wrap">${renderRevenueChart()}${toggle}</div>`;
+  }
 
   if(!total){
     return `<div class="donut-wrap"><div class="donut" style="background:var(--parchment);"></div>
@@ -1036,7 +1219,7 @@ function renderChart(priv){
       <span class="legend-count mono">${s.count}</span>
     </div>`).join('');
 
-  if(state.chartType==='bar'){
+  if(chartType==='bar'){
     const max = Math.max(...segs.map(s=>s.count), 1);
     const bars = segs.map(s=>`
       <div class="bar-row" data-navigate="${s.key}">
@@ -1055,7 +1238,7 @@ function renderChart(priv){
     return `${s.color} ${start}deg ${end}deg`;
   }).join(', ');
 
-  const hole = state.chartType==='donut' ? `<div class="donut-hole"><div class="dnum mono">${total}</div><div class="dlbl">Total records</div></div>` : '';
+  const hole = chartType==='donut' ? `<div class="donut-hole"><div class="dnum mono">${total}</div><div class="dlbl">Total records</div></div>` : '';
 
   return `<div class="donut-wrap">
       <div class="donut" style="background:conic-gradient(${stops});">${hole}</div>
@@ -1111,10 +1294,10 @@ function renderContacts(){
 function renderDeals(){
   return `<div class="kanban">${STAGES.map(stage=>{
     const items = state.deals.filter(d=>d.stage===stage);
-    return `<div class="kcol">
+    return `<div class="kcol" data-stage-col="${stage}">
       <div class="kcol-head"><span>${stage}</span><span>${items.length}</span></div>
       ${items.map(d=>`
-        <div class="kcard">
+        <div class="kcard" draggable="true" data-deal-id="${d.id}">
           <div class="ledger-no mono">#${d.id.slice(-4)}</div>
           <div class="ktitle">${esc(d.title)}</div>
           <div class="kcontact">${esc(contactName(d.contactId))}</div>
@@ -1271,21 +1454,46 @@ function renderPayments(){
   </tbody></table>`;
 }
 
+const AVATAR_COLORS = ['var(--amber)','var(--sage)','var(--clay)','var(--ochre)','var(--umber)','var(--olive)','var(--rust)'];
+function avatarColor(name){
+  let hash = 0;
+  for(let i=0;i<(name||'').length;i++) hash = (hash*31 + name.charCodeAt(i)) >>> 0;
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+}
+function initials(name){
+  const parts = (name||'').trim().split(/\s+/).filter(Boolean);
+  return (parts.map(w=>w[0]).slice(0,2).join('') || '?').toUpperCase();
+}
+function avatarHTML(name, size){
+  const sz = size==='sm' ? 22 : 34;
+  return `<div class="avatar" style="width:${sz}px;height:${sz}px;font-size:${size==='sm'?'9.5px':'13px'};background:${avatarColor(name)};">${esc(initials(name))}</div>`;
+}
+
 function renderTeam(){
   const del = canDeleteUsers();
-  return `<table><thead><tr><th>No.</th><th>Name</th><th>Email</th><th>Role</th><th></th></tr></thead><tbody>
-  ${state.team.map((t,i)=>{
+  return `<div class="team-grid">${state.team.map(t=>{
     const role = t.name===FULL_ADMIN ? 'Admin' : CO_ADMINS.includes(t.name) ? 'Co-admin' : 'Member';
     const canDel = del && t.name!==FULL_ADMIN;
-    return `<tr>
-      <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
-      <td>${esc(t.name)}</td>
-      <td style="font-size:12px;color:var(--ink-soft);">${esc(t.email||'—')}</td>
-      <td><span class="badge ${role==='Admin'?'company':role==='Co-admin'?'customer':'individual'}">${role}</span></td>
-      <td class="row-actions"><span data-edit="team:${t.id}">edit</span>${canDel?`<span data-del="team:${t.id}">delete</span>`:''}</td>
-    </tr>`;
-  }).join('')}
-  </tbody></table>`;
+    const myDeals = state.deals.filter(d=>d.owner===t.name);
+    const openDeals = myDeals.filter(d=>d.stage!=='Won' && d.stage!=='Lost').length;
+    const wonValue = myDeals.filter(d=>d.stage==='Won').reduce((s,d)=>s+(Number(d.value)||0),0);
+    const openTasks = state.tasks.filter(x=>x.owner===t.name && x.status!=='Done').length;
+    return `<div class="team-card">
+      <div class="team-top">
+        ${avatarHTML(t.name)}
+        <div>
+          <div class="team-name">${esc(t.name)}</div>
+          <div class="team-role">${role}${t.email?' · '+esc(t.email):''}</div>
+        </div>
+      </div>
+      <div class="team-stats">
+        <div class="team-stat"><b class="mono">${openDeals}</b><span>Deals</span></div>
+        <div class="team-stat"><b class="mono">${openTasks}</b><span>Tasks</span></div>
+        <div class="team-stat"><b class="mono">${wonValue.toLocaleString()}</b><span>Won</span></div>
+      </div>
+      <div class="row-actions"><span data-edit="team:${t.id}">edit</span>${canDel?`<span data-del="team:${t.id}">delete</span>`:''}</div>
+    </div>`;
+  }).join('')}</div>`;
 }
 
 function esc(s){ return String(s??'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
@@ -1324,27 +1532,24 @@ function attachContentHandlers(){
     };
   });
   document.querySelectorAll('[data-stage]').forEach(el=>{
-    el.onchange = async ()=>{
-      const deal = state.deals.find(d=>d.id===el.dataset.stage);
-      if(!deal) return;
-      const wasWon = deal.stage === 'Won';
-      deal.stage = el.value;
-      if(deal.stage==='Won' && !wasWon && !deal._autoInvoiced){
-        deal._autoInvoiced = true;
-        await saveKey(KEYS.deals, state.deals);
-        await createPaidOrderAndInvoice({
-          relatedType:'contact', relatedId: deal.contactId,
-          product: deal.title, qty:1, amount: deal.value||0, currencies: deal.currencies||[],
-          notes: `Auto-generated when the deal "${deal.title}" was marked Won.`
-        });
-        render();
-        toast(`Invoice created for "${deal.title}" — ${Number(deal.value||0).toLocaleString()}`);
-        celebrate();
-        return;
-      }
-      await saveKey(KEYS.deals, state.deals);
-      render();
-    };
+    el.onchange = ()=> setDealStage(el.dataset.stage, el.value);
+  });
+  let dragDealId = null;
+  document.querySelectorAll('.kcard[draggable]').forEach(card=>{
+    card.addEventListener('dragstart', ()=>{
+      dragDealId = card.dataset.dealId;
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', ()=> card.classList.remove('dragging'));
+  });
+  document.querySelectorAll('.kcol[data-stage-col]').forEach(col=>{
+    col.addEventListener('dragover', e=>{ e.preventDefault(); col.classList.add('dragover'); });
+    col.addEventListener('dragleave', ()=> col.classList.remove('dragover'));
+    col.addEventListener('drop', e=>{
+      e.preventDefault();
+      col.classList.remove('dragover');
+      if(dragDealId) setDealStage(dragDealId, col.dataset.stageCol);
+    });
   });
   document.querySelectorAll('[data-order]').forEach(el=>{
     el.onclick = ()=>{
@@ -1823,6 +2028,28 @@ async function createPaidOrderAndInvoice({relatedType, relatedId, product, qty, 
   return { order, invoice };
 }
 
+async function setDealStage(dealId, newStage){
+  const deal = state.deals.find(d=>d.id===dealId);
+  if(!deal || deal.stage===newStage) return;
+  const wasWon = deal.stage === 'Won';
+  deal.stage = newStage;
+  if(deal.stage==='Won' && !wasWon && !deal._autoInvoiced){
+    deal._autoInvoiced = true;
+    await saveKey(KEYS.deals, state.deals);
+    await createPaidOrderAndInvoice({
+      relatedType:'contact', relatedId: deal.contactId,
+      product: deal.title, qty:1, amount: deal.value||0, currencies: deal.currencies||[],
+      notes: `Auto-generated when the deal "${deal.title}" was marked Won.`
+    });
+    render();
+    toast(`Invoice created for "${deal.title}" — ${Number(deal.value||0).toLocaleString()}`);
+    celebrate();
+    return;
+  }
+  await saveKey(KEYS.deals, state.deals);
+  render();
+}
+
 function openPlaceOrderModal(relatedType, relatedId, name){
   const bodyEl = document.getElementById('modalBody');
   bodyEl.innerHTML = `<h2 class="display">Place order — ${esc(name)}</h2>
@@ -1924,7 +2151,8 @@ function updateIdentityUI(){
   } else {
     adminBox.style.display = 'none';
     staticBox.style.display = 'block';
-    document.getElementById('identityName').textContent = state.currentUser;
+    const row = document.getElementById('identityRow');
+    row.innerHTML = avatarHTML(state.currentUser, 'sm') + `<div class="identity-name">${esc(state.currentUser)}</div>`;
   }
 }
 
