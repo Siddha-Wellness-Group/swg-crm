@@ -5,6 +5,7 @@
 <title>SWG CRM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
     --cream:#F6F1E7;
@@ -54,7 +55,8 @@
   .navlink[data-view="orders"] .dot{background:var(--umber);}
   .navlink[data-view="tasks"] .dot{background:var(--olive);}
   .navlink[data-view="invoices"] .dot{background:var(--rust);}
-  .navlink[data-view="products"] .dot{background:var(--sage);}
+  .navlink[data-view="payments"] .dot{background:var(--rust);}
+  .navlink[data-view="team"] .dot{background:var(--ink);}
   .navlink[data-view="dashboard"].active{background:var(--ink);}
   .navlink[data-view="home"].active{background:var(--amber);}
   .navlink[data-view="contacts"].active{background:var(--amber);}
@@ -66,7 +68,8 @@
   .navlink[data-view="orders"].active{background:var(--umber);}
   .navlink[data-view="tasks"].active{background:var(--olive);}
   .navlink[data-view="invoices"].active{background:var(--rust);}
-  .navlink[data-view="products"].active{background:var(--sage);}
+  .navlink[data-view="payments"].active{background:var(--rust);}
+  .navlink[data-view="team"].active{background:var(--ink);}
   .navlink.hidden-role{display:none;}
   .sidebar-foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--border);}
   .foot-label{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
@@ -177,6 +180,19 @@
   .legend-name{flex:1;color:var(--ink);}
   .legend-count{font-family:'IBM Plex Mono',monospace;color:var(--ink-soft);font-size:12px;}
   .donut-empty{color:var(--ink-soft);font-size:13px;}
+  .chart-toggle{display:flex;gap:4px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
+  .chart-toggle-btn{padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:var(--cream);font-family:inherit;font-size:11.5px;color:var(--ink-soft);cursor:pointer;}
+  .chart-toggle-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .bar-chart{display:flex;flex-direction:column;gap:10px;flex:1;min-width:280px;}
+  .bar-row{display:grid;grid-template-columns:90px 1fr 32px;align-items:center;gap:10px;cursor:pointer;}
+  .bar-label{font-size:12.5px;color:var(--ink-soft);}
+  .bar-track{height:10px;background:var(--parchment);border-radius:5px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:5px;transition:width .2s;}
+  .bar-count{font-size:12px;color:var(--ink-soft);text-align:right;}
+
+  /* Toast */
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;box-shadow:0 8px 24px rgba(42,40,32,0.25);opacity:0;transition:opacity .25s,transform .25s;z-index:300;max-width:80vw;text-align:center;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
   /* Login screen */
   .login-screen{position:fixed;inset:0;background:var(--cream);display:flex;align-items:center;justify-content:center;overflow:hidden;z-index:100;}
@@ -214,12 +230,13 @@
   .dpipe-step.current .dpipe-label{color:var(--ink);font-weight:600;}
 
   /* Top navbar */
-  .topnav{display:flex;align-items:center;gap:4px;background:var(--ink);padding:0 22px;height:44px;flex-shrink:0;}
+  .topnav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:var(--ink);padding:0 22px;height:44px;flex-shrink:0;}
+  .topnav-group{display:flex;align-items:center;gap:4px;}
+  .topnav-center{display:flex;justify-content:center;}
   .topnav-btn{display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:6px;font-family:'Work Sans',sans-serif;font-size:12.5px;font-weight:500;color:rgba(255,255,255,0.72);background:none;border:none;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
   .topnav-btn:hover{background:rgba(255,255,255,0.1);color:#fff;}
   .topnav-btn.tnav-active{background:rgba(255,255,255,0.15);color:#fff;}
   .topnav-icon{font-size:14px;line-height:1;}
-  .topnav-sep{flex:1;}
 
   /* Search screen */
   .search-bar-wrap{display:flex;gap:10px;margin-bottom:20px;}
@@ -232,10 +249,6 @@
   .search-hit-name{font-size:13px;font-weight:500;flex:1;}
   .search-hit-sub{font-size:11.5px;color:var(--ink-soft);}
   .search-empty{color:var(--ink-soft);font-size:13px;text-align:center;padding:30px;}
-
-  /* Rickroll screen */
-  .rickroll{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:18px;}
-  .rickroll-text{font-family:Arial,sans-serif;font-size:52px;font-weight:700;color:var(--ink);text-align:center;}
 
   /* Rocket flight on login screen */
   .rocket{position:absolute;left:-80px;bottom:22vh;font-size:44px;z-index:3;pointer-events:none;transform:rotate(-8deg);opacity:0;filter:drop-shadow(0 4px 8px rgba(42,40,32,0.2));}
@@ -279,14 +292,14 @@
   .welcome-hi{font-family:'Fraunces',serif;font-size:48px;font-weight:600;color:var(--ink);text-align:center;}
   .welcome-sub{font-family:'Work Sans',sans-serif;font-size:16px;color:var(--ink-soft);}
 
-  /* Rickroll tilt */
-  .rickroll{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:18px;}
-  .rickroll-text{font-family:Arial,sans-serif;font-size:52px;font-weight:700;color:var(--ink);text-align:center;}
-  .rickroll.tilting{animation:tilt-lr 2s ease-in-out;}
-  @keyframes tilt-lr{
-    0%{transform:rotate(0deg);}15%{transform:rotate(-6deg);}40%{transform:rotate(6deg);}
-    65%{transform:rotate(-4deg);}85%{transform:rotate(4deg);}100%{transform:rotate(0deg);}
-  }
+  /* Import / Export */
+  .io-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .io-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px 24px;}
+  .io-card h3{margin:0 0 4px;font-size:15px;font-weight:500;}
+  .io-card p{color:var(--ink-soft);font-size:12.5px;margin:0 0 16px;line-height:1.5;}
+  .io-dropzone{border:1px dashed var(--border);border-radius:8px;padding:20px;text-align:center;color:var(--ink-soft);font-size:12.5px;margin-top:12px;}
+  .io-status{margin-top:12px;font-size:12.5px;color:var(--sage);min-height:1.2em;}
+  .io-status.error{color:var(--rust);}
 
   /* Lead status badges (reuse existing 5 stages) */
   .badge.new{background:var(--amber-soft);color:var(--amber);}
@@ -334,17 +347,14 @@
     <div class="navlink" data-view="distributors"><span class="dot"></span>Distributors</div>
     <div class="navlink" data-view="suppliers"><span class="dot"></span>Suppliers</div>
     <div class="navlink" data-view="deals"><span class="dot"></span>Deals</div>
-    <div class="navlink" data-view="orders"><span class="dot"></span>Orders</div>
     <div class="navlink" data-view="tasks"><span class="dot"></span>Tasks</div>
     <div class="navlink" data-view="invoices"><span class="dot"></span>Invoices</div>
-    <div class="navlink" data-view="products"><span class="dot"></span>Products</div>
+    <div class="navlink" data-view="payments"><span class="dot"></span>Payments</div>
+    <div class="navlink" data-view="team"><span class="dot"></span>Team</div>
     <div class="sidebar-foot">
       <div id="identityAdmin" style="display:none;">
         <div class="foot-label">Viewing as</div>
-        <select id="viewingAs">
-          <option>Ariel</option><option>Daniel</option><option>Omri</option>
-          <option>Kfir</option><option>David</option><option>Nishant</option><option>Elianna</option>
-        </select>
+        <select id="viewingAs"></select>
       </div>
       <div id="identityStatic" style="display:none;">
         <div class="foot-label">Logged in as</div>
@@ -357,12 +367,16 @@
   </aside>
   <main id="mainArea" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
     <nav class="topnav">
-      <button class="topnav-btn" id="tn-dashboard"><span class="topnav-icon">📊</span>Dashboard</button>
-      <button class="topnav-btn" id="tn-contacts"><span class="topnav-icon">👥</span>Contacts</button>
-      <button class="topnav-btn" id="tn-home"><span class="topnav-icon">🏠</span>Home</button>
-      <button class="topnav-btn" id="tn-export"><span class="topnav-icon">📤</span>Excel Export</button>
-      <div class="topnav-sep"></div>
-      <button class="topnav-btn" id="tn-search"><span class="topnav-icon">🔍</span>Search</button>
+      <div class="topnav-group">
+        <button class="topnav-btn" id="tn-dashboard"><span class="topnav-icon">📊</span>Dashboard</button>
+        <button class="topnav-btn" id="tn-contacts"><span class="topnav-icon">👥</span>Contacts</button>
+        <button class="topnav-btn" id="tn-home"><span class="topnav-icon">🏠</span>Home</button>
+        <button class="topnav-btn" id="tn-export"><span class="topnav-icon">📤</span>Import / Export</button>
+      </div>
+      <div class="topnav-center">
+        <button class="topnav-btn" id="tn-search"><span class="topnav-icon">🔍</span>Search</button>
+      </div>
+      <div class="topnav-group"></div>
     </nav>
     <div style="flex:1;overflow-y:auto;padding:28px 34px;">
       <div class="topbar">
@@ -382,8 +396,8 @@
 </div>
 
 <script>
-const KEYS = { contacts:'crm_contacts', deals:'crm_deals', orders:'crm_orders', customers:'crm_customers', suppliers:'crm_suppliers', tasks:'crm_tasks', invoices:'crm_invoices', leads:'crm_leads', distributors:'crm_distributors', products:'crm_products' };
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], products:[], contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false };
+const KEYS = { contacts:'crm_contacts', deals:'crm_deals', orders:'crm_orders', customers:'crm_customers', suppliers:'crm_suppliers', tasks:'crm_tasks', invoices:'crm_invoices', leads:'crm_leads', distributors:'crm_distributors', payments:'crm_payments', team:'crm_team' };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut' };
 const STAGES = ['Lead','Contacted','Negotiation','Won','Lost'];
 const STAGES_NEW = ['Lead','Contacted','Negotiation','Won']; // creation only — no Lost
 const CTYPES = ['Supplier','Distributor','Customer','Marketing'];
@@ -399,7 +413,22 @@ const OSTATUS_NEW = ['Pending','Shipped','Delivered']; // no Cancelled on creati
 const TSTATUS = ['Open','Done'];
 const TSTATUS_NEW = ['Open']; // no Done on creation
 const ISTATUS = ['Unpaid','Paid','Overdue'];
-const TEAM = ['Ariel','Daniel','Omri','Kfir','David','Nishant','Elianna'];
+const PAYEE_TYPES = [
+  {key:'team', label:'Team member'},
+  {key:'supplier', label:'Supplier'},
+  {key:'distributor', label:'Distributor'},
+  {key:'customer', label:'Customer'},
+  {key:'other', label:'Other'},
+];
+const PSTATUS = ['Pending','Paid'];
+function payeeSelectHTML(type, item){
+  const selected = item ? item.payee : '';
+  if(type==='team') return `<select id="f_payeeSel">${teamNames().map(n=>`<option ${selected===n?'selected':''}>${esc(n)}</option>`).join('')}</select>`;
+  if(type==='supplier') return `<select id="f_payeeSel">${state.suppliers.map(s=>`<option ${selected===s.name?'selected':''}>${esc(s.name)}</option>`).join('') || '<option value="">No suppliers yet</option>'}</select>`;
+  if(type==='distributor') return `<select id="f_payeeSel">${state.distributors.map(d=>`<option ${selected===d.name?'selected':''}>${esc(d.name)}</option>`).join('') || '<option value="">No distributors yet</option>'}</select>`;
+  if(type==='customer') return `<select id="f_payeeSel">${state.customers.map(c=>`<option ${selected===c.name?'selected':''}>${esc(c.name)}</option>`).join('') || '<option value="">No customers yet</option>'}</select>`;
+  return `<input id="f_payeeSel" value="${esc(selected)}" placeholder="Payee name">`;
+}
 const LINKTYPES = [
   {key:'none', label:'— None —'},
   {key:'contact', label:'Contact'},
@@ -421,7 +450,7 @@ const COUNTRIES = ['Afghanistan','Albania','Algeria','Andorra','Angola','Antigua
 const ACCENTS = {
   dashboard:'var(--ink)', home:'var(--amber)', contacts:'var(--amber)', leads:'var(--ochre)', customers:'var(--sage)',
   distributors:'var(--umber)', suppliers:'var(--clay)', deals:'var(--ochre)', orders:'var(--umber)',
-  tasks:'var(--olive)', invoices:'var(--rust)', products:'var(--sage)',
+  tasks:'var(--olive)', invoices:'var(--rust)', payments:'var(--rust)', team:'var(--ink)',
   search:'var(--ink)', rickroll:'var(--ink)'
 };
 const CONTINENTS = ['Africa','Asia','Europe','North America','South America','Oceania','Middle East'];
@@ -477,20 +506,42 @@ const CITIES_BY_COUNTRY = {
   'Chile':['Santiago','Antofagasta','Viña del Mar','Valparaíso','Temuco','Iquique'],
 };
 const PRIVILEGED = ['Ariel','Daniel'];
+const FULL_ADMIN = 'Ariel';
+const CO_ADMINS = ['David'];
 function isPrivileged(){ return PRIVILEGED.includes(state.viewingAs); }
-function isAdmin(){ return state.currentUser === 'Ariel'; }
+function isAdmin(){ return state.currentUser === FULL_ADMIN || CO_ADMINS.includes(state.currentUser); }
+function canDeleteUsers(){ return state.currentUser === FULL_ADMIN; }
 function canSeeLeads(){ return !LEAD_HIDDEN_FOR.includes(state.viewingAs); }
+function teamNames(){ return state.team.map(t=>t.name); }
 
-const TEAM_EMAILS = {
-  'ariel@siddhayogaweb.com':'Ariel',
-  'daniel@siddhayogaweb.com':'Daniel',
-  'omri@siddhayogaweb.com':'Omri',
-  'kfir@siddhayogaweb.com':'Kfir',
-  'david@siddhayogaweb.com':'David',
-  'nishant@siddhayogaweb.com':'Nishant',
-  'elianna@siddhayogaweb.com':'Elianna',
-};
+const DEFAULT_TEAM = [
+  {name:'Ariel', email:'ariel@siddhayogaweb.com'},
+  {name:'Daniel', email:'daniel@siddhayogaweb.com'},
+  {name:'Omri', email:'omri@siddhayogaweb.com'},
+  {name:'Kfir', email:'kfir@siddhayogaweb.com'},
+  {name:'David', email:'david@siddhayogaweb.com'},
+  {name:'Nishant', email:'nishant@siddhayogaweb.com'},
+  {name:'Elianna', email:'elianna@siddhayogaweb.com'},
+];
 const APP_PASSWORD = 'siddhayoga';
+let teamLoadPromise = null;
+async function loadTeamData(){
+  let t = await loadKey(KEYS.team);
+  if(!t || !t.length){
+    t = DEFAULT_TEAM.map(m=>({id:uid(), createdAt:Date.now(), ...m}));
+    await saveKey(KEYS.team, t);
+  }
+  state.team = t;
+}
+function ensureTeamLoaded(){
+  if(!teamLoadPromise) teamLoadPromise = loadTeamData();
+  return teamLoadPromise;
+}
+function teamEmailMap(){
+  const m = {};
+  state.team.forEach(t=>{ if(t.email) m[t.email.toLowerCase()] = t.name; });
+  return m;
+}
 
 function uid(){ return 'id_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
 
@@ -506,14 +557,14 @@ async function saveKey(key, arr){
 }
 
 async function loadAll(){
-  const [c,d,o,cu,su,ta,inv,le,di,pr] = await Promise.all([
+  const [c,d,o,cu,su,ta,inv,le,di,pa] = await Promise.all([
     loadKey(KEYS.contacts), loadKey(KEYS.deals), loadKey(KEYS.orders),
     loadKey(KEYS.customers), loadKey(KEYS.suppliers), loadKey(KEYS.tasks), loadKey(KEYS.invoices),
-    loadKey(KEYS.leads), loadKey(KEYS.distributors), loadKey(KEYS.products)
+    loadKey(KEYS.leads), loadKey(KEYS.distributors), loadKey(KEYS.payments)
   ]);
   state.contacts = c; state.deals = d; state.orders = o;
   state.customers = cu; state.suppliers = su; state.tasks = ta; state.invoices = inv;
-  state.leads = le; state.distributors = di; state.products = pr;
+  state.leads = le; state.distributors = di; state.payments = pa;
   state.loaded = true;
 }
 
@@ -529,13 +580,47 @@ function orderLabel(id){
   const o = state.orders.find(x=>x.id===id);
   return o ? (o.product+' — '+Number(o.amount||0).toLocaleString()) : '—';
 }
+function supplierName(id){
+  const s = state.suppliers.find(x=>x.id===id);
+  return s ? s.name : '—';
+}
+function distributorName(id){
+  const d = state.distributors.find(x=>x.id===id);
+  return d ? d.name : '—';
+}
+const REL_TYPES = [
+  {key:'customer', label:'Customer'},
+  {key:'supplier', label:'Supplier'},
+  {key:'distributor', label:'Distributor'},
+  {key:'contact', label:'Contact'},
+];
+function relatedEntityName(type, id){
+  if(type==='customer') return customerName(id);
+  if(type==='supplier') return supplierName(id);
+  if(type==='distributor') return distributorName(id);
+  if(type==='contact') return contactName(id);
+  return '—';
+}
+function relatedItemsFor(type){
+  if(type==='customer') return state.customers.map(x=>({id:x.id, label:x.name}));
+  if(type==='supplier') return state.suppliers.map(x=>({id:x.id, label:x.name}));
+  if(type==='distributor') return state.distributors.map(x=>({id:x.id, label:x.name}));
+  if(type==='contact') return state.contacts.map(x=>({id:x.id, label:x.name}));
+  return [];
+}
+function invoiceSubjectLabel(inv){
+  if(inv.relatedType && inv.relatedType!=='none') return relatedEntityName(inv.relatedType, inv.relatedId);
+  if(inv.orderId){ const o = state.orders.find(x=>x.id===inv.orderId); return o ? contactName(o.contactId) : '—'; }
+  if(inv.customerId) return customerName(inv.customerId);
+  return '—';
+}
 function linkItemsFor(type){
   if(type==='contact') return state.contacts.map(x=>({id:x.id, label:x.name}));
   if(type==='customer') return state.customers.map(x=>({id:x.id, label:x.name}));
   if(type==='supplier') return state.suppliers.map(x=>({id:x.id, label:x.name}));
   if(type==='deal') return state.deals.map(x=>({id:x.id, label:x.title}));
   if(type==='order') return state.orders.map(x=>({id:x.id, label:x.product+' — '+contactName(x.contactId)}));
-  if(type==='user') return TEAM.map(t=>({id:t, label:t}));
+  if(type==='user') return teamNames().map(t=>({id:t, label:t}));
   return [];
 }
 
@@ -637,14 +722,21 @@ function setActiveNav(){
 function updateNavVisibility(){
   const invLink = document.querySelector('.navlink[data-view="invoices"]');
   if(invLink) invLink.classList.toggle('hidden-role', !isPrivileged());
+  const payLink = document.querySelector('.navlink[data-view="payments"]');
+  if(payLink) payLink.classList.toggle('hidden-role', !isPrivileged());
+  const teamLink = document.querySelector('.navlink[data-view="team"]');
+  if(teamLink) teamLink.classList.toggle('hidden-role', !isAdmin());
   const leadLink = document.querySelector('.navlink[data-view="leads"]');
   if(leadLink) leadLink.classList.toggle('hidden-role', !canSeeLeads());
 }
 
 function render(){
   if(state.view==='invoices' && !isPrivileged()) state.view = 'dashboard';
+  if(state.view==='payments' && !isPrivileged()) state.view = 'dashboard';
+  if(state.view==='team' && !isAdmin()) state.view = 'dashboard';
   if(state.view==='leads' && !canSeeLeads()) state.view = 'dashboard';
   updateNavVisibility();
+  populateViewingAsOptions();
   setActiveNav();
   const titleMap = {dashboard:['Dashboard','Overview of the whole ledger'],
     home:['Home','Your personal space'],
@@ -657,13 +749,14 @@ function render(){
     orders:['Orders','Order history and fulfillment status'],
     tasks:['Tasks','Follow-ups and team to-dos'],
     invoices:['Invoices','Billing, linked to orders or standalone'],
-    products:['Products','Your product catalog'],
+    payments:['Payments','Track what SWG owes and pays out'],
+    team:['Team','Manage who has access to the ledger'],
     search:['Search','Find anything across all tabs'],
-    rickroll:['Excel Export','']};
+    rickroll:['Import / Export','Move data in and out of the ledger']};
   document.getElementById('pageTitle').innerHTML = `<span class="accent-dot"></span>${titleMap[state.view]?titleMap[state.view][0]:state.view}`;
   document.getElementById('pageSub').textContent = titleMap[state.view]?titleMap[state.view][1]:'';
   document.getElementById('mainArea').style.setProperty('--accent', ACCENTS[state.view] || 'var(--amber)');
-  const addLabels = {contacts:'contact', leads:'lead', customers:'customer', distributors:'distributor', suppliers:'supplier', deals:'deal', orders:'order', tasks:'task', invoices:'invoice', products:'product'};
+  const addLabels = {contacts:'contact', leads:'lead', customers:'customer', distributors:'distributor', suppliers:'supplier', deals:'deal', tasks:'task', invoices:'invoice', payments:'payment', team:'team member'};
   const addBtn = document.getElementById('addBtn');
   const noAdd = ['dashboard','home','search','rickroll'];
   addBtn.style.display = noAdd.includes(state.view) ? 'none' : 'inline-block';
@@ -688,17 +781,118 @@ function render(){
   if(state.view==='orders') c.innerHTML = renderOrders();
   if(state.view==='tasks') c.innerHTML = renderTasks();
   if(state.view==='invoices') c.innerHTML = renderInvoices();
-  if(state.view==='products') c.innerHTML = renderProducts();
+  if(state.view==='payments') c.innerHTML = renderPayments();
+  if(state.view==='team') c.innerHTML = renderTeam();
   if(state.view==='search') c.innerHTML = renderSearch();
-  if(state.view==='rickroll'){ c.innerHTML = renderRickroll(); setTimeout(()=>{ const r=c.querySelector('.rickroll'); if(r){r.classList.add('tilting');setTimeout(()=>r.classList.remove('tilting'),2100);} },50); }
+  if(state.view==='rickroll') c.innerHTML = renderImportExport();
   attachContentHandlers();
 }
 
-function renderRickroll(){
-  return `<div class="rickroll">
-    <div class="rickroll-text">You got rickrolled 🕺</div>
-    <div style="font-family:Arial,sans-serif;font-size:16px;color:var(--ink-soft);">No Excel export here. Never gonna give you up.</div>
+const EXPORT_SHEETS = [
+  {key:'contacts', label:'Contacts', fields:['id','name','kind','company','type','email','phone','notes','owner','createdAt']},
+  {key:'leads', label:'Leads', fields:['id','name','kind','company','source','status','email','phone','notes','owner','createdAt']},
+  {key:'customers', label:'Customers', fields:['id','name','kind','company','email','phone','country','city','address','notes','owner','createdAt']},
+  {key:'distributors', label:'Distributors', fields:['id','name','company','continents','subregions','email','phone','notes','owner','createdAt']},
+  {key:'suppliers', label:'Suppliers', fields:['id','name','company','email','phone','notes','owner','createdAt']},
+  {key:'deals', label:'Deals', fields:['id','title','contactId','value','currencies','stage','notes','owner','createdAt']},
+  {key:'orders', label:'Orders', fields:['id','relatedType','relatedId','contactId','product','qty','amount','currencies','status','owner','createdAt']},
+  {key:'tasks', label:'Tasks', fields:['id','title','dueDate','owner','status','linkType','linkId','notes','createdAt']},
+  {key:'invoices', label:'Invoices', fields:['id','relatedType','relatedId','orderId','amount','currencies','status','dueDate','notes','createdAt']},
+  {key:'payments', label:'Payments', fields:['id','payeeType','payee','purpose','amount','currencies','status','dueDate','notes','owner','createdAt']},
+];
+
+function renderImportExport(){
+  return `<div class="io-grid">
+    <div class="io-card">
+      <h3 class="display">Export to Excel</h3>
+      <p>Downloads every tab in the ledger as one .xlsx workbook, one sheet per tab. Open it directly, or import it into Google Sheets via File → Import.</p>
+      <button class="btn" id="ioExportBtn">Download .xlsx</button>
+      <div class="io-status" id="ioExportStatus"></div>
+    </div>
+    <div class="io-card">
+      <h3 class="display">Import from Excel</h3>
+      <p>Upload a workbook exported from here (or a matching .csv). Rows are matched by sheet name and merged into the ledger — existing records with the same ID are updated, new ones are added.</p>
+      <input type="file" id="ioImportFile" accept=".xlsx,.xls,.csv" style="display:none;">
+      <button class="btn secondary" id="ioImportBtn">Choose file…</button>
+      <div class="io-dropzone" id="ioFileName">No file selected</div>
+      <div class="io-status" id="ioImportStatus"></div>
+    </div>
   </div>`;
+}
+
+function exportWorkbook(){
+  const wb = XLSX.utils.book_new();
+  EXPORT_SHEETS.forEach(sheet=>{
+    const rows = (state[sheet.key]||[]).map(item=>{
+      const row = {};
+      sheet.fields.forEach(f=>{
+        let v = item[f];
+        if(Array.isArray(v)) v = v.join(', ');
+        if(f==='createdAt' && v) v = new Date(v).toISOString();
+        row[f] = v==null ? '' : v;
+      });
+      return row;
+    });
+    const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [Object.fromEntries(sheet.fields.map(f=>[f,'']))]);
+    XLSX.utils.book_append_sheet(wb, ws, sheet.label);
+  });
+  XLSX.writeFile(wb, `swg-crm-export-${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+async function importWorkbookFile(file){
+  const statusEl = document.getElementById('ioImportStatus');
+  if(!statusEl) return;
+  statusEl.textContent = 'Reading file…';
+  statusEl.classList.remove('error');
+  try{
+    const data = await file.arrayBuffer();
+    const wb = XLSX.read(data, {type:'array'});
+    let totalAdded = 0, totalUpdated = 0, matchedSheets = 0;
+    wb.SheetNames.forEach(sheetName=>{
+      let sheetDef = EXPORT_SHEETS.find(s=>s.label.toLowerCase()===sheetName.toLowerCase() || s.key.toLowerCase()===sheetName.toLowerCase());
+      const ws = wb.Sheets[sheetName];
+      if(!sheetDef && wb.SheetNames.length===1){
+        const headerRow = XLSX.utils.sheet_to_json(ws, {header:1})[0] || [];
+        let best=null, bestScore=0;
+        EXPORT_SHEETS.forEach(s=>{
+          const score = s.fields.filter(f=>headerRow.includes(f)).length;
+          if(score>bestScore){ bestScore=score; best=s; }
+        });
+        if(best && bestScore>=2) sheetDef = best;
+      }
+      if(!sheetDef) return;
+      matchedSheets++;
+      const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+      const list = state[sheetDef.key];
+      rows.forEach(row=>{
+        const obj = {};
+        sheetDef.fields.forEach(f=>{
+          let v = row[f];
+          if(v===''||v==null){ v = (f==='currencies'||f==='continents'||f==='subregions') ? [] : ''; }
+          else if(f==='currencies'||f==='continents'||f==='subregions'){ v = String(v).split(',').map(s=>s.trim()).filter(Boolean); }
+          else if(f==='value'||f==='amount'||f==='qty'){ v = Number(v)||0; }
+          else if(f==='createdAt'){ const t=new Date(v).getTime(); v = isNaN(t)?Date.now():t; }
+          obj[f] = v;
+        });
+        if(!obj.id) obj.id = uid();
+        const idx = list.findIndex(x=>x.id===obj.id);
+        if(idx>=0){ list[idx] = {...list[idx], ...obj}; totalUpdated++; }
+        else { list.push(obj); totalAdded++; }
+      });
+    });
+    if(!matchedSheets){
+      statusEl.textContent = 'No matching sheets found — export from this ledger first to see the expected format.';
+      statusEl.classList.add('error');
+      return;
+    }
+    await Promise.all(EXPORT_SHEETS.map(s=>saveKey(KEYS[s.key], state[s.key])));
+    statusEl.textContent = `Imported: ${totalAdded} added, ${totalUpdated} updated.`;
+    toast(`Import complete — ${totalAdded} added, ${totalUpdated} updated.`);
+  }catch(e){
+    console.error(e);
+    statusEl.textContent = 'Could not read that file. Make sure it is a .xlsx or .csv file.';
+    statusEl.classList.add('error');
+  }
 }
 
 function renderHome(){
@@ -729,21 +923,21 @@ function renderHome(){
 function renderSearch(query=''){
   const q = (query||'').toLowerCase().trim();
   const sections = [
-    { label:'Contacts', items: state.contacts.map(x=>({name:x.name, sub:x.type+' · '+(x.company||x.email||''), view:'contacts'})) },
-    { label:'Leads', items: state.leads.map(x=>({name:x.name, sub:(x.status||'New')+' · '+((x.sources&&x.sources.join(', '))||''), view:'leads'})) },
-    { label:'Customers', items: state.customers.map(x=>({name:x.name, sub:(x.kind||'')+(x.company?' · '+x.company:'')+(x.country?' · '+x.country:''), view:'customers'})) },
-    { label:'Distributors', items: state.distributors.map(x=>({name:x.name, sub:x.company||x.region||'', view:'distributors'})) },
-    { label:'Suppliers', items: state.suppliers.map(x=>({name:x.name, sub:x.company||'', view:'suppliers'})) },
-    { label:'Deals', items: state.deals.map(x=>({name:x.title, sub:x.stage+' · '+Number(x.value||0).toLocaleString(), view:'deals'})) },
-    { label:'Orders', items: state.orders.map(x=>({name:x.product, sub:contactName(x.contactId)+' · '+x.status, view:'orders'})) },
-    { label:'Tasks', items: state.tasks.map(x=>({name:x.title, sub:(x.owner||'')+(x.dueDate?' · due '+new Date(x.dueDate).toLocaleDateString():''), view:'tasks'})) },
-    { label:'Invoices', items: isPrivileged() ? state.invoices.map(x=>({name:'Invoice for '+customerName(x.customerId), sub:x.status+' · '+Number(x.amount||0).toLocaleString(), view:'invoices'})) : [] },
-    { label:'Products', items: state.products.map(x=>({name:x.name, sub:(x.unit||'')+(x.sizes&&x.sizes.length?' '+x.sizes.join('/'):''), view:'products'})) },
+    { label:'Contacts', items: state.contacts.map(x=>({name:x.name, sub:x.type+' · '+(x.company||x.email||''), extra:[x.email,x.phone,x.company,x.notes].join(' '), view:'contacts'})) },
+    { label:'Leads', items: canSeeLeads() ? state.leads.map(x=>({name:x.name, sub:(x.status||'New')+' · '+(x.source||(x.sources&&x.sources.join(', '))||''), extra:[x.email,x.phone,x.company,x.notes].join(' '), view:'leads'})) : [] },
+    { label:'Customers', items: state.customers.map(x=>({name:x.name, sub:(x.kind||'')+(x.company?' · '+x.company:'')+(x.country?' · '+x.country:''), extra:[x.email,x.phone,x.company,x.city,x.notes].join(' '), view:'customers'})) },
+    { label:'Distributors', items: state.distributors.map(x=>({name:x.name, sub:x.company||(x.continents&&x.continents.join(', '))||'', extra:[x.email,x.phone,x.company,(x.continents||[]).join(' '),(x.subregions||[]).join(' '),x.notes].join(' '), view:'distributors'})) },
+    { label:'Suppliers', items: state.suppliers.map(x=>({name:x.name, sub:x.company||'', extra:[x.email,x.phone,x.notes].join(' '), view:'suppliers'})) },
+    { label:'Deals', items: state.deals.map(x=>({name:x.title, sub:x.stage+' · '+Number(x.value||0).toLocaleString(), extra:[contactName(x.contactId),x.owner,x.notes].join(' '), view:'deals'})) },
+    { label:'Tasks', items: state.tasks.map(x=>({name:x.title, sub:(x.owner||'')+(x.dueDate?' · due '+new Date(x.dueDate).toLocaleDateString():''), extra:[x.notes].join(' '), view:'tasks'})) },
+    { label:'Invoices', items: isPrivileged() ? state.invoices.map(x=>({name:'Invoice for '+invoiceSubjectLabel(x), sub:x.status+' · '+Number(x.amount||0).toLocaleString(), extra:[x.notes].join(' '), view:'invoices'})) : [] },
+    { label:'Payments', items: isPrivileged() ? state.payments.map(x=>({name:x.payee, sub:x.status+' · '+Number(x.amount||0).toLocaleString(), extra:[x.purpose,x.notes].join(' '), view:'payments'})) : [] },
+    { label:'Team', items: isAdmin() ? state.team.map(x=>({name:x.name, sub:x.email||'', extra:'', view:'team'})) : [] },
   ];
 
   let hits = 0;
   const rows = sections.map(sec=>{
-    const filtered = q ? sec.items.filter(i=>(i.name+i.sub).toLowerCase().includes(q)) : sec.items;
+    const filtered = q ? sec.items.filter(i=>(i.name+' '+i.sub+' '+(i.extra||'')).toLowerCase().includes(q)) : sec.items;
     if(!filtered.length) return '';
     hits += filtered.length;
     return `<div class="search-results-section">
@@ -767,7 +961,6 @@ function renderSearch(query=''){
 function renderDashboard(){
   const openDeals = state.deals.filter(d=>d.stage!=='Won' && d.stage!=='Lost');
   const openValue = openDeals.reduce((s,d)=>s+(Number(d.value)||0),0);
-  const pendingOrders = state.orders.filter(o=>o.status==='Pending' || o.status==='Shipped');
   const openTasks = state.tasks.filter(t=>t.status!=='Done');
   const unpaidInvoices = state.invoices.filter(i=>i.status!=='Paid');
   const unpaidValue = unpaidInvoices.reduce((s,i)=>s+(Number(i.amount)||0),0);
@@ -775,7 +968,7 @@ function renderDashboard(){
 
   let secondary = `
     <div class="stat-card ochre"><div class="num mono">${openValue.toLocaleString()}</div><div class="lbl">Pipeline value</div></div>
-    <div class="stat-card umber"><div class="num mono">${pendingOrders.length}</div><div class="lbl">Orders in flight</div></div>
+    <div class="stat-card sage"><div class="num mono">${state.customers.length}</div><div class="lbl">Customers</div></div>
     <div class="stat-card olive"><div class="num mono">${openTasks.length}</div><div class="lbl">Open tasks</div></div>`;
   if(priv) secondary += `<div class="stat-card rust"><div class="num mono">${unpaidValue.toLocaleString()}</div><div class="lbl">Unpaid invoices</div></div>`;
 
@@ -784,14 +977,14 @@ function renderDashboard(){
       <p class="hi display">Hello, ${esc(state.viewingAs)}</p>
       <div class="sub2">Here's where the SWG ledger stands today.</div>
     </div>
-    ${renderDonut(priv)}
+    ${renderChart(priv)}
     <div class="stat-grid" style="grid-template-columns:repeat(${priv?4:3},1fr);">${secondary}</div>
     <div class="section-title">Recent activity</div>
     ${renderRecent()}
   `;
 }
 
-function renderDonut(priv){
+function chartSegments(priv){
   const showLeads = canSeeLeads();
   const segs = [
     {key:'contacts', label:'Contacts', count:state.contacts.length, color:'var(--amber)'},
@@ -800,24 +993,41 @@ function renderDonut(priv){
   segs.push(
     {key:'customers', label:'Customers', count:state.customers.length, color:'var(--sage)'},
     {key:'suppliers', label:'Suppliers', count:state.suppliers.length, color:'var(--clay)'},
+    {key:'distributors', label:'Distributors', count:state.distributors.length, color:'var(--umber)'},
     {key:'deals', label:'Deals', count:state.deals.length, color:'var(--ochre)'},
-    {key:'orders', label:'Orders', count:state.orders.length, color:'var(--umber)'},
     {key:'tasks', label:'Tasks', count:state.tasks.length, color:'var(--olive)'},
   );
-  if(priv) segs.push({key:'invoices', label:'Invoices', count:state.invoices.length, color:'var(--rust)'});
+  if(priv){
+    segs.push({key:'invoices', label:'Invoices', count:state.invoices.length, color:'var(--rust)'});
+    segs.push({key:'payments', label:'Payments', count:state.payments.length, color:'var(--clay)'});
+  }
+  return segs;
+}
 
+const CHART_TYPES = [
+  {key:'donut', label:'Donut'},
+  {key:'pie', label:'Pie'},
+  {key:'bar', label:'Bar'},
+];
+function loadChartPref(){
+  try{
+    const v = localStorage.getItem('crm_chart_pref');
+    if(v && CHART_TYPES.some(c=>c.key===v)) state.chartType = v;
+  }catch(e){}
+}
+function saveChartPref(type){
+  try{ localStorage.setItem('crm_chart_pref', type); }catch(e){}
+}
+
+function renderChart(priv){
+  const segs = chartSegments(priv);
   const total = segs.reduce((s,x)=>s+x.count,0);
+  const toggle = `<div class="chart-toggle">${CHART_TYPES.map(c=>`<button type="button" class="chart-toggle-btn ${state.chartType===c.key?'active':''}" data-chart="${c.key}">${c.label}</button>`).join('')}</div>`;
+
   if(!total){
     return `<div class="donut-wrap"><div class="donut" style="background:var(--parchment);"></div>
-      <div class="legend"><div class="donut-empty">The ledger is empty — add a few contacts, deals or orders and this chart fills in.</div></div></div>`;
+      <div class="legend"><div class="donut-empty">The ledger is empty — add a few contacts, deals or customers and this chart fills in.</div>${toggle}</div></div>`;
   }
-  let cum = 0;
-  const stops = segs.filter(s=>s.count>0).map(s=>{
-    const start = (cum/total)*360;
-    cum += s.count;
-    const end = (cum/total)*360;
-    return `${s.color} ${start}deg ${end}deg`;
-  }).join(', ');
 
   const legend = segs.map(s=>`
     <div class="legend-row" data-navigate="${s.key}">
@@ -826,11 +1036,30 @@ function renderDonut(priv){
       <span class="legend-count mono">${s.count}</span>
     </div>`).join('');
 
+  if(state.chartType==='bar'){
+    const max = Math.max(...segs.map(s=>s.count), 1);
+    const bars = segs.map(s=>`
+      <div class="bar-row" data-navigate="${s.key}">
+        <span class="bar-label">${s.label}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${(s.count/max)*100}%;background:${s.color};"></div></div>
+        <span class="bar-count mono">${s.count}</span>
+      </div>`).join('');
+    return `<div class="donut-wrap"><div class="bar-chart">${bars}</div>${toggle}</div>`;
+  }
+
+  let cum = 0;
+  const stops = segs.filter(s=>s.count>0).map(s=>{
+    const start = (cum/total)*360;
+    cum += s.count;
+    const end = (cum/total)*360;
+    return `${s.color} ${start}deg ${end}deg`;
+  }).join(', ');
+
+  const hole = state.chartType==='donut' ? `<div class="donut-hole"><div class="dnum mono">${total}</div><div class="dlbl">Total records</div></div>` : '';
+
   return `<div class="donut-wrap">
-      <div class="donut" style="background:conic-gradient(${stops});">
-        <div class="donut-hole"><div class="dnum mono">${total}</div><div class="dlbl">Total records</div></div>
-      </div>
-      <div class="legend">${legend}</div>
+      <div class="donut" style="background:conic-gradient(${stops});">${hole}</div>
+      <div class="legend">${legend}${toggle}</div>
     </div>`;
 }
 
@@ -843,11 +1072,11 @@ function renderRecent(){
     ...state.customers.map(x=>({...x,_type:'Customer',_when:x.createdAt,_label:x.name})),
     ...state.suppliers.map(x=>({...x,_type:'Supplier',_when:x.createdAt,_label:x.name})),
     ...state.deals.map(x=>({...x,_type:'Deal',_when:x.createdAt,_label:x.title})),
-    ...state.orders.map(x=>({...x,_type:'Order',_when:x.createdAt,_label:x.product+' — '+contactName(x.contactId)})),
     ...state.tasks.map(x=>({...x,_type:'Task',_when:x.createdAt,_label:x.title})),
-    ...(priv ? state.invoices.map(x=>({...x,_type:'Invoice',_when:x.createdAt,_label:'Invoice for '+customerName(x.customerId)})) : []),
+    ...(priv ? state.invoices.map(x=>({...x,_type:'Invoice',_when:x.createdAt,_label:'Invoice for '+invoiceSubjectLabel(x)})) : []),
+    ...(priv ? state.payments.map(x=>({...x,_type:'Payment',_when:x.createdAt,_label:'Payment to '+x.payee})) : []),
   ].sort((a,b)=>b._when-a._when).slice(0,8);
-  if(!all.length) return `<div class="empty"><div class="display">The ledger is empty</div>Add your first contact, deal, order, task or invoice to get started.</div>`;
+  if(!all.length) return `<div class="empty"><div class="display">The ledger is empty</div>Add your first contact, deal, task or invoice to get started.</div>`;
   return `<table><tbody>${all.map(x=>`
     <tr><td class="mono ledger-no">${x._type}</td>
     <td>${esc(x._label)}</td>
@@ -862,7 +1091,7 @@ function renderContacts(){
   if(!filtered.length){
     rows = `<div class="empty"><div class="display">No contacts yet</div>Add a supplier, distributor, customer or marketing contact.</div>`;
   } else {
-    rows = `<table><thead><tr><th>No.</th><th>Name</th><th>Company</th><th>Type</th><th>Kind</th><th>Email / Phone</th><th>Owner</th><th></th></tr></thead><tbody>
+    rows = `<table><thead><tr><th>No.</th><th>Name</th><th>Company Name</th><th>Type</th><th>Kind</th><th>Email / Phone</th><th>Owner</th><th></th></tr></thead><tbody>
     ${filtered.map((c,i)=>`
       <tr>
         <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
@@ -872,7 +1101,7 @@ function renderContacts(){
         <td><span class="badge ${(c.kind||'Individual').toLowerCase()}">${c.kind||'Individual'}</span></td>
         <td style="font-size:12px;">${esc(c.email||'')}${c.email&&c.phone?' · ':''}${esc(c.phone||'')}</td>
         <td style="font-size:12px;color:var(--ink-soft);">${esc(c.owner||'—')}</td>
-        <td class="row-actions"><span data-edit="contacts:${c.id}">edit</span><span data-del="contacts:${c.id}">delete</span></td>
+        <td class="row-actions"><span data-order="contacts:${c.id}">order</span><span data-edit="contacts:${c.id}">edit</span><span data-del="contacts:${c.id}">delete</span></td>
       </tr>`).join('')}
     </tbody></table>`;
   }
@@ -924,7 +1153,7 @@ function renderOrders(){
 
 function renderLeads(){
   if(!state.leads.length) return `<div class="empty"><div class="display">No leads yet</div>Add a prospect to warm up before they become a customer.</div>`;
-  return `<table><thead><tr><th>No.</th><th>Name</th><th>Kind</th><th>Company</th><th>Source</th><th>Email / Phone</th><th>Status</th><th>Owner</th><th></th></tr></thead><tbody>
+  return `<table><thead><tr><th>No.</th><th>Name</th><th>Kind</th><th>Company Name</th><th>Source</th><th>Email / Phone</th><th>Status</th><th>Owner</th><th></th></tr></thead><tbody>
   ${state.leads.map((l,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
@@ -942,7 +1171,7 @@ function renderLeads(){
 
 function renderCustomers(){
   if(!state.customers.length) return `<div class="empty"><div class="display">No customers yet</div>Add the people and businesses who buy from you.</div>`;
-  return `<table><thead><tr><th>No.</th><th>Name</th><th>Kind</th><th>Company</th><th>Email / Phone</th><th>Owner</th><th>Notes</th><th></th></tr></thead><tbody>
+  return `<table><thead><tr><th>No.</th><th>Name</th><th>Kind</th><th>Company Name</th><th>Email / Phone</th><th>Owner</th><th>Notes</th><th></th></tr></thead><tbody>
   ${state.customers.map((c,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
@@ -952,14 +1181,14 @@ function renderCustomers(){
       <td style="font-size:12px;">${esc(c.email||'')}${c.email&&c.phone?' · ':''}${esc(c.phone||'')}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${esc(c.owner||'—')}</td>
       <td style="font-size:12px;color:var(--ink-soft);max-width:180px;">${esc(c.notes||'')}</td>
-      <td class="row-actions"><span data-edit="customers:${c.id}">edit</span><span data-del="customers:${c.id}">delete</span></td>
+      <td class="row-actions"><span data-order="customers:${c.id}">order</span><span data-edit="customers:${c.id}">edit</span><span data-del="customers:${c.id}">delete</span></td>
     </tr>`).join('')}
   </tbody></table>`;
 }
 
 function renderSuppliers(){
   if(!state.suppliers.length) return `<div class="empty"><div class="display">No suppliers yet</div>Add who you source oils and materials from.</div>`;
-  return `<table><thead><tr><th>No.</th><th>Name</th><th>Company</th><th>Email / Phone</th><th>Owner</th><th></th></tr></thead><tbody>
+  return `<table><thead><tr><th>No.</th><th>Name</th><th>Company Name</th><th>Email / Phone</th><th>Owner</th><th></th></tr></thead><tbody>
   ${state.suppliers.map((s,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
@@ -967,14 +1196,14 @@ function renderSuppliers(){
       <td>${esc(s.company||'—')}</td>
       <td style="font-size:12px;">${esc(s.email||'')}${s.email&&s.phone?' · ':''}${esc(s.phone||'')}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${esc(s.owner||'—')}</td>
-      <td class="row-actions"><span data-edit="suppliers:${s.id}">edit</span><span data-del="suppliers:${s.id}">delete</span></td>
+      <td class="row-actions"><span data-order="suppliers:${s.id}">order</span><span data-edit="suppliers:${s.id}">edit</span><span data-del="suppliers:${s.id}">delete</span></td>
     </tr>`).join('')}
   </tbody></table>`;
 }
 
 function renderDistributors(){
   if(!state.distributors.length) return `<div class="empty"><div class="display">No distributors yet</div>Add the partners who distribute SWG products.</div>`;
-  return `<table><thead><tr><th>No.</th><th>Name</th><th>Company</th><th>Continents</th><th>Sub-regions</th><th>Email / Phone</th><th>Owner</th><th></th></tr></thead><tbody>
+  return `<table><thead><tr><th>No.</th><th>Name</th><th>Company Name</th><th>Continents</th><th>Sub-regions</th><th>Email / Phone</th><th>Owner</th><th></th></tr></thead><tbody>
   ${state.distributors.map((d,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
@@ -984,29 +1213,11 @@ function renderDistributors(){
       <td style="font-size:12px;">${(d.subregions&&d.subregions.length)?d.subregions.map(s=>`<span class="currency-chip">${esc(s)}</span>`).join(''):'—'}</td>
       <td style="font-size:12px;">${esc(d.email||'')}${d.email&&d.phone?' · ':''}${esc(d.phone||'')}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${esc(d.owner||'—')}</td>
-      <td class="row-actions"><span data-edit="distributors:${d.id}">edit</span><span data-del="distributors:${d.id}">delete</span></td>
+      <td class="row-actions"><span data-order="distributors:${d.id}">order</span><span data-edit="distributors:${d.id}">edit</span><span data-del="distributors:${d.id}">delete</span></td>
     </tr>`).join('')}
   </tbody></table>`;
 }
 
-function renderProducts(){
-  if(!state.products.length) return `<div class="empty"><div class="display">No products yet</div>Add your essential oil products to the catalog.</div>`;
-  return `<table><thead><tr><th>No.</th><th>Name</th><th>Serial No.</th><th>Unit</th><th>Sizes</th><th>Currencies</th><th>Price</th><th>Stock</th><th>Notes</th><th></th></tr></thead><tbody>
-  ${state.products.map((p,i)=>`
-    <tr>
-      <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
-      <td>${esc(p.name)}</td>
-      <td class="mono" style="font-size:12px;">${esc(p.serial||'—')}</td>
-      <td style="font-size:12px;">${esc(p.unit||'—')}</td>
-      <td style="font-size:12px;">${(p.sizes&&p.sizes.length)?p.sizes.map(s=>`<span class="currency-chip">${esc(s)}</span>`).join(''):'—'}</td>
-      <td style="font-size:12px;">${(p.currencies&&p.currencies.length)?p.currencies.map(c=>`<span class="currency-chip">${esc(c)} (${esc(CURRENCY_SYMBOLS[c]||'')})</span>`).join(''):'—'}</td>
-      <td class="mono">${Number(p.price||0).toLocaleString()}</td>
-      <td style="font-size:12px;">${esc(p.stock||'—')}</td>
-      <td style="font-size:12px;color:var(--ink-soft);max-width:140px;">${esc(p.notes||'')}</td>
-      <td class="row-actions"><span data-edit="products:${p.id}">edit</span><span data-del="products:${p.id}">delete</span></td>
-    </tr>`).join('')}
-  </tbody></table>`;
-}
 
 function renderTasks(){
   if(!state.tasks.length) return `<div class="empty"><div class="display">No tasks yet</div>Add a follow-up or a general to-do.</div>`;
@@ -1027,11 +1238,11 @@ function renderTasks(){
 
 function renderInvoices(){
   if(!state.invoices.length) return `<div class="empty"><div class="display">No invoices yet</div>Generate one from an order or create a standalone invoice.</div>`;
-  return `<table><thead><tr><th>No.</th><th>Customer</th><th>Order</th><th>Amount</th><th>Currencies</th><th>Status</th><th>Due</th><th></th></tr></thead><tbody>
+  return `<table><thead><tr><th>No.</th><th>Related to</th><th>Order</th><th>Amount</th><th>Currencies</th><th>Status</th><th>Due</th><th></th></tr></thead><tbody>
   ${state.invoices.map((inv,i)=>`
     <tr>
       <td class="mono ledger-no">INV-${String(i+1).padStart(3,'0')}</td>
-      <td>${esc(customerName(inv.customerId))}</td>
+      <td>${esc(invoiceSubjectLabel(inv))}${inv.relatedType?` <span style="color:var(--ink-soft);font-size:11px;">(${esc(REL_TYPES.find(r=>r.key===inv.relatedType)?.label||inv.relatedType)})</span>`:''}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${inv.orderId ? esc(orderLabel(inv.orderId)) : '— standalone —'}</td>
       <td class="mono">${Number(inv.amount||0).toLocaleString()}</td>
       <td>${(inv.currencies&&inv.currencies.length) ? inv.currencies.map(cur=>`<span class="currency-chip">${esc(cur)} (${esc(CURRENCY_SYMBOLS[cur]||'')})</span>`).join('') : '<span style="color:var(--ink-soft);font-size:12px;">—</span>'}</td>
@@ -1039,6 +1250,41 @@ function renderInvoices(){
       <td style="font-size:12px;">${inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : '—'}</td>
       <td class="row-actions"><span data-edit="invoices:${inv.id}">edit</span><span data-del="invoices:${inv.id}">delete</span></td>
     </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderPayments(){
+  if(!state.payments.length) return `<div class="empty"><div class="display">No payments yet</div>Log a payment to a team member, supplier or distributor.</div>`;
+  return `<table><thead><tr><th>No.</th><th>Payee</th><th>Type</th><th>Purpose</th><th>Amount</th><th>Currencies</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody>
+  ${state.payments.map((p,i)=>`
+    <tr>
+      <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
+      <td>${esc(p.payee)}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(PAYEE_TYPES.find(t=>t.key===p.payeeType)?.label||'—')}</td>
+      <td style="font-size:12px;color:var(--ink-soft);max-width:160px;">${esc(p.purpose||'—')}</td>
+      <td class="mono">${Number(p.amount||0).toLocaleString()}</td>
+      <td>${(p.currencies&&p.currencies.length) ? p.currencies.map(cur=>`<span class="currency-chip">${esc(cur)} (${esc(CURRENCY_SYMBOLS[cur]||'')})</span>`).join('') : '<span style="color:var(--ink-soft);font-size:12px;">—</span>'}</td>
+      <td><span class="badge ${p.status.toLowerCase()}">${p.status}</span></td>
+      <td style="font-size:12px;">${p.dueDate ? new Date(p.dueDate).toLocaleDateString() : '—'}</td>
+      <td class="row-actions"><span data-edit="payments:${p.id}">edit</span><span data-del="payments:${p.id}">delete</span></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderTeam(){
+  const del = canDeleteUsers();
+  return `<table><thead><tr><th>No.</th><th>Name</th><th>Email</th><th>Role</th><th></th></tr></thead><tbody>
+  ${state.team.map((t,i)=>{
+    const role = t.name===FULL_ADMIN ? 'Admin' : CO_ADMINS.includes(t.name) ? 'Co-admin' : 'Member';
+    const canDel = del && t.name!==FULL_ADMIN;
+    return `<tr>
+      <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
+      <td>${esc(t.name)}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(t.email||'—')}</td>
+      <td><span class="badge ${role==='Admin'?'company':role==='Co-admin'?'customer':'individual'}">${role}</span></td>
+      <td class="row-actions"><span data-edit="team:${t.id}">edit</span>${canDel?`<span data-del="team:${t.id}">delete</span>`:''}</td>
+    </tr>`;
+  }).join('')}
   </tbody></table>`;
 }
 
@@ -1062,6 +1308,9 @@ function attachContentHandlers(){
   document.querySelectorAll('[data-filter]').forEach(el=>{
     el.onclick = ()=>{ state.contactFilter = el.dataset.filter; render(); };
   });
+  document.querySelectorAll('[data-chart]').forEach(el=>{
+    el.onclick = ()=>{ state.chartType = el.dataset.chart; saveChartPref(state.chartType); render(); };
+  });
   document.querySelectorAll('[data-edit]').forEach(el=>{
     el.onclick = ()=>{ const [table,id] = el.dataset.edit.split(':'); openModal(table, id); };
   });
@@ -1077,9 +1326,53 @@ function attachContentHandlers(){
   document.querySelectorAll('[data-stage]').forEach(el=>{
     el.onchange = async ()=>{
       const deal = state.deals.find(d=>d.id===el.dataset.stage);
-      if(deal){ deal.stage = el.value; await saveKey(KEYS.deals, state.deals); render(); }
+      if(!deal) return;
+      const wasWon = deal.stage === 'Won';
+      deal.stage = el.value;
+      if(deal.stage==='Won' && !wasWon && !deal._autoInvoiced){
+        deal._autoInvoiced = true;
+        await saveKey(KEYS.deals, state.deals);
+        await createPaidOrderAndInvoice({
+          relatedType:'contact', relatedId: deal.contactId,
+          product: deal.title, qty:1, amount: deal.value||0, currencies: deal.currencies||[],
+          notes: `Auto-generated when the deal "${deal.title}" was marked Won.`
+        });
+        render();
+        toast(`Invoice created for "${deal.title}" — ${Number(deal.value||0).toLocaleString()}`);
+        celebrate();
+        return;
+      }
+      await saveKey(KEYS.deals, state.deals);
+      render();
     };
   });
+  document.querySelectorAll('[data-order]').forEach(el=>{
+    el.onclick = ()=>{
+      const [table,id] = el.dataset.order.split(':');
+      const typeMap = {contacts:'contact', customers:'customer', suppliers:'supplier', distributors:'distributor'};
+      const item = state[table].find(x=>x.id===id);
+      if(!item) return;
+      openPlaceOrderModal(typeMap[table], id, item.name);
+    };
+  });
+  const ioExportBtn = document.getElementById('ioExportBtn');
+  if(ioExportBtn) ioExportBtn.onclick = ()=>{
+    exportWorkbook();
+    const s = document.getElementById('ioExportStatus');
+    if(s) s.textContent = 'Downloaded.';
+  };
+  const ioImportBtn = document.getElementById('ioImportBtn');
+  const ioImportFile = document.getElementById('ioImportFile');
+  if(ioImportBtn && ioImportFile){
+    ioImportBtn.onclick = ()=>ioImportFile.click();
+    ioImportFile.onchange = ()=>{
+      const file = ioImportFile.files[0];
+      const nameEl = document.getElementById('ioFileName');
+      if(!file) return;
+      if(nameEl) nameEl.textContent = file.name;
+      importWorkbookFile(file);
+    };
+  }
 }
 
 /* ---------- Modal / forms ---------- */
@@ -1092,7 +1385,7 @@ function openModal(table, id){
     html = `<h2 class="display">${isEdit?'Edit':'Add'} contact</h2>
       <div class="field"><label>Name</label><input id="f_name" value="${item?esc(item.name):''}"></div>
       <div class="field"><label>Individual or company</label><select id="f_kind">${ENTITY_KINDS.map(k=>`<option ${kind===k?'selected':''}>${k}</option>`).join('')}</select></div>
-      <div class="field" id="f_companyWrap" style="${kind==='Individual'?'display:none;':''}"><label>Company</label><input id="f_company" value="${item?esc(item.company||''):''}"></div>
+      <div class="field" id="f_companyWrap" style="${kind==='Individual'?'display:none;':''}"><label>Company Name</label><input id="f_company" value="${item?esc(item.company||''):''}"></div>
       <div class="field"><label>Type</label><select id="f_type">${CTYPES.map(t=>`<option ${item&&item.type===t?'selected':''}>${t}</option>`).join('')}</select></div>
       <div class="field"><label>Email</label><input id="f_email" value="${item?esc(item.email||''):''}"></div>
       <div class="field"><label>Phone</label><input id="f_phone" value="${item?esc(item.phone||''):''}"></div>
@@ -1124,7 +1417,7 @@ function openModal(table, id){
     html = `<h2 class="display">${isEdit?'Edit':'Add'} lead</h2>
       <div class="field"><label>Name</label><input id="f_name" value="${item?esc(item.name):''}"></div>
       <div class="field"><label>Individual or company</label><select id="f_kind">${ENTITY_KINDS.map(k=>`<option ${kind===k?'selected':''}>${k}</option>`).join('')}</select></div>
-      <div class="field" id="f_companyWrap" style="${kind==='Individual'?'display:none;':''}"><label>Company</label><input id="f_company" value="${item?esc(item.company||''):''}"></div>
+      <div class="field" id="f_companyWrap" style="${kind==='Individual'?'display:none;':''}"><label>Company Name</label><input id="f_company" value="${item?esc(item.company||''):''}"></div>
       <div class="field"><label>Source</label><select id="f_source"><option value="">— select —</option>${LEAD_SOURCES.map(s=>`<option ${item&&(item.source===s||(item.sources&&item.sources[0]===s))?'selected':''}>${esc(s)}</option>`).join('')}</select></div>
       <div class="field"><label>Status</label><select id="f_status">${statusOpts.map(s=>`<option ${item&&item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
       <div class="field"><label>Email</label><input id="f_email" value="${item?esc(item.email||''):''}"></div>
@@ -1136,7 +1429,7 @@ function openModal(table, id){
     html = `<h2 class="display">${isEdit?'Edit':'Add'} customer</h2>
       <div class="field"><label>Name</label><input id="f_name" value="${item?esc(item.name):''}"></div>
       <div class="field"><label>Individual or company</label><select id="f_kind">${ENTITY_KINDS.map(k=>`<option ${kind===k?'selected':''}>${k}</option>`).join('')}</select></div>
-      <div class="field" id="f_companyWrap" style="${isInd?'display:none;':''}"><label>Company</label><input id="f_company" value="${item?esc(item.company||''):''}"></div>
+      <div class="field" id="f_companyWrap" style="${isInd?'display:none;':''}"><label>Company Name</label><input id="f_company" value="${item?esc(item.company||''):''}"></div>
       <div class="field"><label>Email</label><input id="f_email" value="${item?esc(item.email||''):''}"></div>
       <div class="field"><label>Phone</label><input id="f_phone" value="${item?esc(item.phone||''):''}"></div>
       <div id="f_indFields" style="${isInd?'':'display:none;'}">
@@ -1151,7 +1444,7 @@ function openModal(table, id){
   } else if(table==='suppliers'){
     html = `<h2 class="display">${isEdit?'Edit':'Add'} supplier</h2>
       <div class="field"><label>Name</label><input id="f_name" value="${item?esc(item.name):''}"></div>
-      <div class="field"><label>Company</label><input id="f_company" value="${item?esc(item.company||''):''}"></div>
+      <div class="field"><label>Company Name</label><input id="f_company" value="${item?esc(item.company||''):''}"></div>
       <div class="field"><label>Email</label><input id="f_email" value="${item?esc(item.email||''):''}"></div>
       <div class="field"><label>Phone</label><input id="f_phone" value="${item?esc(item.phone||''):''}"></div>
       <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
@@ -1159,32 +1452,18 @@ function openModal(table, id){
     const selConts = item && item.continents ? item.continents : [];
     html = `<h2 class="display">${isEdit?'Edit':'Add'} distributor</h2>
       <div class="field"><label>Name</label><input id="f_name" value="${item?esc(item.name):''}"></div>
-      <div class="field"><label>Company</label><input id="f_company" value="${item?esc(item.company||''):''}"></div>
+      <div class="field"><label>Company Name</label><input id="f_company" value="${item?esc(item.company||''):''}"></div>
       <div class="field"><label>Continents</label>${msHTMLsrc('f_conts', CONTINENTS, selConts)}</div>
       <div class="field" id="f_subregWrap"><label>Sub-regions</label><div id="f_subregContent" style="color:var(--ink-soft);font-size:12px;padding:4px 0;">Select a continent first</div></div>
       <div class="field"><label>Email</label><input id="f_email" value="${item?esc(item.email||''):''}"></div>
       <div class="field"><label>Phone</label><input id="f_phone" value="${item?esc(item.phone||''):''}"></div>
-      <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
-  } else if(table==='products'){
-    const selSizes = item && item.sizes ? item.sizes : [];
-    const selCurr = item && item.currencies ? item.currencies : [];
-    const SIZES = ['2','5','10','15','20','25','30'];
-    const UNITS = ['ml','g'];
-    html = `<h2 class="display">${isEdit?'Edit':'Add'} product</h2>
-      <div class="field"><label>Name</label><input id="f_name" value="${item?esc(item.name):''}"></div>
-      <div class="field"><label>Serial Number</label><input id="f_serial" type="number" value="${item?esc(item.serial||''):''}" placeholder="e.g. 10042"></div>
-      <div class="field"><label>Unit</label><select id="f_unit">${UNITS.map(u=>`<option ${item&&item.unit===u?'selected':''}>${u}</option>`).join('')}</select></div>
-      <div class="field"><label>Volume / Size</label>${msHTMLsrc('f_sizes_prod', SIZES, selSizes)}</div>
-      <div class="field"><label>Currencies accepted</label>${msHTML('f_curr_prod', CURRENCIES, selCurr)}</div>
-      <div class="field"><label>Price ($)</label><input id="f_price" type="number" value="${item?item.price:''}"></div>
-      <div class="field"><label>Stock</label><input id="f_stock" value="${item?esc(item.stock||''):''}" placeholder="e.g. 240 units"></div>
       <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
   } else if(table==='tasks'){
     const curType = item ? (item.linkType||'none') : 'none';
     const priv = isPrivileged();
     const linkTypeList = priv ? LINKTYPES_PRIV : LINKTYPES;
     const assigneeField = priv
-      ? `<select id="f_owner">${TEAM.map(t=>`<option ${item&&item.owner===t?'selected':(!item&&t===state.viewingAs?'selected':'')}>${t}</option>`).join('')}</select>`
+      ? `<select id="f_owner">${teamNames().map(t=>`<option ${item&&item.owner===t?'selected':(!item&&t===state.viewingAs?'selected':'')}>${t}</option>`).join('')}</select>`
       : `<select id="f_owner" disabled><option selected>${esc(state.viewingAs)}</option></select>`;
     const statusOpts = isEdit ? TSTATUS : TSTATUS_NEW;
     html = `<h2 class="display">${isEdit?'Edit':'Add'} task</h2>
@@ -1197,14 +1476,33 @@ function openModal(table, id){
       <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
   } else if(table==='invoices'){
     const selCurr = item && item.currencies ? item.currencies : [];
+    const relType = item ? (item.relatedType||'customer') : 'customer';
+    const relItems = relatedItemsFor(relType);
     html = `<h2 class="display">${isEdit?'Edit':'Add'} invoice</h2>
-      <div class="field"><label>Customer</label><select id="f_customer">${state.customers.map(c=>`<option value="${c.id}" ${item&&item.customerId===c.id?'selected':''}>${esc(c.name)}</option>`).join('') || '<option value="">Add a customer first</option>'}</select></div>
+      <div class="field"><label>Related to</label><select id="f_relType">${REL_TYPES.map(r=>`<option value="${r.key}" ${relType===r.key?'selected':''}>${r.label}</option>`).join('')}</select></div>
+      <div class="field"><label>${REL_TYPES.find(r=>r.key===relType).label}</label><select id="f_relId">${relItems.map(o=>`<option value="${o.id}" ${item&&item.relatedId===o.id?'selected':''}>${esc(o.label)}</option>`).join('') || '<option value="">None available yet</option>'}</select></div>
       <div class="field"><label>Link to order (optional)</label><select id="f_order"><option value="">— standalone —</option>${state.orders.map(o=>`<option value="${o.id}" ${item&&item.orderId===o.id?'selected':''}>${esc(orderLabel(o.id))}</option>`).join('')}</select></div>
       <div class="field"><label>Currencies accepted</label>${msHTML('f_curr_inv', CURRENCIES, selCurr)}</div>
       <div class="field"><label>Amount</label><input id="f_amount" type="number" value="${item?item.amount:''}"></div>
       <div class="field"><label>Status</label><select id="f_status">${ISTATUS.map(s=>`<option ${item&&item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
       <div class="field"><label>Due date</label><input id="f_dueDate" type="date" value="${item&&item.dueDate?item.dueDate:''}"></div>
       <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
+  } else if(table==='payments'){
+    const selCurr = item && item.currencies ? item.currencies : [];
+    const payeeType = item ? (item.payeeType||'team') : 'team';
+    html = `<h2 class="display">${isEdit?'Edit':'Add'} payment</h2>
+      <div class="field"><label>Payee type</label><select id="f_payeeType">${PAYEE_TYPES.map(p=>`<option value="${p.key}" ${payeeType===p.key?'selected':''}>${p.label}</option>`).join('')}</select></div>
+      <div class="field" id="f_payeeSelWrap"><label>Payee</label>${payeeSelectHTML(payeeType, item)}</div>
+      <div class="field"><label>Purpose</label><input id="f_purpose" value="${item?esc(item.purpose||''):''}" placeholder="e.g. October commission, oil shipment"></div>
+      <div class="field"><label>Amount</label><input id="f_amount" type="number" value="${item?item.amount:''}"></div>
+      <div class="field"><label>Currencies</label>${msHTML('f_curr_pay', CURRENCIES, selCurr)}</div>
+      <div class="field"><label>Status</label><select id="f_status">${PSTATUS.map(s=>`<option ${item&&item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="field"><label>Date</label><input id="f_dueDate" type="date" value="${item&&item.dueDate?item.dueDate:''}"></div>
+      <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
+  } else if(table==='team'){
+    html = `<h2 class="display">${isEdit?'Edit':'Add'} team member</h2>
+      <div class="field"><label>Name</label><input id="f_name" value="${item?esc(item.name):''}"></div>
+      <div class="field"><label>Email</label><input id="f_email" type="email" value="${item?esc(item.email||''):''}" placeholder="name@siddhayogaweb.com"></div>`;
   }
   html += `<div class="modal-actions">
       <button class="btn secondary" id="cancelBtn">Cancel</button>
@@ -1219,7 +1517,7 @@ function openModal(table, id){
   if(table==='deals') msInit('f_curr_deal');
   if(table==='orders') msInit('f_curr_order');
   if(table==='invoices') msInit('f_curr_inv');
-  if(table==='products'){ msInitSrc('f_sizes_prod'); msInit('f_curr_prod'); }
+  if(table==='payments') msInit('f_curr_pay');
   if(table==='distributors'){
     const prevItem = item;
     msInitSrc('f_conts');
@@ -1252,6 +1550,19 @@ function openModal(table, id){
     document.getElementById('f_order').onchange = (e)=>{
       const ord = state.orders.find(o=>o.id===e.target.value);
       if(ord) document.getElementById('f_amount').value = ord.amount;
+    };
+    document.getElementById('f_relType').onchange = (e)=>{
+      const type = e.target.value;
+      const items = relatedItemsFor(type);
+      const sel = document.getElementById('f_relId');
+      sel.innerHTML = items.map(o=>`<option value="${o.id}">${esc(o.label)}</option>`).join('') || '<option value="">None available yet</option>';
+      sel.previousElementSibling.textContent = REL_TYPES.find(r=>r.key===type).label;
+    };
+  }
+  if(table==='payments'){
+    document.getElementById('f_payeeType').onchange = (e)=>{
+      const wrap = document.getElementById('f_payeeSelWrap');
+      wrap.innerHTML = `<label>Payee</label>${payeeSelectHTML(e.target.value, null)}`;
     };
   }
   if(['contacts','leads'].includes(table)){
@@ -1371,16 +1682,6 @@ async function saveModal(table, id){
     obj.email = document.getElementById('f_email').value.trim();
     obj.phone = document.getElementById('f_phone').value.trim();
     obj.notes = document.getElementById('f_notes').value.trim();
-  } else if(table==='products'){
-    obj.name = document.getElementById('f_name').value.trim();
-    if(!obj.name) return alert('Name is required.');
-    obj.serial = document.getElementById('f_serial').value.trim();
-    obj.unit = document.getElementById('f_unit').value;
-    obj.sizes = msReadSrc('f_sizes_prod');
-    obj.currencies = msRead('f_curr_prod');
-    obj.price = Number(document.getElementById('f_price').value)||0;
-    obj.stock = document.getElementById('f_stock').value.trim();
-    obj.notes = document.getElementById('f_notes').value.trim();
   } else if(table==='leads'){
     obj.name = document.getElementById('f_name').value.trim();
     if(!obj.name) return alert('Name is required.');
@@ -1403,14 +1704,34 @@ async function saveModal(table, id){
     obj.linkId = obj.linkType!=='none' && linkSel ? linkSel.value : null;
     obj.notes = document.getElementById('f_notes').value.trim();
   } else if(table==='invoices'){
-    obj.customerId = document.getElementById('f_customer').value;
-    if(!obj.customerId) return alert('Pick a customer (add one under Customers first).');
+    obj.relatedType = document.getElementById('f_relType').value;
+    obj.relatedId = document.getElementById('f_relId').value;
+    if(!obj.relatedId) return alert('Pick who this invoice relates to.');
+    delete obj.customerId;
     obj.orderId = document.getElementById('f_order').value || null;
     obj.amount = Number(document.getElementById('f_amount').value)||0;
     obj.currencies = msRead('f_curr_inv');
     obj.status = document.getElementById('f_status').value;
     obj.dueDate = document.getElementById('f_dueDate').value;
     obj.notes = document.getElementById('f_notes').value.trim();
+  } else if(table==='payments'){
+    obj.payeeType = document.getElementById('f_payeeType').value;
+    const payeeSel = document.getElementById('f_payeeSel');
+    obj.payee = payeeSel ? payeeSel.value.trim() : '';
+    if(!obj.payee) return alert('Payee is required.');
+    obj.purpose = document.getElementById('f_purpose').value.trim();
+    obj.amount = Number(document.getElementById('f_amount').value)||0;
+    obj.currencies = msRead('f_curr_pay');
+    obj.status = document.getElementById('f_status').value;
+    obj.dueDate = document.getElementById('f_dueDate').value;
+    obj.notes = document.getElementById('f_notes').value.trim();
+  } else if(table==='team'){
+    obj.name = document.getElementById('f_name').value.trim();
+    if(!obj.name) return alert('Name is required.');
+    obj.email = document.getElementById('f_email').value.trim().toLowerCase();
+    if(!obj.email) return alert('Email is required.');
+    const dupe = state.team.find(t=>t.email===obj.email && t.id!==obj.id);
+    if(dupe) return alert('That email is already in use by another team member.');
   }
   if(!isEdit) state[table].push(obj);
   await saveKey(KEYS[table], state[table]);
@@ -1441,16 +1762,16 @@ document.getElementById('tn-contacts').onclick = ()=>{ state.view='contacts'; re
 document.getElementById('tn-export').onclick = ()=>{ state.view='rickroll'; render(); };
 document.getElementById('tn-search').onclick = ()=>{ state.view='search'; render(); };
 document.getElementById('addBtn').onclick = ()=>{
-  const addable = ['contacts','leads','customers','distributors','suppliers','deals','orders','tasks','invoices','products'];
+  const addable = ['contacts','leads','customers','distributors','suppliers','deals','tasks','invoices','payments','team'];
   if(addable.includes(state.view)) openModal(state.view, null);
 };
 document.getElementById('overlay').onclick = (e)=>{ if(e.target.id==='overlay') closeModal(); };
 document.getElementById('viewingAs').onchange = (e)=>{ state.viewingAs = e.target.value; render(); };
 document.getElementById('resetBtn').onclick = async ()=>{
-  if(!confirm('This clears ALL data for the whole team. Continue?')) return;
+  if(!confirm('This clears ALL ledger data for the whole team (team member logins are kept). Continue?')) return;
   state.contacts=[]; state.deals=[]; state.orders=[]; state.customers=[]; state.suppliers=[];
-  state.tasks=[]; state.invoices=[]; state.leads=[]; state.distributors=[]; state.products=[];
-  await Promise.all(Object.values(KEYS).map(k=>saveKey(k,[])));
+  state.tasks=[]; state.invoices=[]; state.leads=[]; state.distributors=[]; state.payments=[];
+  await Promise.all(Object.entries(KEYS).filter(([k])=>k!=='team').map(([,v])=>saveKey(v,[])));
   render();
 };
 
@@ -1479,6 +1800,58 @@ async function autoCreateFromContact(contact){
   }
   // Marketing type → no auto-create
 }
+function toast(message){
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = message;
+  document.body.appendChild(el);
+  requestAnimationFrame(()=>el.classList.add('show'));
+  setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(), 300); }, 2800);
+}
+
+async function createPaidOrderAndInvoice({relatedType, relatedId, product, qty, amount, currencies, notes}){
+  const order = { id:uid(), createdAt:Date.now(), owner:state.viewingAs,
+    relatedType, relatedId, contactId: relatedType==='contact' ? relatedId : null,
+    product, qty: qty||1, amount: amount||0, currencies: currencies||[], status:'Delivered' };
+  state.orders.push(order);
+  await saveKey(KEYS.orders, state.orders);
+  const invoice = { id:uid(), createdAt:Date.now(), orderId: order.id,
+    relatedType, relatedId, amount: amount||0, currencies: currencies||[],
+    status:'Paid', dueDate:'', notes: notes||'' };
+  state.invoices.push(invoice);
+  await saveKey(KEYS.invoices, state.invoices);
+  return { order, invoice };
+}
+
+function openPlaceOrderModal(relatedType, relatedId, name){
+  const bodyEl = document.getElementById('modalBody');
+  bodyEl.innerHTML = `<h2 class="display">Place order — ${esc(name)}</h2>
+    <div class="field"><label>Product</label><input id="po_product" placeholder="e.g. Cinnamor Oregano 10ml"></div>
+    <div class="field"><label>Quantity</label><input id="po_qty" type="number" value="1"></div>
+    <div class="field"><label>Amount</label><input id="po_amount" type="number"></div>
+    <div class="field"><label>Currencies</label>${msHTML('po_curr', CURRENCIES, [])}</div>
+    <div class="shared-note">This immediately marks the order as paid and generates a matching invoice.</div>
+    <div class="modal-actions">
+      <button class="btn secondary" id="cancelBtn">Cancel</button>
+      <button class="btn" id="poSaveBtn">Place & invoice</button>
+    </div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  msInit('po_curr');
+  document.getElementById('poSaveBtn').onclick = async ()=>{
+    const product = document.getElementById('po_product').value.trim();
+    if(!product) return alert('Product is required.');
+    const qty = Number(document.getElementById('po_qty').value)||1;
+    const amount = Number(document.getElementById('po_amount').value)||0;
+    const currencies = msRead('po_curr');
+    await createPaidOrderAndInvoice({relatedType, relatedId, product, qty, amount, currencies, notes:`Order placed for ${name}.`});
+    closeModal();
+    render();
+    toast(`Order placed & invoice created for ${name} — ${Number(amount).toLocaleString()}`);
+    celebrate();
+  };
+}
+
 function celebrate(){
   const colors = ['var(--amber)','var(--sage)','var(--clay)','var(--ochre)','var(--umber)','var(--olive)','var(--rust)'];
   const wrap = document.createElement('div');
@@ -1534,9 +1907,16 @@ function spawnConfetti(){
   container.innerHTML = html;
 }
 
+function populateViewingAsOptions(){
+  const sel = document.getElementById('viewingAs');
+  if(!sel) return;
+  sel.innerHTML = state.team.map(t=>`<option>${esc(t.name)}</option>`).join('');
+  sel.value = state.viewingAs;
+}
 function updateIdentityUI(){
   const adminBox = document.getElementById('identityAdmin');
   const staticBox = document.getElementById('identityStatic');
+  populateViewingAsOptions();
   if(isAdmin()){
     adminBox.style.display = 'block';
     staticBox.style.display = 'none';
@@ -1563,13 +1943,14 @@ async function boot(){
   }, 2000);
 }
 
-function attemptLogin(){
+async function attemptLogin(){
   const emailEl = document.getElementById('loginEmail');
   const passEl = document.getElementById('loginPassword');
   const errEl = document.getElementById('loginError');
   const email = emailEl.value.trim().toLowerCase();
   const pass = passEl.value;
-  const name = TEAM_EMAILS[email];
+  await ensureTeamLoaded();
+  const name = teamEmailMap()[email];
   if(!name || pass !== APP_PASSWORD){
     errEl.textContent = 'Incorrect email or password.';
     errEl.style.display = 'block';
@@ -1583,6 +1964,8 @@ function attemptLogin(){
 }
 
 document.getElementById('loginBtn').onclick = attemptLogin;
+ensureTeamLoaded();
+loadChartPref();
 document.getElementById('loginPassword').onkeydown = (e)=>{ if(e.key==='Enter') attemptLogin(); };
 document.getElementById('loginEmail').onkeydown = (e)=>{ if(e.key==='Enter') document.getElementById('loginPassword').focus(); };
 document.getElementById('logoutBtn').onclick = ()=>{
