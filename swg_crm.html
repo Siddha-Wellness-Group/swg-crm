@@ -395,8 +395,11 @@
   <div class="modal" id="modalBody"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const KEYS = { contacts:'crm_contacts', deals:'crm_deals', orders:'crm_orders', customers:'crm_customers', suppliers:'crm_suppliers', tasks:'crm_tasks', invoices:'crm_invoices', leads:'crm_leads', distributors:'crm_distributors', payments:'crm_payments', team:'crm_team' };
+const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut' };
 const STAGES = ['Lead','Contacted','Negotiation','Won','Lost'];
 const STAGES_NEW = ['Lead','Contacted','Negotiation','Won']; // creation only — no Lost
@@ -526,10 +529,10 @@ const DEFAULT_TEAM = [
 const APP_PASSWORD = 'siddhayoga';
 let teamLoadPromise = null;
 async function loadTeamData(){
-  let t = await loadKey(KEYS.team);
+  let t = await loadTable('team');
   if(!t || !t.length){
     t = DEFAULT_TEAM.map(m=>({id:uid(), createdAt:Date.now(), ...m}));
-    await saveKey(KEYS.team, t);
+    await dbInsertMany('team', t);
   }
   state.team = t;
 }
@@ -545,22 +548,52 @@ function teamEmailMap(){
 
 function uid(){ return 'id_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
 
-async function loadKey(key){
-  try{
-    const r = await window.storage.get(key, true);
-    return r && r.value ? JSON.parse(r.value) : [];
-  }catch(e){ return []; }
+const FIELD_MAP = {
+  contactId:'contact_id', customerId:'customer_id', orderId:'order_id', linkType:'link_type', linkId:'link_id',
+  dueDate:'due_date', createdAt:'created_at', relatedType:'related_type', relatedId:'related_id',
+  payeeType:'payee_type', _autoInvoiced:'auto_invoiced',
+};
+const FIELD_MAP_REV = Object.fromEntries(Object.entries(FIELD_MAP).map(([a,b])=>[b,a]));
+function toRow(obj){ const row={}; for(const k in obj){ row[FIELD_MAP[k]||k] = obj[k]; } return row; }
+function fromRow(row){ if(!row) return row; const obj={}; for(const k in row){ obj[FIELD_MAP_REV[k]||k] = row[k]; } return obj; }
+
+async function loadTable(table){
+  const { data, error } = await sb.from(table).select('*').order('created_at', { ascending:true });
+  if(error){ console.error('load failed', table, error); return []; }
+  return (data||[]).map(fromRow);
 }
-async function saveKey(key, arr){
-  try{ await window.storage.set(key, JSON.stringify(arr), true); }
-  catch(e){ console.error('save failed', key, e); }
+async function dbInsert(table, obj){
+  const { error } = await sb.from(table).insert(toRow(obj));
+  if(error) console.error('insert failed', table, error);
+}
+async function dbInsertMany(table, objs){
+  if(!objs.length) return;
+  const { error } = await sb.from(table).insert(objs.map(toRow));
+  if(error) console.error('bulk insert failed', table, error);
+}
+async function dbUpsertMany(table, objs){
+  if(!objs.length) return;
+  const { error } = await sb.from(table).upsert(objs.map(toRow), { onConflict:'id' });
+  if(error) console.error('bulk upsert failed', table, error);
+}
+async function dbUpdate(table, obj){
+  const { error } = await sb.from(table).update(toRow(obj)).eq('id', obj.id);
+  if(error) console.error('update failed', table, error);
+}
+async function dbDelete(table, id){
+  const { error } = await sb.from(table).delete().eq('id', id);
+  if(error) console.error('delete failed', table, error);
+}
+async function dbDeleteAll(table){
+  const { error } = await sb.from(table).delete().neq('id', '');
+  if(error) console.error('delete-all failed', table, error);
 }
 
 async function loadAll(){
   const [c,d,o,cu,su,ta,inv,le,di,pa] = await Promise.all([
-    loadKey(KEYS.contacts), loadKey(KEYS.deals), loadKey(KEYS.orders),
-    loadKey(KEYS.customers), loadKey(KEYS.suppliers), loadKey(KEYS.tasks), loadKey(KEYS.invoices),
-    loadKey(KEYS.leads), loadKey(KEYS.distributors), loadKey(KEYS.payments)
+    loadTable('contacts'), loadTable('deals'), loadTable('orders'),
+    loadTable('customers'), loadTable('suppliers'), loadTable('tasks'), loadTable('invoices'),
+    loadTable('leads'), loadTable('distributors'), loadTable('payments')
   ]);
   state.contacts = c; state.deals = d; state.orders = o;
   state.customers = cu; state.suppliers = su; state.tasks = ta; state.invoices = inv;
@@ -885,7 +918,7 @@ async function importWorkbookFile(file){
       statusEl.classList.add('error');
       return;
     }
-    await Promise.all(EXPORT_SHEETS.map(s=>saveKey(KEYS[s.key], state[s.key])));
+    await Promise.all(EXPORT_SHEETS.map(s=>dbUpsertMany(s.key, state[s.key])));
     statusEl.textContent = `Imported: ${totalAdded} added, ${totalUpdated} updated.`;
     toast(`Import complete — ${totalAdded} added, ${totalUpdated} updated.`);
   }catch(e){
@@ -1319,8 +1352,8 @@ function attachContentHandlers(){
       const [table,id] = el.dataset.del.split(':');
       if(!confirm('Delete this entry?')) return;
       state[table] = state[table].filter(x=>x.id!==id);
-      await saveKey(KEYS[table], state[table]);
       render();
+      await dbDelete(table, id);
     };
   });
   document.querySelectorAll('[data-stage]').forEach(el=>{
@@ -1331,7 +1364,8 @@ function attachContentHandlers(){
       deal.stage = el.value;
       if(deal.stage==='Won' && !wasWon && !deal._autoInvoiced){
         deal._autoInvoiced = true;
-        await saveKey(KEYS.deals, state.deals);
+        render();
+        await dbUpdate('deals', deal);
         await createPaidOrderAndInvoice({
           relatedType:'contact', relatedId: deal.contactId,
           product: deal.title, qty:1, amount: deal.value||0, currencies: deal.currencies||[],
@@ -1342,8 +1376,8 @@ function attachContentHandlers(){
         celebrate();
         return;
       }
-      await saveKey(KEYS.deals, state.deals);
       render();
+      await dbUpdate('deals', deal);
     };
   });
   document.querySelectorAll('[data-order]').forEach(el=>{
@@ -1734,11 +1768,11 @@ async function saveModal(table, id){
     if(dupe) return alert('That email is already in use by another team member.');
   }
   if(!isEdit) state[table].push(obj);
-  await saveKey(KEYS[table], state[table]);
   const wasNew = !isEdit;
   const savedObj = obj;
   closeModal();
   render();
+  if(wasNew) await dbInsert(table, obj); else await dbUpdate(table, obj);
   if(wasNew){
     if(table==='deals' || table==='leads'){
       celebrate();
@@ -1771,8 +1805,9 @@ document.getElementById('resetBtn').onclick = async ()=>{
   if(!confirm('This clears ALL ledger data for the whole team (team member logins are kept). Continue?')) return;
   state.contacts=[]; state.deals=[]; state.orders=[]; state.customers=[]; state.suppliers=[];
   state.tasks=[]; state.invoices=[]; state.leads=[]; state.distributors=[]; state.payments=[];
-  await Promise.all(Object.entries(KEYS).filter(([k])=>k!=='team').map(([,v])=>saveKey(v,[])));
   render();
+  const tables = ['contacts','deals','orders','customers','suppliers','tasks','invoices','leads','distributors','payments'];
+  await Promise.all(tables.map(t=>dbDeleteAll(t)));
 };
 
 /* ---------- Celebration + follow-up ---------- */
@@ -1783,20 +1818,20 @@ async function autoCreateFromContact(contact){
       name:contact.name, company:contact.company||'',
       email:contact.email||'', phone:contact.phone||'', notes:contact.notes||'' };
     state.suppliers.push(obj);
-    await saveKey(KEYS.suppliers, state.suppliers);
+    await dbInsert('suppliers', obj);
   } else if(type === 'Distributor'){
     const obj = { id:uid(), createdAt:Date.now(), owner:state.viewingAs,
       name:contact.name, company:contact.company||'',
       continents:[], subregions:[],
       email:contact.email||'', phone:contact.phone||'', notes:contact.notes||'' };
     state.distributors.push(obj);
-    await saveKey(KEYS.distributors, state.distributors);
+    await dbInsert('distributors', obj);
   } else if(type === 'Customer'){
     const obj = { id:uid(), createdAt:Date.now(), owner:state.viewingAs,
       name:contact.name, kind:contact.kind||'Individual', company:contact.company||'',
       email:contact.email||'', phone:contact.phone||'', notes:contact.notes||'' };
     state.customers.push(obj);
-    await saveKey(KEYS.customers, state.customers);
+    await dbInsert('customers', obj);
   }
   // Marketing type → no auto-create
 }
@@ -1814,12 +1849,12 @@ async function createPaidOrderAndInvoice({relatedType, relatedId, product, qty, 
     relatedType, relatedId, contactId: relatedType==='contact' ? relatedId : null,
     product, qty: qty||1, amount: amount||0, currencies: currencies||[], status:'Delivered' };
   state.orders.push(order);
-  await saveKey(KEYS.orders, state.orders);
+  await dbInsert('orders', order);
   const invoice = { id:uid(), createdAt:Date.now(), orderId: order.id,
     relatedType, relatedId, amount: amount||0, currencies: currencies||[],
     status:'Paid', dueDate:'', notes: notes||'' };
   state.invoices.push(invoice);
-  await saveKey(KEYS.invoices, state.invoices);
+  await dbInsert('invoices', invoice);
   return { order, invoice };
 }
 
