@@ -28,6 +28,13 @@
     --olive-soft:#E4E8D3;
     --rust:#A6472B;
     --rust-soft:#F0DBD2;
+    /* Revenue stream identity: Essential Oils reads blue, Siddha Yoga reads green,
+       so the two businesses stay distinguishable in every finance chart. */
+    --rev-oils:#31648F;
+    --rev-oils-soft:#D9E4EE;
+    --rev-yoga:#43855A;
+    --rev-yoga-soft:#DAEADF;
+    --rev-other:#8A7A5C;
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--cream);color:var(--ink);font-family:'Work Sans',sans-serif;font-size:14px;}
@@ -193,34 +200,67 @@
   .bar-count{font-size:12px;color:var(--ink-soft);text-align:right;}
 
   /* Finance */
-  .fin-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:18px;}
+  .fin-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:20px;}
   .fin-asof{font-size:11.5px;color:var(--ink-soft);}
   .fin-export{position:relative;}
-  .fin-export-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:7px;border:1px solid var(--border);background:var(--surface);font-family:inherit;font-size:12.5px;color:var(--ink);cursor:pointer;}
-  .fin-export-btn:hover{background:var(--cream);}
-  .panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:18px;}
-  .panel-title{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;}
-  .panel-sub{font-size:11.5px;color:var(--ink-soft);margin-bottom:18px;}
+  .fin-export-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 15px;border-radius:7px;border:1px solid var(--border);background:var(--surface);font-family:inherit;font-size:12.5px;color:var(--ink);cursor:pointer;transition:background .15s,border-color .15s;}
+  .fin-export-btn:hover{background:var(--cream);border-color:var(--ink-soft);}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px 22px;margin-bottom:18px;}
+  .panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+  .panel-title{font-size:13.5px;font-weight:600;color:var(--ink);letter-spacing:.1px;}
+  .panel-sub{font-size:11.5px;color:var(--ink-soft);margin-top:3px;}
+  .panel-meta{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-soft);white-space:nowrap;}
   .fin-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
   @media (max-width:900px){ .fin-cols{grid-template-columns:1fr;} }
-  .pie-row{display:flex;align-items:center;gap:26px;flex-wrap:wrap;}
-  .pie{width:172px;height:172px;border-radius:50%;flex-shrink:0;}
-  .pie-legend{display:flex;flex-direction:column;gap:8px;flex:1;min-width:150px;}
-  .pie-leg-row{display:flex;align-items:center;gap:9px;font-size:12.5px;}
-  .pie-leg-row .sw{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-  .pie-leg-row .nm{flex:1;color:var(--ink);}
-  .pie-leg-row .pc{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);}
-  .vbar-wrap{position:relative;padding-left:56px;}
-  .vbar-plot{position:relative;height:230px;display:flex;align-items:flex-end;gap:16px;border-bottom:1px solid var(--border);}
+
+  /* KPI cards get a colored top rule so the eye groups them by meaning */
+  .kpi-card{position:relative;overflow:hidden;}
+  .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--kpi-accent,var(--border));}
+
+  /* Shared legend, Monday-style "Name: 50.0%" */
+  .fin-legend{display:flex;flex-direction:column;gap:9px;flex:1;min-width:160px;}
+  .fin-legend.row{flex-direction:row;flex-wrap:wrap;gap:8px 18px;margin-top:14px;}
+  .leg-item{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink);}
+  .leg-item .sw{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .leg-item .nm{flex:1;}
+  .leg-item .vl{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);}
+
+  .pie-row{display:flex;align-items:center;gap:28px;flex-wrap:wrap;}
+  .pie{width:168px;height:168px;border-radius:50%;flex-shrink:0;}
+
+  /* Horizontal ranked bars (revenue by brand) */
+  .hbar{display:grid;grid-template-columns:minmax(90px,auto) 1fr auto;align-items:center;gap:12px;margin-bottom:12px;}
+  .hbar:last-child{margin-bottom:0;}
+  .hbar-name{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink);}
+  .hbar-name .sw{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .hbar-track{height:14px;background:var(--parchment);border-radius:7px;overflow:hidden;}
+  .hbar-fill{height:100%;border-radius:7px;transition:width .3s ease;}
+  .hbar-val{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);text-align:right;white-space:nowrap;}
+
+  /* Single split bar for channel mix */
+  .split-bar{display:flex;height:26px;border-radius:8px;overflow:hidden;background:var(--parchment);}
+  .split-seg{transition:width .3s ease;}
+  .split-key{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:14px;}
+  .split-key-item{display:flex;align-items:baseline;gap:8px;}
+  .split-key-item .sw{width:10px;height:10px;border-radius:3px;transform:translateY(1px);}
+  .split-key-item .nm{font-size:12.5px;color:var(--ink);}
+  .split-key-item .vl{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);}
+
+  /* Vertical stacked bar chart */
+  .vbar-wrap{position:relative;padding-left:60px;}
+  .vbar-plot{position:relative;height:236px;display:flex;align-items:flex-end;gap:18px;border-bottom:1px solid var(--border);}
   .vbar-grid{position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none;}
-  .vbar-gline{position:absolute;left:0;right:0;border-top:1px solid var(--border);opacity:.55;}
-  .vbar-ylab{position:absolute;right:calc(100% + 10px);font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-soft);transform:translateY(-50%);white-space:nowrap;}
+  .vbar-gline{position:absolute;left:0;right:0;border-top:1px dashed var(--border);}
+  .vbar-gline.zero{border-top-style:solid;opacity:0;}
+  .vbar-ylab{position:absolute;right:calc(100% + 12px);font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-soft);transform:translateY(-50%);white-space:nowrap;}
   .vbar-col{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative;z-index:1;min-width:0;}
-  .vbar-val{font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:500;color:var(--ink);margin-bottom:6px;white-space:nowrap;}
-  .vbar{width:100%;max-width:58px;border-radius:6px 6px 0 0;background:var(--sage);min-height:2px;transition:height .25s;}
-  .vbar-x{display:flex;gap:16px;margin-top:9px;}
+  .vbar-val{font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:500;color:var(--ink);margin-bottom:7px;white-space:nowrap;}
+  .vbar-stack{width:100%;max-width:62px;display:flex;flex-direction:column-reverse;min-height:2px;transition:height .3s ease;border-radius:6px 6px 0 0;overflow:hidden;}
+  .vbar-seg{width:100%;transition:height .3s ease;}
+  .vbar-col:hover .vbar-stack{filter:brightness(1.08);}
+  .vbar-x{display:flex;gap:18px;margin-top:10px;}
   .vbar-xlab{flex:1;text-align:center;font-size:11px;color:var(--ink-soft);min-width:0;}
-  .fin-empty{color:var(--ink-soft);font-size:13px;padding:6px 0;}
+  .fin-empty{color:var(--ink-soft);font-size:13px;padding:8px 0;}
   @media print{
     .sidebar,.topnav,#addBtn,.fin-export,.toast{display:none !important;}
     #app{display:block !important;}
@@ -1397,6 +1437,11 @@ function renderPayments(){
 }
 
 const STAGE_COLORS = { Lead:'var(--umber)', Contacted:'var(--amber)', Negotiation:'var(--ochre)', Won:'var(--sage)', Lost:'var(--clay)' };
+// The two businesses are colour-coded everywhere money is shown: oils blue, yoga green.
+const BRAND_COLORS = { 'Essential Oils':'var(--rev-oils)', 'Siddha Yoga':'var(--rev-yoga)' };
+function brandColor(name){ return BRAND_COLORS[name] || 'var(--rev-other)'; }
+// Channel answers "how did the money reach us", independent of which business it was for.
+const CHANNEL_COLORS = { Online:'var(--ochre)', Direct:'var(--umber)' };
 const usd = n => '$' + Math.round(n).toLocaleString();
 function invoiceCurrency(i){ return (i.currencies && i.currencies[0]) || 'USD'; }
 
@@ -1414,12 +1459,18 @@ function financeData(){
   // Collected revenue = paid invoices (which is also what a Won deal auto-generates)
   // plus paid storefront orders. Storefront orders don't get an auto-invoice today,
   // so the two sources never double count the same sale.
+  // Each entry carries two independent dimensions: which business earned it (brand)
+  // and how it reached us (channel). Today invoices are always Direct and storefront
+  // orders always Online, but keeping them separate means an Essential Oils webshop
+  // slots straight in as brand "Essential Oils" / channel "Online".
   const revenueEntries = [
     ...state.invoices.filter(i=>i.status==='Paid').map(i=>({
-      amount:toUSD(i.amount, invoiceCurrency(i)), when:i.createdAt, source:'Essential Oils',
+      amount:toUSD(i.amount, invoiceCurrency(i)), when:i.createdAt,
+      brand:'Essential Oils', channel:'Direct',
     })),
     ...state.orders.filter(o=>o.source && o.paymentStatus==='paid').map(o=>({
-      amount:toUSD(o.amount, orderCurrency(o)), when:o.createdAt, source:o.source,
+      amount:toUSD(o.amount, orderCurrency(o)), when:o.createdAt,
+      brand:o.source, channel:'Online',
     })),
   ];
   // No payment-processing/clearing fee is netted out yet -- add once we know the real %.
@@ -1429,19 +1480,28 @@ function financeData(){
   const totalRevenue = revenueEntries.reduce((s,e)=>s+e.amount,0);
   const totalExpenses = expenseEntries.reduce((s,e)=>s+e.amount,0);
 
-  const bySource = {};
-  revenueEntries.forEach(e=>{ bySource[e.source] = (bySource[e.source]||0) + e.amount; });
-  const sourceRows = Object.entries(bySource).sort((a,b)=>b[1]-a[1]);
+  const byBrand = {};
+  revenueEntries.forEach(e=>{ byBrand[e.brand] = (byBrand[e.brand]||0) + e.amount; });
+  const brandRows = Object.entries(byBrand).sort((a,b)=>b[1]-a[1]);
+  const brandNames = brandRows.map(([n])=>n);
+
+  const byChannel = {};
+  revenueEntries.forEach(e=>{ byChannel[e.channel] = (byChannel[e.channel]||0) + e.amount; });
+  const channelRows = ['Online','Direct'].map(c=>[c, byChannel[c]||0]).filter(([,v])=>v>0);
 
   const monthKey = ts=>{ const d=new Date(ts); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); };
   const monthLabel = ts=> new Date(ts).toLocaleDateString('en-US',{month:'short',year:'2-digit'});
   const months = {};
   const touchMonth = (ts)=>{
     const k = monthKey(ts);
-    if(!months[k]) months[k] = { key:k, label:monthLabel(ts), revenue:0, expenses:0 };
+    if(!months[k]) months[k] = { key:k, label:monthLabel(ts), revenue:0, expenses:0, brands:{} };
     return months[k];
   };
-  revenueEntries.forEach(e=>{ touchMonth(e.when).revenue += e.amount; });
+  revenueEntries.forEach(e=>{
+    const m = touchMonth(e.when);
+    m.revenue += e.amount;
+    m.brands[e.brand] = (m.brands[e.brand]||0) + e.amount;
+  });
   expenseEntries.forEach(e=>{ touchMonth(e.when).expenses += e.amount; });
   const monthRows = Object.values(months).sort((a,b)=>a.key.localeCompare(b.key)).slice(-6);
 
@@ -1468,30 +1528,81 @@ function financeData(){
   const outstanding = openInvoices.reduce((s,r)=>s+r.amount,0);
   const overdue = openInvoices.filter(r=>r.daysLate>0 || r.inv.status==='Overdue').reduce((s,r)=>s+r.amount,0);
 
-  return { totalRevenue, totalExpenses, net: totalRevenue-totalExpenses, sourceRows, monthRows,
+  return { totalRevenue, totalExpenses, net: totalRevenue-totalExpenses,
+    brandRows, brandNames, channelRows, monthRows,
     stageCounts, dealTotal, winRate, pipelineValue, avgDealSize, openInvoices, outstanding, overdue };
+}
+
+function panelHead(title, sub, meta){
+  return `<div class="panel-head">
+    <div><div class="panel-title">${title}</div>${sub?`<div class="panel-sub">${sub}</div>`:''}</div>
+    ${meta?`<div class="panel-meta">${meta}</div>`:''}
+  </div>`;
 }
 
 function renderFinanceKPIs(f){
   const cards = [
-    {cls:'sage',  val:usd(f.totalRevenue),   lbl:'Revenue collected'},
-    {cls:'amber', val:usd(f.outstanding),    lbl:'Outstanding'},
-    {cls:'rust',  val:usd(f.totalExpenses),  lbl:'Payments out'},
-    {cls:f.net>=0?'olive':'rust', val:usd(f.net), lbl:'Net'},
-    {cls:'ochre', val:usd(f.pipelineValue),  lbl:'Open pipeline'},
-    {cls:'umber', val:f.winRate===null?'—':Math.round(f.winRate)+'%', lbl:'Win rate'},
-    {cls:'clay',  val:usd(f.avgDealSize),    lbl:'Avg won deal'},
-    {cls:'rust',  val:usd(f.overdue),        lbl:'Overdue'},
+    {accent:'var(--sage)',  val:usd(f.totalRevenue),  lbl:'Revenue collected', cls:'sage'},
+    {accent:'var(--amber)', val:usd(f.outstanding),   lbl:'Outstanding',       cls:'amber'},
+    {accent:'var(--rust)',  val:usd(f.totalExpenses), lbl:'Payments out',      cls:'rust'},
+    {accent:f.net>=0?'var(--olive)':'var(--rust)', val:usd(f.net), lbl:'Net', cls:f.net>=0?'olive':'rust'},
+    {accent:'var(--ochre)', val:usd(f.pipelineValue), lbl:'Open pipeline',     cls:'ochre'},
+    {accent:'var(--umber)', val:f.winRate===null?'—':Math.round(f.winRate)+'%', lbl:'Win rate', cls:'umber'},
+    {accent:'var(--clay)',  val:usd(f.avgDealSize),   lbl:'Avg won deal',      cls:'clay'},
+    {accent:'var(--rust)',  val:usd(f.overdue),       lbl:'Overdue',           cls:'rust'},
   ];
-  return `<div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(165px,1fr));">${cards.map(c=>
-    `<div class="stat-card ${c.cls}"><div class="num mono">${c.val}</div><div class="lbl">${c.lbl}</div></div>`
+  return `<div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(168px,1fr));">${cards.map(c=>
+    `<div class="stat-card kpi-card ${c.cls}" style="--kpi-accent:${c.accent};">
+       <div class="num mono">${c.val}</div><div class="lbl">${c.lbl}</div>
+     </div>`
   ).join('')}</div>`;
+}
+
+function renderBrandRevenue(f){
+  if(!f.brandRows.length){
+    return `<div class="panel">${panelHead('Revenue by business','Essential Oils vs. Siddha Yoga')}
+      <div class="fin-empty">No collected revenue yet.</div></div>`;
+  }
+  const max = Math.max(...f.brandRows.map(([,v])=>v), 1);
+  const bars = f.brandRows.map(([name,val])=>{
+    const pct = f.totalRevenue ? (val/f.totalRevenue)*100 : 0;
+    return `<div class="hbar" title="${esc(name)}: ${usd(val)} (${pct.toFixed(1)}%)">
+      <span class="hbar-name"><span class="sw" style="background:${brandColor(name)};"></span>${esc(name)}</span>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${(val/max)*100}%;background:${brandColor(name)};"></div></div>
+      <span class="hbar-val">${usd(val)} <span style="color:var(--ink-soft);">· ${pct.toFixed(0)}%</span></span>
+    </div>`;
+  }).join('');
+  return `<div class="panel">
+    ${panelHead('Revenue by business','Which side of SWG earned it', usd(f.totalRevenue)+' total')}
+    ${bars}
+  </div>`;
+}
+
+function renderChannelSplit(f){
+  if(!f.channelRows.length){
+    return `<div class="panel">${panelHead('Revenue by channel','Website orders vs. direct sales')}
+      <div class="fin-empty">No collected revenue yet.</div></div>`;
+  }
+  const total = f.channelRows.reduce((s,[,v])=>s+v,0) || 1;
+  const segs = f.channelRows.map(([name,val])=>
+    `<div class="split-seg" style="width:${(val/total)*100}%;background:${CHANNEL_COLORS[name]};"
+      title="${esc(name)}: ${usd(val)}"></div>`).join('');
+  const key = f.channelRows.map(([name,val])=>`
+    <div class="split-key-item">
+      <span class="sw" style="background:${CHANNEL_COLORS[name]};"></span>
+      <span class="nm">${name==='Online'?'Website orders':'Direct &amp; wholesale'}</span>
+      <span class="vl">${usd(val)} · ${((val/total)*100).toFixed(0)}%</span>
+    </div>`).join('');
+  return `<div class="panel">
+    ${panelHead('Revenue by channel','How the money reached us')}
+    <div class="split-bar">${segs}</div>
+    <div class="split-key">${key}</div>
+  </div>`;
 }
 
 function renderDealPie(f){
   if(!f.dealTotal){
-    return `<div class="panel"><div class="panel-title">Deal status distribution</div>
-      <div class="panel-sub">Share of every deal by stage</div>
+    return `<div class="panel">${panelHead('Deal status distribution','Share of every deal by stage')}
       <div class="fin-empty">No deals in the ledger yet.</div></div>`;
   }
   let cum = 0;
@@ -1500,68 +1611,58 @@ function renderDealPie(f){
     return `${STAGE_COLORS[s.stage]} ${start}deg ${(cum/f.dealTotal)*360}deg`;
   }).join(', ');
   const legend = f.stageCounts.map(s=>`
-    <div class="pie-leg-row">
+    <div class="leg-item" title="${esc(s.stage)}: ${s.count} deal${s.count===1?'':'s'}">
       <span class="sw" style="background:${STAGE_COLORS[s.stage]};"></span>
       <span class="nm">${esc(s.stage)}</span>
-      <span class="pc">${((s.count/f.dealTotal)*100).toFixed(1)}%</span>
+      <span class="vl">${((s.count/f.dealTotal)*100).toFixed(1)}%</span>
     </div>`).join('');
   return `<div class="panel">
-    <div class="panel-title">Deal status distribution</div>
-    <div class="panel-sub">${f.dealTotal} deal${f.dealTotal===1?'':'s'} across every stage</div>
+    ${panelHead('Deal status distribution','Share of every deal by stage', f.dealTotal+' deal'+(f.dealTotal===1?'':'s'))}
     <div class="pie-row">
       <div class="pie" style="background:conic-gradient(${stops});"></div>
-      <div class="pie-legend">${legend}</div>
+      <div class="fin-legend">${legend}</div>
     </div>
-  </div>`;
-}
-
-function renderRevenueSource(f){
-  const max = Math.max(...f.sourceRows.map(([,v])=>v), 1);
-  const body = f.sourceRows.length ? f.sourceRows.map(([label,val])=>`
-    <div class="bar-row" style="cursor:default;grid-template-columns:110px 1fr 74px;">
-      <span class="bar-label">${esc(label)}</span>
-      <div class="bar-track"><div class="bar-fill" style="width:${(val/max)*100}%;background:var(--sage);"></div></div>
-      <span class="bar-count mono">${usd(val)}</span>
-    </div>`).join('') : `<div class="fin-empty">No collected revenue yet.</div>`;
-  return `<div class="panel">
-    <div class="panel-title">Revenue by source</div>
-    <div class="panel-sub">Where collected money came from</div>
-    <div class="bar-chart">${body}</div>
   </div>`;
 }
 
 function renderRevenueByMonth(f){
   if(!f.monthRows.length){
-    return `<div class="panel"><div class="panel-title">Actual revenue by month</div>
-      <div class="panel-sub">Collected revenue, last 6 months</div>
+    return `<div class="panel">${panelHead('Actual revenue by month','Collected revenue, last 6 months')}
       <div class="fin-empty">Nothing collected yet.</div></div>`;
   }
   const top = niceMax(Math.max(...f.monthRows.map(m=>m.revenue), 0));
-  const ticks = [0, .25, .5, .75, 1];
-  const grid = ticks.map(t=>`
-    <div class="vbar-gline" style="bottom:${t*100}%;">
+  const grid = [0,.25,.5,.75,1].map(t=>`
+    <div class="vbar-gline${t===0?' zero':''}" style="bottom:${t*100}%;">
       <span class="vbar-ylab">${usd(top*t)}</span>
     </div>`).join('');
-  const cols = f.monthRows.map(m=>`
-    <div class="vbar-col">
+  const cols = f.monthRows.map(m=>{
+    const segs = f.brandNames.filter(b=>m.brands[b]>0).map(b=>{
+      const share = m.revenue ? (m.brands[b]/m.revenue)*100 : 0;
+      return `<div class="vbar-seg" style="height:${share}%;background:${brandColor(b)};"
+        title="${esc(b)} — ${esc(m.label)}: ${usd(m.brands[b])}"></div>`;
+    }).join('');
+    return `<div class="vbar-col">
       <span class="vbar-val">${usd(m.revenue)}</span>
-      <div class="vbar" style="height:${top? (m.revenue/top)*100 : 0}%;"></div>
-    </div>`).join('');
+      <div class="vbar-stack" style="height:${top ? (m.revenue/top)*100 : 0}%;">${segs}</div>
+    </div>`;
+  }).join('');
   const xlabs = f.monthRows.map(m=>`<span class="vbar-xlab">${esc(m.label)}</span>`).join('');
+  const legend = f.brandNames.map(b=>`
+    <div class="leg-item"><span class="sw" style="background:${brandColor(b)};"></span><span>${esc(b)}</span></div>`).join('');
   return `<div class="panel">
-    <div class="panel-title">Actual revenue by month</div>
-    <div class="panel-sub">Collected revenue in USD, last ${f.monthRows.length} month${f.monthRows.length===1?'':'s'}</div>
+    ${panelHead('Actual revenue by month','Collected revenue in USD, stacked by business',
+      'last '+f.monthRows.length+' month'+(f.monthRows.length===1?'':'s'))}
     <div class="vbar-wrap">
       <div class="vbar-plot"><div class="vbar-grid">${grid}</div>${cols}</div>
       <div class="vbar-x">${xlabs}</div>
     </div>
+    <div class="fin-legend row">${legend}</div>
   </div>`;
 }
 
 function renderReceivables(f){
   if(!f.openInvoices.length){
-    return `<div class="panel"><div class="panel-title">Outstanding invoices</div>
-      <div class="panel-sub">Billed but not yet collected</div>
+    return `<div class="panel">${panelHead('Outstanding invoices','Billed but not yet collected')}
       <div class="fin-empty">Everything billed has been collected.</div></div>`;
   }
   const rows = f.openInvoices.slice(0,10).map(r=>`
@@ -1574,8 +1675,7 @@ function renderReceivables(f){
     </tr>`).join('');
   const more = f.openInvoices.length>10 ? `<div class="fin-empty">+ ${f.openInvoices.length-10} more on the Invoices tab.</div>` : '';
   return `<div class="panel">
-    <div class="panel-title">Outstanding invoices</div>
-    <div class="panel-sub">${usd(f.outstanding)} billed and not yet collected</div>
+    ${panelHead('Outstanding invoices','Billed but not yet collected', usd(f.outstanding)+' owed')}
     <table><thead><tr><th>Billed to</th><th>Amount</th><th>Status</th><th>Due</th><th>Age</th></tr></thead>
     <tbody>${rows}</tbody></table>${more}
   </div>`;
@@ -1595,9 +1695,9 @@ function renderFinance(){
   }
   return head
     + renderFinanceKPIs(f)
-    + `<div class="fin-cols">${renderDealPie(f)}${renderRevenueSource(f)}</div>`
+    + `<div class="fin-cols">${renderBrandRevenue(f)}${renderChannelSplit(f)}</div>`
     + renderRevenueByMonth(f)
-    + renderReceivables(f);
+    + `<div class="fin-cols">${renderDealPie(f)}${renderReceivables(f)}</div>`;
 }
 
 function renderTeam(){
