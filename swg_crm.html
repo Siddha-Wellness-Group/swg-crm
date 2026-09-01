@@ -57,6 +57,7 @@
   .navlink[data-view="invoices"] .dot{background:var(--rust);}
   .navlink[data-view="payments"] .dot{background:var(--rust);}
   .navlink[data-view="team"] .dot{background:var(--ink);}
+  .navlink[data-view="finance"] .dot{background:var(--sage);}
   .navlink[data-view="dashboard"].active{background:var(--ink);}
   .navlink[data-view="home"].active{background:var(--amber);}
   .navlink[data-view="contacts"].active{background:var(--amber);}
@@ -70,6 +71,7 @@
   .navlink[data-view="invoices"].active{background:var(--rust);}
   .navlink[data-view="payments"].active{background:var(--rust);}
   .navlink[data-view="team"].active{background:var(--ink);}
+  .navlink[data-view="finance"].active{background:var(--sage);}
   .navlink.hidden-role{display:none;}
   .sidebar-foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--border);}
   .foot-label{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
@@ -350,6 +352,7 @@
     <div class="navlink" data-view="tasks"><span class="dot"></span>Tasks</div>
     <div class="navlink" data-view="invoices"><span class="dot"></span>Invoices</div>
     <div class="navlink" data-view="payments"><span class="dot"></span>Payments</div>
+    <div class="navlink" data-view="finance"><span class="dot"></span>Finance</div>
     <div class="navlink" data-view="team"><span class="dot"></span>Team</div>
     <div class="sidebar-foot">
       <div id="identityAdmin" style="display:none;">
@@ -453,7 +456,7 @@ const COUNTRIES = ['Afghanistan','Albania','Algeria','Andorra','Angola','Antigua
 const ACCENTS = {
   dashboard:'var(--ink)', home:'var(--amber)', contacts:'var(--amber)', leads:'var(--ochre)', customers:'var(--sage)',
   distributors:'var(--umber)', suppliers:'var(--clay)', deals:'var(--ochre)', orders:'var(--umber)',
-  tasks:'var(--olive)', invoices:'var(--rust)', payments:'var(--rust)', team:'var(--ink)',
+  tasks:'var(--olive)', invoices:'var(--rust)', payments:'var(--rust)', team:'var(--ink)', finance:'var(--sage)',
   search:'var(--ink)', rickroll:'var(--ink)'
 };
 const CONTINENTS = ['Africa','Asia','Europe','North America','South America','Oceania','Middle East'];
@@ -552,6 +555,8 @@ const FIELD_MAP = {
   contactId:'contact_id', customerId:'customer_id', orderId:'order_id', linkType:'link_type', linkId:'link_id',
   dueDate:'due_date', createdAt:'created_at', relatedType:'related_type', relatedId:'related_id',
   payeeType:'payee_type', _autoInvoiced:'auto_invoiced',
+  paymentStatus:'payment_status', paymentProvider:'payment_provider', paymentReference:'payment_reference',
+  shippingAddress:'shipping_address', externalOrderNumber:'external_order_number',
 };
 const FIELD_MAP_REV = Object.fromEntries(Object.entries(FIELD_MAP).map(([a,b])=>[b,a]));
 function toRow(obj){ const row={}; for(const k in obj){ row[FIELD_MAP[k]||k] = obj[k]; } return row; }
@@ -757,6 +762,8 @@ function updateNavVisibility(){
   if(invLink) invLink.classList.toggle('hidden-role', !isPrivileged());
   const payLink = document.querySelector('.navlink[data-view="payments"]');
   if(payLink) payLink.classList.toggle('hidden-role', !isPrivileged());
+  const financeLink = document.querySelector('.navlink[data-view="finance"]');
+  if(financeLink) financeLink.classList.toggle('hidden-role', !isPrivileged());
   const teamLink = document.querySelector('.navlink[data-view="team"]');
   if(teamLink) teamLink.classList.toggle('hidden-role', !isAdmin());
   const leadLink = document.querySelector('.navlink[data-view="leads"]');
@@ -766,6 +773,7 @@ function updateNavVisibility(){
 function render(){
   if(state.view==='invoices' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='payments' && !isPrivileged()) state.view = 'dashboard';
+  if(state.view==='finance' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='team' && !isAdmin()) state.view = 'dashboard';
   if(state.view==='leads' && !canSeeLeads()) state.view = 'dashboard';
   updateNavVisibility();
@@ -783,6 +791,7 @@ function render(){
     tasks:['Tasks','Follow-ups and team to-dos'],
     invoices:['Invoices','Billing, linked to orders or standalone'],
     payments:['Payments','Track what SWG owes and pays out'],
+    finance:['Finance','Revenue vs. payments, by source and over time'],
     team:['Team','Manage who has access to the ledger'],
     search:['Search','Find anything across all tabs'],
     rickroll:['Import / Export','Move data in and out of the ledger']};
@@ -791,7 +800,7 @@ function render(){
   document.getElementById('mainArea').style.setProperty('--accent', ACCENTS[state.view] || 'var(--amber)');
   const addLabels = {contacts:'contact', leads:'lead', customers:'customer', distributors:'distributor', suppliers:'supplier', deals:'deal', tasks:'task', invoices:'invoice', payments:'payment', team:'team member'};
   const addBtn = document.getElementById('addBtn');
-  const noAdd = ['dashboard','home','search','rickroll'];
+  const noAdd = ['dashboard','home','search','rickroll','finance'];
   addBtn.style.display = noAdd.includes(state.view) ? 'none' : 'inline-block';
   addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
 
@@ -815,6 +824,7 @@ function render(){
   if(state.view==='tasks') c.innerHTML = renderTasks();
   if(state.view==='invoices') c.innerHTML = renderInvoices();
   if(state.view==='payments') c.innerHTML = renderPayments();
+  if(state.view==='finance') c.innerHTML = renderFinance();
   if(state.view==='team') c.innerHTML = renderTeam();
   if(state.view==='search') c.innerHTML = renderSearch();
   if(state.view==='rickroll') c.innerHTML = renderImportExport();
@@ -1312,6 +1322,80 @@ function renderPayments(){
       <td class="row-actions"><span data-edit="payments:${p.id}">edit</span><span data-del="payments:${p.id}">delete</span></td>
     </tr>`).join('')}
   </tbody></table>`;
+}
+
+function financeData(){
+  const revenueEntries = [
+    ...state.invoices.filter(i=>i.status==='Paid').map(i=>({
+      amount:Number(i.amount)||0, when:i.createdAt, source:'Essential Oils',
+    })),
+    ...state.orders.filter(o=>o.source && o.paymentStatus==='paid').map(o=>({
+      amount:Number(o.amount)||0, when:o.createdAt, source:o.source,
+    })),
+  ];
+  const expenseEntries = state.payments.filter(p=>p.status==='Paid').map(p=>({
+    amount:Number(p.amount)||0, when:p.createdAt,
+  }));
+  const totalRevenue = revenueEntries.reduce((s,e)=>s+e.amount,0);
+  const totalExpenses = expenseEntries.reduce((s,e)=>s+e.amount,0);
+
+  const bySource = {};
+  revenueEntries.forEach(e=>{ bySource[e.source] = (bySource[e.source]||0) + e.amount; });
+  const sourceRows = Object.entries(bySource).sort((a,b)=>b[1]-a[1]);
+
+  const monthKey = ts=>{ const d=new Date(ts); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); };
+  const monthLabel = ts=> new Date(ts).toLocaleDateString('en-US',{month:'short',year:'2-digit'});
+  const months = {};
+  const touchMonth = (ts)=>{
+    const k = monthKey(ts);
+    if(!months[k]) months[k] = { key:k, label:monthLabel(ts), revenue:0, expenses:0 };
+    return months[k];
+  };
+  revenueEntries.forEach(e=>{ touchMonth(e.when).revenue += e.amount; });
+  expenseEntries.forEach(e=>{ touchMonth(e.when).expenses += e.amount; });
+  const monthRows = Object.values(months).sort((a,b)=>a.key.localeCompare(b.key)).slice(-6);
+
+  return { totalRevenue, totalExpenses, net: totalRevenue-totalExpenses, sourceRows, monthRows };
+}
+
+function renderFinance(){
+  const { totalRevenue, totalExpenses, net, sourceRows, monthRows } = financeData();
+  if(!totalRevenue && !totalExpenses){
+    return `<div class="empty"><div class="display">No money in or out yet</div>Revenue shows up once an invoice is marked Paid or a storefront order is paid; expenses once a payment is marked Paid.</div>`;
+  }
+
+  const stats = `<div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
+    <div class="stat-card sage"><div class="num mono">${totalRevenue.toLocaleString()}</div><div class="lbl">Revenue</div></div>
+    <div class="stat-card rust"><div class="num mono">${totalExpenses.toLocaleString()}</div><div class="lbl">Payments (expenses)</div></div>
+    <div class="stat-card ${net>=0?'olive':'rust'}"><div class="num mono">${net.toLocaleString()}</div><div class="lbl">Net</div></div>
+  </div>`;
+
+  const sourceMax = Math.max(...sourceRows.map(([,v])=>v), 1);
+  const sourceHTML = sourceRows.length ? sourceRows.map(([label,val])=>`
+    <div class="bar-row">
+      <span class="bar-label">${esc(label)}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${(val/sourceMax)*100}%;background:var(--sage);"></div></div>
+      <span class="bar-count mono">${val.toLocaleString()}</span>
+    </div>`).join('') : `<div style="color:var(--ink-soft);font-size:13px;">No paid revenue yet.</div>`;
+
+  const monthMax = Math.max(...monthRows.map(m=>Math.max(m.revenue,m.expenses)), 1);
+  const monthHTML = monthRows.length ? monthRows.map(m=>`
+    <div class="bar-row" style="margin-bottom:10px;">
+      <span class="bar-label">${esc(m.label)}</span>
+      <div style="flex:1;display:flex;flex-direction:column;gap:3px;">
+        <div class="bar-track" style="height:8px;"><div class="bar-fill" style="width:${(m.revenue/monthMax)*100}%;background:var(--sage);"></div></div>
+        <div class="bar-track" style="height:8px;"><div class="bar-fill" style="width:${(m.expenses/monthMax)*100}%;background:var(--rust);"></div></div>
+      </div>
+      <span class="bar-count mono" style="font-size:11px;">${m.revenue.toLocaleString()} / ${m.expenses.toLocaleString()}</span>
+    </div>`).join('') : '';
+
+  return `
+    ${stats}
+    <div class="section-title">Revenue by source</div>
+    <div class="bar-chart">${sourceHTML}</div>
+    <div class="section-title">Last 6 months — revenue (sage) vs. payments (rust)</div>
+    <div class="bar-chart">${monthHTML}</div>
+  `;
 }
 
 function renderTeam(){
