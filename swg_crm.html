@@ -1202,9 +1202,18 @@ function renderLeads(){
   </tbody></table>`;
 }
 
+function customerTotalSpent(customer){
+  const email = (customer.email||'').trim().toLowerCase();
+  if(!email) return 0;
+  const contactIds = new Set(state.contacts.filter(ct=>(ct.email||'').trim().toLowerCase()===email).map(ct=>ct.id));
+  if(!contactIds.size) return 0;
+  return state.orders
+    .filter(o=>contactIds.has(o.contactId) && o.status!=='Cancelled')
+    .reduce((sum,o)=>sum + (Number(o.amount)||0), 0);
+}
 function renderCustomers(){
   if(!state.customers.length) return `<div class="empty"><div class="display">No customers yet</div>Add the people and businesses who buy from you.</div>`;
-  return `<table><thead><tr><th>No.</th><th>Name</th><th>Kind</th><th>Company Name</th><th>Email / Phone</th><th>Owner</th><th>Notes</th><th></th></tr></thead><tbody>
+  return `<table><thead><tr><th>No.</th><th>Name</th><th>Kind</th><th>Company Name</th><th>Email / Phone</th><th>Total Spent</th><th>Owner</th><th>Notes</th><th></th></tr></thead><tbody>
   ${state.customers.map((c,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
@@ -1212,6 +1221,7 @@ function renderCustomers(){
       <td><span class="badge ${(c.kind||'Individual').toLowerCase()}">${c.kind||'Individual'}</span></td>
       <td>${esc(c.company||'—')}</td>
       <td style="font-size:12px;">${esc(c.email||'')}${c.email&&c.phone?' · ':''}${esc(c.phone||'')}</td>
+      <td class="mono" style="font-size:12px;">${customerTotalSpent(c).toLocaleString()}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${esc(c.owner||'—')}</td>
       <td style="font-size:12px;color:var(--ink-soft);max-width:180px;">${esc(c.notes||'')}</td>
       <td class="row-actions"><span data-order="customers:${c.id}">order</span><span data-edit="customers:${c.id}">edit</span><span data-del="customers:${c.id}">delete</span></td>
