@@ -261,6 +261,8 @@
   .vbar-x{display:flex;gap:18px;margin-top:10px;}
   .vbar-xlab{flex:1;text-align:center;font-size:11px;color:var(--ink-soft);min-width:0;}
   .fin-empty{color:var(--ink-soft);font-size:13px;padding:8px 0;}
+  .demo-banner{background:var(--ochre-soft);border:1px solid var(--ochre);border-radius:9px;padding:11px 15px;margin-bottom:18px;font-size:12.5px;line-height:1.5;color:var(--ink);}
+  .demo-banner strong{color:var(--umber);}
   @media print{
     .sidebar,.topnav,#addBtn,.fin-export,.toast{display:none !important;}
     #app{display:block !important;}
@@ -1455,7 +1457,73 @@ function niceMax(v){
   return step*mag;
 }
 
+// --- Demo mode -------------------------------------------------------------
+// Builds a plausible three-month trading history so the Finance dashboard can be
+// shown before real volume exists. It is generated on the fly and passed straight
+// into financeSummary -- it never touches state.contacts / customers / orders /
+// invoices, and never reaches Supabase. Seeded so the figures stay put between
+// renders instead of reshuffling on every click.
+function seededRandom(seed){
+  return function(){
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed>>>15, 1 | seed);
+    t = t + Math.imul(t ^ t>>>7, 61 | t) ^ t;
+    return ((t ^ t>>>14) >>> 0) / 4294967296;
+  };
+}
+function demoFinanceSet(){
+  const rnd = seededRandom(20260901);
+  const pick = (lo,hi)=> lo + rnd()*(hi-lo);
+  // A timestamp somewhere inside the calendar month `k` months back.
+  const tsMonthsAgo = k=>{
+    const d = new Date(); d.setDate(1); d.setHours(12,0,0,0); d.setMonth(d.getMonth()-k);
+    const span = new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+    d.setDate(1 + Math.floor(rnd()*span));
+    return Math.min(d.getTime(), Date.now());
+  };
+  const revenueEntries = [];
+  // Siddha Yoga -- 30 webshop orders, growing month over month.
+  [[2,7],[1,10],[0,13]].forEach(([k,n])=>{
+    for(let i=0;i<n;i++) revenueEntries.push({amount:pick(50,150), when:tsMonthsAgo(k), brand:'Siddha Yoga', channel:'Online'});
+  });
+  // Essential Oils -- 20 orders, mostly through the shop with a few taken direct.
+  [[2,5],[1,7],[0,8]].forEach(([k,n])=>{
+    for(let i=0;i<n;i++){
+      // Every third one is a wholesale order taken directly rather than through the
+      // shop -- fixed rather than random so the channel split is always demonstrative.
+      revenueEntries.push({amount:pick(50,150), when:tsMonthsAgo(k),
+        brand:'Essential Oils', channel: i%3===0 ? 'Direct' : 'Online'});
+    }
+  });
+  // Running costs for a business at this volume: stock, commissions, shipping.
+  const expenseEntries = [];
+  [2,1,0].forEach(k=>{
+    expenseEntries.push({amount:pick(600,900), when:tsMonthsAgo(k)});   // stock
+    expenseEntries.push({amount:pick(180,320), when:tsMonthsAgo(k)});   // commission
+    expenseEntries.push({amount:pick(90,160),  when:tsMonthsAgo(k)});   // shipping & packaging
+  });
+  const deals = [
+    ['Won',2400],['Won',1650],['Won',900],['Won',1200],
+    ['Negotiation',3200],['Negotiation',1400],
+    ['Contacted',800],['Contacted',1900],
+    ['Lead',600],['Lead',1100],['Lead',450],
+    ['Lost',1300],
+  ].map(([stage,value],i)=>({id:'demo_d'+i, stage, value, currencies:['USD'], createdAt:tsMonthsAgo(i%3)}));
+  const day = 86400000, now = Date.now();
+  const openInvoiceSource = [
+    ['Aroma Studio Tel Aviv', 780, 'Overdue', -18],
+    ['Wellness Retreat Goa',   540, 'Overdue', -6],
+    ['Yoga Loft Berlin',       420, 'Unpaid',   11],
+    ['Green Leaf Distribution',960, 'Unpaid',   24],
+  ].map(([label,amount,status,dueOffset],i)=>({
+    inv:{id:'demo_i'+i, status, dueDate:new Date(now + dueOffset*day).toISOString().slice(0,10)},
+    amount, label,
+  }));
+  return { revenueEntries, expenseEntries, deals, openInvoiceSource };
+}
+
 function financeData(){
+  if(state.financeDemo) return financeSummary(demoFinanceSet());
   // Collected revenue = paid invoices (which is also what a Won deal auto-generates)
   // plus paid storefront orders. Storefront orders don't get an auto-invoice today,
   // so the two sources never double count the same sale.
@@ -1477,6 +1545,15 @@ function financeData(){
   const expenseEntries = state.payments.filter(p=>p.status==='Paid').map(p=>({
     amount:toUSD(p.amount, (p.currencies&&p.currencies[0])||'USD'), when:p.createdAt,
   }));
+  const openInvoiceSource = state.invoices.filter(i=>i.status!=='Paid').map(i=>({
+    inv:i, amount:toUSD(i.amount, invoiceCurrency(i)), label:invoiceSubjectLabel(i),
+  }));
+  return financeSummary({ revenueEntries, expenseEntries, deals:state.deals, openInvoiceSource });
+}
+
+// Aggregation shared by live and demo data, so the demo exercises exactly the
+// same maths the real dashboard runs on.
+function financeSummary({revenueEntries, expenseEntries, deals, openInvoiceSource}){
   const totalRevenue = revenueEntries.reduce((s,e)=>s+e.amount,0);
   const totalExpenses = expenseEntries.reduce((s,e)=>s+e.amount,0);
 
@@ -1507,23 +1584,23 @@ function financeData(){
 
   // Pipeline health
   const dealUSD = d => toUSD(d.value, (d.currencies&&d.currencies[0])||'USD');
-  const stageCounts = STAGES.map(s=>({ stage:s, count:state.deals.filter(d=>d.stage===s).length }))
+  const stageCounts = STAGES.map(s=>({ stage:s, count:deals.filter(d=>d.stage===s).length }))
     .filter(x=>x.count>0);
   const dealTotal = stageCounts.reduce((s,x)=>s+x.count,0);
-  const wonDeals = state.deals.filter(d=>d.stage==='Won');
-  const lostDeals = state.deals.filter(d=>d.stage==='Lost');
+  const wonDeals = deals.filter(d=>d.stage==='Won');
+  const lostDeals = deals.filter(d=>d.stage==='Lost');
   const closed = wonDeals.length + lostDeals.length;
   const winRate = closed ? (wonDeals.length/closed)*100 : null;
-  const openDeals = state.deals.filter(d=>d.stage!=='Won' && d.stage!=='Lost');
+  const openDeals = deals.filter(d=>d.stage!=='Won' && d.stage!=='Lost');
   const pipelineValue = openDeals.reduce((s,d)=>s+dealUSD(d),0);
   const avgDealSize = wonDeals.length ? wonDeals.reduce((s,d)=>s+dealUSD(d),0)/wonDeals.length : 0;
 
   // Receivables -- money billed but not collected
   const today = new Date(); today.setHours(0,0,0,0);
-  const openInvoices = state.invoices.filter(i=>i.status!=='Paid').map(i=>{
-    const due = i.dueDate ? new Date(i.dueDate) : null;
+  const openInvoices = openInvoiceSource.map(r=>{
+    const due = r.inv.dueDate ? new Date(r.inv.dueDate) : null;
     const daysLate = due ? Math.floor((today-due)/86400000) : 0;
-    return { inv:i, amount:toUSD(i.amount, invoiceCurrency(i)), daysLate: daysLate>0 ? daysLate : 0 };
+    return { ...r, daysLate: daysLate>0 ? daysLate : 0 };
   }).sort((a,b)=>b.daysLate-a.daysLate || b.amount-a.amount);
   const outstanding = openInvoices.reduce((s,r)=>s+r.amount,0);
   const overdue = openInvoices.filter(r=>r.daysLate>0 || r.inv.status==='Overdue').reduce((s,r)=>s+r.amount,0);
@@ -1667,7 +1744,7 @@ function renderReceivables(f){
   }
   const rows = f.openInvoices.slice(0,10).map(r=>`
     <tr>
-      <td>${esc(invoiceSubjectLabel(r.inv))}</td>
+      <td>${esc(r.label || '—')}</td>
       <td class="mono">${usd(r.amount)}</td>
       <td><span class="badge ${(r.inv.status||'Unpaid').toLowerCase()}">${esc(r.inv.status||'Unpaid')}</span></td>
       <td style="font-size:12px;">${r.inv.dueDate ? new Date(r.inv.dueDate).toLocaleDateString() : '—'}</td>
@@ -1688,10 +1765,18 @@ function renderFinance(){
     : `<span style="color:var(--rust);">approximate exchange rates — live rates unavailable</span>`;
   const head = `<div class="fin-head">
       <div class="fin-asof">All figures in USD using ${fxNote} · as of ${new Date().toLocaleDateString()}</div>
-      <div class="fin-export"><button class="fin-export-btn" id="finExportBtn">Export to PDF</button></div>
-    </div>`;
+      <div class="fin-export">
+        <button class="fin-export-btn" id="finDemoBtn">${state.financeDemo?'Show live data':'Preview with sample data'}</button>
+        <button class="fin-export-btn" id="finExportBtn">Export to PDF</button>
+      </div>
+    </div>`
+    + (state.financeDemo ? `<div class="demo-banner">
+        <strong>Sample data — not real.</strong> A made-up three-month history (30 Siddha Yoga
+        and 20 Essential Oils orders, $50–$150 each) so the dashboard can be seen with volume in it.
+        Nothing here is saved and no real record is touched.
+      </div>` : '');
   if(!f.totalRevenue && !f.totalExpenses && !f.dealTotal && !f.openInvoices.length){
-    return head + `<div class="empty"><div class="display">Nothing to report yet</div>Revenue appears once an invoice is marked Paid or a storefront order is paid; expenses once a payment is marked Paid.</div>`;
+    return head + `<div class="empty"><div class="display">Nothing to report yet</div>Revenue appears once an invoice is marked Paid or a storefront order is paid; expenses once a payment is marked Paid. Use <em>Preview with sample data</em> to see the dashboard populated.</div>`;
   }
   return head
     + renderFinanceKPIs(f)
@@ -1788,6 +1873,9 @@ function attachContentHandlers(){
   const finExportBtn = document.getElementById('finExportBtn');
   // The browser's print dialog is the PDF writer -- "Save as PDF" as the destination.
   if(finExportBtn) finExportBtn.onclick = ()=>window.print();
+  const finDemoBtn = document.getElementById('finDemoBtn');
+  // Deliberately not persisted: every page load starts on real figures.
+  if(finDemoBtn) finDemoBtn.onclick = ()=>{ state.financeDemo = !state.financeDemo; render(); };
   const ioExportBtn = document.getElementById('ioExportBtn');
   if(ioExportBtn) ioExportBtn.onclick = ()=>{
     exportWorkbook();
