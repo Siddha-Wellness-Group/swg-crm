@@ -404,6 +404,32 @@ const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut' };
+
+// Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
+// completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
+// totaled across records, it's normalized to USD first via toUSD(); no processing/clearing
+// fee is netted out yet -- that's a follow-up once we have the real fee percentage.
+state.fxRates = { USD:1, ILS:3.7, EUR:0.92, THB:35, JPY:150, INR:83, AUD:1.5, HKD:7.8, CZK:23 };
+async function loadFxRates(){
+  try{
+    const cached = JSON.parse(localStorage.getItem('crm_fx_cache')||'null');
+    if(cached && Date.now()-cached.at < 12*3600*1000){ state.fxRates = {...state.fxRates, ...cached.rates}; return; }
+  }catch(e){}
+  try{
+    const res = await fetch('https://api.frankfurter.app/latest?from=USD');
+    const data = await res.json();
+    if(data && data.rates){
+      state.fxRates = {...state.fxRates, USD:1, ...data.rates};
+      try{ localStorage.setItem('crm_fx_cache', JSON.stringify({at:Date.now(), rates:data.rates})); }catch(e){}
+    }
+  }catch(e){ console.error('fx rate fetch failed, using fallback rates', e); }
+}
+function toUSD(amount, currency){
+  const n = Number(amount)||0;
+  if(!currency || currency==='USD') return n;
+  const rate = state.fxRates[currency];
+  return rate ? n/rate : n; // unknown currency: treat as already-USD rather than guess wrong
+}
 const STAGES = ['Lead','Contacted','Negotiation','Won','Lost'];
 const STAGES_NEW = ['Lead','Contacted','Negotiation','Won']; // creation only — no Lost
 const CTYPES = ['Supplier','Distributor','Customer','Marketing'];
@@ -598,7 +624,7 @@ async function loadAll(){
   const [c,d,o,cu,su,ta,inv,le,di,pa] = await Promise.all([
     loadTable('contacts'), loadTable('deals'), loadTable('orders'),
     loadTable('customers'), loadTable('suppliers'), loadTable('tasks'), loadTable('invoices'),
-    loadTable('leads'), loadTable('distributors'), loadTable('payments')
+    loadTable('leads'), loadTable('distributors'), loadTable('payments'), loadFxRates()
   ]);
   state.contacts = c; state.deals = d; state.orders = o;
   state.customers = cu; state.suppliers = su; state.tasks = ta; state.invoices = inv;
@@ -1212,6 +1238,7 @@ function renderLeads(){
   </tbody></table>`;
 }
 
+function orderCurrency(o){ return o.currency || (o.currencies && o.currencies[0]) || 'USD'; }
 function customerTotalSpent(customer){
   const email = (customer.email||'').trim().toLowerCase();
   if(!email) return 0;
@@ -1219,11 +1246,11 @@ function customerTotalSpent(customer){
   if(!contactIds.size) return 0;
   return state.orders
     .filter(o=>contactIds.has(o.contactId) && o.status!=='Cancelled')
-    .reduce((sum,o)=>sum + (Number(o.amount)||0), 0);
+    .reduce((sum,o)=>sum + toUSD(o.amount, orderCurrency(o)), 0);
 }
 function renderCustomers(){
   if(!state.customers.length) return `<div class="empty"><div class="display">No customers yet</div>Add the people and businesses who buy from you.</div>`;
-  return `<table><thead><tr><th>No.</th><th>Name</th><th>Kind</th><th>Company Name</th><th>Email / Phone</th><th>Total Spent</th><th>Owner</th><th>Notes</th><th></th></tr></thead><tbody>
+  return `<table><thead><tr><th>No.</th><th>Name</th><th>Kind</th><th>Company Name</th><th>Email / Phone</th><th>Total Spent (USD)</th><th>Owner</th><th>Notes</th><th></th></tr></thead><tbody>
   ${state.customers.map((c,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
@@ -1231,7 +1258,7 @@ function renderCustomers(){
       <td><span class="badge ${(c.kind||'Individual').toLowerCase()}">${c.kind||'Individual'}</span></td>
       <td>${esc(c.company||'—')}</td>
       <td style="font-size:12px;">${esc(c.email||'')}${c.email&&c.phone?' · ':''}${esc(c.phone||'')}</td>
-      <td class="mono" style="font-size:12px;">${customerTotalSpent(c).toLocaleString()}</td>
+      <td class="mono" style="font-size:12px;">$${customerTotalSpent(c).toLocaleString(undefined,{maximumFractionDigits:0})}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${esc(c.owner||'—')}</td>
       <td style="font-size:12px;color:var(--ink-soft);max-width:180px;">${esc(c.notes||'')}</td>
       <td class="row-actions"><span data-order="customers:${c.id}">order</span><span data-edit="customers:${c.id}">edit</span><span data-del="customers:${c.id}">delete</span></td>
@@ -1327,14 +1354,15 @@ function renderPayments(){
 function financeData(){
   const revenueEntries = [
     ...state.invoices.filter(i=>i.status==='Paid').map(i=>({
-      amount:Number(i.amount)||0, when:i.createdAt, source:'Essential Oils',
+      amount:toUSD(i.amount, (i.currencies&&i.currencies[0])||'USD'), when:i.createdAt, source:'Essential Oils',
     })),
     ...state.orders.filter(o=>o.source && o.paymentStatus==='paid').map(o=>({
-      amount:Number(o.amount)||0, when:o.createdAt, source:o.source,
+      amount:toUSD(o.amount, orderCurrency(o)), when:o.createdAt, source:o.source,
     })),
   ];
+  // No payment-processing/clearing fee is netted out yet -- add once we know the real %.
   const expenseEntries = state.payments.filter(p=>p.status==='Paid').map(p=>({
-    amount:Number(p.amount)||0, when:p.createdAt,
+    amount:toUSD(p.amount, (p.currencies&&p.currencies[0])||'USD'), when:p.createdAt,
   }));
   const totalRevenue = revenueEntries.reduce((s,e)=>s+e.amount,0);
   const totalExpenses = expenseEntries.reduce((s,e)=>s+e.amount,0);
@@ -1364,10 +1392,11 @@ function renderFinance(){
     return `<div class="empty"><div class="display">No money in or out yet</div>Revenue shows up once an invoice is marked Paid or a storefront order is paid; expenses once a payment is marked Paid.</div>`;
   }
 
+  const usd = n => '$' + n.toLocaleString(undefined,{maximumFractionDigits:0});
   const stats = `<div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
-    <div class="stat-card sage"><div class="num mono">${totalRevenue.toLocaleString()}</div><div class="lbl">Revenue</div></div>
-    <div class="stat-card rust"><div class="num mono">${totalExpenses.toLocaleString()}</div><div class="lbl">Payments (expenses)</div></div>
-    <div class="stat-card ${net>=0?'olive':'rust'}"><div class="num mono">${net.toLocaleString()}</div><div class="lbl">Net</div></div>
+    <div class="stat-card sage"><div class="num mono">${usd(totalRevenue)}</div><div class="lbl">Revenue (USD)</div></div>
+    <div class="stat-card rust"><div class="num mono">${usd(totalExpenses)}</div><div class="lbl">Payments (USD)</div></div>
+    <div class="stat-card ${net>=0?'olive':'rust'}"><div class="num mono">${usd(net)}</div><div class="lbl">Net (USD)</div></div>
   </div>`;
 
   const sourceMax = Math.max(...sourceRows.map(([,v])=>v), 1);
@@ -1375,7 +1404,7 @@ function renderFinance(){
     <div class="bar-row">
       <span class="bar-label">${esc(label)}</span>
       <div class="bar-track"><div class="bar-fill" style="width:${(val/sourceMax)*100}%;background:var(--sage);"></div></div>
-      <span class="bar-count mono">${val.toLocaleString()}</span>
+      <span class="bar-count mono">${usd(val)}</span>
     </div>`).join('') : `<div style="color:var(--ink-soft);font-size:13px;">No paid revenue yet.</div>`;
 
   const monthMax = Math.max(...monthRows.map(m=>Math.max(m.revenue,m.expenses)), 1);
@@ -1386,14 +1415,14 @@ function renderFinance(){
         <div class="bar-track" style="height:8px;"><div class="bar-fill" style="width:${(m.revenue/monthMax)*100}%;background:var(--sage);"></div></div>
         <div class="bar-track" style="height:8px;"><div class="bar-fill" style="width:${(m.expenses/monthMax)*100}%;background:var(--rust);"></div></div>
       </div>
-      <span class="bar-count mono" style="font-size:11px;">${m.revenue.toLocaleString()} / ${m.expenses.toLocaleString()}</span>
+      <span class="bar-count mono" style="font-size:11px;">${usd(m.revenue)} / ${usd(m.expenses)}</span>
     </div>`).join('') : '';
 
   return `
     ${stats}
-    <div class="section-title">Revenue by source</div>
+    <div class="section-title">Revenue by source (USD)</div>
     <div class="bar-chart">${sourceHTML}</div>
-    <div class="section-title">Last 6 months — revenue (sage) vs. payments (rust)</div>
+    <div class="section-title">Last 6 months — revenue (sage) vs. payments (rust), USD</div>
     <div class="bar-chart">${monthHTML}</div>
   `;
 }
