@@ -416,7 +416,7 @@ async function loadFxRates(){
     if(cached && Date.now()-cached.at < 12*3600*1000){ state.fxRates = {...state.fxRates, ...cached.rates}; return; }
   }catch(e){}
   try{
-    const res = await fetch('https://api.frankfurter.app/latest?from=USD');
+    const res = await fetch('https://api.frankfurter.dev/v1/latest?from=USD');
     const data = await res.json();
     if(data && data.rates){
       state.fxRates = {...state.fxRates, USD:1, ...data.rates};
