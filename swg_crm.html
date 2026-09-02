@@ -236,6 +236,11 @@
   .hello{margin-bottom:22px;}
   .hello .hi{font-size:30px;font-weight:500;margin:0;}
   .hello .sub2{color:var(--ink-soft);font-size:13px;margin-top:4px;}
+  .dash-tabs{display:flex;align-items:center;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+  .dash-tab{padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-family:inherit;font-size:12.5px;color:var(--ink-soft);cursor:pointer;}
+  .dash-tab.active{background:var(--ink-fixed);color:#fff;border-color:var(--ink-fixed);}
+  .dash-tab-add{background:none;border-style:dashed;color:var(--amber);}
+  .dash-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;}
   .donut-wrap{display:flex;align-items:center;gap:34px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-bottom:24px;flex-wrap:wrap;}
   .donut{width:220px;height:220px;border-radius:50%;flex-shrink:0;position:relative;}
   .donut-hole{position:absolute;top:50%;left:50%;width:128px;height:128px;background:var(--surface);border-radius:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;}
@@ -486,8 +491,8 @@
 </div>
 
 <script>
-const KEYS = { contacts:'crm_contacts', deals:'crm_deals', orders:'crm_orders', customers:'crm_customers', suppliers:'crm_suppliers', tasks:'crm_tasks', invoices:'crm_invoices', leads:'crm_leads', distributors:'crm_distributors', payments:'crm_payments', team:'crm_team' };
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut' };
+const KEYS = { contacts:'crm_contacts', deals:'crm_deals', orders:'crm_orders', customers:'crm_customers', suppliers:'crm_suppliers', tasks:'crm_tasks', invoices:'crm_invoices', leads:'crm_leads', distributors:'crm_distributors', payments:'crm_payments', team:'crm_team', dashboards:'crm_dashboards' };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut' };
 const STAGES = ['Lead','Contacted','Negotiation','Won','Lost'];
 const STAGES_NEW = ['Lead','Contacted','Negotiation','Won']; // creation only — no Lost
 const CTYPES = ['Supplier','Distributor','Customer','Marketing'];
@@ -649,14 +654,14 @@ async function saveKey(key, arr){
 }
 
 async function loadAll(){
-  const [c,d,o,cu,su,ta,inv,le,di,pa] = await Promise.all([
+  const [c,d,o,cu,su,ta,inv,le,di,pa,db] = await Promise.all([
     loadKey(KEYS.contacts), loadKey(KEYS.deals), loadKey(KEYS.orders),
     loadKey(KEYS.customers), loadKey(KEYS.suppliers), loadKey(KEYS.tasks), loadKey(KEYS.invoices),
-    loadKey(KEYS.leads), loadKey(KEYS.distributors), loadKey(KEYS.payments)
+    loadKey(KEYS.leads), loadKey(KEYS.distributors), loadKey(KEYS.payments), loadKey(KEYS.dashboards)
   ]);
   state.contacts = c; state.deals = d; state.orders = o;
   state.customers = cu; state.suppliers = su; state.tasks = ta; state.invoices = inv;
-  state.leads = le; state.distributors = di; state.payments = pa;
+  state.leads = le; state.distributors = di; state.payments = pa; state.dashboards = db;
   state.loaded = true;
 }
 
@@ -1340,12 +1345,98 @@ function pctDelta(thisPeriod, lastPeriod){
 }
 
 function renderDashboard(){
+  const priv = isPrivileged();
+  const myDashboards = state.dashboards.filter(d=>d.owner===state.viewingAs);
+  const tabs = `<div class="dash-tabs">
+    <button type="button" class="dash-tab ${!state.activeDashboardId?'active':''}" data-dash-tab="">Overview</button>
+    ${myDashboards.map(d=>`<button type="button" class="dash-tab ${state.activeDashboardId===d.id?'active':''}" data-dash-tab="${d.id}">${esc(d.name)}</button>`).join('')}
+    <button type="button" class="dash-tab dash-tab-add" id="dashAddBtn">+ New dashboard</button>
+  </div>`;
+  const active = myDashboards.find(d=>d.id===state.activeDashboardId);
+  return tabs + (active ? renderCustomDashboard(active, priv) : renderOverviewDashboard(priv));
+}
+
+function widgetKPI(label, value, colorClass){
+  return `<div class="stat-card ${colorClass}"><div class="num mono">${value}</div><div class="lbl">${esc(label)}</div></div>`;
+}
+const WIDGET_DEFS = [
+  {key:'kpi_pipeline', label:'Pipeline value', priv:false, render:()=>{ const v=state.deals.filter(d=>d.stage!=='Won'&&d.stage!=='Lost').reduce((s,d)=>s+(Number(d.value)||0),0); return widgetKPI('Pipeline value', v.toLocaleString(), 'ochre'); }},
+  {key:'kpi_customers', label:'Customers', priv:false, render:()=>widgetKPI('Customers', state.customers.length, 'sage')},
+  {key:'kpi_leads', label:'Leads', priv:false, render:()=>canSeeLeads() ? widgetKPI('Leads', state.leads.length, 'ochre') : ''},
+  {key:'kpi_deals', label:'Open deals', priv:false, render:()=>widgetKPI('Open deals', state.deals.filter(d=>d.stage!=='Won'&&d.stage!=='Lost').length, 'ochre')},
+  {key:'kpi_tasks', label:'Open tasks', priv:false, render:()=>widgetKPI('Open tasks', state.tasks.filter(t=>t.status!=='Done').length, 'olive')},
+  {key:'kpi_suppliers', label:'Suppliers', priv:false, render:()=>widgetKPI('Suppliers', state.suppliers.length, 'clay')},
+  {key:'kpi_distributors', label:'Distributors', priv:false, render:()=>widgetKPI('Distributors', state.distributors.length, 'umber')},
+  {key:'kpi_won', label:'Won value', priv:false, render:()=>{ const v = state.deals.filter(d=>d.stage==='Won').reduce((s,d)=>s+(Number(d.value)||0),0); return widgetKPI('Won value', v.toLocaleString(), 'sage'); }},
+  {key:'kpi_invoices', label:'Unpaid invoices', priv:true, render:()=>{ const v=state.invoices.filter(i=>i.status!=='Paid').reduce((s,i)=>s+(Number(i.amount)||0),0); return widgetKPI('Unpaid invoices', v.toLocaleString(), 'rust'); }},
+  {key:'kpi_payments', label:'Pending payments', priv:true, render:()=>{ const v=state.payments.filter(p=>p.status!=='Paid').reduce((s,p)=>s+(Number(p.amount)||0),0); return widgetKPI('Pending payments', v.toLocaleString(), 'clay'); }},
+  {key:'chart_breakdown', label:'Ledger breakdown chart', priv:false, wide:true, render:(priv)=>renderChart(priv)},
+  {key:'chart_revenue', label:'Revenue trend', priv:true, wide:true, render:()=>`<div class="donut-wrap">${renderRevenueChart()}</div>`},
+  {key:'list_recent', label:'Recent activity', priv:false, wide:true, render:()=>`<div class="section-title">Recent activity</div>${renderRecent()}`},
+  {key:'list_mytasks', label:'My open tasks', priv:false, wide:true, render:()=>{
+    const mine = state.tasks.filter(t=>t.status!=='Done' && t.owner===state.viewingAs);
+    if(!mine.length) return `<div class="section-title">My open tasks</div><div class="empty"><div class="display">All clear!</div>No open tasks assigned to you.</div>`;
+    return `<div class="section-title">My open tasks</div><table><thead><tr><th>Task</th><th>Due</th><th>Status</th></tr></thead><tbody>${mine.slice(0,8).map(t=>`<tr><td>${esc(t.title)}</td><td style="font-size:12px;">${t.dueDate?new Date(t.dueDate).toLocaleDateString():'—'}</td><td><span class="badge ${t.status.toLowerCase()}">${t.status}</span></td></tr>`).join('')}</tbody></table>`;
+  }},
+];
+function renderCustomDashboard(dash, priv){
+  const widgets = dash.widgets.map(k=>WIDGET_DEFS.find(w=>w.key===k)).filter(w=>w && (!w.priv || priv));
+  const kpis = widgets.filter(w=>!w.wide);
+  const wides = widgets.filter(w=>w.wide);
+  return `
+    <div class="dash-head">
+      <p class="hi display" style="margin:0;">${esc(dash.name)}</p>
+      <div class="row-actions"><span id="dashEditBtn" data-dash-id="${dash.id}">edit widgets</span><span id="dashDeleteBtn" data-dash-id="${dash.id}">delete</span></div>
+    </div>
+    ${kpis.length ? `<div class="stat-grid" style="grid-template-columns:repeat(${Math.min(kpis.length,4)},1fr);margin-top:14px;">${kpis.map(w=>w.render(priv)).join('')}</div>` : ''}
+    ${wides.map(w=>`<div style="margin-top:18px;">${w.render(priv)}</div>`).join('')}
+    ${!widgets.length ? `<div class="empty" style="margin-top:16px;"><div class="display">No widgets yet</div>Click "edit widgets" to add some.</div>` : ''}
+  `;
+}
+function openNewDashboardModal(){
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">New dashboard</h2>
+    <div class="field"><label>Name</label><input id="f_dashName" placeholder="e.g. My Sales Snapshot"></div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="dashCreateBtn">Create</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  document.getElementById('dashCreateBtn').onclick = async ()=>{
+    const name = document.getElementById('f_dashName').value.trim();
+    if(!name) return alert('Give it a name.');
+    const dash = {id:uid(), owner:state.viewingAs, name, widgets:[], createdAt:Date.now()};
+    state.dashboards.push(dash);
+    await saveKey(KEYS.dashboards, state.dashboards);
+    state.activeDashboardId = dash.id;
+    closeModal();
+    render();
+    openDashboardWidgetPicker(dash.id);
+  };
+}
+function openDashboardWidgetPicker(dashId){
+  const dash = state.dashboards.find(d=>d.id===dashId);
+  if(!dash) return;
+  const priv = isPrivileged();
+  const avail = WIDGET_DEFS.filter(w=>!w.priv||priv);
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">Edit widgets — ${esc(dash.name)}</h2>
+    <div class="field">
+      ${avail.map(w=>`<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;"><input type="checkbox" data-widget-key="${w.key}" ${dash.widgets.includes(w.key)?'checked':''} style="accent-color:var(--amber);"> ${esc(w.label)}</label>`).join('')}
+    </div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Close</button><button class="btn" id="dashSaveWidgetsBtn">Save</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  document.getElementById('dashSaveWidgetsBtn').onclick = async ()=>{
+    dash.widgets = Array.from(document.querySelectorAll('[data-widget-key]:checked')).map(cb=>cb.dataset.widgetKey);
+    await saveKey(KEYS.dashboards, state.dashboards);
+    closeModal();
+    render();
+  };
+}
+
+function renderOverviewDashboard(priv){
   const openDeals = state.deals.filter(d=>d.stage!=='Won' && d.stage!=='Lost');
   const openValue = openDeals.reduce((s,d)=>s+(Number(d.value)||0),0);
   const openTasks = state.tasks.filter(t=>t.status!=='Done');
   const unpaidInvoices = state.invoices.filter(i=>i.status!=='Paid');
   const unpaidValue = unpaidInvoices.reduce((s,i)=>s+(Number(i.amount)||0),0);
-  const priv = isPrivileged();
 
   const now = Date.now(), week = 7*24*60*60*1000;
   const inRange = (ts,from,to) => ts>=from && ts<to;
@@ -1816,6 +1907,21 @@ function attachContentHandlers(){
   document.querySelectorAll('[data-chart]').forEach(el=>{
     el.onclick = ()=>{ state.chartType = el.dataset.chart; saveChartPref(state.chartType); render(); };
   });
+  document.querySelectorAll('[data-dash-tab]').forEach(btn=>{
+    btn.onclick = ()=>{ state.activeDashboardId = btn.dataset.dashTab; render(); };
+  });
+  const dashAddBtn = document.getElementById('dashAddBtn');
+  if(dashAddBtn) dashAddBtn.onclick = openNewDashboardModal;
+  const dashEditBtn = document.getElementById('dashEditBtn');
+  if(dashEditBtn) dashEditBtn.onclick = ()=>openDashboardWidgetPicker(dashEditBtn.dataset.dashId);
+  const dashDeleteBtn = document.getElementById('dashDeleteBtn');
+  if(dashDeleteBtn) dashDeleteBtn.onclick = async ()=>{
+    if(!confirm('Delete this dashboard?')) return;
+    state.dashboards = state.dashboards.filter(d=>d.id!==dashDeleteBtn.dataset.dashId);
+    await saveKey(KEYS.dashboards, state.dashboards);
+    state.activeDashboardId = '';
+    render();
+  };
   document.querySelectorAll('[data-edit]').forEach(el=>{
     el.onclick = ()=>{ const [table,id] = el.dataset.edit.split(':'); openModal(table, id); };
   });
@@ -2265,7 +2371,8 @@ document.getElementById('viewingAs').onchange = (e)=>{ state.viewingAs = e.targe
 document.getElementById('resetBtn').onclick = async ()=>{
   if(!confirm('This clears ALL ledger data for the whole team (team member logins are kept). Continue?')) return;
   state.contacts=[]; state.deals=[]; state.orders=[]; state.customers=[]; state.suppliers=[];
-  state.tasks=[]; state.invoices=[]; state.leads=[]; state.distributors=[]; state.payments=[];
+  state.tasks=[]; state.invoices=[]; state.leads=[]; state.distributors=[]; state.payments=[]; state.dashboards=[];
+  state.activeDashboardId = '';
   await Promise.all(Object.entries(KEYS).filter(([k])=>k!=='team').map(([,v])=>saveKey(v,[])));
   render();
 };
