@@ -104,6 +104,7 @@
   .navlink[data-view="invoices"] .dot{background:var(--rust);}
   .navlink[data-view="payments"] .dot{background:var(--rust);}
   .navlink[data-view="team"] .dot{background:var(--ink-fixed);}
+  .navlink[data-view="setup"] .dot{background:var(--umber);}
   .navlink[data-view="dashboard"].active{background:var(--ink-fixed);}
   .navlink[data-view="home"].active{background:var(--amber);}
   .navlink[data-view="contacts"].active{background:var(--amber);}
@@ -117,6 +118,7 @@
   .navlink[data-view="invoices"].active{background:var(--rust);}
   .navlink[data-view="payments"].active{background:var(--rust);}
   .navlink[data-view="team"].active{background:var(--ink-fixed);}
+  .navlink[data-view="setup"].active{background:var(--umber);}
   .navlink.hidden-role{display:none;}
   .sidebar-foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--border);}
   .foot-label{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
@@ -441,6 +443,7 @@
     <div class="navlink" data-view="invoices"><span class="dot"></span>Invoices</div>
     <div class="navlink" data-view="payments"><span class="dot"></span>Payments</div>
     <div class="navlink" data-view="team"><span class="dot"></span>Team</div>
+    <div class="navlink" data-view="setup"><span class="dot"></span>Setup</div>
     <div class="sidebar-foot">
       <div class="theme-toggle" id="themeToggle">
         <button type="button" data-theme-choice="system" title="Match system">Auto</button>
@@ -491,8 +494,8 @@
 </div>
 
 <script>
-const KEYS = { contacts:'crm_contacts', deals:'crm_deals', orders:'crm_orders', customers:'crm_customers', suppliers:'crm_suppliers', tasks:'crm_tasks', invoices:'crm_invoices', leads:'crm_leads', distributors:'crm_distributors', payments:'crm_payments', team:'crm_team', dashboards:'crm_dashboards' };
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut' };
+const KEYS = { contacts:'crm_contacts', deals:'crm_deals', orders:'crm_orders', customers:'crm_customers', suppliers:'crm_suppliers', tasks:'crm_tasks', invoices:'crm_invoices', leads:'crm_leads', distributors:'crm_distributors', payments:'crm_payments', team:'crm_team', dashboards:'crm_dashboards', validationRules:'crm_validation_rules', automations:'crm_automations', sharingRules:'crm_sharing_rules' };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut' };
 const STAGES = ['Lead','Contacted','Negotiation','Won','Lost'];
 const STAGES_NEW = ['Lead','Contacted','Negotiation','Won']; // creation only — no Lost
 const CTYPES = ['Supplier','Distributor','Customer','Marketing'];
@@ -546,7 +549,7 @@ const ACCENTS = {
   dashboard:'var(--ink-fixed)', home:'var(--amber)', contacts:'var(--amber)', leads:'var(--ochre)', customers:'var(--sage)',
   distributors:'var(--umber)', suppliers:'var(--clay)', deals:'var(--ochre)', orders:'var(--umber)',
   tasks:'var(--olive)', invoices:'var(--rust)', payments:'var(--rust)', team:'var(--ink-fixed)',
-  search:'var(--ink-fixed)', rickroll:'var(--ink-fixed)'
+  setup:'var(--umber)', search:'var(--ink-fixed)', rickroll:'var(--ink-fixed)'
 };
 const CONTINENTS = ['Africa','Asia','Europe','North America','South America','Oceania','Middle East'];
 const SUBREGIONS = {
@@ -608,6 +611,16 @@ function isAdmin(){ return state.currentUser === FULL_ADMIN || CO_ADMINS.include
 function canDeleteUsers(){ return state.currentUser === FULL_ADMIN; }
 function canSeeLeads(){ return !LEAD_HIDDEN_FOR.includes(state.viewingAs); }
 function teamNames(){ return state.team.map(t=>t.name); }
+const ROLE_LIST = ['Admin','Manager','Sales Rep','Marketing','Support'];
+function currentTeamRecord(){ return state.team.find(t=>t.name===state.currentUser); }
+function roleFor(name){
+  const rec = state.team.find(t=>t.name===name);
+  if(rec && rec.role) return rec.role;
+  if(name===FULL_ADMIN) return 'Admin';
+  if(CO_ADMINS.includes(name)) return 'Manager';
+  return 'Sales Rep';
+}
+function canAccessSetup(){ return isAdmin() || roleFor(state.currentUser)==='Manager'; }
 
 const DEFAULT_TEAM = [
   {name:'Ariel', email:'ariel@siddhayogaweb.com'},
@@ -654,14 +667,17 @@ async function saveKey(key, arr){
 }
 
 async function loadAll(){
-  const [c,d,o,cu,su,ta,inv,le,di,pa,db] = await Promise.all([
+  const [c,d,o,cu,su,ta,inv,le,di,pa,db,vr,au,sr] = await Promise.all([
     loadKey(KEYS.contacts), loadKey(KEYS.deals), loadKey(KEYS.orders),
     loadKey(KEYS.customers), loadKey(KEYS.suppliers), loadKey(KEYS.tasks), loadKey(KEYS.invoices),
-    loadKey(KEYS.leads), loadKey(KEYS.distributors), loadKey(KEYS.payments), loadKey(KEYS.dashboards)
+    loadKey(KEYS.leads), loadKey(KEYS.distributors), loadKey(KEYS.payments), loadKey(KEYS.dashboards),
+    loadKey(KEYS.validationRules), loadKey(KEYS.automations), loadKey(KEYS.sharingRules)
   ]);
   state.contacts = c; state.deals = d; state.orders = o;
   state.customers = cu; state.suppliers = su; state.tasks = ta; state.invoices = inv;
   state.leads = le; state.distributors = di; state.payments = pa; state.dashboards = db;
+  state.validationRules = vr; state.automations = au;
+  state.sharingRules = (sr && !Array.isArray(sr)) ? sr : {};
   state.loaded = true;
 }
 
@@ -823,6 +839,8 @@ function updateNavVisibility(){
   if(payLink) payLink.classList.toggle('hidden-role', !isPrivileged());
   const teamLink = document.querySelector('.navlink[data-view="team"]');
   if(teamLink) teamLink.classList.toggle('hidden-role', !isAdmin());
+  const setupLink = document.querySelector('.navlink[data-view="setup"]');
+  if(setupLink) setupLink.classList.toggle('hidden-role', !canAccessSetup());
   const leadLink = document.querySelector('.navlink[data-view="leads"]');
   if(leadLink) leadLink.classList.toggle('hidden-role', !canSeeLeads());
 }
@@ -831,6 +849,7 @@ function render(){
   if(state.view==='invoices' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='payments' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='team' && !isAdmin()) state.view = 'dashboard';
+  if(state.view==='setup' && !canAccessSetup()) state.view = 'dashboard';
   if(state.view==='leads' && !canSeeLeads()) state.view = 'dashboard';
   updateNavVisibility();
   populateViewingAsOptions();
@@ -848,6 +867,7 @@ function render(){
     invoices:['Invoices','Billing, linked to orders or standalone'],
     payments:['Payments','Track what SWG owes and pays out'],
     team:['Team','Manage who has access to the ledger'],
+    setup:['Setup','Roles, validation rules, automation and sharing'],
     search:['Search','Find anything across all tabs'],
     rickroll:['Import / Export','Move data in and out of the ledger']};
   document.getElementById('pageTitle').innerHTML = `<span class="accent-dot"></span>${titleMap[state.view]?titleMap[state.view][0]:state.view}`;
@@ -855,7 +875,7 @@ function render(){
   document.getElementById('mainArea').style.setProperty('--accent', ACCENTS[state.view] || 'var(--amber)');
   const addLabels = {contacts:'contact', leads:'lead', customers:'customer', distributors:'distributor', suppliers:'supplier', deals:'deal', tasks:'task', invoices:'invoice', payments:'payment', team:'team member'};
   const addBtn = document.getElementById('addBtn');
-  const noAdd = ['dashboard','home','search','rickroll'];
+  const noAdd = ['dashboard','home','search','rickroll','setup'];
   addBtn.style.display = noAdd.includes(state.view) ? 'none' : 'inline-block';
   addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
 
@@ -880,6 +900,7 @@ function render(){
   if(state.view==='invoices') c.innerHTML = renderInvoices();
   if(state.view==='payments') c.innerHTML = renderPayments();
   if(state.view==='team') c.innerHTML = renderTeam();
+  if(state.view==='setup') c.innerHTML = renderSetup();
   if(state.view==='search') c.innerHTML = renderSearch();
   if(state.view==='rickroll') c.innerHTML = renderImportExport();
   attachContentHandlers();
@@ -1653,7 +1674,8 @@ function renderRecent(){
 }
 
 function renderContacts(){
-  const filtered = state.contactFilter==='all' ? state.contacts : state.contacts.filter(c=>c.type===state.contactFilter);
+  const visible = visibleRecords('contacts', state.contacts);
+  const filtered = state.contactFilter==='all' ? visible : visible.filter(c=>c.type===state.contactFilter);
   const chips = ['all',...CTYPES].map(t=>`<div class="filter-chip ${state.contactFilter===t?'active':''}" data-filter="${t}">${t==='all'?'All':t}</div>`).join('');
   let rows;
   if(!filtered.length){
@@ -1677,8 +1699,9 @@ function renderContacts(){
 }
 
 function renderDeals(){
+  const visible = visibleRecords('deals', state.deals);
   return `<div class="kanban">${STAGES.map(stage=>{
-    const items = state.deals.filter(d=>d.stage===stage);
+    const items = visible.filter(d=>d.stage===stage);
     return `<div class="kcol" data-stage-col="${stage}">
       <div class="kcol-head"><span>${stage}</span><span>${items.length}</span></div>
       ${items.map(d=>`
@@ -1720,9 +1743,10 @@ function renderOrders(){
 }
 
 function renderLeads(){
-  if(!state.leads.length) return `<div class="empty"><div class="display">No leads yet</div>Add a prospect to warm up before they become a customer.</div>`;
+  const visible = visibleRecords('leads', state.leads);
+  if(!visible.length) return `<div class="empty"><div class="display">No leads yet</div>Add a prospect to warm up before they become a customer.</div>`;
   return `<table><thead><tr><th>No.</th><th>Name</th><th>Kind</th><th>Company Name</th><th>Source</th><th>Email / Phone</th><th>Status</th><th>Owner</th><th></th></tr></thead><tbody>
-  ${state.leads.map((l,i)=>`
+  ${visible.map((l,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
       <td>${esc(l.name)}</td>
@@ -1738,9 +1762,10 @@ function renderLeads(){
 }
 
 function renderCustomers(){
-  if(!state.customers.length) return `<div class="empty"><div class="display">No customers yet</div>Add the people and businesses who buy from you.</div>`;
+  const visible = visibleRecords('customers', state.customers);
+  if(!visible.length) return `<div class="empty"><div class="display">No customers yet</div>Add the people and businesses who buy from you.</div>`;
   return `<table><thead><tr><th>No.</th><th>Name</th><th>Kind</th><th>Company Name</th><th>Email / Phone</th><th>Owner</th><th>Notes</th><th></th></tr></thead><tbody>
-  ${state.customers.map((c,i)=>`
+  ${visible.map((c,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
       <td>${esc(c.name)}</td>
@@ -1755,9 +1780,10 @@ function renderCustomers(){
 }
 
 function renderSuppliers(){
-  if(!state.suppliers.length) return `<div class="empty"><div class="display">No suppliers yet</div>Add who you source oils and materials from.</div>`;
+  const visible = visibleRecords('suppliers', state.suppliers);
+  if(!visible.length) return `<div class="empty"><div class="display">No suppliers yet</div>Add who you source oils and materials from.</div>`;
   return `<table><thead><tr><th>No.</th><th>Name</th><th>Company Name</th><th>Email / Phone</th><th>Owner</th><th></th></tr></thead><tbody>
-  ${state.suppliers.map((s,i)=>`
+  ${visible.map((s,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
       <td>${esc(s.name)}</td>
@@ -1770,9 +1796,10 @@ function renderSuppliers(){
 }
 
 function renderDistributors(){
-  if(!state.distributors.length) return `<div class="empty"><div class="display">No distributors yet</div>Add the partners who distribute SWG products.</div>`;
+  const visible = visibleRecords('distributors', state.distributors);
+  if(!visible.length) return `<div class="empty"><div class="display">No distributors yet</div>Add the partners who distribute SWG products.</div>`;
   return `<table><thead><tr><th>No.</th><th>Name</th><th>Company Name</th><th>Continents</th><th>Sub-regions</th><th>Email / Phone</th><th>Owner</th><th></th></tr></thead><tbody>
-  ${state.distributors.map((d,i)=>`
+  ${visible.map((d,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
       <td>${esc(d.name)}</td>
@@ -1788,8 +1815,9 @@ function renderDistributors(){
 
 
 function renderTasks(){
-  if(!state.tasks.length) return `<div class="empty"><div class="display">No tasks yet</div>Add a follow-up or a general to-do.</div>`;
-  const sorted = [...state.tasks].sort((a,b)=>(a.status==='Done')-(b.status==='Done') || new Date(a.dueDate||0)-new Date(b.dueDate||0));
+  const visible = visibleRecords('tasks', state.tasks);
+  if(!visible.length) return `<div class="empty"><div class="display">No tasks yet</div>Add a follow-up or a general to-do.</div>`;
+  const sorted = [...visible].sort((a,b)=>(a.status==='Done')-(b.status==='Done') || new Date(a.dueDate||0)-new Date(b.dueDate||0));
   return `<table><thead><tr><th>No.</th><th>Task</th><th>Related to</th><th>Due</th><th>Assignee</th><th>Status</th><th></th></tr></thead><tbody>
   ${sorted.map((t,i)=>`
     <tr>
@@ -1860,7 +1888,7 @@ function avatarHTML(name, size){
 function renderTeam(){
   const del = canDeleteUsers();
   return `<div class="team-grid">${state.team.map(t=>{
-    const role = t.name===FULL_ADMIN ? 'Admin' : CO_ADMINS.includes(t.name) ? 'Co-admin' : 'Member';
+    const role = roleFor(t.name);
     const canDel = del && t.name!==FULL_ADMIN;
     const myDeals = state.deals.filter(d=>d.owner===t.name);
     const openDeals = myDeals.filter(d=>d.stage!=='Won' && d.stage!=='Lost').length;
@@ -1882,6 +1910,313 @@ function renderTeam(){
       <div class="row-actions"><span data-edit="team:${t.id}">edit</span>${canDel?`<span data-del="team:${t.id}">delete</span>`:''}</div>
     </div>`;
   }).join('')}</div>`;
+}
+
+/* ---------- Setup: roles, validation rules, automation, sharing ---------- */
+const SETUP_TABS = [
+  {key:'roles', label:'Roles'},
+  {key:'validation', label:'Validation Rules'},
+  {key:'automation', label:'Automation'},
+  {key:'sharing', label:'Sharing Rules'},
+];
+const SETUP_ENTITIES = ['contacts','leads','customers','distributors','suppliers','deals','tasks','invoices','payments'];
+const SHARING_ENTITIES = ['contacts','leads','customers','distributors','suppliers','deals','tasks'];
+const RULE_TYPES = [
+  {key:'required', label:'Required (not empty)'},
+  {key:'min', label:'Minimum value'},
+  {key:'max', label:'Maximum value'},
+  {key:'regex', label:'Must match pattern (regex)'},
+];
+const COND_OPS = [
+  {key:'any', label:'— always run —'},
+  {key:'equals', label:'equals'},
+  {key:'contains', label:'contains'},
+  {key:'gt', label:'is greater than'},
+  {key:'lt', label:'is less than'},
+];
+const SHARING_MODES = [
+  {key:'everyone', label:'Everyone on the team'},
+  {key:'owner', label:'Owner only'},
+  {key:'owner_and_admins', label:'Owner + Admins'},
+];
+
+function entityFieldsFor(entityKey){
+  const sheet = EXPORT_SHEETS.find(s=>s.key===entityKey);
+  return sheet ? sheet.fields.filter(f=>f!=='id'&&f!=='createdAt') : [];
+}
+
+function validateAgainstRules(entityKey, obj){
+  const rules = state.validationRules.filter(r=>r.entity===entityKey);
+  for(const r of rules){
+    const val = obj[r.field];
+    if(r.type==='required'){
+      const empty = val===undefined || val===null || val==='' || (Array.isArray(val)&&!val.length);
+      if(empty) return r.message || `${prettyField(r.field)} is required.`;
+    } else if(r.type==='min'){
+      if(Number(val) < Number(r.value)) return r.message || `${prettyField(r.field)} must be at least ${r.value}.`;
+    } else if(r.type==='max'){
+      if(Number(val) > Number(r.value)) return r.message || `${prettyField(r.field)} must be at most ${r.value}.`;
+    } else if(r.type==='regex'){
+      try{ if(!new RegExp(r.value).test(String(val||''))) return r.message || `${prettyField(r.field)} is not valid.`; }catch(e){}
+    }
+  }
+  return null;
+}
+
+async function runAutomations(entityKey, obj){
+  const rules = state.automations.filter(a=>a.entity===entityKey);
+  for(const a of rules){
+    let match = a.conditionOp==='any' || !a.conditionField;
+    if(!match){
+      const val = obj[a.conditionField];
+      if(a.conditionOp==='equals') match = String(val||'').toLowerCase()===String(a.conditionValue||'').toLowerCase();
+      else if(a.conditionOp==='contains') match = String(val||'').toLowerCase().includes(String(a.conditionValue||'').toLowerCase());
+      else if(a.conditionOp==='gt') match = Number(val) > Number(a.conditionValue);
+      else if(a.conditionOp==='lt') match = Number(val) < Number(a.conditionValue);
+    }
+    if(!match) continue;
+    if(a.action==='create_task'){
+      const due = a.taskDueInDays ? new Date(Date.now()+Number(a.taskDueInDays)*86400000).toISOString().slice(0,10) : '';
+      const subject = obj.name || obj.title || obj.payee || '';
+      const task = { id:uid(), createdAt:Date.now(), title:(a.taskTitle||'Follow up').replace('{name}', subject),
+        dueDate:due, owner:a.taskOwner||obj.owner||state.viewingAs, status:'Open', linkType:'none', linkId:null,
+        notes:`Auto-created by automation "${a.name}".` };
+      state.tasks.push(task);
+      await saveKey(KEYS.tasks, state.tasks);
+    } else if(a.action==='set_field' && a.setField){
+      const list = state[entityKey];
+      const rec = list.find(x=>x.id===obj.id);
+      if(rec){ rec[a.setField] = a.setValue; await saveKey(KEYS[entityKey], list); }
+    }
+  }
+}
+
+function personaIsAdmin(){ return state.viewingAs===FULL_ADMIN || CO_ADMINS.includes(state.viewingAs); }
+function visibleRecords(entityKey, list){
+  if(personaIsAdmin()) return list;
+  const mode = state.sharingRules[entityKey] || 'everyone';
+  if(mode==='everyone') return list;
+  return list.filter(x=>x.owner===state.viewingAs);
+}
+
+function renderSetupRoles(){
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Assign each team member a role. Admins and Managers can open Setup; only Ariel can delete a team member.</p>
+    <table><thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody>
+    ${state.team.map(t=>`<tr>
+      <td>${esc(t.name)}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(t.email||'—')}</td>
+      <td><select data-role-for="${t.id}" ${t.name===FULL_ADMIN?'disabled':''}>${ROLE_LIST.map(r=>`<option ${roleFor(t.name)===r?'selected':''}>${r}</option>`).join('')}</select></td>
+    </tr>`).join('')}
+    </tbody></table>
+  </div>`;
+}
+
+function renderSetupValidation(){
+  const rules = state.validationRules;
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Rules run whenever a record is added in that object. Saving is blocked with the message below until the rule passes.</p>
+    <table><thead><tr><th>Object</th><th>Field</th><th>Rule</th><th>Value</th><th>Message</th><th></th></tr></thead><tbody>
+    ${rules.map(r=>`<tr>
+      <td style="font-size:12px;">${esc(EXPORT_SHEETS.find(s=>s.key===r.entity)?.label||r.entity)}</td>
+      <td style="font-size:12px;">${esc(prettyField(r.field))}</td>
+      <td style="font-size:12px;">${esc(RULE_TYPES.find(t=>t.key===r.type)?.label||r.type)}</td>
+      <td style="font-size:12px;" class="mono">${esc(r.value||'—')}</td>
+      <td style="font-size:12px;color:var(--ink-soft);max-width:160px;">${esc(r.message||'—')}</td>
+      <td class="row-actions"><span data-del-rule="${r.id}">delete</span></td>
+    </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:20px;">No validation rules yet.</td></tr>`}
+    </tbody></table>
+    <button class="btn" id="addValidationBtn" style="margin-top:14px;">+ Add validation rule</button>
+  </div>`;
+}
+
+function renderSetupAutomation(){
+  const rules = state.automations;
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Runs automatically right after a new record is created in that object.</p>
+    <table><thead><tr><th>Name</th><th>Object</th><th>When</th><th>Then</th><th></th></tr></thead><tbody>
+    ${rules.map(a=>`<tr>
+      <td style="font-size:12px;">${esc(a.name)}</td>
+      <td style="font-size:12px;">${esc(EXPORT_SHEETS.find(s=>s.key===a.entity)?.label||a.entity)} created</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${a.conditionOp==='any'?'always':`${esc(prettyField(a.conditionField))} ${esc(COND_OPS.find(o=>o.key===a.conditionOp)?.label||'')} "${esc(a.conditionValue)}"`}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${a.action==='create_task' ? 'Create a task' : `Set ${esc(prettyField(a.setField||''))} = "${esc(a.setValue||'')}"`}</td>
+      <td class="row-actions"><span data-del-automation="${a.id}">delete</span></td>
+    </tr>`).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--ink-soft);padding:20px;">No automations yet.</td></tr>`}
+    </tbody></table>
+    <button class="btn" id="addAutomationBtn" style="margin-top:14px;">+ Add automation</button>
+  </div>`;
+}
+
+function renderSetupSharing(){
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Controls which team members can see each object's records in lists. Admins always see everything.</p>
+    <table><thead><tr><th>Object</th><th>Visible to</th></tr></thead><tbody>
+    ${SHARING_ENTITIES.map(key=>`<tr>
+      <td style="font-size:13px;">${esc(EXPORT_SHEETS.find(s=>s.key===key).label)}</td>
+      <td><select data-sharing-for="${key}">${SHARING_MODES.map(m=>`<option value="${m.key}" ${(state.sharingRules[key]||'everyone')===m.key?'selected':''}>${m.label}</option>`).join('')}</select></td>
+    </tr>`).join('')}
+    </tbody></table>
+  </div>`;
+}
+
+function renderSetupTabBody(){
+  if(state.setupTab==='roles') return renderSetupRoles();
+  if(state.setupTab==='validation') return renderSetupValidation();
+  if(state.setupTab==='automation') return renderSetupAutomation();
+  if(state.setupTab==='sharing') return renderSetupSharing();
+  return '';
+}
+function renderSetup(){
+  return `<div class="dash-tabs">
+    ${SETUP_TABS.map(t=>`<button type="button" class="dash-tab ${state.setupTab===t.key?'active':''}" data-setup-tab="${t.key}">${t.label}</button>`).join('')}
+  </div>
+  <div id="setupTabBody">${renderSetupTabBody()}</div>`;
+}
+
+function rerenderSetupView(){
+  const c = document.getElementById('content');
+  if(!c) return;
+  c.innerHTML = renderSetup();
+  wireSetupView();
+}
+
+function openValidationRuleModal(){
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">New validation rule</h2>
+    <div class="field"><label>Object</label><select id="vr_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}">${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
+    <div class="field"><label>Field</label><select id="vr_field"></select></div>
+    <div class="field"><label>Rule</label><select id="vr_type">${RULE_TYPES.map(t=>`<option value="${t.key}">${t.label}</option>`).join('')}</select></div>
+    <div class="field" id="vr_valueWrap"><label>Value</label><input id="vr_value" placeholder="e.g. 0, or a regex pattern"></div>
+    <div class="field"><label>Error message (optional)</label><input id="vr_message" placeholder="Shown when the rule fails"></div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="vr_saveBtn">Add rule</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  function refreshFields(){
+    document.getElementById('vr_field').innerHTML = entityFieldsFor(document.getElementById('vr_entity').value).map(f=>`<option value="${f}">${esc(prettyField(f))}</option>`).join('');
+  }
+  document.getElementById('vr_entity').onchange = refreshFields;
+  refreshFields();
+  document.getElementById('vr_type').onchange = ()=>{
+    document.getElementById('vr_valueWrap').style.display = document.getElementById('vr_type').value==='required' ? 'none' : 'block';
+  };
+  document.getElementById('vr_saveBtn').onclick = async ()=>{
+    const rule = {
+      id: uid(),
+      entity: document.getElementById('vr_entity').value,
+      field: document.getElementById('vr_field').value,
+      type: document.getElementById('vr_type').value,
+      value: document.getElementById('vr_value').value.trim(),
+      message: document.getElementById('vr_message').value.trim(),
+    };
+    state.validationRules.push(rule);
+    await saveKey(KEYS.validationRules, state.validationRules);
+    closeModal();
+    rerenderSetupView();
+  };
+}
+
+function openAutomationModal(){
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">New automation</h2>
+    <div class="field"><label>Name</label><input id="au_name" placeholder="e.g. Welcome task for new leads"></div>
+    <div class="field"><label>When this object is created</label><select id="au_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}">${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
+    <div class="field"><label>Condition</label><select id="au_op">${COND_OPS.map(o=>`<option value="${o.key}">${o.label}</option>`).join('')}</select></div>
+    <div class="field" id="au_condFieldWrap"><label>Field</label><select id="au_condField"></select></div>
+    <div class="field" id="au_condValueWrap"><label>Value</label><input id="au_condValue"></div>
+    <div class="field"><label>Then</label><select id="au_action">
+      <option value="create_task">Create a follow-up task</option>
+      <option value="set_field">Set a field on the record</option>
+    </select></div>
+    <div id="au_taskFields">
+      <div class="field"><label>Task title</label><input id="au_taskTitle" placeholder="e.g. Welcome {name}"></div>
+      <div class="field"><label>Assign to</label><select id="au_taskOwner">${teamNames().map(n=>`<option>${esc(n)}</option>`).join('')}</select></div>
+      <div class="field"><label>Due in (days)</label><input id="au_taskDue" type="number" placeholder="e.g. 3"></div>
+    </div>
+    <div id="au_setFields" style="display:none;">
+      <div class="field"><label>Field to set</label><select id="au_setField"></select></div>
+      <div class="field"><label>New value</label><input id="au_setValue"></div>
+    </div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="au_saveBtn">Add automation</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  function refreshCondField(){
+    document.getElementById('au_condField').innerHTML = entityFieldsFor(document.getElementById('au_entity').value).map(f=>`<option value="${f}">${esc(prettyField(f))}</option>`).join('');
+  }
+  function refreshSetField(){
+    document.getElementById('au_setField').innerHTML = entityFieldsFor(document.getElementById('au_entity').value).map(f=>`<option value="${f}">${esc(prettyField(f))}</option>`).join('');
+  }
+  document.getElementById('au_entity').onchange = ()=>{ refreshCondField(); refreshSetField(); };
+  refreshCondField(); refreshSetField();
+  function toggleCondValue(){
+    const isAny = document.getElementById('au_op').value==='any';
+    document.getElementById('au_condFieldWrap').style.display = isAny?'none':'block';
+    document.getElementById('au_condValueWrap').style.display = isAny?'none':'block';
+  }
+  document.getElementById('au_op').onchange = toggleCondValue;
+  toggleCondValue();
+  document.getElementById('au_action').onchange = ()=>{
+    const isTask = document.getElementById('au_action').value==='create_task';
+    document.getElementById('au_taskFields').style.display = isTask?'block':'none';
+    document.getElementById('au_setFields').style.display = isTask?'none':'block';
+  };
+  document.getElementById('au_saveBtn').onclick = async ()=>{
+    const name = document.getElementById('au_name').value.trim();
+    if(!name) return alert('Give the automation a name.');
+    const automation = {
+      id: uid(), name,
+      entity: document.getElementById('au_entity').value,
+      conditionOp: document.getElementById('au_op').value,
+      conditionField: document.getElementById('au_condField').value,
+      conditionValue: document.getElementById('au_condValue').value.trim(),
+      action: document.getElementById('au_action').value,
+      taskTitle: document.getElementById('au_taskTitle').value.trim(),
+      taskOwner: document.getElementById('au_taskOwner').value,
+      taskDueInDays: document.getElementById('au_taskDue').value,
+      setField: document.getElementById('au_setField').value,
+      setValue: document.getElementById('au_setValue').value.trim(),
+    };
+    state.automations.push(automation);
+    await saveKey(KEYS.automations, state.automations);
+    closeModal();
+    rerenderSetupView();
+  };
+}
+
+function wireSetupView(){
+  document.querySelectorAll('[data-setup-tab]').forEach(btn=>{
+    btn.onclick = ()=>{ state.setupTab = btn.dataset.setupTab; rerenderSetupView(); };
+  });
+  document.querySelectorAll('[data-role-for]').forEach(sel=>{
+    sel.onchange = async ()=>{
+      const rec = state.team.find(t=>t.id===sel.dataset.roleFor);
+      if(rec){ rec.role = sel.value; await saveKey(KEYS.team, state.team); toast(`${rec.name} is now ${rec.role}.`); }
+    };
+  });
+  const addValBtn = document.getElementById('addValidationBtn');
+  if(addValBtn) addValBtn.onclick = openValidationRuleModal;
+  document.querySelectorAll('[data-del-rule]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!confirm('Delete this validation rule?')) return;
+      state.validationRules = state.validationRules.filter(r=>r.id!==el.dataset.delRule);
+      await saveKey(KEYS.validationRules, state.validationRules);
+      rerenderSetupView();
+    };
+  });
+  const addAutoBtn = document.getElementById('addAutomationBtn');
+  if(addAutoBtn) addAutoBtn.onclick = openAutomationModal;
+  document.querySelectorAll('[data-del-automation]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!confirm('Delete this automation?')) return;
+      state.automations = state.automations.filter(a=>a.id!==el.dataset.delAutomation);
+      await saveKey(KEYS.automations, state.automations);
+      rerenderSetupView();
+    };
+  });
+  document.querySelectorAll('[data-sharing-for]').forEach(sel=>{
+    sel.onchange = async ()=>{
+      state.sharingRules[sel.dataset.sharingFor] = sel.value;
+      await saveKey(KEYS.sharingRules, state.sharingRules);
+      toast('Sharing rule updated.');
+    };
+  });
 }
 
 function esc(s){ return String(s??'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
@@ -1965,6 +2300,7 @@ function attachContentHandlers(){
     };
   });
   wireIOView();
+  wireSetupView();
 }
 
 /* ---------- Modal / forms ---------- */
@@ -2326,6 +2662,10 @@ async function saveModal(table, id){
     const dupe = state.team.find(t=>t.email===obj.email && t.id!==obj.id);
     if(dupe) return alert('That email is already in use by another team member.');
   }
+  if(table!=='team'){
+    const valErr = validateAgainstRules(table, obj);
+    if(valErr) return alert(valErr);
+  }
   if(!isEdit) state[table].push(obj);
   await saveKey(KEYS[table], state[table]);
   const wasNew = !isEdit;
@@ -2340,6 +2680,9 @@ async function saveModal(table, id){
       // Auto-create linked entity based on contact type
       await autoCreateFromContact(savedObj);
       showContactFollowup(savedObj);
+    }
+    if(table!=='team'){
+      await runAutomations(table, savedObj);
     }
   }
 }
