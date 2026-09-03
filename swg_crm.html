@@ -47,6 +47,12 @@
   .sidebar{width:200px;background:var(--parchment);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:22px 16px;flex-shrink:0;}
   .brand{font-size:19px;font-weight:600;letter-spacing:0.3px;margin-bottom:2px;}
   .brand-sub{font-size:10.5px;color:var(--ink-soft);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:28px;}
+  .brand-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;}
+  .brand-row .brand{margin-bottom:0;}
+  .setup-gear{width:27px;height:27px;border-radius:8px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);flex-shrink:0;padding:0;}
+  .setup-gear:hover{color:var(--setup-blue);border-color:var(--setup-blue);}
+  .setup-gear.active{background:var(--setup-blue);border-color:var(--setup-blue);color:#fff;}
+  .setup-gear svg{width:15px;height:15px;}
   .navlink{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:6px;color:var(--ink-soft);cursor:pointer;margin-bottom:2px;font-size:13.5px;font-weight:500;transition:background .15s,color .15s;}
   .navlink:hover{background:rgba(42,40,32,0.06);}
   .navlink.active{color:#fff;}
@@ -201,6 +207,19 @@
   .dash-tabs{display:flex;align-items:center;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
   .dash-tab{padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-family:inherit;font-size:12.5px;color:var(--ink-soft);cursor:pointer;}
   .dash-tab.active{background:var(--ink-fixed);color:#fff;border-color:var(--ink-fixed);}
+  .setup-tabs .dash-tab.active{background:var(--setup-blue);border-color:var(--setup-blue);}
+  .setup-banner{background:var(--setup-blue-soft);color:var(--setup-blue);border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .help-tip{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--border);color:var(--ink-soft);font-size:10px;font-weight:700;cursor:help;margin-left:5px;vertical-align:middle;}
+  .formula-wizard{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:8px;}
+  .formula-wizard .fw-label{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 6px;}
+  .formula-wizard .fw-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .fw-chip{padding:4px 10px;border-radius:14px;border:1px solid var(--border);background:var(--surface);font-family:inherit;font-size:11.5px;color:var(--ink);cursor:pointer;}
+  .fw-chip:hover{border-color:var(--setup-blue);color:var(--setup-blue);}
+  .fw-chip.op{font-family:'IBM Plex Mono',monospace;font-weight:600;}
+  #vr_formula{width:100%;min-height:64px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;padding:9px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink);resize:vertical;box-sizing:border-box;}
+  .fw-test-result{font-size:12px;margin-top:8px;padding:7px 10px;border-radius:7px;display:none;}
+  .fw-test-result.ok{display:block;background:var(--setup-blue-soft);color:var(--setup-blue);}
+  .fw-test-result.err{display:block;background:#FCE7E7;color:#B4232C;}
   .dash-tab-add{background:none;border-style:dashed;color:var(--amber);}
   .dash-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;}
   .donut-wrap{display:flex;align-items:center;gap:34px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-bottom:24px;flex-wrap:wrap;}
@@ -338,13 +357,26 @@
   .dpipe-step.current .dpipe-label{color:var(--ink);font-weight:600;}
 
   /* Top navbar */
-  .topnav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:var(--ink-fixed);padding:0 22px;height:44px;flex-shrink:0;}
-  .topnav-group{display:flex;align-items:center;gap:4px;}
+  .topnav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:var(--ink-fixed);padding:0 22px;height:46px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,0.08);}
+  .topnav-group{display:flex;align-items:center;gap:2px;height:100%;}
+  .topnav-group-right{justify-content:flex-end;gap:10px;}
   .topnav-center{display:flex;justify-content:center;}
-  .topnav-btn{display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:6px;font-family:'Work Sans',sans-serif;font-size:12.5px;font-weight:500;color:rgba(255,255,255,0.72);background:none;border:none;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
-  .topnav-btn:hover{background:rgba(255,255,255,0.1);color:#fff;}
-  .topnav-btn.tnav-active{background:rgba(255,255,255,0.15);color:#fff;}
-  .topnav-icon{font-size:14px;line-height:1;}
+  .topnav-btn{display:flex;align-items:center;gap:7px;padding:0 12px;height:100%;font-family:'Work Sans',sans-serif;font-size:12.5px;font-weight:500;letter-spacing:0.1px;color:rgba(255,255,255,0.66);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:background .15s,color .15s,border-color .15s;white-space:nowrap;}
+  .topnav-btn svg{width:15px;height:15px;flex-shrink:0;opacity:0.85;}
+  .topnav-btn:hover{background:rgba(255,255,255,0.06);color:#fff;}
+  .topnav-btn.tnav-active{color:#fff;border-bottom-color:var(--setup-blue);background:rgba(255,255,255,0.04);}
+  .topnav-divider{width:1px;height:22px;background:rgba(255,255,255,0.12);margin:0 6px;}
+  .topnav-qa{display:flex;align-items:center;gap:2px;}
+  .qa-btn{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;font-family:'Work Sans',sans-serif;font-size:12px;font-weight:500;color:rgba(255,255,255,0.72);background:rgba(255,255,255,0.06);border:none;cursor:pointer;white-space:nowrap;}
+  .qa-btn:hover{background:rgba(255,255,255,0.14);color:#fff;}
+  .qa-btn svg{width:13px;height:13px;flex-shrink:0;}
+  .qa-add-btn{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;border:1px dashed rgba(255,255,255,0.3);background:none;color:rgba(255,255,255,0.55);cursor:pointer;flex-shrink:0;}
+  .qa-add-btn:hover{color:#fff;border-color:rgba(255,255,255,0.6);}
+  .qa-add-btn svg{width:13px;height:13px;}
+  .qa-picker-list{display:flex;flex-direction:column;gap:2px;margin:8px 0 4px;}
+  .qa-picker-opt{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;}
+  .qa-picker-opt:hover{background:var(--cream);}
+  .qa-picker-opt input{width:auto;}
 
   /* Search screen */
   .search-bar-wrap{display:flex;gap:10px;margin-bottom:20px;}
@@ -462,8 +494,12 @@
 
 <div id="app" style="display:none;">
   <aside class="sidebar">
-    <div class="brand display">SWG</div>
-    <div class="brand-sub">CRM Ledger</div>
+    <div class="brand-row">
+      <div class="brand display">SWG</div>
+      <button type="button" id="setupGearBtn" class="setup-gear" title="Setup" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 13.5a1.7 1.7 0 0 0 .34 1.87l.06.06a2.06 2.06 0 1 1-2.92 2.92l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V20a2.06 2.06 0 1 1-4.12 0v-.09a1.7 1.7 0 0 0-1.11-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2.06 2.06 0 1 1-2.92-2.92l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H4a2.06 2.06 0 1 1 0-4.12h.09a1.7 1.7 0 0 0 1.55-1.11 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2.06 2.06 0 1 1 2.92-2.92l.06.06a1.7 1.7 0 0 0 1.87.34H10a1.7 1.7 0 0 0 1-1.55V4a2.06 2.06 0 1 1 4.12 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2.06 2.06 0 1 1 2.92 2.92l-.06.06a1.7 1.7 0 0 0-.34 1.87V10a1.7 1.7 0 0 0 1.55 1H20a2.06 2.06 0 1 1 0 4.12h-.09a1.7 1.7 0 0 0-1.55 1Z"/></svg>
+      </button>
+    </div>
     <div class="navlink" data-view="home"><span class="dot"></span>Home</div>
     <div class="navlink active" data-view="dashboard"><span class="dot"></span>Dashboard</div>
     <div class="navlink" data-view="contacts"><span class="dot"></span>Contacts</div>
@@ -477,7 +513,6 @@
     <div class="navlink" data-view="payments"><span class="dot"></span>Payments</div>
     <div class="navlink" data-view="finance"><span class="dot"></span>Finance</div>
     <div class="navlink" data-view="team"><span class="dot"></span>Team</div>
-    <div class="navlink" data-view="setup"><span class="dot"></span>Setup</div>
     <div class="sidebar-foot">
       <div class="theme-toggle" id="themeToggle">
         <button type="button" data-theme-choice="system" title="Match system">Auto</button>
@@ -500,15 +535,19 @@
   <main id="mainArea" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
     <nav class="topnav">
       <div class="topnav-group">
-        <button class="topnav-btn" id="tn-dashboard"><span class="topnav-icon">📊</span>Dashboard</button>
-        <button class="topnav-btn" id="tn-contacts"><span class="topnav-icon">👥</span>Contacts</button>
-        <button class="topnav-btn" id="tn-home"><span class="topnav-icon">🏠</span>Home</button>
-        <button class="topnav-btn" id="tn-export"><span class="topnav-icon">📤</span>Import / Export</button>
+        <button class="topnav-btn" id="tn-dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.3"/><rect x="14" y="3" width="7" height="5" rx="1.3"/><rect x="14" y="12" width="7" height="9" rx="1.3"/><rect x="3" y="16" width="7" height="5" rx="1.3"/></svg>Dashboard</button>
+        <button class="topnav-btn" id="tn-contacts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="9" r="2.4"/><path d="M15.8 14.2c2.7.4 4.7 2.7 4.7 5.4"/></svg>Contacts</button>
+        <button class="topnav-btn" id="tn-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9.5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V10"/></svg>Home</button>
+        <button class="topnav-btn" id="tn-export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 19h16"/></svg>Import / Export</button>
       </div>
       <div class="topnav-center">
-        <button class="topnav-btn" id="tn-search"><span class="topnav-icon">🔍</span>Search</button>
+        <button class="topnav-btn" id="tn-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.3-4.3"/></svg>Search</button>
       </div>
-      <div class="topnav-group"></div>
+      <div class="topnav-group topnav-group-right">
+        <div class="topnav-qa" id="topnavQa"></div>
+        <div class="topnav-divider"></div>
+        <button class="topnav-btn" id="tn-help" title="Hands-on Guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.3 9a2.7 2.7 0 1 1 3.9 2.4c-.9.5-1.2 1-1.2 2"/><circle cx="12" cy="16.6" r=".3" fill="currentColor"/></svg>Help</button>
+      </div>
     </nav>
     <div style="flex:1;overflow-y:auto;padding:28px 34px;">
       <div class="topbar">
@@ -582,13 +621,23 @@ const TSTATUS = ['Open','Done'];
 const TSTATUS_NEW = ['Open']; // no Done on creation
 const ISTATUS = ['Unpaid','Paid','Overdue'];
 const PAYEE_TYPES = [
-  {key:'team', label:'Team member'},
-  {key:'supplier', label:'Supplier'},
-  {key:'distributor', label:'Distributor'},
-  {key:'customer', label:'Customer'},
-  {key:'other', label:'Other'},
+  {key:'team', label:'Team member (monthly work)'},
+  {key:'supplier', label:'External payee — Supplier'},
+  {key:'distributor', label:'External payee — Distributor'},
+  {key:'customer', label:'External payee — Customer'},
+  {key:'other', label:'External payee — Other'},
 ];
 const PSTATUS = ['Pending','Paid'];
+const QUICK_ACTION_LIBRARY = [
+  {key:'new_contact', label:'New Contact', view:'contacts', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="9" r="2.4"/><path d="M15.8 14.2c2.7.4 4.7 2.7 4.7 5.4"/></svg>'},
+  {key:'new_lead', label:'New Lead', view:'leads', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>'},
+  {key:'new_deal', label:'New Deal', view:'deals', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h6l2-3 4 6 2-3h4"/></svg>'},
+  {key:'new_task', label:'New Task', view:'tasks', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11.5 11 13.5 15.5 9"/><rect x="3.5" y="4" width="17" height="16" rx="2.3"/></svg>'},
+  {key:'new_invoice', label:'New Invoice', view:'invoices', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M9 10h6M9 14h6M9 18h3"/></svg>'},
+  {key:'new_payment', label:'New Payment', view:'payments', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>'},
+  {key:'go_search', label:'Search', view:null, icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.3-4.3"/></svg>'},
+];
+const QUICK_ACTION_MAX = 3;
 function payeeSelectHTML(type, item){
   const selected = item ? item.payee : '';
   if(type==='team') return `<select id="f_payeeSel">${teamNames().map(n=>`<option ${selected===n?'selected':''}>${esc(n)}</option>`).join('')}</select>`;
@@ -776,6 +825,10 @@ async function loadAll(){
   state.leads = le; state.distributors = di; state.payments = pa; state.dashboards = db;
   state.validationRules = vr; state.automations = au;
   state.sharingRules = (sr && !Array.isArray(sr)) ? sr : {};
+  state.guideEntries = ge;
+  state.bigDealAlert = (bda && !Array.isArray(bda)) ? bda : {enabled:false, threshold:10000, currency:'USD'};
+  state.bigDealAlerts = bdal;
+  state.quickActionPrefs = (qap && !Array.isArray(qap)) ? qap : {};
   state.loaded = true;
 }
 
@@ -836,16 +889,17 @@ function linkItemsFor(type){
 }
 
 /* Multi-select picklist builder */
-function msHTML(id, options, selected=[]){
+function msHTML(id, options, selected=[], maxSelect=null){
   const label = selected.length ? selected.map(s=>`${s} (${CURRENCY_SYMBOLS[s]||s})`).join(', ') : 'Select…';
   return `<div class="ms-wrap" id="${id}_wrap">
     <button type="button" class="ms-trigger" id="${id}_btn">
       <span class="ms-chips" id="${id}_label">${esc(label)}</span>
       <span class="ms-arrow">▾</span>
     </button>
-    <div class="ms-dropdown" id="${id}_dd">
+    <div class="ms-dropdown" id="${id}_dd" ${maxSelect?`data-max-select="${maxSelect}"`:''}>
       ${options.map(o=>`<label class="ms-option"><input type="checkbox" value="${esc(o)}" ${selected.includes(o)?'checked':''}> ${esc(o)}${CURRENCY_SYMBOLS[o]?' ('+CURRENCY_SYMBOLS[o]+')':''}</label>`).join('')}
     </div>
+    ${maxSelect?`<div style="color:var(--ink-soft);font-size:11px;margin-top:4px;">Up to ${maxSelect} currencies.</div>`:''}
   </div>`;
 }
 function msRead(id){
@@ -856,6 +910,7 @@ function msInit(id){
   const dd = document.getElementById(`${id}_dd`);
   const lbl = document.getElementById(`${id}_label`);
   if(!btn||!dd) return;
+  const maxSelect = Number(dd.dataset.maxSelect) || null;
   btn.onclick = (e)=>{ e.preventDefault(); dd.classList.toggle('open'); };
   document.addEventListener('mousedown', function handler(e){
     const wrap = document.getElementById(`${id}_wrap`);
@@ -863,6 +918,11 @@ function msInit(id){
   });
   dd.querySelectorAll('input').forEach(cb=>{
     cb.onchange = ()=>{
+      if(maxSelect && cb.checked && msRead(id).length > maxSelect){
+        cb.checked = false;
+        toast(`You can select up to ${maxSelect} currencies.`);
+        return;
+      }
       const vals = msRead(id);
       lbl.textContent = vals.length ? vals.map(v=>`${v}${CURRENCY_SYMBOLS[v]?' ('+CURRENCY_SYMBOLS[v]+')':''}`).join(', ') : 'Select…';
     };
@@ -939,10 +999,14 @@ function updateNavVisibility(){
   if(financeLink) financeLink.classList.toggle('hidden-role', !isPrivileged());
   const teamLink = document.querySelector('.navlink[data-view="team"]');
   if(teamLink) teamLink.classList.toggle('hidden-role', !isAdmin());
-  const setupLink = document.querySelector('.navlink[data-view="setup"]');
-  if(setupLink) setupLink.classList.toggle('hidden-role', !canAccessSetup());
+  const setupGear = document.getElementById('setupGearBtn');
+  if(setupGear){
+    setupGear.style.display = canAccessSetup() ? 'flex' : 'none';
+    setupGear.classList.toggle('active', state.view==='setup');
+  }
   const leadLink = document.querySelector('.navlink[data-view="leads"]');
   if(leadLink) leadLink.classList.toggle('hidden-role', !canSeeLeads());
+  renderTopnavQuickActions();
 }
 
 function render(){
@@ -2332,6 +2396,8 @@ const SETUP_TABS = [
   {key:'validation', label:'Validation Rules'},
   {key:'automation', label:'Automation'},
   {key:'sharing', label:'Sharing Rules'},
+  {key:'guide', label:'Hands-on Guide'},
+  {key:'bigdeal', label:'Big Deal Alerts'},
 ];
 const SETUP_ENTITIES = ['contacts','leads','customers','distributors','suppliers','deals','tasks','invoices','payments'];
 const SHARING_ENTITIES = ['contacts','leads','customers','distributors','suppliers','deals','tasks'];
@@ -2340,6 +2406,7 @@ const RULE_TYPES = [
   {key:'min', label:'Minimum value'},
   {key:'max', label:'Maximum value'},
   {key:'regex', label:'Must match pattern (regex)'},
+  {key:'formula', label:'Custom formula'},
 ];
 const COND_OPS = [
   {key:'any', label:'— always run —'},
@@ -2350,8 +2417,8 @@ const COND_OPS = [
 ];
 const SHARING_MODES = [
   {key:'everyone', label:'Everyone on the team'},
-  {key:'owner', label:'Owner only'},
-  {key:'owner_and_admins', label:'Owner + Admins'},
+  {key:'owner_and_admins', label:'Just me + my manager'},
+  {key:'owner', label:'Just me'},
 ];
 
 function entityFieldsFor(entityKey){
@@ -2359,9 +2426,121 @@ function entityFieldsFor(entityKey){
   return sheet ? sheet.fields.filter(f=>f!=='id'&&f!=='createdAt') : [];
 }
 
+/* ---------- Safe formula mini-language (no eval/Function — tokenize/parse/evaluate) ---------- */
+function tokenizeFormula(src){
+  const tokens = []; let i = 0; const n = src.length;
+  while(i < n){
+    const c = src[i];
+    if(/\s/.test(c)){ i++; continue; }
+    if(c==='{'){
+      const end = src.indexOf('}', i);
+      if(end===-1) throw new Error('Missing closing } in formula.');
+      tokens.push({type:'field', value: src.slice(i+1, end).trim()});
+      i = end+1; continue;
+    }
+    if(c==='"' || c==="'"){
+      const quote = c; let j = i+1, s='';
+      while(j<n && src[j]!==quote){ s+=src[j]; j++; }
+      if(j>=n) throw new Error('Unterminated text value in formula.');
+      tokens.push({type:'string', value:s}); i = j+1; continue;
+    }
+    if(/[0-9]/.test(c) || (c==='.' && /[0-9]/.test(src[i+1]||''))){
+      let j=i, s='';
+      while(j<n && /[0-9.]/.test(src[j])){ s+=src[j]; j++; }
+      tokens.push({type:'number', value:Number(s)}); i=j; continue;
+    }
+    if(/[A-Za-z_]/.test(c)){
+      let j=i, s='';
+      while(j<n && /[A-Za-z_0-9]/.test(src[j])){ s+=src[j]; j++; }
+      const upper = s.toUpperCase();
+      if(['AND','OR','NOT','TRUE','FALSE'].includes(upper)){ tokens.push({type:'kw', value:upper}); }
+      else { throw new Error(`Unknown word "${s}" — field names must be wrapped like {${s}}.`); }
+      i=j; continue;
+    }
+    if(c==='='&&src[i+1]==='='){ tokens.push({type:'op',value:'=='}); i+=2; continue; }
+    if(c==='!'&&src[i+1]==='='){ tokens.push({type:'op',value:'!='}); i+=2; continue; }
+    if(c==='>'&&src[i+1]==='='){ tokens.push({type:'op',value:'>='}); i+=2; continue; }
+    if(c==='<'&&src[i+1]==='='){ tokens.push({type:'op',value:'<='}); i+=2; continue; }
+    if('><+-*/()'.includes(c)){ tokens.push({type:'op', value:c}); i++; continue; }
+    throw new Error(`Unexpected character "${c}" in formula.`);
+  }
+  return tokens;
+}
+function parseFormula(tokens){
+  let pos = 0;
+  const peek = ()=>tokens[pos];
+  const next = ()=>tokens[pos++];
+  const expectOp = (val)=>{ const t=next(); if(!t||t.value!==val) throw new Error(`Expected "${val}" in formula.`); return t; };
+  function parseOr(){ let l=parseAnd(); while(peek()&&peek().type==='kw'&&peek().value==='OR'){ next(); l={type:'or',left:l,right:parseAnd()}; } return l; }
+  function parseAnd(){ let l=parseNot(); while(peek()&&peek().type==='kw'&&peek().value==='AND'){ next(); l={type:'and',left:l,right:parseNot()}; } return l; }
+  function parseNot(){ if(peek()&&peek().type==='kw'&&peek().value==='NOT'){ next(); return {type:'not', expr:parseNot()}; } return parseCompare(); }
+  function parseCompare(){
+    let l = parseAdd();
+    if(peek() && peek().type==='op' && ['==','!=','>','<','>=','<='].includes(peek().value)){
+      const op = next().value; return {type:'cmp', op, left:l, right:parseAdd()};
+    }
+    return l;
+  }
+  function parseAdd(){ let l=parseMul(); while(peek()&&peek().type==='op'&&(peek().value==='+'||peek().value==='-')){ const op=next().value; l={type:'arith',op,left:l,right:parseMul()}; } return l; }
+  function parseMul(){ let l=parseUnary(); while(peek()&&peek().type==='op'&&(peek().value==='*'||peek().value==='/')){ const op=next().value; l={type:'arith',op,left:l,right:parseUnary()}; } return l; }
+  function parseUnary(){ if(peek()&&peek().type==='op'&&peek().value==='-'){ next(); return {type:'neg', expr:parseUnary()}; } return parsePrimary(); }
+  function parsePrimary(){
+    const t = peek();
+    if(!t) throw new Error('Formula ended unexpectedly.');
+    if(t.type==='number'){ next(); return {type:'lit', value:t.value}; }
+    if(t.type==='string'){ next(); return {type:'lit', value:t.value}; }
+    if(t.type==='field'){ next(); return {type:'field', name:t.value}; }
+    if(t.type==='kw' && (t.value==='TRUE'||t.value==='FALSE')){ next(); return {type:'lit', value:t.value==='TRUE'}; }
+    if(t.type==='op' && t.value==='('){ next(); const inner=parseOr(); expectOp(')'); return inner; }
+    throw new Error(`Unexpected "${t.value}" in formula.`);
+  }
+  const ast = parseOr();
+  if(pos !== tokens.length) throw new Error('Unexpected extra text at the end of the formula.');
+  return ast;
+}
+function evalFormulaAst(node, ctx){
+  switch(node.type){
+    case 'lit': return node.value;
+    case 'field': { const v = ctx[node.name]; return v===undefined ? '' : v; }
+    case 'or': return !!(evalFormulaAst(node.left,ctx) || evalFormulaAst(node.right,ctx));
+    case 'and': return !!(evalFormulaAst(node.left,ctx) && evalFormulaAst(node.right,ctx));
+    case 'not': return !evalFormulaAst(node.expr,ctx);
+    case 'neg': return -Number(evalFormulaAst(node.expr,ctx));
+    case 'arith': {
+      const l = evalFormulaAst(node.left,ctx), r = evalFormulaAst(node.right,ctx);
+      if(node.op==='+') return (typeof l==='string'||typeof r==='string') ? String(l)+String(r) : Number(l)+Number(r);
+      if(node.op==='-') return Number(l)-Number(r);
+      if(node.op==='*') return Number(l)*Number(r);
+      if(node.op==='/') return Number(l)/Number(r);
+      break;
+    }
+    case 'cmp': {
+      const l = evalFormulaAst(node.left,ctx), r = evalFormulaAst(node.right,ctx);
+      const numeric = l!=='' && r!=='' && !isNaN(Number(l)) && !isNaN(Number(r));
+      if(node.op==='==') return numeric ? Number(l)===Number(r) : String(l).toLowerCase()===String(r).toLowerCase();
+      if(node.op==='!=') return numeric ? Number(l)!==Number(r) : String(l).toLowerCase()!==String(r).toLowerCase();
+      if(node.op==='>') return Number(l) > Number(r);
+      if(node.op==='<') return Number(l) < Number(r);
+      if(node.op==='>=') return Number(l) >= Number(r);
+      if(node.op==='<=') return Number(l) <= Number(r);
+      break;
+    }
+  }
+  return false;
+}
+function runFormula(src, ctx){
+  return !!evalFormulaAst(parseFormula(tokenizeFormula(src)), ctx);
+}
+
 function validateAgainstRules(entityKey, obj){
   const rules = state.validationRules.filter(r=>r.entity===entityKey);
   for(const r of rules){
+    if(r.type==='formula'){
+      try{
+        if(!runFormula(r.value, obj)) return r.message || 'This record does not satisfy a configured formula rule.';
+      }catch(e){ return `Formula error in a validation rule: ${e.message}`; }
+      continue;
+    }
     const val = obj[r.field];
     if(r.type==='required'){
       const empty = val===undefined || val===null || val==='' || (Array.isArray(val)&&!val.length);
@@ -2410,6 +2589,7 @@ function visibleRecords(entityKey, list){
   if(personaIsAdmin()) return list;
   const mode = state.sharingRules[entityKey] || 'everyone';
   if(mode==='everyone') return list;
+  if(mode==='owner_and_admins' && roleFor(state.viewingAs)==='Manager') return list;
   return list.filter(x=>x.owner===state.viewingAs);
 }
 
@@ -2433,9 +2613,9 @@ function renderSetupValidation(){
     <table><thead><tr><th>Object</th><th>Field</th><th>Rule</th><th>Value</th><th>Message</th><th></th></tr></thead><tbody>
     ${rules.map(r=>`<tr>
       <td style="font-size:12px;">${esc(EXPORT_SHEETS.find(s=>s.key===r.entity)?.label||r.entity)}</td>
-      <td style="font-size:12px;">${esc(prettyField(r.field))}</td>
+      <td style="font-size:12px;">${r.type==='formula' ? '—' : esc(prettyField(r.field))}</td>
       <td style="font-size:12px;">${esc(RULE_TYPES.find(t=>t.key===r.type)?.label||r.type)}</td>
-      <td style="font-size:12px;" class="mono">${esc(r.value||'—')}</td>
+      <td style="font-size:12px;max-width:220px;word-break:break-word;" class="mono">${esc(r.value||'—')}</td>
       <td style="font-size:12px;color:var(--ink-soft);max-width:160px;">${esc(r.message||'—')}</td>
       <td class="row-actions"><span data-del-rule="${r.id}">delete</span></td>
     </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:20px;">No validation rules yet.</td></tr>`}
@@ -2463,7 +2643,7 @@ function renderSetupAutomation(){
 
 function renderSetupSharing(){
   return `<div class="io-card">
-    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Controls which team members can see each object's records in lists. Admins always see everything.</p>
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Controls which team members can see each object's records in lists. Only an admin or manager can change these — a regular user can't. Everyone always sees their own records; admins always see everything.</p>
     <table><thead><tr><th>Object</th><th>Visible to</th></tr></thead><tbody>
     ${SHARING_ENTITIES.map(key=>`<tr>
       <td style="font-size:13px;">${esc(EXPORT_SHEETS.find(s=>s.key===key).label)}</td>
@@ -2473,15 +2653,58 @@ function renderSetupSharing(){
   </div>`;
 }
 
+function renderSetupGuide(){
+  const entries = state.guideEntries;
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Write short how-to notes for your team — how a feature works, when to use it. They show up for everyone under the <strong>?</strong> Help button in the top bar.</p>
+    <table><thead><tr><th>Title</th><th>Note</th><th></th></tr></thead><tbody>
+    ${entries.map(g=>`<tr>
+      <td style="font-size:12px;font-weight:600;max-width:150px;">${esc(g.title)}</td>
+      <td style="font-size:12px;color:var(--ink-soft);max-width:340px;">${esc(g.body)}</td>
+      <td class="row-actions"><span data-del-guide="${g.id}">delete</span></td>
+    </tr>`).join('') || `<tr><td colspan="3" style="text-align:center;color:var(--ink-soft);padding:20px;">No guide entries yet.</td></tr>`}
+    </tbody></table>
+    <button class="btn" id="addGuideBtn" style="margin-top:14px;">+ Add guide entry</button>
+  </div>`;
+}
+
+function renderSetupBigDeal(){
+  const cfg = state.bigDealAlert;
+  const alerts = state.bigDealAlerts;
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">When a deal at or above this value is created or sits pending (not Lost), managers and admins are alerted — adjust it here, much like a sharing or validation rule.</p>
+    <div class="field"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="bda_enabled" ${cfg.enabled?'checked':''} style="width:auto;">Enable big deal alerts</label></div>
+    <div class="field"><label>Alert threshold</label><input type="number" id="bda_threshold" min="0" step="100" value="${cfg.threshold}"></div>
+    <div class="field"><label>Currency</label><select id="bda_currency">${CURRENCIES.map(c=>`<option value="${c}" ${cfg.currency===c?'selected':''}>${c} (${esc(CURRENCY_SYMBOLS[c]||'')})</option>`).join('')}</select></div>
+    <button class="btn" id="bda_saveBtn" style="margin-top:6px;">Save alert settings</button>
+  </div>
+  <div class="io-card" style="margin-top:16px;">
+    <p style="font-size:12.5px;font-weight:600;margin:0 0 10px;">Triggered alerts</p>
+    <table><thead><tr><th>Deal</th><th>Value</th><th>Owner</th><th>Stage</th><th>When</th><th></th></tr></thead><tbody>
+    ${alerts.map(a=>`<tr>
+      <td style="font-size:12px;font-weight:600;">${esc(a.title)}</td>
+      <td style="font-size:12px;">${Number(a.value||0).toLocaleString()}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(a.owner||'—')}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(a.stage||'—')}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${new Date(a.createdAt).toLocaleDateString()}</td>
+      <td class="row-actions"><span data-del-bigdeal="${a.id}">dismiss</span></td>
+    </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:20px;">No big deal alerts triggered yet.</td></tr>`}
+    </tbody></table>
+  </div>`;
+}
+
 function renderSetupTabBody(){
   if(state.setupTab==='roles') return renderSetupRoles();
   if(state.setupTab==='validation') return renderSetupValidation();
   if(state.setupTab==='automation') return renderSetupAutomation();
   if(state.setupTab==='sharing') return renderSetupSharing();
+  if(state.setupTab==='guide') return renderSetupGuide();
+  if(state.setupTab==='bigdeal') return renderSetupBigDeal();
   return '';
 }
 function renderSetup(){
-  return `<div class="dash-tabs">
+  return `<div class="setup-banner">🔧 You're in the backend — changes here affect the whole team.</div>
+  <div class="dash-tabs setup-tabs">
     ${SETUP_TABS.map(t=>`<button type="button" class="dash-tab ${state.setupTab===t.key?'active':''}" data-setup-tab="${t.key}">${t.label}</button>`).join('')}
   </div>
   <div id="setupTabBody">${renderSetupTabBody()}</div>`;
@@ -2494,35 +2717,121 @@ function rerenderSetupView(){
   wireSetupView();
 }
 
+function insertAtCursor(textareaId, text){
+  const el = document.getElementById(textareaId);
+  if(!el) return;
+  const start = el.selectionStart ?? el.value.length;
+  const end = el.selectionEnd ?? el.value.length;
+  el.value = el.value.slice(0,start) + text + el.value.slice(end);
+  el.focus();
+  el.selectionStart = el.selectionEnd = start + text.length;
+}
+
+const FORMULA_OPS = ['AND','OR','NOT','==','!=','>=','<=','>','<','+','-','(',')'];
+
 function openValidationRuleModal(){
   document.getElementById('modalBody').innerHTML = `<h2 class="display">New validation rule</h2>
     <div class="field"><label>Object</label><select id="vr_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}">${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
-    <div class="field"><label>Field</label><select id="vr_field"></select></div>
     <div class="field"><label>Rule</label><select id="vr_type">${RULE_TYPES.map(t=>`<option value="${t.key}">${t.label}</option>`).join('')}</select></div>
-    <div class="field" id="vr_valueWrap"><label>Value</label><input id="vr_value" placeholder="e.g. 0, or a regex pattern"></div>
+    <div id="vr_simpleWrap">
+      <div class="field"><label>Field</label><select id="vr_field"></select></div>
+      <div class="field" id="vr_valueWrap"><label>Value <span class="help-tip" id="vr_regexHelp" title="A regex (regular expression) is a small pattern used to check the shape of text — e.g. it can require an email to contain an @ sign, or a phone number to be all digits. If this feels technical, ask Kfir or David to help write one." style="display:none;">?</span></label>
+        <input id="vr_value" placeholder="e.g. 0, or a regex pattern">
+        <div id="vr_regexHint" style="display:none;color:var(--ink-soft);font-size:11.5px;margin-top:5px;line-height:1.5;">A regex is just a text pattern that checks the shape of a value (e.g. "must contain @", "must be all digits"). Not sure how to write one? Ask Kfir or David.</div>
+      </div>
+    </div>
+    <div id="vr_formulaWrap" style="display:none;">
+      <div class="field"><label>Formula (must evaluate to true for the record to be allowed)</label>
+        <textarea id="vr_formula" placeholder='e.g. {amount} > 0 AND {status} != "Lost"'></textarea>
+      </div>
+      <div class="formula-wizard">
+        <p class="fw-label">Insert a field</p>
+        <div class="fw-chips" id="vr_fieldChips"></div>
+        <p class="fw-label">Insert an operator</p>
+        <div class="fw-chips" id="vr_opChips">${FORMULA_OPS.map(o=>`<button type="button" class="fw-chip op" data-fw-op="${esc(o)}">${esc(o)}</button>`).join('')}</div>
+        <button type="button" class="btn secondary" id="vr_testFormula" style="margin-top:2px;">Test formula</button>
+        <div class="fw-test-result" id="vr_testResult"></div>
+      </div>
+    </div>
     <div class="field"><label>Error message (optional)</label><input id="vr_message" placeholder="Shown when the rule fails"></div>
     <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="vr_saveBtn">Add rule</button></div>`;
   document.getElementById('overlay').classList.add('show');
   document.getElementById('cancelBtn').onclick = closeModal;
   function refreshFields(){
-    document.getElementById('vr_field').innerHTML = entityFieldsFor(document.getElementById('vr_entity').value).map(f=>`<option value="${f}">${esc(prettyField(f))}</option>`).join('');
+    const fields = entityFieldsFor(document.getElementById('vr_entity').value);
+    document.getElementById('vr_field').innerHTML = fields.map(f=>`<option value="${f}">${esc(prettyField(f))}</option>`).join('');
+    document.getElementById('vr_fieldChips').innerHTML = fields.map(f=>`<button type="button" class="fw-chip" data-fw-field="${esc(f)}">${esc(prettyField(f))}</button>`).join('');
+    document.getElementById('vr_fieldChips').querySelectorAll('[data-fw-field]').forEach(btn=>{
+      btn.onclick = ()=> insertAtCursor('vr_formula', `{${btn.dataset.fwField}}`);
+    });
   }
+  document.getElementById('vr_opChips').querySelectorAll('[data-fw-op]').forEach(btn=>{
+    btn.onclick = ()=> insertAtCursor('vr_formula', ` ${btn.dataset.fwOp} `);
+  });
   document.getElementById('vr_entity').onchange = refreshFields;
   refreshFields();
-  document.getElementById('vr_type').onchange = ()=>{
-    document.getElementById('vr_valueWrap').style.display = document.getElementById('vr_type').value==='required' ? 'none' : 'block';
+  function refreshTypeUI(){
+    const type = document.getElementById('vr_type').value;
+    document.getElementById('vr_simpleWrap').style.display = type==='formula' ? 'none' : 'block';
+    document.getElementById('vr_formulaWrap').style.display = type==='formula' ? 'block' : 'none';
+    document.getElementById('vr_valueWrap').style.display = (type==='required'||type==='formula') ? 'none' : 'block';
+    document.getElementById('vr_regexHelp').style.display = type==='regex' ? 'inline-flex' : 'none';
+    document.getElementById('vr_regexHint').style.display = type==='regex' ? 'block' : 'none';
+  }
+  document.getElementById('vr_type').onchange = refreshTypeUI;
+  refreshTypeUI();
+  document.getElementById('vr_testFormula').onclick = ()=>{
+    const resultEl = document.getElementById('vr_testResult');
+    try{
+      parseFormula(tokenizeFormula(document.getElementById('vr_formula').value));
+      resultEl.className = 'fw-test-result ok';
+      resultEl.textContent = '✓ Formula syntax looks valid.';
+    }catch(e){
+      resultEl.className = 'fw-test-result err';
+      resultEl.textContent = `✗ ${e.message}`;
+    }
   };
   document.getElementById('vr_saveBtn').onclick = async ()=>{
-    const rule = {
-      id: uid(),
-      entity: document.getElementById('vr_entity').value,
-      field: document.getElementById('vr_field').value,
-      type: document.getElementById('vr_type').value,
-      value: document.getElementById('vr_value').value.trim(),
-      message: document.getElementById('vr_message').value.trim(),
-    };
+    const type = document.getElementById('vr_type').value;
+    const entity = document.getElementById('vr_entity').value;
+    const message = document.getElementById('vr_message').value.trim();
+    let rule;
+    if(type==='formula'){
+      const formula = document.getElementById('vr_formula').value.trim();
+      if(!formula){ alert('Write a formula first.'); return; }
+      try{ parseFormula(tokenizeFormula(formula)); }
+      catch(e){ alert(`This formula has a syntax problem: ${e.message}`); return; }
+      rule = { id: uid(), entity, type:'formula', value: formula, message };
+    }else{
+      rule = {
+        id: uid(),
+        entity,
+        field: document.getElementById('vr_field').value,
+        type,
+        value: document.getElementById('vr_value').value.trim(),
+        message,
+      };
+    }
     state.validationRules.push(rule);
     await saveKey(KEYS.validationRules, state.validationRules);
+    closeModal();
+    rerenderSetupView();
+  };
+}
+
+function openGuideEntryModal(){
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">New guide entry</h2>
+    <div class="field"><label>Title</label><input id="ge_title" placeholder="e.g. How to log a new deal"></div>
+    <div class="field"><label>Note</label><textarea id="ge_body" style="min-height:100px;" placeholder="Explain the feature in plain language, for anyone on the team."></textarea></div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="ge_saveBtn">Add entry</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  document.getElementById('ge_saveBtn').onclick = async ()=>{
+    const title = document.getElementById('ge_title').value.trim();
+    const body = document.getElementById('ge_body').value.trim();
+    if(!title || !body){ alert('Fill in a title and a note.'); return; }
+    state.guideEntries.push({id:uid(), title, body});
+    await saveKey(KEYS.guideEntries, state.guideEntries);
     closeModal();
     rerenderSetupView();
   };
@@ -2629,6 +2938,35 @@ function wireSetupView(){
       state.sharingRules[sel.dataset.sharingFor] = sel.value;
       await saveKey(KEYS.sharingRules, state.sharingRules);
       toast('Sharing rule updated.');
+    };
+  });
+  const addGuideBtn = document.getElementById('addGuideBtn');
+  if(addGuideBtn) addGuideBtn.onclick = openGuideEntryModal;
+  document.querySelectorAll('[data-del-guide]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!confirm('Delete this guide entry?')) return;
+      state.guideEntries = state.guideEntries.filter(g=>g.id!==el.dataset.delGuide);
+      await saveKey(KEYS.guideEntries, state.guideEntries);
+      rerenderSetupView();
+    };
+  });
+  const bdaSaveBtn = document.getElementById('bda_saveBtn');
+  if(bdaSaveBtn){
+    bdaSaveBtn.onclick = async ()=>{
+      state.bigDealAlert = {
+        enabled: document.getElementById('bda_enabled').checked,
+        threshold: Number(document.getElementById('bda_threshold').value)||0,
+        currency: document.getElementById('bda_currency').value,
+      };
+      await saveKey(KEYS.bigDealAlert, state.bigDealAlert);
+      toast('Big deal alert settings saved.');
+    };
+  }
+  document.querySelectorAll('[data-del-bigdeal]').forEach(el=>{
+    el.onclick = async ()=>{
+      state.bigDealAlerts = state.bigDealAlerts.filter(a=>a.id!==el.dataset.delBigdeal);
+      await saveKey(KEYS.bigDealAlerts, state.bigDealAlerts);
+      rerenderSetupView();
     };
   });
 }
@@ -2764,7 +3102,7 @@ function openModal(table, id){
     html = `<h2 class="display">${isEdit?'Edit':'Add'} deal</h2>
       <div class="field"><label>Title</label><input id="f_title" value="${item?esc(item.title):''}"></div>
       <div class="field"><label>Contact</label><select id="f_contact">${state.contacts.map(c=>`<option value="${c.id}" ${item&&item.contactId===c.id?'selected':''}>${esc(c.name)}</option>`).join('') || '<option value="">No contacts yet</option>'}</select></div>
-      <div class="field"><label>Currencies accepted</label>${msHTML('f_curr_deal', CURRENCIES, selCurr)}</div>
+      <div class="field"><label>Currencies accepted</label>${msHTML('f_curr_deal', CURRENCIES, selCurr, 3)}</div>
       <div class="field"><label>Value</label><input id="f_value" type="number" value="${item?item.value:''}"></div>
       <div class="field"><label>Stage</label><select id="f_stage">${stagesForModal.map(s=>`<option ${item&&item.stage===s?'selected':''}>${s}</option>`).join('')}</select></div>
       <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
@@ -2851,7 +3189,7 @@ function openModal(table, id){
       <div class="field"><label>${REL_TYPES.find(r=>r.key===relType).label}</label><select id="f_relId">${relItems.map(o=>`<option value="${o.id}" ${item&&item.relatedId===o.id?'selected':''}>${esc(o.label)}</option>`).join('') || '<option value="">None available yet</option>'}</select></div>
       <div class="field"><label>Link to order (optional)</label><select id="f_order"><option value="">— standalone —</option>${state.orders.map(o=>`<option value="${o.id}" ${item&&item.orderId===o.id?'selected':''}>${esc(orderLabel(o.id))}</option>`).join('')}</select></div>
       <div class="field"><label>Currencies accepted</label>${msHTML('f_curr_inv', CURRENCIES, selCurr)}</div>
-      <div class="field"><label>Amount</label><input id="f_amount" type="number" value="${item?item.amount:''}"></div>
+      <div class="field"><label>Amount (money)</label><input id="f_amount" type="number" value="${item?item.amount:''}"></div>
       <div class="field"><label>Status</label><select id="f_status">${ISTATUS.map(s=>`<option ${item&&item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
       <div class="field"><label>Due date</label><input id="f_dueDate" type="date" value="${item&&item.dueDate?item.dueDate:''}"></div>
       <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
@@ -2859,8 +3197,8 @@ function openModal(table, id){
     const curVal = item ? (item.currency || (item.currencies && item.currencies[0]) || 'USD') : 'USD';
     const payeeType = item ? (item.payeeType||'team') : 'team';
     html = `<h2 class="display">${isEdit?'Edit':'Add'} payment</h2>
-      <div class="field"><label>Payee type</label><select id="f_payeeType">${PAYEE_TYPES.map(p=>`<option value="${p.key}" ${payeeType===p.key?'selected':''}>${p.label}</option>`).join('')}</select></div>
-      <div class="field" id="f_payeeSelWrap"><label>Payee</label>${payeeSelectHTML(payeeType, item)}</div>
+      <div class="field"><label>Payment for</label><select id="f_payeeType">${PAYEE_TYPES.map(p=>`<option value="${p.key}" ${payeeType===p.key?'selected':''}>${p.label}</option>`).join('')}</select></div>
+      <div class="field" id="f_payeeSelWrap"><label>${payeeType==='team'?'Team member':'Payee'}</label>${payeeSelectHTML(payeeType, item)}</div>
       <div class="field"><label>Purpose</label><input id="f_purpose" value="${item?esc(item.purpose||''):''}" placeholder="e.g. October commission, oil shipment"></div>
       <div class="field"><label>Amount</label><input id="f_amount" type="number" value="${item?item.amount:''}"></div>
       <div class="field"><label>Currency</label><select id="f_currency">${CURRENCIES.map(c=>`<option value="${c}" ${curVal===c?'selected':''}>${c} (${esc(CURRENCY_SYMBOLS[c]||'')})</option>`).join('')}</select></div>
@@ -2929,7 +3267,8 @@ function openModal(table, id){
   if(table==='payments'){
     document.getElementById('f_payeeType').onchange = (e)=>{
       const wrap = document.getElementById('f_payeeSelWrap');
-      wrap.innerHTML = `<label>Payee</label>${payeeSelectHTML(e.target.value, null)}`;
+      const label = e.target.value==='team' ? 'Team member' : 'Payee';
+      wrap.innerHTML = `<label>${label}</label>${payeeSelectHTML(e.target.value, null)}`;
     };
   }
   if(['contacts','leads'].includes(table)){
@@ -2981,6 +3320,82 @@ function openModal(table, id){
   }
 }
 function closeModal(){ document.getElementById('overlay').classList.remove('show'); }
+
+function openConfirmModal({title, message, confirmLabel, cancelLabel, onConfirm}){
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">${esc(title)}</h2>
+    <p style="color:var(--ink-soft);font-size:13px;line-height:1.5;margin:0 0 4px;">${esc(message)}</p>
+    <div class="modal-actions">
+      <button class="btn secondary" id="confirmGoBack">${esc(cancelLabel||'Go back')}</button>
+      <button class="btn" id="confirmContinue">${esc(confirmLabel||'Continue')}</button>
+    </div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('confirmGoBack').onclick = closeModal;
+  document.getElementById('confirmContinue').onclick = ()=>{ closeModal(); onConfirm(); };
+}
+
+/* ---------- Hands-on Guide viewer ---------- */
+function openGuideViewerModal(){
+  const entries = state.guideEntries;
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">Hands-on Guide</h2>
+    <p style="color:var(--ink-soft);font-size:12.5px;line-height:1.5;margin:0 0 14px;">Quick notes from the team on how things work. ${canAccessSetup() ? 'Add more under Setup → Hands-on Guide.' : ''}</p>
+    <div style="display:flex;flex-direction:column;gap:10px;max-height:52vh;overflow-y:auto;">
+      ${entries.map(g=>`<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;">
+        <div style="font-weight:600;font-size:13px;margin-bottom:4px;">${esc(g.title)}</div>
+        <div style="color:var(--ink-soft);font-size:12.5px;line-height:1.5;">${esc(g.body)}</div>
+      </div>`).join('') || `<p style="color:var(--ink-soft);font-size:13px;text-align:center;padding:20px 0;">No guide entries yet — ${canAccessSetup() ? 'add the first one from Setup.' : 'check back once your admin adds some.'}</p>`}
+    </div>
+    <div class="modal-actions"><button class="btn" id="cancelBtn">Close</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+}
+
+/* ---------- Customizable quick actions ---------- */
+function renderTopnavQuickActions(){
+  const wrap = document.getElementById('topnavQa');
+  if(!wrap) return;
+  const keys = state.quickActionPrefs[state.currentUser] || [];
+  wrap.innerHTML = keys.map(k=>{
+    const qa = QUICK_ACTION_LIBRARY.find(q=>q.key===k);
+    return qa ? `<button type="button" class="qa-btn" data-qa="${qa.key}" title="${esc(qa.label)}">${qa.icon}<span>${esc(qa.label)}</span></button>` : '';
+  }).join('') + `<button type="button" class="qa-add-btn" id="qaAddBtn" title="Customize your quick actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>`;
+  wrap.querySelectorAll('[data-qa]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const qa = QUICK_ACTION_LIBRARY.find(q=>q.key===btn.dataset.qa);
+      if(!qa) return;
+      if(qa.view===null){ state.view = 'search'; render(); return; }
+      openModal(qa.view, null);
+    };
+  });
+  document.getElementById('qaAddBtn').onclick = openQuickActionsCustomizeModal;
+}
+function openQuickActionsCustomizeModal(){
+  const current = state.quickActionPrefs[state.currentUser] || [];
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">Your quick actions</h2>
+    <p style="color:var(--ink-soft);font-size:12.5px;line-height:1.5;margin:0 0 4px;">Pick up to ${QUICK_ACTION_MAX} shortcuts to keep in your top bar. Only you see this — everyone can set their own.</p>
+    <div class="qa-picker-list">
+      ${QUICK_ACTION_LIBRARY.map(qa=>`<label class="qa-picker-opt"><input type="checkbox" value="${qa.key}" ${current.includes(qa.key)?'checked':''}>${qa.icon}<span>${esc(qa.label)}</span></label>`).join('')}
+    </div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="qa_saveBtn">Save</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  const boxes = Array.from(document.querySelectorAll('.qa-picker-list input'));
+  boxes.forEach(cb=>{
+    cb.onchange = ()=>{
+      const checked = boxes.filter(b=>b.checked);
+      if(checked.length > QUICK_ACTION_MAX){
+        cb.checked = false;
+        toast(`You can pick up to ${QUICK_ACTION_MAX} quick actions.`);
+      }
+    };
+  });
+  document.getElementById('qa_saveBtn').onclick = async ()=>{
+    state.quickActionPrefs[state.currentUser] = boxes.filter(b=>b.checked).map(b=>b.value);
+    await saveKey(KEYS.quickActionPrefs, state.quickActionPrefs);
+    closeModal();
+    renderTopnavQuickActions();
+    toast('Quick actions updated.');
+  };
+}
 
 async function saveModal(table, id){
   const isEdit = !!id;
@@ -3109,6 +3524,7 @@ async function saveModal(table, id){
   if(!isEdit) state[table].push(obj);
   const wasNew = !isEdit;
   const savedObj = obj;
+  if(table==='deals') await checkBigDealAlert(savedObj);
   closeModal();
   render();
   if(wasNew) await dbInsert(table, obj); else await dbUpdate(table, obj);
@@ -3137,6 +3553,17 @@ document.getElementById('tn-home').onclick = ()=>{ state.view='home'; render(); 
 document.getElementById('tn-contacts').onclick = ()=>{ state.view='contacts'; render(); };
 document.getElementById('tn-export').onclick = ()=>{ state.view='rickroll'; render(); };
 document.getElementById('tn-search').onclick = ()=>{ state.view='search'; render(); };
+document.getElementById('tn-help').onclick = openGuideViewerModal;
+document.getElementById('setupGearBtn').onclick = ()=>{
+  if(state.view==='setup') return;
+  openConfirmModal({
+    title:'Enter Setup?',
+    message:"You're about to open the backend of the CRM — roles, validation rules, automation and sharing rules live here, and changes affect the whole team.",
+    confirmLabel:'Continue',
+    cancelLabel:'Go back',
+    onConfirm: ()=>{ state.view='setup'; render(); },
+  });
+};
 document.addEventListener('keydown', (e)=>{
   if(e.key!=='/' || !document.getElementById('app') || document.getElementById('app').style.display==='none') return;
   const tag = (document.activeElement && document.activeElement.tagName) || '';
@@ -3208,6 +3635,19 @@ async function createPaidOrderAndInvoice({relatedType, relatedId, product, qty, 
   return { order, invoice };
 }
 
+async function checkBigDealAlert(deal){
+  const cfg = state.bigDealAlert;
+  if(!cfg || !cfg.enabled || !deal || deal.stage==='Lost') return;
+  if(Number(deal.value||0) < Number(cfg.threshold||0)) return;
+  if(state.bigDealAlerts.some(a=>a.dealId===deal.id)) return;
+  const alert = { id:uid(), dealId:deal.id, title:deal.title, value:deal.value, owner:deal.owner, stage:deal.stage, createdAt:Date.now() };
+  state.bigDealAlerts.unshift(alert);
+  await saveKey(KEYS.bigDealAlerts, state.bigDealAlerts);
+  if(personaIsAdmin() || roleFor(state.viewingAs)==='Manager'){
+    toast(`🚨 Big deal alert: "${deal.title}" — ${Number(deal.value||0).toLocaleString()} ${cfg.currency}`);
+  }
+}
+
 async function setDealStage(dealId, newStage){
   const deal = state.deals.find(d=>d.id===dealId);
   if(!deal || deal.stage===newStage) return;
@@ -3227,6 +3667,7 @@ async function setDealStage(dealId, newStage){
     return;
   }
   await saveKey(KEYS.deals, state.deals);
+  await checkBigDealAlert(deal);
   render();
 }
 
