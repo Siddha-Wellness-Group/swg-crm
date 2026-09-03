@@ -6,6 +6,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
   :root{
     --cream:#F2EEE3;
@@ -197,6 +198,11 @@
   .hello{margin-bottom:22px;}
   .hello .hi{font-size:30px;font-weight:500;margin:0;}
   .hello .sub2{color:var(--ink-soft);font-size:13px;margin-top:4px;}
+  .dash-tabs{display:flex;align-items:center;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+  .dash-tab{padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-family:inherit;font-size:12.5px;color:var(--ink-soft);cursor:pointer;}
+  .dash-tab.active{background:var(--ink-fixed);color:#fff;border-color:var(--ink-fixed);}
+  .dash-tab-add{background:none;border-style:dashed;color:var(--amber);}
+  .dash-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;}
   .donut-wrap{display:flex;align-items:center;gap:34px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-bottom:24px;flex-wrap:wrap;}
   .donut{width:220px;height:220px;border-radius:50%;flex-shrink:0;position:relative;}
   .donut-hole{position:absolute;top:50%;left:50%;width:128px;height:128px;background:var(--surface);border-radius:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;}
@@ -402,6 +408,23 @@
   .io-dropzone{border:1px dashed var(--border);border-radius:8px;padding:20px;text-align:center;color:var(--ink-soft);font-size:12.5px;margin-top:12px;}
   .io-status{margin-top:12px;font-size:12.5px;color:var(--sage);min-height:1.2em;}
   .io-status.error{color:var(--rust);}
+  .export-check-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;max-height:200px;overflow-y:auto;padding-right:4px;}
+  .export-check-row{display:flex;align-items:center;gap:8px;font-size:13px;}
+  .export-check-row input{accent-color:var(--amber);width:14px;height:14px;margin:0;}
+  .export-check-actions{display:flex;gap:10px;margin-bottom:10px;}
+  .export-check-actions span{font-size:11.5px;color:var(--amber);cursor:pointer;text-decoration:underline;}
+  .io-source-tabs{display:flex;gap:6px;margin-bottom:14px;}
+  .io-source-tab{padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--cream);font-size:12px;cursor:pointer;color:var(--ink-soft);}
+  .io-source-tab.active{background:var(--ink-fixed);color:#fff;border-color:var(--ink-fixed);}
+  .io-source-pane{display:none;}
+  .io-source-pane.active{display:block;}
+  .map-table{border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:12px;background:var(--cream);}
+  .map-table-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+  .map-table-head select{padding:5px 8px;border-radius:6px;border:1px solid var(--border);font-family:inherit;font-size:12.5px;background:var(--surface);color:var(--ink);}
+  .map-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;}
+  .map-row{display:flex;align-items:center;gap:8px;}
+  .map-field-name{font-size:12px;color:var(--ink-soft);min-width:90px;flex-shrink:0;}
+  .map-row select{flex:1;padding:5px 7px;border-radius:6px;border:1px solid var(--border);font-family:inherit;font-size:12.5px;background:var(--surface);color:var(--ink);}
 
   /* Lead status badges (reuse existing 5 stages) */
   .badge.new{background:var(--amber-soft);color:var(--amber);}
@@ -441,8 +464,8 @@
   <aside class="sidebar">
     <div class="brand display">SWG</div>
     <div class="brand-sub">CRM Ledger</div>
-    <div class="navlink active" data-view="dashboard"><span class="dot"></span>Dashboard</div>
     <div class="navlink" data-view="home"><span class="dot"></span>Home</div>
+    <div class="navlink active" data-view="dashboard"><span class="dot"></span>Dashboard</div>
     <div class="navlink" data-view="contacts"><span class="dot"></span>Contacts</div>
     <div class="navlink" data-view="leads"><span class="dot"></span>Leads</div>
     <div class="navlink" data-view="customers"><span class="dot"></span>Customers</div>
@@ -454,6 +477,7 @@
     <div class="navlink" data-view="payments"><span class="dot"></span>Payments</div>
     <div class="navlink" data-view="finance"><span class="dot"></span>Finance</div>
     <div class="navlink" data-view="team"><span class="dot"></span>Team</div>
+    <div class="navlink" data-view="setup"><span class="dot"></span>Setup</div>
     <div class="sidebar-foot">
       <div class="theme-toggle" id="themeToggle">
         <button type="button" data-theme-choice="system" title="Match system">Auto</button>
@@ -657,6 +681,16 @@ function isAdmin(){ return state.currentUser === FULL_ADMIN || CO_ADMINS.include
 function canDeleteUsers(){ return state.currentUser === FULL_ADMIN; }
 function canSeeLeads(){ return !LEAD_HIDDEN_FOR.includes(state.viewingAs); }
 function teamNames(){ return state.team.map(t=>t.name); }
+const ROLE_LIST = ['Admin','Manager','Sales Rep','Marketing','Support'];
+function currentTeamRecord(){ return state.team.find(t=>t.name===state.currentUser); }
+function roleFor(name){
+  const rec = state.team.find(t=>t.name===name);
+  if(rec && rec.role) return rec.role;
+  if(name===FULL_ADMIN) return 'Admin';
+  if(CO_ADMINS.includes(name)) return 'Manager';
+  return 'Sales Rep';
+}
+function canAccessSetup(){ return isAdmin() || roleFor(state.currentUser)==='Manager'; }
 
 const DEFAULT_TEAM = [
   {name:'Ariel', email:'ariel@siddhayogaweb.com'},
@@ -665,7 +699,6 @@ const DEFAULT_TEAM = [
   {name:'Kfir', email:'kfir@siddhayogaweb.com'},
   {name:'David', email:'david@siddhayogaweb.com'},
   {name:'Nishant', email:'nishant@siddhayogaweb.com'},
-  {name:'Elianna', email:'elianna@siddhayogaweb.com'},
 ];
 const APP_PASSWORD = 'siddhayoga';
 let teamLoadPromise = null;
@@ -740,7 +773,9 @@ async function loadAll(){
   ]);
   state.contacts = c; state.deals = d; state.orders = o;
   state.customers = cu; state.suppliers = su; state.tasks = ta; state.invoices = inv;
-  state.leads = le; state.distributors = di; state.payments = pa;
+  state.leads = le; state.distributors = di; state.payments = pa; state.dashboards = db;
+  state.validationRules = vr; state.automations = au;
+  state.sharingRules = (sr && !Array.isArray(sr)) ? sr : {};
   state.loaded = true;
 }
 
@@ -904,6 +939,8 @@ function updateNavVisibility(){
   if(financeLink) financeLink.classList.toggle('hidden-role', !isPrivileged());
   const teamLink = document.querySelector('.navlink[data-view="team"]');
   if(teamLink) teamLink.classList.toggle('hidden-role', !isAdmin());
+  const setupLink = document.querySelector('.navlink[data-view="setup"]');
+  if(setupLink) setupLink.classList.toggle('hidden-role', !canAccessSetup());
   const leadLink = document.querySelector('.navlink[data-view="leads"]');
   if(leadLink) leadLink.classList.toggle('hidden-role', !canSeeLeads());
 }
@@ -913,6 +950,7 @@ function render(){
   if(state.view==='payments' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='finance' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='team' && !isAdmin()) state.view = 'dashboard';
+  if(state.view==='setup' && !canAccessSetup()) state.view = 'dashboard';
   if(state.view==='leads' && !canSeeLeads()) state.view = 'dashboard';
   updateNavVisibility();
   populateViewingAsOptions();
@@ -931,6 +969,7 @@ function render(){
     payments:['Payments','Track what SWG owes and pays out'],
     finance:['Finance','Revenue vs. payments, by source and over time'],
     team:['Team','Manage who has access to the ledger'],
+    setup:['Setup','Roles, validation rules, automation and sharing'],
     search:['Search','Find anything across all tabs'],
     rickroll:['Import / Export','Move data in and out of the ledger']};
   document.getElementById('pageTitle').innerHTML = `<span class="accent-dot"></span>${titleMap[state.view]?titleMap[state.view][0]:state.view}`;
@@ -964,6 +1003,7 @@ function render(){
   if(state.view==='payments') c.innerHTML = renderPayments();
   if(state.view==='finance') c.innerHTML = renderFinance();
   if(state.view==='team') c.innerHTML = renderTeam();
+  if(state.view==='setup') c.innerHTML = renderSetup();
   if(state.view==='search') c.innerHTML = renderSearch();
   if(state.view==='rickroll') c.innerHTML = renderImportExport();
   attachContentHandlers();
@@ -979,31 +1019,208 @@ const EXPORT_SHEETS = [
   {key:'orders', label:'Orders', fields:['id','relatedType','relatedId','contactId','product','qty','amount','currencies','status','owner','createdAt']},
   {key:'tasks', label:'Tasks', fields:['id','title','dueDate','owner','status','linkType','linkId','notes','createdAt']},
   {key:'invoices', label:'Invoices', fields:['id','relatedType','relatedId','orderId','amount','currencies','status','dueDate','notes','createdAt']},
-  {key:'payments', label:'Payments', fields:['id','payeeType','payee','purpose','amount','currencies','status','dueDate','notes','owner','createdAt']},
+  {key:'payments', label:'Payments', fields:['id','payeeType','payee','purpose','amount','currency','status','dueDate','notes','owner','createdAt']},
 ];
+
+const EXPORT_ARRAY_FIELDS = new Set(['currencies','continents','subregions']);
+const FIELD_ALIASES = {
+  name:['fullname','contactname','clientname'], email:['emailaddress','e-mail','mail'],
+  phone:['phonenumber','tel','telephone','mobile'], amount:['value','total','price','cost'],
+  company:['companyname','organization','organisation','business'], notes:['note','comments','comment','description'],
+  status:['stage'], dueDate:['due','duedate','deadline'], title:['name','subject'],
+  purpose:['reason','description'], payee:['name','recipient'], product:['item','sku'],
+};
+function normKey(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,''); }
+function prettyField(f){
+  const s = f.replace(/Id$/,' Id').replace(/([a-z0-9])([A-Z])/g,'$1 $2');
+  return s.charAt(0).toUpperCase()+s.slice(1);
+}
+function autoMatchHeader(field, headers){
+  const nf = normKey(field);
+  let m = headers.find(h=>normKey(h)===nf);
+  if(m) return m;
+  const aliases = FIELD_ALIASES[field]||[];
+  m = headers.find(h=>aliases.some(a=>normKey(h)===normKey(a)));
+  return m || '';
+}
+function guessEntityForTable(name, headers){
+  const byName = EXPORT_SHEETS.find(s=>normKey(s.label)===normKey(name) || normKey(s.key)===normKey(name));
+  if(byName) return byName.key;
+  let best=null, bestScore=0;
+  EXPORT_SHEETS.forEach(s=>{
+    const score = s.fields.filter(f=>f!=='id'&&f!=='createdAt').filter(f=>headers.some(h=>normKey(h)===normKey(f))).length;
+    if(score>bestScore){ bestScore=score; best=s.key; }
+  });
+  return bestScore>=1 ? best : '';
+}
+function buildImportTables(raw){
+  return raw.map(t=>{
+    const entityKey = guessEntityForTable(t.name, t.headers);
+    const fieldMap = {};
+    if(entityKey){
+      const sheetDef = EXPORT_SHEETS.find(s=>s.key===entityKey);
+      sheetDef.fields.filter(f=>f!=='id'&&f!=='createdAt').forEach(f=>{ fieldMap[f] = autoMatchHeader(f, t.headers); });
+    }
+    return { name:t.name, headers:t.headers, rows:t.rows, entityKey, fieldMap };
+  });
+}
+function coerceFieldValue(field, raw){
+  if(raw===undefined || raw===null || raw==='') return EXPORT_ARRAY_FIELDS.has(field) ? [] : '';
+  if(EXPORT_ARRAY_FIELDS.has(field)) return String(raw).split(',').map(s=>s.trim()).filter(Boolean);
+  if(field==='value' || field==='amount' || field==='qty') return Number(raw)||0;
+  return String(raw).trim();
+}
+function tablesFromWorkbook(wb){
+  return wb.SheetNames.map(name=>{
+    const ws = wb.Sheets[name];
+    const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+    const headers = rows.length ? Object.keys(rows[0]) : (XLSX.utils.sheet_to_json(ws, {header:1})[0]||[]);
+    return { name, headers, rows };
+  }).filter(t=>t.headers.length && t.rows.length);
+}
+async function parseExcelFile(file){
+  const data = await file.arrayBuffer();
+  const wb = XLSX.read(data, {type:'array'});
+  return tablesFromWorkbook(wb);
+}
+async function parseGoogleSheetUrl(url){
+  const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  if(!m) throw new Error("That doesn't look like a Google Sheets link.");
+  const gidMatch = url.match(/[?#&]gid=([0-9]+)/);
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${m[1]}/export?format=csv&gid=${gidMatch?gidMatch[1]:'0'}`;
+  const res = await fetch(csvUrl);
+  if(!res.ok) throw new Error('Could not fetch that sheet. Make sure sharing is set to "Anyone with the link can view".');
+  const csvText = await res.text();
+  const wb = XLSX.read(csvText, {type:'string'});
+  return tablesFromWorkbook(wb);
+}
+async function parsePdfFile(file){
+  if(typeof pdfjsLib==='undefined') throw new Error('PDF support failed to load — check your connection and try again.');
+  if(!parsePdfFile._workerSet){
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    parsePdfFile._workerSet = true;
+  }
+  const data = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data}).promise;
+  const tables = [];
+  for(let p=1; p<=pdf.numPages; p++){
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    const lines = [];
+    let curY = null, curLine = [];
+    content.items.forEach(it=>{
+      const y = Math.round(it.transform[5]);
+      if(curY===null || Math.abs(y-curY)>3){
+        if(curLine.length) lines.push(curLine);
+        curLine = [it.str]; curY = y;
+      } else {
+        curLine.push(it.str);
+      }
+    });
+    if(curLine.length) lines.push(curLine);
+    const textLines = lines.map(l=>l.join(' ').trim()).filter(Boolean);
+    if(textLines.length<2) continue;
+    const split = l => l.split(/\s{2,}|\t/).map(s=>s.trim()).filter(Boolean);
+    const headerCells = split(textLines[0]);
+    if(headerCells.length<2) continue;
+    const rows = [];
+    for(let i=1;i<textLines.length;i++){
+      const cells = split(textLines[i]);
+      if(cells.length!==headerCells.length) continue;
+      const row = {};
+      headerCells.forEach((h,idx)=>row[h]=cells[idx]);
+      rows.push(row);
+    }
+    if(rows.length) tables.push({name:`PDF page ${p}`, headers:headerCells, rows});
+  }
+  return tables;
+}
+
+let importTables = [];
+
+function renderExportChecklist(){
+  return `<div class="export-check-actions"><span data-export-all="1">Select all</span><span data-export-none="1">Select none</span></div>
+  <div class="export-check-list">
+    ${EXPORT_SHEETS.map(s=>`<label class="export-check-row"><input type="checkbox" data-export-key="${s.key}" checked> ${esc(s.label)} <span class="mono" style="color:var(--ink-soft);font-size:11px;">(${(state[s.key]||[]).length})</span></label>`).join('')}
+  </div>`;
+}
+
+function renderImportMapping(){
+  if(!importTables.length) return '';
+  return `<div class="io-card" style="margin-top:16px;">
+    <h3 class="display">Map fields</h3>
+    <p>Match each column to a CRM field, or leave one blank to skip it. IDs and creation dates are detected automatically when present.</p>
+    ${importTables.map((t,ti)=>`
+      <div class="map-table">
+        <div class="map-table-head">
+          <strong>${esc(t.name)}</strong>
+          <span style="color:var(--ink-soft);font-size:11.5px;">${t.rows.length} row${t.rows.length===1?'':'s'}</span>
+          <select data-map-entity="${ti}">
+            <option value="">— Skip this table —</option>
+            ${EXPORT_SHEETS.map(s=>`<option value="${s.key}" ${t.entityKey===s.key?'selected':''}>${esc(s.label)}</option>`).join('')}
+          </select>
+        </div>
+        ${t.entityKey ? `<div class="map-fields">
+          ${EXPORT_SHEETS.find(s=>s.key===t.entityKey).fields.filter(f=>f!=='id'&&f!=='createdAt').map(f=>`
+            <div class="map-row">
+              <span class="map-field-name">${esc(prettyField(f))}</span>
+              <select data-map-field="${ti}:${f}">
+                <option value="">— leave blank —</option>
+                ${t.headers.map(h=>`<option value="${esc(h)}" ${t.fieldMap[f]===h?'selected':''}>${esc(h)}</option>`).join('')}
+              </select>
+            </div>`).join('')}
+        </div>` : ''}
+      </div>`).join('')}
+    <div class="modal-actions" style="justify-content:flex-start;">
+      <button class="btn" id="ioRunImportBtn">Import mapped data</button>
+      <button class="btn secondary" id="ioCancelImportBtn">Cancel</button>
+    </div>
+  </div>`;
+}
 
 function renderImportExport(){
   return `<div class="io-grid">
     <div class="io-card">
       <h3 class="display">Export to Excel</h3>
-      <p>Downloads every tab in the ledger as one .xlsx workbook, one sheet per tab. Open it directly, or import it into Google Sheets via File → Import.</p>
+      <p>Choose what to include, then download one .xlsx workbook — one sheet per selection. Open it directly, or import it into Google Sheets via File → Import.</p>
+      ${renderExportChecklist()}
       <button class="btn" id="ioExportBtn">Download .xlsx</button>
       <div class="io-status" id="ioExportStatus"></div>
     </div>
     <div class="io-card">
-      <h3 class="display">Import from Excel</h3>
-      <p>Upload a workbook exported from here (or a matching .csv). Rows are matched by sheet name and merged into the ledger — existing records with the same ID are updated, new ones are added.</p>
-      <input type="file" id="ioImportFile" accept=".xlsx,.xls,.csv" style="display:none;">
-      <button class="btn secondary" id="ioImportBtn">Choose file…</button>
-      <div class="io-dropzone" id="ioFileName">No file selected</div>
+      <h3 class="display">Import data</h3>
+      <p>Bring records in from a file, a Google Sheet, or a PDF. You'll map columns to CRM fields before anything is added.</p>
+      <div class="io-source-tabs">
+        <button type="button" class="io-source-tab active" data-io-source="file">Excel / CSV</button>
+        <button type="button" class="io-source-tab" data-io-source="gsheet">Google Sheet</button>
+        <button type="button" class="io-source-tab" data-io-source="pdf">PDF</button>
+      </div>
+      <div class="io-source-pane active" id="ioPane-file">
+        <input type="file" id="ioImportFile" accept=".xlsx,.xls,.csv" style="display:none;">
+        <button class="btn secondary" id="ioImportBtn">Choose file…</button>
+        <div class="io-dropzone" id="ioFileName">No file selected</div>
+      </div>
+      <div class="io-source-pane" id="ioPane-gsheet">
+        <div class="field"><label>Google Sheet link</label><input id="ioGsheetUrl" placeholder="https://docs.google.com/spreadsheets/d/…"></div>
+        <div class="shared-note">The sheet must be shared as "Anyone with the link can view".</div>
+        <button class="btn secondary" id="ioGsheetBtn" style="margin-top:8px;">Fetch sheet</button>
+      </div>
+      <div class="io-source-pane" id="ioPane-pdf">
+        <input type="file" id="ioImportPdf" accept=".pdf" style="display:none;">
+        <button class="btn secondary" id="ioImportPdfBtn">Choose PDF…</button>
+        <div class="io-dropzone" id="ioPdfName">No file selected</div>
+        <div class="shared-note">Best-effort: works well for simple tables with clear columns, and may need manual cleanup for complex layouts.</div>
+      </div>
       <div class="io-status" id="ioImportStatus"></div>
     </div>
-  </div>`;
+  </div>
+  ${renderImportMapping()}`;
 }
 
-function exportWorkbook(){
+function exportWorkbook(selectedKeys){
+  const keys = (selectedKeys && selectedKeys.length) ? selectedKeys : EXPORT_SHEETS.map(s=>s.key);
   const wb = XLSX.utils.book_new();
-  EXPORT_SHEETS.forEach(sheet=>{
+  EXPORT_SHEETS.filter(s=>keys.includes(s.key)).forEach(sheet=>{
     const rows = (state[sheet.key]||[]).map(item=>{
       const row = {};
       sheet.fields.forEach(f=>{
@@ -1020,46 +1237,26 @@ function exportWorkbook(){
   XLSX.writeFile(wb, `swg-crm-export-${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
-async function importWorkbookFile(file){
-  const statusEl = document.getElementById('ioImportStatus');
-  if(!statusEl) return;
-  statusEl.textContent = 'Reading file…';
-  statusEl.classList.remove('error');
-  try{
-    const data = await file.arrayBuffer();
-    const wb = XLSX.read(data, {type:'array'});
-    let totalAdded = 0, totalUpdated = 0, matchedSheets = 0;
-    wb.SheetNames.forEach(sheetName=>{
-      let sheetDef = EXPORT_SHEETS.find(s=>s.label.toLowerCase()===sheetName.toLowerCase() || s.key.toLowerCase()===sheetName.toLowerCase());
-      const ws = wb.Sheets[sheetName];
-      if(!sheetDef && wb.SheetNames.length===1){
-        const headerRow = XLSX.utils.sheet_to_json(ws, {header:1})[0] || [];
-        let best=null, bestScore=0;
-        EXPORT_SHEETS.forEach(s=>{
-          const score = s.fields.filter(f=>headerRow.includes(f)).length;
-          if(score>bestScore){ bestScore=score; best=s; }
-        });
-        if(best && bestScore>=2) sheetDef = best;
-      }
-      if(!sheetDef) return;
-      matchedSheets++;
-      const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
-      const list = state[sheetDef.key];
-      rows.forEach(row=>{
-        const obj = {};
-        sheetDef.fields.forEach(f=>{
-          let v = row[f];
-          if(v===''||v==null){ v = (f==='currencies'||f==='continents'||f==='subregions') ? [] : ''; }
-          else if(f==='currencies'||f==='continents'||f==='subregions'){ v = String(v).split(',').map(s=>s.trim()).filter(Boolean); }
-          else if(f==='value'||f==='amount'||f==='qty'){ v = Number(v)||0; }
-          else if(f==='createdAt'){ const t=new Date(v).getTime(); v = isNaN(t)?Date.now():t; }
-          obj[f] = v;
-        });
-        if(!obj.id) obj.id = uid();
-        const idx = list.findIndex(x=>x.id===obj.id);
-        if(idx>=0){ list[idx] = {...list[idx], ...obj}; totalUpdated++; }
-        else { list.push(obj); totalAdded++; }
+async function runImport(){
+  let added=0, updated=0;
+  const touched = new Set();
+  importTables.forEach(t=>{
+    if(!t.entityKey) return;
+    const sheetDef = EXPORT_SHEETS.find(s=>s.key===t.entityKey);
+    const list = state[t.entityKey];
+    const idHeader = t.headers.find(h=>normKey(h)==='id');
+    const createdHeader = t.headers.find(h=>['createdat','created','date'].includes(normKey(h)));
+    t.rows.forEach(row=>{
+      const obj = {};
+      sheetDef.fields.filter(f=>f!=='id'&&f!=='createdAt').forEach(f=>{
+        const h = t.fieldMap[f];
+        obj[f] = coerceFieldValue(f, h ? row[h] : '');
       });
+      obj.id = idHeader && row[idHeader] ? String(row[idHeader]) : uid();
+      obj.createdAt = createdHeader && row[createdHeader] ? (new Date(row[createdHeader]).getTime()||Date.now()) : Date.now();
+      const idx = list.findIndex(x=>x.id===obj.id);
+      if(idx>=0){ list[idx] = {...list[idx], ...obj}; updated++; }
+      else { list.push(obj); added++; }
     });
     if(!matchedSheets){
       statusEl.textContent = 'No matching sheets found — export from this ledger first to see the expected format.';
@@ -1074,6 +1271,92 @@ async function importWorkbookFile(file){
     statusEl.textContent = 'Could not read that file. Make sure it is a .xlsx or .csv file.';
     statusEl.classList.add('error');
   }
+
+  const fileInput = document.getElementById('ioImportFile');
+  const fileBtn = document.getElementById('ioImportBtn');
+  if(fileBtn && fileInput){
+    fileBtn.onclick = ()=>fileInput.click();
+    fileInput.onchange = async ()=>{
+      const file = fileInput.files[0];
+      if(!file) return;
+      document.getElementById('ioFileName').textContent = file.name;
+      setStatus('Reading file…', false);
+      try{
+        const tables = await parseExcelFile(file);
+        if(!tables.length) throw new Error('No readable sheets found in that file.');
+        importTables = buildImportTables(tables);
+        setStatus(`Found ${tables.length} sheet${tables.length===1?'':'s'} — map the fields below.`, false);
+        rerenderIOView();
+      }catch(e){ console.error(e); setStatus('Could not read that file. Make sure it is a .xlsx or .csv file.', true); }
+    };
+  }
+
+  const gsheetBtn = document.getElementById('ioGsheetBtn');
+  if(gsheetBtn){
+    gsheetBtn.onclick = async ()=>{
+      const url = document.getElementById('ioGsheetUrl').value.trim();
+      if(!url) return setStatus('Paste a Google Sheets link first.', true);
+      setStatus('Fetching sheet…', false);
+      try{
+        const tables = await parseGoogleSheetUrl(url);
+        if(!tables.length) throw new Error('No data found in that sheet.');
+        importTables = buildImportTables(tables);
+        setStatus(`Fetched ${tables.length} sheet${tables.length===1?'':'s'} — map the fields below.`, false);
+        rerenderIOView();
+      }catch(e){ console.error(e); setStatus(e.message || 'Could not fetch that sheet.', true); }
+    };
+  }
+
+  const pdfInput = document.getElementById('ioImportPdf');
+  const pdfBtn = document.getElementById('ioImportPdfBtn');
+  if(pdfBtn && pdfInput){
+    pdfBtn.onclick = ()=>pdfInput.click();
+    pdfInput.onchange = async ()=>{
+      const file = pdfInput.files[0];
+      if(!file) return;
+      document.getElementById('ioPdfName').textContent = file.name;
+      setStatus('Extracting tables from PDF…', false);
+      try{
+        const tables = await parsePdfFile(file);
+        if(!tables.length) throw new Error('Could not find a clear table in that PDF — try exporting it as Excel or CSV instead.');
+        importTables = buildImportTables(tables);
+        setStatus(`Extracted ${tables.length} table${tables.length===1?'':'s'} — check the mapping below carefully.`, false);
+        rerenderIOView();
+      }catch(e){ console.error(e); setStatus(e.message || 'Could not read that PDF.', true); }
+    };
+  }
+
+  document.querySelectorAll('[data-map-entity]').forEach(sel=>{
+    sel.onchange = ()=>{
+      const ti = Number(sel.dataset.mapEntity);
+      const t = importTables[ti];
+      t.entityKey = sel.value;
+      if(t.entityKey){
+        const sheetDef = EXPORT_SHEETS.find(s=>s.key===t.entityKey);
+        t.fieldMap = {};
+        sheetDef.fields.filter(f=>f!=='id'&&f!=='createdAt').forEach(f=>{ t.fieldMap[f] = autoMatchHeader(f, t.headers); });
+      }
+      rerenderIOView();
+    };
+  });
+  document.querySelectorAll('[data-map-field]').forEach(sel=>{
+    sel.onchange = ()=>{
+      const [ti,f] = sel.dataset.mapField.split(':');
+      importTables[Number(ti)].fieldMap[f] = sel.value;
+    };
+  });
+
+  const runBtn = document.getElementById('ioRunImportBtn');
+  if(runBtn) runBtn.onclick = async ()=>{
+    const result = await runImport();
+    toast(`Import complete — ${result.added} added, ${result.updated} updated.`);
+    importTables = [];
+    rerenderIOView();
+    const freshStatus = document.getElementById('ioImportStatus');
+    if(freshStatus) freshStatus.textContent = `Imported: ${result.added} added, ${result.updated} updated.`;
+  };
+  const cancelBtn = document.getElementById('ioCancelImportBtn');
+  if(cancelBtn) cancelBtn.onclick = ()=>{ importTables = []; rerenderIOView(); };
 }
 
 function renderHome(){
@@ -1155,12 +1438,98 @@ function pctDelta(thisPeriod, lastPeriod){
 }
 
 function renderDashboard(){
+  const priv = isPrivileged();
+  const myDashboards = state.dashboards.filter(d=>d.owner===state.viewingAs);
+  const tabs = `<div class="dash-tabs">
+    <button type="button" class="dash-tab ${!state.activeDashboardId?'active':''}" data-dash-tab="">Overview</button>
+    ${myDashboards.map(d=>`<button type="button" class="dash-tab ${state.activeDashboardId===d.id?'active':''}" data-dash-tab="${d.id}">${esc(d.name)}</button>`).join('')}
+    <button type="button" class="dash-tab dash-tab-add" id="dashAddBtn">+ New dashboard</button>
+  </div>`;
+  const active = myDashboards.find(d=>d.id===state.activeDashboardId);
+  return tabs + (active ? renderCustomDashboard(active, priv) : renderOverviewDashboard(priv));
+}
+
+function widgetKPI(label, value, colorClass){
+  return `<div class="stat-card ${colorClass}"><div class="num mono">${value}</div><div class="lbl">${esc(label)}</div></div>`;
+}
+const WIDGET_DEFS = [
+  {key:'kpi_pipeline', label:'Pipeline value', priv:false, render:()=>{ const v=state.deals.filter(d=>d.stage!=='Won'&&d.stage!=='Lost').reduce((s,d)=>s+(Number(d.value)||0),0); return widgetKPI('Pipeline value', v.toLocaleString(), 'ochre'); }},
+  {key:'kpi_customers', label:'Customers', priv:false, render:()=>widgetKPI('Customers', state.customers.length, 'sage')},
+  {key:'kpi_leads', label:'Leads', priv:false, render:()=>canSeeLeads() ? widgetKPI('Leads', state.leads.length, 'ochre') : ''},
+  {key:'kpi_deals', label:'Open deals', priv:false, render:()=>widgetKPI('Open deals', state.deals.filter(d=>d.stage!=='Won'&&d.stage!=='Lost').length, 'ochre')},
+  {key:'kpi_tasks', label:'Open tasks', priv:false, render:()=>widgetKPI('Open tasks', state.tasks.filter(t=>t.status!=='Done').length, 'olive')},
+  {key:'kpi_suppliers', label:'Suppliers', priv:false, render:()=>widgetKPI('Suppliers', state.suppliers.length, 'clay')},
+  {key:'kpi_distributors', label:'Distributors', priv:false, render:()=>widgetKPI('Distributors', state.distributors.length, 'umber')},
+  {key:'kpi_won', label:'Won value', priv:false, render:()=>{ const v = state.deals.filter(d=>d.stage==='Won').reduce((s,d)=>s+(Number(d.value)||0),0); return widgetKPI('Won value', v.toLocaleString(), 'sage'); }},
+  {key:'kpi_invoices', label:'Unpaid invoices', priv:true, render:()=>{ const v=state.invoices.filter(i=>i.status!=='Paid').reduce((s,i)=>s+(Number(i.amount)||0),0); return widgetKPI('Unpaid invoices', v.toLocaleString(), 'rust'); }},
+  {key:'kpi_payments', label:'Pending payments', priv:true, render:()=>{ const v=state.payments.filter(p=>p.status!=='Paid').reduce((s,p)=>s+(Number(p.amount)||0),0); return widgetKPI('Pending payments', v.toLocaleString(), 'clay'); }},
+  {key:'chart_breakdown', label:'Ledger breakdown chart', priv:false, wide:true, render:(priv)=>renderChart(priv)},
+  {key:'chart_revenue', label:'Revenue trend', priv:true, wide:true, render:()=>`<div class="donut-wrap">${renderRevenueChart()}</div>`},
+  {key:'list_recent', label:'Recent activity', priv:false, wide:true, render:()=>`<div class="section-title">Recent activity</div>${renderRecent()}`},
+  {key:'list_mytasks', label:'My open tasks', priv:false, wide:true, render:()=>{
+    const mine = state.tasks.filter(t=>t.status!=='Done' && t.owner===state.viewingAs);
+    if(!mine.length) return `<div class="section-title">My open tasks</div><div class="empty"><div class="display">All clear!</div>No open tasks assigned to you.</div>`;
+    return `<div class="section-title">My open tasks</div><table><thead><tr><th>Task</th><th>Due</th><th>Status</th></tr></thead><tbody>${mine.slice(0,8).map(t=>`<tr><td>${esc(t.title)}</td><td style="font-size:12px;">${t.dueDate?new Date(t.dueDate).toLocaleDateString():'—'}</td><td><span class="badge ${t.status.toLowerCase()}">${t.status}</span></td></tr>`).join('')}</tbody></table>`;
+  }},
+];
+function renderCustomDashboard(dash, priv){
+  const widgets = dash.widgets.map(k=>WIDGET_DEFS.find(w=>w.key===k)).filter(w=>w && (!w.priv || priv));
+  const kpis = widgets.filter(w=>!w.wide);
+  const wides = widgets.filter(w=>w.wide);
+  return `
+    <div class="dash-head">
+      <p class="hi display" style="margin:0;">${esc(dash.name)}</p>
+      <div class="row-actions"><span id="dashEditBtn" data-dash-id="${dash.id}">edit widgets</span><span id="dashDeleteBtn" data-dash-id="${dash.id}">delete</span></div>
+    </div>
+    ${kpis.length ? `<div class="stat-grid" style="grid-template-columns:repeat(${Math.min(kpis.length,4)},1fr);margin-top:14px;">${kpis.map(w=>w.render(priv)).join('')}</div>` : ''}
+    ${wides.map(w=>`<div style="margin-top:18px;">${w.render(priv)}</div>`).join('')}
+    ${!widgets.length ? `<div class="empty" style="margin-top:16px;"><div class="display">No widgets yet</div>Click "edit widgets" to add some.</div>` : ''}
+  `;
+}
+function openNewDashboardModal(){
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">New dashboard</h2>
+    <div class="field"><label>Name</label><input id="f_dashName" placeholder="e.g. My Sales Snapshot"></div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="dashCreateBtn">Create</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  document.getElementById('dashCreateBtn').onclick = async ()=>{
+    const name = document.getElementById('f_dashName').value.trim();
+    if(!name) return alert('Give it a name.');
+    const dash = {id:uid(), owner:state.viewingAs, name, widgets:[], createdAt:Date.now()};
+    state.dashboards.push(dash);
+    await saveKey(KEYS.dashboards, state.dashboards);
+    state.activeDashboardId = dash.id;
+    closeModal();
+    render();
+    openDashboardWidgetPicker(dash.id);
+  };
+}
+function openDashboardWidgetPicker(dashId){
+  const dash = state.dashboards.find(d=>d.id===dashId);
+  if(!dash) return;
+  const priv = isPrivileged();
+  const avail = WIDGET_DEFS.filter(w=>!w.priv||priv);
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">Edit widgets — ${esc(dash.name)}</h2>
+    <div class="field">
+      ${avail.map(w=>`<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;"><input type="checkbox" data-widget-key="${w.key}" ${dash.widgets.includes(w.key)?'checked':''} style="accent-color:var(--amber);"> ${esc(w.label)}</label>`).join('')}
+    </div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Close</button><button class="btn" id="dashSaveWidgetsBtn">Save</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  document.getElementById('dashSaveWidgetsBtn').onclick = async ()=>{
+    dash.widgets = Array.from(document.querySelectorAll('[data-widget-key]:checked')).map(cb=>cb.dataset.widgetKey);
+    await saveKey(KEYS.dashboards, state.dashboards);
+    closeModal();
+    render();
+  };
+}
+
+function renderOverviewDashboard(priv){
   const openDeals = state.deals.filter(d=>d.stage!=='Won' && d.stage!=='Lost');
   const openValue = openDeals.reduce((s,d)=>s+(Number(d.value)||0),0);
   const openTasks = state.tasks.filter(t=>t.status!=='Done');
   const unpaidInvoices = state.invoices.filter(i=>i.status!=='Paid');
   const unpaidValue = unpaidInvoices.reduce((s,i)=>s+(Number(i.amount)||0),0);
-  const priv = isPrivileged();
 
   const now = Date.now(), week = 7*24*60*60*1000;
   const inRange = (ts,from,to) => ts>=from && ts<to;
@@ -1377,7 +1746,8 @@ function renderRecent(){
 }
 
 function renderContacts(){
-  const filtered = state.contactFilter==='all' ? state.contacts : state.contacts.filter(c=>c.type===state.contactFilter);
+  const visible = visibleRecords('contacts', state.contacts);
+  const filtered = state.contactFilter==='all' ? visible : visible.filter(c=>c.type===state.contactFilter);
   const chips = ['all',...CTYPES].map(t=>`<div class="filter-chip ${state.contactFilter===t?'active':''}" data-filter="${t}">${t==='all'?'All':t}</div>`).join('');
   let rows;
   if(!filtered.length){
@@ -1401,8 +1771,9 @@ function renderContacts(){
 }
 
 function renderDeals(){
+  const visible = visibleRecords('deals', state.deals);
   return `<div class="kanban">${STAGES.map(stage=>{
-    const items = state.deals.filter(d=>d.stage===stage);
+    const items = visible.filter(d=>d.stage===stage);
     return `<div class="kcol" data-stage-col="${stage}">
       <div class="kcol-head"><span>${stage}</span><span>${items.length}</span></div>
       ${items.map(d=>`
@@ -1444,9 +1815,10 @@ function renderOrders(){
 }
 
 function renderLeads(){
-  if(!state.leads.length) return `<div class="empty"><div class="display">No leads yet</div>Add a prospect to warm up before they become a customer.</div>`;
+  const visible = visibleRecords('leads', state.leads);
+  if(!visible.length) return `<div class="empty"><div class="display">No leads yet</div>Add a prospect to warm up before they become a customer.</div>`;
   return `<table><thead><tr><th>No.</th><th>Name</th><th>Kind</th><th>Company Name</th><th>Source</th><th>Email / Phone</th><th>Status</th><th>Owner</th><th></th></tr></thead><tbody>
-  ${state.leads.map((l,i)=>`
+  ${visible.map((l,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
       <td>${esc(l.name)}</td>
@@ -1490,9 +1862,10 @@ function renderCustomers(){
 }
 
 function renderSuppliers(){
-  if(!state.suppliers.length) return `<div class="empty"><div class="display">No suppliers yet</div>Add who you source oils and materials from.</div>`;
+  const visible = visibleRecords('suppliers', state.suppliers);
+  if(!visible.length) return `<div class="empty"><div class="display">No suppliers yet</div>Add who you source oils and materials from.</div>`;
   return `<table><thead><tr><th>No.</th><th>Name</th><th>Company Name</th><th>Email / Phone</th><th>Owner</th><th></th></tr></thead><tbody>
-  ${state.suppliers.map((s,i)=>`
+  ${visible.map((s,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
       <td>${esc(s.name)}</td>
@@ -1505,9 +1878,10 @@ function renderSuppliers(){
 }
 
 function renderDistributors(){
-  if(!state.distributors.length) return `<div class="empty"><div class="display">No distributors yet</div>Add the partners who distribute SWG products.</div>`;
+  const visible = visibleRecords('distributors', state.distributors);
+  if(!visible.length) return `<div class="empty"><div class="display">No distributors yet</div>Add the partners who distribute SWG products.</div>`;
   return `<table><thead><tr><th>No.</th><th>Name</th><th>Company Name</th><th>Continents</th><th>Sub-regions</th><th>Email / Phone</th><th>Owner</th><th></th></tr></thead><tbody>
-  ${state.distributors.map((d,i)=>`
+  ${visible.map((d,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
       <td>${esc(d.name)}</td>
@@ -1523,8 +1897,9 @@ function renderDistributors(){
 
 
 function renderTasks(){
-  if(!state.tasks.length) return `<div class="empty"><div class="display">No tasks yet</div>Add a follow-up or a general to-do.</div>`;
-  const sorted = [...state.tasks].sort((a,b)=>(a.status==='Done')-(b.status==='Done') || new Date(a.dueDate||0)-new Date(b.dueDate||0));
+  const visible = visibleRecords('tasks', state.tasks);
+  if(!visible.length) return `<div class="empty"><div class="display">No tasks yet</div>Add a follow-up or a general to-do.</div>`;
+  const sorted = [...visible].sort((a,b)=>(a.status==='Done')-(b.status==='Done') || new Date(a.dueDate||0)-new Date(b.dueDate||0));
   return `<table><thead><tr><th>No.</th><th>Task</th><th>Related to</th><th>Due</th><th>Assignee</th><th>Status</th><th></th></tr></thead><tbody>
   ${sorted.map((t,i)=>`
     <tr>
@@ -1558,19 +1933,22 @@ function renderInvoices(){
 
 function renderPayments(){
   if(!state.payments.length) return `<div class="empty"><div class="display">No payments yet</div>Log a payment to a team member, supplier or distributor.</div>`;
-  return `<table><thead><tr><th>No.</th><th>Payee</th><th>Type</th><th>Purpose</th><th>Amount</th><th>Currencies</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody>
-  ${state.payments.map((p,i)=>`
+  return `<table><thead><tr><th>No.</th><th>Payee</th><th>Type</th><th>Purpose</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody>
+  ${state.payments.map((p,i)=>{
+    const cur = p.currency || (p.currencies && p.currencies[0]) || '';
+    return `
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
       <td>${esc(p.payee)}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${esc(PAYEE_TYPES.find(t=>t.key===p.payeeType)?.label||'—')}</td>
       <td style="font-size:12px;color:var(--ink-soft);max-width:160px;">${esc(p.purpose||'—')}</td>
       <td class="mono">${Number(p.amount||0).toLocaleString()}</td>
-      <td>${(p.currencies&&p.currencies.length) ? p.currencies.map(cur=>`<span class="currency-chip">${esc(cur)} (${esc(CURRENCY_SYMBOLS[cur]||'')})</span>`).join('') : '<span style="color:var(--ink-soft);font-size:12px;">—</span>'}</td>
+      <td>${cur ? `<span class="currency-chip">${esc(cur)} (${esc(CURRENCY_SYMBOLS[cur]||'')})</span>` : '<span style="color:var(--ink-soft);font-size:12px;">—</span>'}</td>
       <td><span class="badge ${p.status.toLowerCase()}">${p.status}</span></td>
       <td style="font-size:12px;">${p.dueDate ? new Date(p.dueDate).toLocaleDateString() : '—'}</td>
       <td class="row-actions"><span data-edit="payments:${p.id}">edit</span><span data-del="payments:${p.id}">delete</span></td>
-    </tr>`).join('')}
+    </tr>`;
+  }).join('')}
   </tbody></table>`;
 }
 
@@ -1924,7 +2302,7 @@ function renderFinance(){
 function renderTeam(){
   const del = canDeleteUsers();
   return `<div class="team-grid">${state.team.map(t=>{
-    const role = t.name===FULL_ADMIN ? 'Admin' : CO_ADMINS.includes(t.name) ? 'Co-admin' : 'Member';
+    const role = roleFor(t.name);
     const canDel = del && t.name!==FULL_ADMIN;
     const myDeals = state.deals.filter(d=>d.owner===t.name);
     const openDeals = myDeals.filter(d=>d.stage!=='Won' && d.stage!=='Lost').length;
@@ -1946,6 +2324,313 @@ function renderTeam(){
       <div class="row-actions"><span data-edit="team:${t.id}">edit</span>${canDel?`<span data-del="team:${t.id}">delete</span>`:''}</div>
     </div>`;
   }).join('')}</div>`;
+}
+
+/* ---------- Setup: roles, validation rules, automation, sharing ---------- */
+const SETUP_TABS = [
+  {key:'roles', label:'Roles'},
+  {key:'validation', label:'Validation Rules'},
+  {key:'automation', label:'Automation'},
+  {key:'sharing', label:'Sharing Rules'},
+];
+const SETUP_ENTITIES = ['contacts','leads','customers','distributors','suppliers','deals','tasks','invoices','payments'];
+const SHARING_ENTITIES = ['contacts','leads','customers','distributors','suppliers','deals','tasks'];
+const RULE_TYPES = [
+  {key:'required', label:'Required (not empty)'},
+  {key:'min', label:'Minimum value'},
+  {key:'max', label:'Maximum value'},
+  {key:'regex', label:'Must match pattern (regex)'},
+];
+const COND_OPS = [
+  {key:'any', label:'— always run —'},
+  {key:'equals', label:'equals'},
+  {key:'contains', label:'contains'},
+  {key:'gt', label:'is greater than'},
+  {key:'lt', label:'is less than'},
+];
+const SHARING_MODES = [
+  {key:'everyone', label:'Everyone on the team'},
+  {key:'owner', label:'Owner only'},
+  {key:'owner_and_admins', label:'Owner + Admins'},
+];
+
+function entityFieldsFor(entityKey){
+  const sheet = EXPORT_SHEETS.find(s=>s.key===entityKey);
+  return sheet ? sheet.fields.filter(f=>f!=='id'&&f!=='createdAt') : [];
+}
+
+function validateAgainstRules(entityKey, obj){
+  const rules = state.validationRules.filter(r=>r.entity===entityKey);
+  for(const r of rules){
+    const val = obj[r.field];
+    if(r.type==='required'){
+      const empty = val===undefined || val===null || val==='' || (Array.isArray(val)&&!val.length);
+      if(empty) return r.message || `${prettyField(r.field)} is required.`;
+    } else if(r.type==='min'){
+      if(Number(val) < Number(r.value)) return r.message || `${prettyField(r.field)} must be at least ${r.value}.`;
+    } else if(r.type==='max'){
+      if(Number(val) > Number(r.value)) return r.message || `${prettyField(r.field)} must be at most ${r.value}.`;
+    } else if(r.type==='regex'){
+      try{ if(!new RegExp(r.value).test(String(val||''))) return r.message || `${prettyField(r.field)} is not valid.`; }catch(e){}
+    }
+  }
+  return null;
+}
+
+async function runAutomations(entityKey, obj){
+  const rules = state.automations.filter(a=>a.entity===entityKey);
+  for(const a of rules){
+    let match = a.conditionOp==='any' || !a.conditionField;
+    if(!match){
+      const val = obj[a.conditionField];
+      if(a.conditionOp==='equals') match = String(val||'').toLowerCase()===String(a.conditionValue||'').toLowerCase();
+      else if(a.conditionOp==='contains') match = String(val||'').toLowerCase().includes(String(a.conditionValue||'').toLowerCase());
+      else if(a.conditionOp==='gt') match = Number(val) > Number(a.conditionValue);
+      else if(a.conditionOp==='lt') match = Number(val) < Number(a.conditionValue);
+    }
+    if(!match) continue;
+    if(a.action==='create_task'){
+      const due = a.taskDueInDays ? new Date(Date.now()+Number(a.taskDueInDays)*86400000).toISOString().slice(0,10) : '';
+      const subject = obj.name || obj.title || obj.payee || '';
+      const task = { id:uid(), createdAt:Date.now(), title:(a.taskTitle||'Follow up').replace('{name}', subject),
+        dueDate:due, owner:a.taskOwner||obj.owner||state.viewingAs, status:'Open', linkType:'none', linkId:null,
+        notes:`Auto-created by automation "${a.name}".` };
+      state.tasks.push(task);
+      await saveKey(KEYS.tasks, state.tasks);
+    } else if(a.action==='set_field' && a.setField){
+      const list = state[entityKey];
+      const rec = list.find(x=>x.id===obj.id);
+      if(rec){ rec[a.setField] = a.setValue; await saveKey(KEYS[entityKey], list); }
+    }
+  }
+}
+
+function personaIsAdmin(){ return state.viewingAs===FULL_ADMIN || CO_ADMINS.includes(state.viewingAs); }
+function visibleRecords(entityKey, list){
+  if(personaIsAdmin()) return list;
+  const mode = state.sharingRules[entityKey] || 'everyone';
+  if(mode==='everyone') return list;
+  return list.filter(x=>x.owner===state.viewingAs);
+}
+
+function renderSetupRoles(){
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Assign each team member a role. Admins and Managers can open Setup; only Ariel can delete a team member.</p>
+    <table><thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody>
+    ${state.team.map(t=>`<tr>
+      <td>${esc(t.name)}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(t.email||'—')}</td>
+      <td><select data-role-for="${t.id}" ${t.name===FULL_ADMIN?'disabled':''}>${ROLE_LIST.map(r=>`<option ${roleFor(t.name)===r?'selected':''}>${r}</option>`).join('')}</select></td>
+    </tr>`).join('')}
+    </tbody></table>
+  </div>`;
+}
+
+function renderSetupValidation(){
+  const rules = state.validationRules;
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Rules run whenever a record is added in that object. Saving is blocked with the message below until the rule passes.</p>
+    <table><thead><tr><th>Object</th><th>Field</th><th>Rule</th><th>Value</th><th>Message</th><th></th></tr></thead><tbody>
+    ${rules.map(r=>`<tr>
+      <td style="font-size:12px;">${esc(EXPORT_SHEETS.find(s=>s.key===r.entity)?.label||r.entity)}</td>
+      <td style="font-size:12px;">${esc(prettyField(r.field))}</td>
+      <td style="font-size:12px;">${esc(RULE_TYPES.find(t=>t.key===r.type)?.label||r.type)}</td>
+      <td style="font-size:12px;" class="mono">${esc(r.value||'—')}</td>
+      <td style="font-size:12px;color:var(--ink-soft);max-width:160px;">${esc(r.message||'—')}</td>
+      <td class="row-actions"><span data-del-rule="${r.id}">delete</span></td>
+    </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:20px;">No validation rules yet.</td></tr>`}
+    </tbody></table>
+    <button class="btn" id="addValidationBtn" style="margin-top:14px;">+ Add validation rule</button>
+  </div>`;
+}
+
+function renderSetupAutomation(){
+  const rules = state.automations;
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Runs automatically right after a new record is created in that object.</p>
+    <table><thead><tr><th>Name</th><th>Object</th><th>When</th><th>Then</th><th></th></tr></thead><tbody>
+    ${rules.map(a=>`<tr>
+      <td style="font-size:12px;">${esc(a.name)}</td>
+      <td style="font-size:12px;">${esc(EXPORT_SHEETS.find(s=>s.key===a.entity)?.label||a.entity)} created</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${a.conditionOp==='any'?'always':`${esc(prettyField(a.conditionField))} ${esc(COND_OPS.find(o=>o.key===a.conditionOp)?.label||'')} "${esc(a.conditionValue)}"`}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${a.action==='create_task' ? 'Create a task' : `Set ${esc(prettyField(a.setField||''))} = "${esc(a.setValue||'')}"`}</td>
+      <td class="row-actions"><span data-del-automation="${a.id}">delete</span></td>
+    </tr>`).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--ink-soft);padding:20px;">No automations yet.</td></tr>`}
+    </tbody></table>
+    <button class="btn" id="addAutomationBtn" style="margin-top:14px;">+ Add automation</button>
+  </div>`;
+}
+
+function renderSetupSharing(){
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Controls which team members can see each object's records in lists. Admins always see everything.</p>
+    <table><thead><tr><th>Object</th><th>Visible to</th></tr></thead><tbody>
+    ${SHARING_ENTITIES.map(key=>`<tr>
+      <td style="font-size:13px;">${esc(EXPORT_SHEETS.find(s=>s.key===key).label)}</td>
+      <td><select data-sharing-for="${key}">${SHARING_MODES.map(m=>`<option value="${m.key}" ${(state.sharingRules[key]||'everyone')===m.key?'selected':''}>${m.label}</option>`).join('')}</select></td>
+    </tr>`).join('')}
+    </tbody></table>
+  </div>`;
+}
+
+function renderSetupTabBody(){
+  if(state.setupTab==='roles') return renderSetupRoles();
+  if(state.setupTab==='validation') return renderSetupValidation();
+  if(state.setupTab==='automation') return renderSetupAutomation();
+  if(state.setupTab==='sharing') return renderSetupSharing();
+  return '';
+}
+function renderSetup(){
+  return `<div class="dash-tabs">
+    ${SETUP_TABS.map(t=>`<button type="button" class="dash-tab ${state.setupTab===t.key?'active':''}" data-setup-tab="${t.key}">${t.label}</button>`).join('')}
+  </div>
+  <div id="setupTabBody">${renderSetupTabBody()}</div>`;
+}
+
+function rerenderSetupView(){
+  const c = document.getElementById('content');
+  if(!c) return;
+  c.innerHTML = renderSetup();
+  wireSetupView();
+}
+
+function openValidationRuleModal(){
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">New validation rule</h2>
+    <div class="field"><label>Object</label><select id="vr_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}">${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
+    <div class="field"><label>Field</label><select id="vr_field"></select></div>
+    <div class="field"><label>Rule</label><select id="vr_type">${RULE_TYPES.map(t=>`<option value="${t.key}">${t.label}</option>`).join('')}</select></div>
+    <div class="field" id="vr_valueWrap"><label>Value</label><input id="vr_value" placeholder="e.g. 0, or a regex pattern"></div>
+    <div class="field"><label>Error message (optional)</label><input id="vr_message" placeholder="Shown when the rule fails"></div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="vr_saveBtn">Add rule</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  function refreshFields(){
+    document.getElementById('vr_field').innerHTML = entityFieldsFor(document.getElementById('vr_entity').value).map(f=>`<option value="${f}">${esc(prettyField(f))}</option>`).join('');
+  }
+  document.getElementById('vr_entity').onchange = refreshFields;
+  refreshFields();
+  document.getElementById('vr_type').onchange = ()=>{
+    document.getElementById('vr_valueWrap').style.display = document.getElementById('vr_type').value==='required' ? 'none' : 'block';
+  };
+  document.getElementById('vr_saveBtn').onclick = async ()=>{
+    const rule = {
+      id: uid(),
+      entity: document.getElementById('vr_entity').value,
+      field: document.getElementById('vr_field').value,
+      type: document.getElementById('vr_type').value,
+      value: document.getElementById('vr_value').value.trim(),
+      message: document.getElementById('vr_message').value.trim(),
+    };
+    state.validationRules.push(rule);
+    await saveKey(KEYS.validationRules, state.validationRules);
+    closeModal();
+    rerenderSetupView();
+  };
+}
+
+function openAutomationModal(){
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">New automation</h2>
+    <div class="field"><label>Name</label><input id="au_name" placeholder="e.g. Welcome task for new leads"></div>
+    <div class="field"><label>When this object is created</label><select id="au_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}">${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
+    <div class="field"><label>Condition</label><select id="au_op">${COND_OPS.map(o=>`<option value="${o.key}">${o.label}</option>`).join('')}</select></div>
+    <div class="field" id="au_condFieldWrap"><label>Field</label><select id="au_condField"></select></div>
+    <div class="field" id="au_condValueWrap"><label>Value</label><input id="au_condValue"></div>
+    <div class="field"><label>Then</label><select id="au_action">
+      <option value="create_task">Create a follow-up task</option>
+      <option value="set_field">Set a field on the record</option>
+    </select></div>
+    <div id="au_taskFields">
+      <div class="field"><label>Task title</label><input id="au_taskTitle" placeholder="e.g. Welcome {name}"></div>
+      <div class="field"><label>Assign to</label><select id="au_taskOwner">${teamNames().map(n=>`<option>${esc(n)}</option>`).join('')}</select></div>
+      <div class="field"><label>Due in (days)</label><input id="au_taskDue" type="number" placeholder="e.g. 3"></div>
+    </div>
+    <div id="au_setFields" style="display:none;">
+      <div class="field"><label>Field to set</label><select id="au_setField"></select></div>
+      <div class="field"><label>New value</label><input id="au_setValue"></div>
+    </div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="au_saveBtn">Add automation</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  function refreshCondField(){
+    document.getElementById('au_condField').innerHTML = entityFieldsFor(document.getElementById('au_entity').value).map(f=>`<option value="${f}">${esc(prettyField(f))}</option>`).join('');
+  }
+  function refreshSetField(){
+    document.getElementById('au_setField').innerHTML = entityFieldsFor(document.getElementById('au_entity').value).map(f=>`<option value="${f}">${esc(prettyField(f))}</option>`).join('');
+  }
+  document.getElementById('au_entity').onchange = ()=>{ refreshCondField(); refreshSetField(); };
+  refreshCondField(); refreshSetField();
+  function toggleCondValue(){
+    const isAny = document.getElementById('au_op').value==='any';
+    document.getElementById('au_condFieldWrap').style.display = isAny?'none':'block';
+    document.getElementById('au_condValueWrap').style.display = isAny?'none':'block';
+  }
+  document.getElementById('au_op').onchange = toggleCondValue;
+  toggleCondValue();
+  document.getElementById('au_action').onchange = ()=>{
+    const isTask = document.getElementById('au_action').value==='create_task';
+    document.getElementById('au_taskFields').style.display = isTask?'block':'none';
+    document.getElementById('au_setFields').style.display = isTask?'none':'block';
+  };
+  document.getElementById('au_saveBtn').onclick = async ()=>{
+    const name = document.getElementById('au_name').value.trim();
+    if(!name) return alert('Give the automation a name.');
+    const automation = {
+      id: uid(), name,
+      entity: document.getElementById('au_entity').value,
+      conditionOp: document.getElementById('au_op').value,
+      conditionField: document.getElementById('au_condField').value,
+      conditionValue: document.getElementById('au_condValue').value.trim(),
+      action: document.getElementById('au_action').value,
+      taskTitle: document.getElementById('au_taskTitle').value.trim(),
+      taskOwner: document.getElementById('au_taskOwner').value,
+      taskDueInDays: document.getElementById('au_taskDue').value,
+      setField: document.getElementById('au_setField').value,
+      setValue: document.getElementById('au_setValue').value.trim(),
+    };
+    state.automations.push(automation);
+    await saveKey(KEYS.automations, state.automations);
+    closeModal();
+    rerenderSetupView();
+  };
+}
+
+function wireSetupView(){
+  document.querySelectorAll('[data-setup-tab]').forEach(btn=>{
+    btn.onclick = ()=>{ state.setupTab = btn.dataset.setupTab; rerenderSetupView(); };
+  });
+  document.querySelectorAll('[data-role-for]').forEach(sel=>{
+    sel.onchange = async ()=>{
+      const rec = state.team.find(t=>t.id===sel.dataset.roleFor);
+      if(rec){ rec.role = sel.value; await saveKey(KEYS.team, state.team); toast(`${rec.name} is now ${rec.role}.`); }
+    };
+  });
+  const addValBtn = document.getElementById('addValidationBtn');
+  if(addValBtn) addValBtn.onclick = openValidationRuleModal;
+  document.querySelectorAll('[data-del-rule]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!confirm('Delete this validation rule?')) return;
+      state.validationRules = state.validationRules.filter(r=>r.id!==el.dataset.delRule);
+      await saveKey(KEYS.validationRules, state.validationRules);
+      rerenderSetupView();
+    };
+  });
+  const addAutoBtn = document.getElementById('addAutomationBtn');
+  if(addAutoBtn) addAutoBtn.onclick = openAutomationModal;
+  document.querySelectorAll('[data-del-automation]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!confirm('Delete this automation?')) return;
+      state.automations = state.automations.filter(a=>a.id!==el.dataset.delAutomation);
+      await saveKey(KEYS.automations, state.automations);
+      rerenderSetupView();
+    };
+  });
+  document.querySelectorAll('[data-sharing-for]').forEach(sel=>{
+    sel.onchange = async ()=>{
+      state.sharingRules[sel.dataset.sharingFor] = sel.value;
+      await saveKey(KEYS.sharingRules, state.sharingRules);
+      toast('Sharing rule updated.');
+    };
+  });
 }
 
 function esc(s){ return String(s??'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
@@ -1971,12 +2656,28 @@ function attachContentHandlers(){
   document.querySelectorAll('[data-chart]').forEach(el=>{
     el.onclick = ()=>{ state.chartType = el.dataset.chart; saveChartPref(state.chartType); render(); };
   });
+  document.querySelectorAll('[data-dash-tab]').forEach(btn=>{
+    btn.onclick = ()=>{ state.activeDashboardId = btn.dataset.dashTab; render(); };
+  });
+  const dashAddBtn = document.getElementById('dashAddBtn');
+  if(dashAddBtn) dashAddBtn.onclick = openNewDashboardModal;
+  const dashEditBtn = document.getElementById('dashEditBtn');
+  if(dashEditBtn) dashEditBtn.onclick = ()=>openDashboardWidgetPicker(dashEditBtn.dataset.dashId);
+  const dashDeleteBtn = document.getElementById('dashDeleteBtn');
+  if(dashDeleteBtn) dashDeleteBtn.onclick = async ()=>{
+    if(!confirm('Delete this dashboard?')) return;
+    state.dashboards = state.dashboards.filter(d=>d.id!==dashDeleteBtn.dataset.dashId);
+    await saveKey(KEYS.dashboards, state.dashboards);
+    state.activeDashboardId = '';
+    render();
+  };
   document.querySelectorAll('[data-edit]').forEach(el=>{
     el.onclick = ()=>{ const [table,id] = el.dataset.edit.split(':'); openModal(table, id); };
   });
   document.querySelectorAll('[data-del]').forEach(el=>{
     el.onclick = async ()=>{
       const [table,id] = el.dataset.del.split(':');
+      if(table==='team' && !canDeleteUsers()) return alert('Only Ariel can delete team members.');
       if(!confirm('Delete this entry?')) return;
       state[table] = state[table].filter(x=>x.id!==id);
       render();
@@ -2155,14 +2856,14 @@ function openModal(table, id){
       <div class="field"><label>Due date</label><input id="f_dueDate" type="date" value="${item&&item.dueDate?item.dueDate:''}"></div>
       <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
   } else if(table==='payments'){
-    const selCurr = item && item.currencies ? item.currencies : [];
+    const curVal = item ? (item.currency || (item.currencies && item.currencies[0]) || 'USD') : 'USD';
     const payeeType = item ? (item.payeeType||'team') : 'team';
     html = `<h2 class="display">${isEdit?'Edit':'Add'} payment</h2>
       <div class="field"><label>Payee type</label><select id="f_payeeType">${PAYEE_TYPES.map(p=>`<option value="${p.key}" ${payeeType===p.key?'selected':''}>${p.label}</option>`).join('')}</select></div>
       <div class="field" id="f_payeeSelWrap"><label>Payee</label>${payeeSelectHTML(payeeType, item)}</div>
       <div class="field"><label>Purpose</label><input id="f_purpose" value="${item?esc(item.purpose||''):''}" placeholder="e.g. October commission, oil shipment"></div>
       <div class="field"><label>Amount</label><input id="f_amount" type="number" value="${item?item.amount:''}"></div>
-      <div class="field"><label>Currencies</label>${msHTML('f_curr_pay', CURRENCIES, selCurr)}</div>
+      <div class="field"><label>Currency</label><select id="f_currency">${CURRENCIES.map(c=>`<option value="${c}" ${curVal===c?'selected':''}>${c} (${esc(CURRENCY_SYMBOLS[c]||'')})</option>`).join('')}</select></div>
       <div class="field"><label>Status</label><select id="f_status">${PSTATUS.map(s=>`<option ${item&&item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
       <div class="field"><label>Date</label><input id="f_dueDate" type="date" value="${item&&item.dueDate?item.dueDate:''}"></div>
       <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
@@ -2184,7 +2885,6 @@ function openModal(table, id){
   if(table==='deals') msInit('f_curr_deal');
   if(table==='orders') msInit('f_curr_order');
   if(table==='invoices') msInit('f_curr_inv');
-  if(table==='payments') msInit('f_curr_pay');
   if(table==='distributors'){
     const prevItem = item;
     msInitSrc('f_conts');
@@ -2388,17 +3088,23 @@ async function saveModal(table, id){
     if(!obj.payee) return alert('Payee is required.');
     obj.purpose = document.getElementById('f_purpose').value.trim();
     obj.amount = Number(document.getElementById('f_amount').value)||0;
-    obj.currencies = msRead('f_curr_pay');
+    obj.currency = document.getElementById('f_currency').value;
+    delete obj.currencies;
     obj.status = document.getElementById('f_status').value;
     obj.dueDate = document.getElementById('f_dueDate').value;
     obj.notes = document.getElementById('f_notes').value.trim();
   } else if(table==='team'){
+    if(!isAdmin()) return alert('Only an admin or co-admin can manage team members.');
     obj.name = document.getElementById('f_name').value.trim();
     if(!obj.name) return alert('Name is required.');
     obj.email = document.getElementById('f_email').value.trim().toLowerCase();
     if(!obj.email) return alert('Email is required.');
     const dupe = state.team.find(t=>t.email===obj.email && t.id!==obj.id);
     if(dupe) return alert('That email is already in use by another team member.');
+  }
+  if(table!=='team'){
+    const valErr = validateAgainstRules(table, obj);
+    if(valErr) return alert(valErr);
   }
   if(!isEdit) state[table].push(obj);
   const wasNew = !isEdit;
@@ -2415,6 +3121,9 @@ async function saveModal(table, id){
       await autoCreateFromContact(savedObj);
       showContactFollowup(savedObj);
     }
+    if(table!=='team'){
+      await runAutomations(table, savedObj);
+    }
   }
 }
 
@@ -2428,6 +3137,14 @@ document.getElementById('tn-home').onclick = ()=>{ state.view='home'; render(); 
 document.getElementById('tn-contacts').onclick = ()=>{ state.view='contacts'; render(); };
 document.getElementById('tn-export').onclick = ()=>{ state.view='rickroll'; render(); };
 document.getElementById('tn-search').onclick = ()=>{ state.view='search'; render(); };
+document.addEventListener('keydown', (e)=>{
+  if(e.key!=='/' || !document.getElementById('app') || document.getElementById('app').style.display==='none') return;
+  const tag = (document.activeElement && document.activeElement.tagName) || '';
+  if(tag==='INPUT' || tag==='TEXTAREA' || tag==='SELECT') return;
+  e.preventDefault();
+  state.view = 'search';
+  render();
+});
 document.getElementById('addBtn').onclick = ()=>{
   const addable = ['contacts','leads','customers','distributors','suppliers','deals','tasks','invoices','payments','team'];
   if(addable.includes(state.view)) openModal(state.view, null);
