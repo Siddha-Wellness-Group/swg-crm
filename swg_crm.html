@@ -29,53 +29,13 @@
     --olive-soft:#E4E8D3;
     --rust:#A6472B;
     --rust-soft:#F0DBD2;
-    --ink-fixed:#23211B;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --cream:#191712;
-      --parchment:#211E17;
-      --surface:#26231C;
-      --ink:#ECE6D6;
-      --ink-soft:#A69C87;
-      --border:#3B3628;
-      --amber:#CB9A61;
-      --amber-soft:#3A2E1E;
-      --sage:#93A67F;
-      --sage-soft:#28301F;
-      --clay:#C88E76;
-      --clay-soft:#382520;
-      --ochre:#D9A84B;
-      --ochre-soft:#3A2E17;
-      --umber:#B08A63;
-      --umber-soft:#332619;
-      --olive:#A6B27E;
-      --olive-soft:#2C321F;
-      --rust:#D2795A;
-      --rust-soft:#3A2119;
-    }
-  }
-  :root[data-theme="dark"]{
-    --cream:#191712;
-    --parchment:#211E17;
-    --surface:#26231C;
-    --ink:#ECE6D6;
-    --ink-soft:#A69C87;
-    --border:#3B3628;
-    --amber:#CB9A61;
-    --amber-soft:#3A2E1E;
-    --sage:#93A67F;
-    --sage-soft:#28301F;
-    --clay:#C88E76;
-    --clay-soft:#382520;
-    --ochre:#D9A84B;
-    --ochre-soft:#3A2E17;
-    --umber:#B08A63;
-    --umber-soft:#332619;
-    --olive:#A6B27E;
-    --olive-soft:#2C321F;
-    --rust:#D2795A;
-    --rust-soft:#3A2119;
+    /* Revenue stream identity: Essential Oils reads blue, Siddha Yoga reads green,
+       so the two businesses stay distinguishable in every finance chart. */
+    --rev-oils:#31648F;
+    --rev-oils-soft:#D9E4EE;
+    --rev-yoga:#43855A;
+    --rev-yoga-soft:#DAEADF;
+    --rev-other:#8A7A5C;
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--cream);color:var(--ink);font-family:'Work Sans',sans-serif;font-size:14px;transition:background .15s,color .15s;}
@@ -103,9 +63,9 @@
   .navlink[data-view="tasks"] .dot{background:var(--olive);}
   .navlink[data-view="invoices"] .dot{background:var(--rust);}
   .navlink[data-view="payments"] .dot{background:var(--rust);}
-  .navlink[data-view="team"] .dot{background:var(--ink-fixed);}
-  .navlink[data-view="setup"] .dot{background:var(--umber);}
-  .navlink[data-view="dashboard"].active{background:var(--ink-fixed);}
+  .navlink[data-view="team"] .dot{background:var(--ink);}
+  .navlink[data-view="finance"] .dot{background:var(--sage);}
+  .navlink[data-view="dashboard"].active{background:var(--ink);}
   .navlink[data-view="home"].active{background:var(--amber);}
   .navlink[data-view="contacts"].active{background:var(--amber);}
   .navlink[data-view="leads"].active{background:var(--ochre);}
@@ -117,8 +77,8 @@
   .navlink[data-view="tasks"].active{background:var(--olive);}
   .navlink[data-view="invoices"].active{background:var(--rust);}
   .navlink[data-view="payments"].active{background:var(--rust);}
-  .navlink[data-view="team"].active{background:var(--ink-fixed);}
-  .navlink[data-view="setup"].active{background:var(--umber);}
+  .navlink[data-view="team"].active{background:var(--ink);}
+  .navlink[data-view="finance"].active{background:var(--sage);}
   .navlink.hidden-role{display:none;}
   .sidebar-foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--border);}
   .foot-label{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
@@ -264,6 +224,79 @@
   .bar-track{height:10px;background:var(--parchment);border-radius:5px;overflow:hidden;}
   .bar-fill{height:100%;border-radius:5px;transition:width .2s;}
   .bar-count{font-size:12px;color:var(--ink-soft);text-align:right;}
+
+  /* Finance */
+  .fin-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:20px;}
+  .fin-asof{font-size:11.5px;color:var(--ink-soft);}
+  .fin-export{position:relative;}
+  .fin-export-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 15px;border-radius:7px;border:1px solid var(--border);background:var(--surface);font-family:inherit;font-size:12.5px;color:var(--ink);cursor:pointer;transition:background .15s,border-color .15s;}
+  .fin-export-btn:hover{background:var(--cream);border-color:var(--ink-soft);}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px 22px;margin-bottom:18px;}
+  .panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+  .panel-title{font-size:13.5px;font-weight:600;color:var(--ink);letter-spacing:.1px;}
+  .panel-sub{font-size:11.5px;color:var(--ink-soft);margin-top:3px;}
+  .panel-meta{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-soft);white-space:nowrap;}
+  .fin-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
+  @media (max-width:900px){ .fin-cols{grid-template-columns:1fr;} }
+
+  /* KPI cards get a colored top rule so the eye groups them by meaning */
+  .kpi-card{position:relative;overflow:hidden;}
+  .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--kpi-accent,var(--border));}
+
+  /* Shared legend, Monday-style "Name: 50.0%" */
+  .fin-legend{display:flex;flex-direction:column;gap:9px;flex:1;min-width:160px;}
+  .fin-legend.row{flex-direction:row;flex-wrap:wrap;gap:8px 18px;margin-top:14px;}
+  .leg-item{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink);}
+  .leg-item .sw{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .leg-item .nm{flex:1;}
+  .leg-item .vl{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);}
+
+  .pie-row{display:flex;align-items:center;gap:28px;flex-wrap:wrap;}
+  .pie{width:168px;height:168px;border-radius:50%;flex-shrink:0;}
+
+  /* Horizontal ranked bars (revenue by brand) */
+  .hbar{display:grid;grid-template-columns:minmax(90px,auto) 1fr auto;align-items:center;gap:12px;margin-bottom:12px;}
+  .hbar:last-child{margin-bottom:0;}
+  .hbar-name{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink);}
+  .hbar-name .sw{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .hbar-track{height:14px;background:var(--parchment);border-radius:7px;overflow:hidden;}
+  .hbar-fill{height:100%;border-radius:7px;transition:width .3s ease;}
+  .hbar-val{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);text-align:right;white-space:nowrap;}
+
+  /* Single split bar for channel mix */
+  .split-bar{display:flex;height:26px;border-radius:8px;overflow:hidden;background:var(--parchment);}
+  .split-seg{transition:width .3s ease;}
+  .split-key{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:14px;}
+  .split-key-item{display:flex;align-items:baseline;gap:8px;}
+  .split-key-item .sw{width:10px;height:10px;border-radius:3px;transform:translateY(1px);}
+  .split-key-item .nm{font-size:12.5px;color:var(--ink);}
+  .split-key-item .vl{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);}
+
+  /* Vertical stacked bar chart */
+  .vbar-wrap{position:relative;padding-left:60px;}
+  .vbar-plot{position:relative;height:236px;display:flex;align-items:flex-end;gap:18px;border-bottom:1px solid var(--border);}
+  .vbar-grid{position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none;}
+  .vbar-gline{position:absolute;left:0;right:0;border-top:1px dashed var(--border);}
+  .vbar-gline.zero{border-top-style:solid;opacity:0;}
+  .vbar-ylab{position:absolute;right:calc(100% + 12px);font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-soft);transform:translateY(-50%);white-space:nowrap;}
+  .vbar-col{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative;z-index:1;min-width:0;}
+  .vbar-val{font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:500;color:var(--ink);margin-bottom:7px;white-space:nowrap;}
+  .vbar-stack{width:100%;max-width:62px;display:flex;flex-direction:column-reverse;min-height:2px;transition:height .3s ease;border-radius:6px 6px 0 0;overflow:hidden;}
+  .vbar-seg{width:100%;transition:height .3s ease;}
+  .vbar-col:hover .vbar-stack{filter:brightness(1.08);}
+  .vbar-x{display:flex;gap:18px;margin-top:10px;}
+  .vbar-xlab{flex:1;text-align:center;font-size:11px;color:var(--ink-soft);min-width:0;}
+  .fin-empty{color:var(--ink-soft);font-size:13px;padding:8px 0;}
+  .demo-banner{background:var(--ochre-soft);border:1px solid var(--ochre);border-radius:9px;padding:11px 15px;margin-bottom:18px;font-size:12.5px;line-height:1.5;color:var(--ink);}
+  .demo-banner strong{color:var(--umber);}
+  @media print{
+    .sidebar,.topnav,#addBtn,.fin-export,.toast{display:none !important;}
+    #app{display:block !important;}
+    #mainArea{overflow:visible !important;}
+    #mainArea>div{overflow:visible !important;padding:0 !important;}
+    .panel,.stat-card{break-inside:avoid;}
+    body{background:#fff;}
+  }
 
   /* Toast */
   .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--ink-fixed);color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,0.3);opacity:0;transition:opacity .25s,transform .25s;z-index:300;max-width:80vw;text-align:center;}
@@ -442,6 +475,7 @@
     <div class="navlink" data-view="tasks"><span class="dot"></span>Tasks</div>
     <div class="navlink" data-view="invoices"><span class="dot"></span>Invoices</div>
     <div class="navlink" data-view="payments"><span class="dot"></span>Payments</div>
+    <div class="navlink" data-view="finance"><span class="dot"></span>Finance</div>
     <div class="navlink" data-view="team"><span class="dot"></span>Team</div>
     <div class="navlink" data-view="setup"><span class="dot"></span>Setup</div>
     <div class="sidebar-foot">
@@ -493,9 +527,45 @@
   <div class="modal" id="modalBody"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const KEYS = { contacts:'crm_contacts', deals:'crm_deals', orders:'crm_orders', customers:'crm_customers', suppliers:'crm_suppliers', tasks:'crm_tasks', invoices:'crm_invoices', leads:'crm_leads', distributors:'crm_distributors', payments:'crm_payments', team:'crm_team', dashboards:'crm_dashboards', validationRules:'crm_validation_rules', automations:'crm_automations', sharingRules:'crm_sharing_rules' };
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut' };
+const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut' };
+
+// Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
+// completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
+// totaled across records, it's normalized to USD first via toUSD(); no processing/clearing
+// fee is netted out yet -- that's a follow-up once we have the real fee percentage.
+state.fxRates = { USD:1, ILS:3.7, EUR:0.92, THB:35, JPY:150, INR:83, AUD:1.5, HKD:7.8, CZK:23 };
+state.fxLive = false;
+state.fxAsOf = null;
+async function loadFxRates(){
+  try{
+    const cached = JSON.parse(localStorage.getItem('crm_fx_cache')||'null');
+    if(cached && Date.now()-cached.at < 12*3600*1000){
+      state.fxRates = {...state.fxRates, ...cached.rates};
+      state.fxLive = true; state.fxAsOf = cached.date || null;
+      return;
+    }
+  }catch(e){}
+  try{
+    const res = await fetch('https://api.frankfurter.dev/v1/latest?from=USD');
+    const data = await res.json();
+    if(data && data.rates){
+      state.fxRates = {...state.fxRates, USD:1, ...data.rates};
+      state.fxLive = true; state.fxAsOf = data.date || null;
+      try{ localStorage.setItem('crm_fx_cache', JSON.stringify({at:Date.now(), rates:data.rates, date:data.date})); }catch(e){}
+    }
+  }catch(e){ console.error('fx rate fetch failed, using fallback rates', e); }
+}
+function toUSD(amount, currency){
+  const n = Number(amount)||0;
+  if(!currency || currency==='USD') return n;
+  const rate = state.fxRates[currency];
+  return rate ? n/rate : n; // unknown currency: treat as already-USD rather than guess wrong
+}
 const STAGES = ['Lead','Contacted','Negotiation','Won','Lost'];
 const STAGES_NEW = ['Lead','Contacted','Negotiation','Won']; // creation only — no Lost
 const CTYPES = ['Supplier','Distributor','Customer','Marketing'];
@@ -548,8 +618,8 @@ const COUNTRIES = ['Afghanistan','Albania','Algeria','Andorra','Angola','Antigua
 const ACCENTS = {
   dashboard:'var(--ink-fixed)', home:'var(--amber)', contacts:'var(--amber)', leads:'var(--ochre)', customers:'var(--sage)',
   distributors:'var(--umber)', suppliers:'var(--clay)', deals:'var(--ochre)', orders:'var(--umber)',
-  tasks:'var(--olive)', invoices:'var(--rust)', payments:'var(--rust)', team:'var(--ink-fixed)',
-  setup:'var(--umber)', search:'var(--ink-fixed)', rickroll:'var(--ink-fixed)'
+  tasks:'var(--olive)', invoices:'var(--rust)', payments:'var(--rust)', team:'var(--ink)', finance:'var(--sage)',
+  search:'var(--ink)', rickroll:'var(--ink)'
 };
 const CONTINENTS = ['Africa','Asia','Europe','North America','South America','Oceania','Middle East'];
 const SUBREGIONS = {
@@ -633,13 +703,10 @@ const DEFAULT_TEAM = [
 const APP_PASSWORD = 'siddhayoga';
 let teamLoadPromise = null;
 async function loadTeamData(){
-  let t = await loadKey(KEYS.team);
+  let t = await loadTable('team');
   if(!t || !t.length){
     t = DEFAULT_TEAM.map(m=>({id:uid(), createdAt:Date.now(), ...m}));
-    await saveKey(KEYS.team, t);
-  } else if(t.some(m=>m.name==='Elianna')){
-    t = t.filter(m=>m.name!=='Elianna');
-    await saveKey(KEYS.team, t);
+    await dbInsertMany('team', t);
   }
   state.team = t;
 }
@@ -655,23 +722,54 @@ function teamEmailMap(){
 
 function uid(){ return 'id_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
 
-async function loadKey(key){
-  try{
-    const r = await window.storage.get(key, true);
-    return r && r.value ? JSON.parse(r.value) : [];
-  }catch(e){ return []; }
+const FIELD_MAP = {
+  contactId:'contact_id', customerId:'customer_id', orderId:'order_id', linkType:'link_type', linkId:'link_id',
+  dueDate:'due_date', createdAt:'created_at', relatedType:'related_type', relatedId:'related_id',
+  payeeType:'payee_type', _autoInvoiced:'auto_invoiced',
+  paymentStatus:'payment_status', paymentProvider:'payment_provider', paymentReference:'payment_reference',
+  shippingAddress:'shipping_address', externalOrderNumber:'external_order_number',
+};
+const FIELD_MAP_REV = Object.fromEntries(Object.entries(FIELD_MAP).map(([a,b])=>[b,a]));
+function toRow(obj){ const row={}; for(const k in obj){ row[FIELD_MAP[k]||k] = obj[k]; } return row; }
+function fromRow(row){ if(!row) return row; const obj={}; for(const k in row){ obj[FIELD_MAP_REV[k]||k] = row[k]; } return obj; }
+
+async function loadTable(table){
+  const { data, error } = await sb.from(table).select('*').order('created_at', { ascending:true });
+  if(error){ console.error('load failed', table, error); return []; }
+  return (data||[]).map(fromRow);
 }
-async function saveKey(key, arr){
-  try{ await window.storage.set(key, JSON.stringify(arr), true); }
-  catch(e){ console.error('save failed', key, e); }
+async function dbInsert(table, obj){
+  const { error } = await sb.from(table).insert(toRow(obj));
+  if(error) console.error('insert failed', table, error);
+}
+async function dbInsertMany(table, objs){
+  if(!objs.length) return;
+  const { error } = await sb.from(table).insert(objs.map(toRow));
+  if(error) console.error('bulk insert failed', table, error);
+}
+async function dbUpsertMany(table, objs){
+  if(!objs.length) return;
+  const { error } = await sb.from(table).upsert(objs.map(toRow), { onConflict:'id' });
+  if(error) console.error('bulk upsert failed', table, error);
+}
+async function dbUpdate(table, obj){
+  const { error } = await sb.from(table).update(toRow(obj)).eq('id', obj.id);
+  if(error) console.error('update failed', table, error);
+}
+async function dbDelete(table, id){
+  const { error } = await sb.from(table).delete().eq('id', id);
+  if(error) console.error('delete failed', table, error);
+}
+async function dbDeleteAll(table){
+  const { error } = await sb.from(table).delete().neq('id', '');
+  if(error) console.error('delete-all failed', table, error);
 }
 
 async function loadAll(){
-  const [c,d,o,cu,su,ta,inv,le,di,pa,db,vr,au,sr] = await Promise.all([
-    loadKey(KEYS.contacts), loadKey(KEYS.deals), loadKey(KEYS.orders),
-    loadKey(KEYS.customers), loadKey(KEYS.suppliers), loadKey(KEYS.tasks), loadKey(KEYS.invoices),
-    loadKey(KEYS.leads), loadKey(KEYS.distributors), loadKey(KEYS.payments), loadKey(KEYS.dashboards),
-    loadKey(KEYS.validationRules), loadKey(KEYS.automations), loadKey(KEYS.sharingRules)
+  const [c,d,o,cu,su,ta,inv,le,di,pa] = await Promise.all([
+    loadTable('contacts'), loadTable('deals'), loadTable('orders'),
+    loadTable('customers'), loadTable('suppliers'), loadTable('tasks'), loadTable('invoices'),
+    loadTable('leads'), loadTable('distributors'), loadTable('payments'), loadFxRates()
   ]);
   state.contacts = c; state.deals = d; state.orders = o;
   state.customers = cu; state.suppliers = su; state.tasks = ta; state.invoices = inv;
@@ -837,6 +935,8 @@ function updateNavVisibility(){
   if(invLink) invLink.classList.toggle('hidden-role', !isPrivileged());
   const payLink = document.querySelector('.navlink[data-view="payments"]');
   if(payLink) payLink.classList.toggle('hidden-role', !isPrivileged());
+  const financeLink = document.querySelector('.navlink[data-view="finance"]');
+  if(financeLink) financeLink.classList.toggle('hidden-role', !isPrivileged());
   const teamLink = document.querySelector('.navlink[data-view="team"]');
   if(teamLink) teamLink.classList.toggle('hidden-role', !isAdmin());
   const setupLink = document.querySelector('.navlink[data-view="setup"]');
@@ -848,6 +948,7 @@ function updateNavVisibility(){
 function render(){
   if(state.view==='invoices' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='payments' && !isPrivileged()) state.view = 'dashboard';
+  if(state.view==='finance' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='team' && !isAdmin()) state.view = 'dashboard';
   if(state.view==='setup' && !canAccessSetup()) state.view = 'dashboard';
   if(state.view==='leads' && !canSeeLeads()) state.view = 'dashboard';
@@ -866,6 +967,7 @@ function render(){
     tasks:['Tasks','Follow-ups and team to-dos'],
     invoices:['Invoices','Billing, linked to orders or standalone'],
     payments:['Payments','Track what SWG owes and pays out'],
+    finance:['Finance','Revenue vs. payments, by source and over time'],
     team:['Team','Manage who has access to the ledger'],
     setup:['Setup','Roles, validation rules, automation and sharing'],
     search:['Search','Find anything across all tabs'],
@@ -875,7 +977,7 @@ function render(){
   document.getElementById('mainArea').style.setProperty('--accent', ACCENTS[state.view] || 'var(--amber)');
   const addLabels = {contacts:'contact', leads:'lead', customers:'customer', distributors:'distributor', suppliers:'supplier', deals:'deal', tasks:'task', invoices:'invoice', payments:'payment', team:'team member'};
   const addBtn = document.getElementById('addBtn');
-  const noAdd = ['dashboard','home','search','rickroll','setup'];
+  const noAdd = ['dashboard','home','search','rickroll','finance'];
   addBtn.style.display = noAdd.includes(state.view) ? 'none' : 'inline-block';
   addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
 
@@ -899,6 +1001,7 @@ function render(){
   if(state.view==='tasks') c.innerHTML = renderTasks();
   if(state.view==='invoices') c.innerHTML = renderInvoices();
   if(state.view==='payments') c.innerHTML = renderPayments();
+  if(state.view==='finance') c.innerHTML = renderFinance();
   if(state.view==='team') c.innerHTML = renderTeam();
   if(state.view==='setup') c.innerHTML = renderSetup();
   if(state.view==='search') c.innerHTML = renderSearch();
@@ -1155,49 +1258,18 @@ async function runImport(){
       if(idx>=0){ list[idx] = {...list[idx], ...obj}; updated++; }
       else { list.push(obj); added++; }
     });
-    touched.add(t.entityKey);
-  });
-  await Promise.all(Array.from(touched).map(k=>saveKey(KEYS[k], state[k])));
-  return {added, updated};
-}
-
-function rerenderIOView(){
-  const c = document.getElementById('content');
-  if(!c) return;
-  c.innerHTML = renderImportExport();
-  wireIOView();
-}
-
-function wireIOView(){
-  const exportBtn = document.getElementById('ioExportBtn');
-  if(!exportBtn) return;
-  const allBtn = document.querySelector('[data-export-all]');
-  if(allBtn) allBtn.onclick = ()=> document.querySelectorAll('[data-export-key]').forEach(cb=>cb.checked=true);
-  const noneBtn = document.querySelector('[data-export-none]');
-  if(noneBtn) noneBtn.onclick = ()=> document.querySelectorAll('[data-export-key]').forEach(cb=>cb.checked=false);
-  exportBtn.onclick = ()=>{
-    const keys = Array.from(document.querySelectorAll('[data-export-key]:checked')).map(cb=>cb.dataset.exportKey);
-    const statusEl = document.getElementById('ioExportStatus');
-    if(!keys.length){ if(statusEl){ statusEl.textContent='Pick at least one to export.'; statusEl.classList.add('error'); } return; }
-    exportWorkbook(keys);
-    if(statusEl){ statusEl.textContent='Downloaded.'; statusEl.classList.remove('error'); }
-  };
-
-  document.querySelectorAll('.io-source-tab').forEach(tab=>{
-    tab.onclick = ()=>{
-      document.querySelectorAll('.io-source-tab').forEach(b=>b.classList.remove('active'));
-      tab.classList.add('active');
-      document.querySelectorAll('.io-source-pane').forEach(p=>p.classList.remove('active'));
-      const pane = document.getElementById('ioPane-'+tab.dataset.ioSource);
-      if(pane) pane.classList.add('active');
-    };
-  });
-
-  const statusEl2 = document.getElementById('ioImportStatus');
-  function setStatus(msg, isError){
-    if(!statusEl2) return;
-    statusEl2.textContent = msg;
-    statusEl2.classList.toggle('error', !!isError);
+    if(!matchedSheets){
+      statusEl.textContent = 'No matching sheets found — export from this ledger first to see the expected format.';
+      statusEl.classList.add('error');
+      return;
+    }
+    await Promise.all(EXPORT_SHEETS.map(s=>dbUpsertMany(s.key, state[s.key])));
+    statusEl.textContent = `Imported: ${totalAdded} added, ${totalUpdated} updated.`;
+    toast(`Import complete — ${totalAdded} added, ${totalUpdated} updated.`);
+  }catch(e){
+    console.error(e);
+    statusEl.textContent = 'Could not read that file. Make sure it is a .xlsx or .csv file.';
+    statusEl.classList.add('error');
   }
 
   const fileInput = document.getElementById('ioImportFile');
@@ -1761,17 +1833,27 @@ function renderLeads(){
   </tbody></table>`;
 }
 
+function orderCurrency(o){ return o.currency || (o.currencies && o.currencies[0]) || 'USD'; }
+function customerTotalSpent(customer){
+  const email = (customer.email||'').trim().toLowerCase();
+  if(!email) return 0;
+  const contactIds = new Set(state.contacts.filter(ct=>(ct.email||'').trim().toLowerCase()===email).map(ct=>ct.id));
+  if(!contactIds.size) return 0;
+  return state.orders
+    .filter(o=>contactIds.has(o.contactId) && o.status!=='Cancelled')
+    .reduce((sum,o)=>sum + toUSD(o.amount, orderCurrency(o)), 0);
+}
 function renderCustomers(){
-  const visible = visibleRecords('customers', state.customers);
-  if(!visible.length) return `<div class="empty"><div class="display">No customers yet</div>Add the people and businesses who buy from you.</div>`;
-  return `<table><thead><tr><th>No.</th><th>Name</th><th>Kind</th><th>Company Name</th><th>Email / Phone</th><th>Owner</th><th>Notes</th><th></th></tr></thead><tbody>
-  ${visible.map((c,i)=>`
+  if(!state.customers.length) return `<div class="empty"><div class="display">No customers yet</div>Add the people and businesses who buy from you.</div>`;
+  return `<table><thead><tr><th>No.</th><th>Name</th><th>Kind</th><th>Company Name</th><th>Email / Phone</th><th>Total Spent (USD)</th><th>Owner</th><th>Notes</th><th></th></tr></thead><tbody>
+  ${state.customers.map((c,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
       <td>${esc(c.name)}</td>
       <td><span class="badge ${(c.kind||'Individual').toLowerCase()}">${c.kind||'Individual'}</span></td>
       <td>${esc(c.company||'—')}</td>
       <td style="font-size:12px;">${esc(c.email||'')}${c.email&&c.phone?' · ':''}${esc(c.phone||'')}</td>
+      <td class="mono" style="font-size:12px;">$${customerTotalSpent(c).toLocaleString(undefined,{maximumFractionDigits:0})}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${esc(c.owner||'—')}</td>
       <td style="font-size:12px;color:var(--ink-soft);max-width:180px;">${esc(c.notes||'')}</td>
       <td class="row-actions"><span data-order="customers:${c.id}">order</span><span data-edit="customers:${c.id}">edit</span><span data-del="customers:${c.id}">delete</span></td>
@@ -1870,19 +1952,351 @@ function renderPayments(){
   </tbody></table>`;
 }
 
-const AVATAR_COLORS = ['var(--amber)','var(--sage)','var(--clay)','var(--ochre)','var(--umber)','var(--olive)','var(--rust)'];
-function avatarColor(name){
-  let hash = 0;
-  for(let i=0;i<(name||'').length;i++) hash = (hash*31 + name.charCodeAt(i)) >>> 0;
-  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+const STAGE_COLORS = { Lead:'var(--umber)', Contacted:'var(--amber)', Negotiation:'var(--ochre)', Won:'var(--sage)', Lost:'var(--clay)' };
+// The two businesses are colour-coded everywhere money is shown: oils blue, yoga green.
+const BRAND_COLORS = { 'Essential Oils':'var(--rev-oils)', 'Siddha Yoga':'var(--rev-yoga)' };
+function brandColor(name){ return BRAND_COLORS[name] || 'var(--rev-other)'; }
+// Channel answers "how did the money reach us", independent of which business it was for.
+const CHANNEL_COLORS = { Online:'var(--ochre)', Direct:'var(--umber)' };
+const usd = n => '$' + Math.round(n).toLocaleString();
+function invoiceCurrency(i){ return (i.currencies && i.currencies[0]) || 'USD'; }
+
+// Rounds an axis maximum up to a readable tick value (1/2/2.5/5 x power of ten),
+// so the y-axis reads $60,000 rather than $57,431.
+function niceMax(v){
+  if(!(v>0)) return 1;
+  const mag = Math.pow(10, Math.floor(Math.log10(v)));
+  const norm = v/mag;
+  const step = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].find(s=>norm<=s);
+  return step*mag;
 }
-function initials(name){
-  const parts = (name||'').trim().split(/\s+/).filter(Boolean);
-  return (parts.map(w=>w[0]).slice(0,2).join('') || '?').toUpperCase();
+
+// --- Demo mode -------------------------------------------------------------
+// Builds a plausible three-month trading history so the Finance dashboard can be
+// shown before real volume exists. It is generated on the fly and passed straight
+// into financeSummary -- it never touches state.contacts / customers / orders /
+// invoices, and never reaches Supabase. Seeded so the figures stay put between
+// renders instead of reshuffling on every click.
+function seededRandom(seed){
+  return function(){
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed>>>15, 1 | seed);
+    t = t + Math.imul(t ^ t>>>7, 61 | t) ^ t;
+    return ((t ^ t>>>14) >>> 0) / 4294967296;
+  };
 }
-function avatarHTML(name, size){
-  const sz = size==='sm' ? 22 : 34;
-  return `<div class="avatar" style="width:${sz}px;height:${sz}px;font-size:${size==='sm'?'9.5px':'13px'};background:${avatarColor(name)};">${esc(initials(name))}</div>`;
+function demoFinanceSet(){
+  const rnd = seededRandom(20260901);
+  const pick = (lo,hi)=> lo + rnd()*(hi-lo);
+  // A timestamp somewhere inside the calendar month `k` months back.
+  const tsMonthsAgo = k=>{
+    const d = new Date(); d.setDate(1); d.setHours(12,0,0,0); d.setMonth(d.getMonth()-k);
+    const span = new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+    d.setDate(1 + Math.floor(rnd()*span));
+    return Math.min(d.getTime(), Date.now());
+  };
+  const revenueEntries = [];
+  // Siddha Yoga -- 30 webshop orders, growing month over month.
+  [[2,7],[1,10],[0,13]].forEach(([k,n])=>{
+    for(let i=0;i<n;i++) revenueEntries.push({amount:pick(50,150), when:tsMonthsAgo(k), brand:'Siddha Yoga', channel:'Online'});
+  });
+  // Essential Oils -- 20 orders, mostly through the shop with a few taken direct.
+  [[2,5],[1,7],[0,8]].forEach(([k,n])=>{
+    for(let i=0;i<n;i++){
+      // Every third one is a wholesale order taken directly rather than through the
+      // shop -- fixed rather than random so the channel split is always demonstrative.
+      revenueEntries.push({amount:pick(50,150), when:tsMonthsAgo(k),
+        brand:'Essential Oils', channel: i%3===0 ? 'Direct' : 'Online'});
+    }
+  });
+  // Running costs for a business at this volume: stock, commissions, shipping.
+  const expenseEntries = [];
+  [2,1,0].forEach(k=>{
+    expenseEntries.push({amount:pick(600,900), when:tsMonthsAgo(k)});   // stock
+    expenseEntries.push({amount:pick(180,320), when:tsMonthsAgo(k)});   // commission
+    expenseEntries.push({amount:pick(90,160),  when:tsMonthsAgo(k)});   // shipping & packaging
+  });
+  const deals = [
+    ['Won',2400],['Won',1650],['Won',900],['Won',1200],
+    ['Negotiation',3200],['Negotiation',1400],
+    ['Contacted',800],['Contacted',1900],
+    ['Lead',600],['Lead',1100],['Lead',450],
+    ['Lost',1300],
+  ].map(([stage,value],i)=>({id:'demo_d'+i, stage, value, currencies:['USD'], createdAt:tsMonthsAgo(i%3)}));
+  const day = 86400000, now = Date.now();
+  const openInvoiceSource = [
+    ['Aroma Studio Tel Aviv', 780, 'Overdue', -18],
+    ['Wellness Retreat Goa',   540, 'Overdue', -6],
+    ['Yoga Loft Berlin',       420, 'Unpaid',   11],
+    ['Green Leaf Distribution',960, 'Unpaid',   24],
+  ].map(([label,amount,status,dueOffset],i)=>({
+    inv:{id:'demo_i'+i, status, dueDate:new Date(now + dueOffset*day).toISOString().slice(0,10)},
+    amount, label,
+  }));
+  return { revenueEntries, expenseEntries, deals, openInvoiceSource };
+}
+
+function financeData(){
+  if(state.financeDemo) return financeSummary(demoFinanceSet());
+  // Collected revenue = paid invoices (which is also what a Won deal auto-generates)
+  // plus paid storefront orders. Storefront orders don't get an auto-invoice today,
+  // so the two sources never double count the same sale.
+  // Each entry carries two independent dimensions: which business earned it (brand)
+  // and how it reached us (channel). Today invoices are always Direct and storefront
+  // orders always Online, but keeping them separate means an Essential Oils webshop
+  // slots straight in as brand "Essential Oils" / channel "Online".
+  const revenueEntries = [
+    ...state.invoices.filter(i=>i.status==='Paid').map(i=>({
+      amount:toUSD(i.amount, invoiceCurrency(i)), when:i.createdAt,
+      brand:'Essential Oils', channel:'Direct',
+    })),
+    ...state.orders.filter(o=>o.source && o.paymentStatus==='paid').map(o=>({
+      amount:toUSD(o.amount, orderCurrency(o)), when:o.createdAt,
+      brand:o.source, channel:'Online',
+    })),
+  ];
+  // No payment-processing/clearing fee is netted out yet -- add once we know the real %.
+  const expenseEntries = state.payments.filter(p=>p.status==='Paid').map(p=>({
+    amount:toUSD(p.amount, (p.currencies&&p.currencies[0])||'USD'), when:p.createdAt,
+  }));
+  const openInvoiceSource = state.invoices.filter(i=>i.status!=='Paid').map(i=>({
+    inv:i, amount:toUSD(i.amount, invoiceCurrency(i)), label:invoiceSubjectLabel(i),
+  }));
+  return financeSummary({ revenueEntries, expenseEntries, deals:state.deals, openInvoiceSource });
+}
+
+// Aggregation shared by live and demo data, so the demo exercises exactly the
+// same maths the real dashboard runs on.
+function financeSummary({revenueEntries, expenseEntries, deals, openInvoiceSource}){
+  const totalRevenue = revenueEntries.reduce((s,e)=>s+e.amount,0);
+  const totalExpenses = expenseEntries.reduce((s,e)=>s+e.amount,0);
+
+  const byBrand = {};
+  revenueEntries.forEach(e=>{ byBrand[e.brand] = (byBrand[e.brand]||0) + e.amount; });
+  const brandRows = Object.entries(byBrand).sort((a,b)=>b[1]-a[1]);
+  const brandNames = brandRows.map(([n])=>n);
+
+  const byChannel = {};
+  revenueEntries.forEach(e=>{ byChannel[e.channel] = (byChannel[e.channel]||0) + e.amount; });
+  const channelRows = ['Online','Direct'].map(c=>[c, byChannel[c]||0]).filter(([,v])=>v>0);
+
+  const monthKey = ts=>{ const d=new Date(ts); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); };
+  const monthLabel = ts=> new Date(ts).toLocaleDateString('en-US',{month:'short',year:'2-digit'});
+  const months = {};
+  const touchMonth = (ts)=>{
+    const k = monthKey(ts);
+    if(!months[k]) months[k] = { key:k, label:monthLabel(ts), revenue:0, expenses:0, brands:{} };
+    return months[k];
+  };
+  revenueEntries.forEach(e=>{
+    const m = touchMonth(e.when);
+    m.revenue += e.amount;
+    m.brands[e.brand] = (m.brands[e.brand]||0) + e.amount;
+  });
+  expenseEntries.forEach(e=>{ touchMonth(e.when).expenses += e.amount; });
+  const monthRows = Object.values(months).sort((a,b)=>a.key.localeCompare(b.key)).slice(-6);
+
+  // Pipeline health
+  const dealUSD = d => toUSD(d.value, (d.currencies&&d.currencies[0])||'USD');
+  const stageCounts = STAGES.map(s=>({ stage:s, count:deals.filter(d=>d.stage===s).length }))
+    .filter(x=>x.count>0);
+  const dealTotal = stageCounts.reduce((s,x)=>s+x.count,0);
+  const wonDeals = deals.filter(d=>d.stage==='Won');
+  const lostDeals = deals.filter(d=>d.stage==='Lost');
+  const closed = wonDeals.length + lostDeals.length;
+  const winRate = closed ? (wonDeals.length/closed)*100 : null;
+  const openDeals = deals.filter(d=>d.stage!=='Won' && d.stage!=='Lost');
+  const pipelineValue = openDeals.reduce((s,d)=>s+dealUSD(d),0);
+  const avgDealSize = wonDeals.length ? wonDeals.reduce((s,d)=>s+dealUSD(d),0)/wonDeals.length : 0;
+
+  // Receivables -- money billed but not collected
+  const today = new Date(); today.setHours(0,0,0,0);
+  const openInvoices = openInvoiceSource.map(r=>{
+    const due = r.inv.dueDate ? new Date(r.inv.dueDate) : null;
+    const daysLate = due ? Math.floor((today-due)/86400000) : 0;
+    return { ...r, daysLate: daysLate>0 ? daysLate : 0 };
+  }).sort((a,b)=>b.daysLate-a.daysLate || b.amount-a.amount);
+  const outstanding = openInvoices.reduce((s,r)=>s+r.amount,0);
+  const overdue = openInvoices.filter(r=>r.daysLate>0 || r.inv.status==='Overdue').reduce((s,r)=>s+r.amount,0);
+
+  return { totalRevenue, totalExpenses, net: totalRevenue-totalExpenses,
+    brandRows, brandNames, channelRows, monthRows,
+    stageCounts, dealTotal, winRate, pipelineValue, avgDealSize, openInvoices, outstanding, overdue };
+}
+
+function panelHead(title, sub, meta){
+  return `<div class="panel-head">
+    <div><div class="panel-title">${title}</div>${sub?`<div class="panel-sub">${sub}</div>`:''}</div>
+    ${meta?`<div class="panel-meta">${meta}</div>`:''}
+  </div>`;
+}
+
+function renderFinanceKPIs(f){
+  const cards = [
+    {accent:'var(--sage)',  val:usd(f.totalRevenue),  lbl:'Revenue collected', cls:'sage'},
+    {accent:'var(--amber)', val:usd(f.outstanding),   lbl:'Outstanding',       cls:'amber'},
+    {accent:'var(--rust)',  val:usd(f.totalExpenses), lbl:'Payments out',      cls:'rust'},
+    {accent:f.net>=0?'var(--olive)':'var(--rust)', val:usd(f.net), lbl:'Net', cls:f.net>=0?'olive':'rust'},
+    {accent:'var(--ochre)', val:usd(f.pipelineValue), lbl:'Open pipeline',     cls:'ochre'},
+    {accent:'var(--umber)', val:f.winRate===null?'—':Math.round(f.winRate)+'%', lbl:'Win rate', cls:'umber'},
+    {accent:'var(--clay)',  val:usd(f.avgDealSize),   lbl:'Avg won deal',      cls:'clay'},
+    {accent:'var(--rust)',  val:usd(f.overdue),       lbl:'Overdue',           cls:'rust'},
+  ];
+  return `<div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(168px,1fr));">${cards.map(c=>
+    `<div class="stat-card kpi-card ${c.cls}" style="--kpi-accent:${c.accent};">
+       <div class="num mono">${c.val}</div><div class="lbl">${c.lbl}</div>
+     </div>`
+  ).join('')}</div>`;
+}
+
+function renderBrandRevenue(f){
+  if(!f.brandRows.length){
+    return `<div class="panel">${panelHead('Revenue by business','Essential Oils vs. Siddha Yoga')}
+      <div class="fin-empty">No collected revenue yet.</div></div>`;
+  }
+  const max = Math.max(...f.brandRows.map(([,v])=>v), 1);
+  const bars = f.brandRows.map(([name,val])=>{
+    const pct = f.totalRevenue ? (val/f.totalRevenue)*100 : 0;
+    return `<div class="hbar" title="${esc(name)}: ${usd(val)} (${pct.toFixed(1)}%)">
+      <span class="hbar-name"><span class="sw" style="background:${brandColor(name)};"></span>${esc(name)}</span>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${(val/max)*100}%;background:${brandColor(name)};"></div></div>
+      <span class="hbar-val">${usd(val)} <span style="color:var(--ink-soft);">· ${pct.toFixed(0)}%</span></span>
+    </div>`;
+  }).join('');
+  return `<div class="panel">
+    ${panelHead('Revenue by business','Which side of SWG earned it', usd(f.totalRevenue)+' total')}
+    ${bars}
+  </div>`;
+}
+
+function renderChannelSplit(f){
+  if(!f.channelRows.length){
+    return `<div class="panel">${panelHead('Revenue by channel','Website orders vs. direct sales')}
+      <div class="fin-empty">No collected revenue yet.</div></div>`;
+  }
+  const total = f.channelRows.reduce((s,[,v])=>s+v,0) || 1;
+  const segs = f.channelRows.map(([name,val])=>
+    `<div class="split-seg" style="width:${(val/total)*100}%;background:${CHANNEL_COLORS[name]};"
+      title="${esc(name)}: ${usd(val)}"></div>`).join('');
+  const key = f.channelRows.map(([name,val])=>`
+    <div class="split-key-item">
+      <span class="sw" style="background:${CHANNEL_COLORS[name]};"></span>
+      <span class="nm">${name==='Online'?'Website orders':'Direct &amp; wholesale'}</span>
+      <span class="vl">${usd(val)} · ${((val/total)*100).toFixed(0)}%</span>
+    </div>`).join('');
+  return `<div class="panel">
+    ${panelHead('Revenue by channel','How the money reached us')}
+    <div class="split-bar">${segs}</div>
+    <div class="split-key">${key}</div>
+  </div>`;
+}
+
+function renderDealPie(f){
+  if(!f.dealTotal){
+    return `<div class="panel">${panelHead('Deal status distribution','Share of every deal by stage')}
+      <div class="fin-empty">No deals in the ledger yet.</div></div>`;
+  }
+  let cum = 0;
+  const stops = f.stageCounts.map(s=>{
+    const start = (cum/f.dealTotal)*360; cum += s.count;
+    return `${STAGE_COLORS[s.stage]} ${start}deg ${(cum/f.dealTotal)*360}deg`;
+  }).join(', ');
+  const legend = f.stageCounts.map(s=>`
+    <div class="leg-item" title="${esc(s.stage)}: ${s.count} deal${s.count===1?'':'s'}">
+      <span class="sw" style="background:${STAGE_COLORS[s.stage]};"></span>
+      <span class="nm">${esc(s.stage)}</span>
+      <span class="vl">${((s.count/f.dealTotal)*100).toFixed(1)}%</span>
+    </div>`).join('');
+  return `<div class="panel">
+    ${panelHead('Deal status distribution','Share of every deal by stage', f.dealTotal+' deal'+(f.dealTotal===1?'':'s'))}
+    <div class="pie-row">
+      <div class="pie" style="background:conic-gradient(${stops});"></div>
+      <div class="fin-legend">${legend}</div>
+    </div>
+  </div>`;
+}
+
+function renderRevenueByMonth(f){
+  if(!f.monthRows.length){
+    return `<div class="panel">${panelHead('Actual revenue by month','Collected revenue, last 6 months')}
+      <div class="fin-empty">Nothing collected yet.</div></div>`;
+  }
+  const top = niceMax(Math.max(...f.monthRows.map(m=>m.revenue), 0));
+  const grid = [0,.25,.5,.75,1].map(t=>`
+    <div class="vbar-gline${t===0?' zero':''}" style="bottom:${t*100}%;">
+      <span class="vbar-ylab">${usd(top*t)}</span>
+    </div>`).join('');
+  const cols = f.monthRows.map(m=>{
+    const segs = f.brandNames.filter(b=>m.brands[b]>0).map(b=>{
+      const share = m.revenue ? (m.brands[b]/m.revenue)*100 : 0;
+      return `<div class="vbar-seg" style="height:${share}%;background:${brandColor(b)};"
+        title="${esc(b)} — ${esc(m.label)}: ${usd(m.brands[b])}"></div>`;
+    }).join('');
+    return `<div class="vbar-col">
+      <span class="vbar-val">${usd(m.revenue)}</span>
+      <div class="vbar-stack" style="height:${top ? (m.revenue/top)*100 : 0}%;">${segs}</div>
+    </div>`;
+  }).join('');
+  const xlabs = f.monthRows.map(m=>`<span class="vbar-xlab">${esc(m.label)}</span>`).join('');
+  const legend = f.brandNames.map(b=>`
+    <div class="leg-item"><span class="sw" style="background:${brandColor(b)};"></span><span>${esc(b)}</span></div>`).join('');
+  return `<div class="panel">
+    ${panelHead('Actual revenue by month','Collected revenue in USD, stacked by business',
+      'last '+f.monthRows.length+' month'+(f.monthRows.length===1?'':'s'))}
+    <div class="vbar-wrap">
+      <div class="vbar-plot"><div class="vbar-grid">${grid}</div>${cols}</div>
+      <div class="vbar-x">${xlabs}</div>
+    </div>
+    <div class="fin-legend row">${legend}</div>
+  </div>`;
+}
+
+function renderReceivables(f){
+  if(!f.openInvoices.length){
+    return `<div class="panel">${panelHead('Outstanding invoices','Billed but not yet collected')}
+      <div class="fin-empty">Everything billed has been collected.</div></div>`;
+  }
+  const rows = f.openInvoices.slice(0,10).map(r=>`
+    <tr>
+      <td>${esc(r.label || '—')}</td>
+      <td class="mono">${usd(r.amount)}</td>
+      <td><span class="badge ${(r.inv.status||'Unpaid').toLowerCase()}">${esc(r.inv.status||'Unpaid')}</span></td>
+      <td style="font-size:12px;">${r.inv.dueDate ? new Date(r.inv.dueDate).toLocaleDateString() : '—'}</td>
+      <td style="font-size:12px;color:${r.daysLate?'var(--rust)':'var(--ink-soft)'};">${r.daysLate ? r.daysLate+' days late' : 'On time'}</td>
+    </tr>`).join('');
+  const more = f.openInvoices.length>10 ? `<div class="fin-empty">+ ${f.openInvoices.length-10} more on the Invoices tab.</div>` : '';
+  return `<div class="panel">
+    ${panelHead('Outstanding invoices','Billed but not yet collected', usd(f.outstanding)+' owed')}
+    <table><thead><tr><th>Billed to</th><th>Amount</th><th>Status</th><th>Due</th><th>Age</th></tr></thead>
+    <tbody>${rows}</tbody></table>${more}
+  </div>`;
+}
+
+function renderFinance(){
+  const f = financeData();
+  const fxNote = state.fxLive
+    ? `live exchange rates${state.fxAsOf?' ('+state.fxAsOf+')':''}`
+    : `<span style="color:var(--rust);">approximate exchange rates — live rates unavailable</span>`;
+  const head = `<div class="fin-head">
+      <div class="fin-asof">All figures in USD using ${fxNote} · as of ${new Date().toLocaleDateString()}</div>
+      <div class="fin-export">
+        <button class="fin-export-btn" id="finDemoBtn">${state.financeDemo?'Show live data':'Preview with sample data'}</button>
+        <button class="fin-export-btn" id="finExportBtn">Export to PDF</button>
+      </div>
+    </div>`
+    + (state.financeDemo ? `<div class="demo-banner">
+        <strong>Sample data — not real.</strong> A made-up three-month history (30 Siddha Yoga
+        and 20 Essential Oils orders, $50–$150 each) so the dashboard can be seen with volume in it.
+        Nothing here is saved and no real record is touched.
+      </div>` : '');
+  if(!f.totalRevenue && !f.totalExpenses && !f.dealTotal && !f.openInvoices.length){
+    return head + `<div class="empty"><div class="display">Nothing to report yet</div>Revenue appears once an invoice is marked Paid or a storefront order is paid; expenses once a payment is marked Paid. Use <em>Preview with sample data</em> to see the dashboard populated.</div>`;
+  }
+  return head
+    + renderFinanceKPIs(f)
+    + `<div class="fin-cols">${renderBrandRevenue(f)}${renderChannelSplit(f)}</div>`
+    + renderRevenueByMonth(f)
+    + `<div class="fin-cols">${renderDealPie(f)}${renderReceivables(f)}</div>`;
 }
 
 function renderTeam(){
@@ -2266,29 +2680,33 @@ function attachContentHandlers(){
       if(table==='team' && !canDeleteUsers()) return alert('Only Ariel can delete team members.');
       if(!confirm('Delete this entry?')) return;
       state[table] = state[table].filter(x=>x.id!==id);
-      await saveKey(KEYS[table], state[table]);
       render();
+      await dbDelete(table, id);
     };
   });
   document.querySelectorAll('[data-stage]').forEach(el=>{
-    el.onchange = ()=> setDealStage(el.dataset.stage, el.value);
-  });
-  let dragDealId = null;
-  document.querySelectorAll('.kcard[draggable]').forEach(card=>{
-    card.addEventListener('dragstart', ()=>{
-      dragDealId = card.dataset.dealId;
-      card.classList.add('dragging');
-    });
-    card.addEventListener('dragend', ()=> card.classList.remove('dragging'));
-  });
-  document.querySelectorAll('.kcol[data-stage-col]').forEach(col=>{
-    col.addEventListener('dragover', e=>{ e.preventDefault(); col.classList.add('dragover'); });
-    col.addEventListener('dragleave', ()=> col.classList.remove('dragover'));
-    col.addEventListener('drop', e=>{
-      e.preventDefault();
-      col.classList.remove('dragover');
-      if(dragDealId) setDealStage(dragDealId, col.dataset.stageCol);
-    });
+    el.onchange = async ()=>{
+      const deal = state.deals.find(d=>d.id===el.dataset.stage);
+      if(!deal) return;
+      const wasWon = deal.stage === 'Won';
+      deal.stage = el.value;
+      if(deal.stage==='Won' && !wasWon && !deal._autoInvoiced){
+        deal._autoInvoiced = true;
+        render();
+        await dbUpdate('deals', deal);
+        await createPaidOrderAndInvoice({
+          relatedType:'contact', relatedId: deal.contactId,
+          product: deal.title, qty:1, amount: deal.value||0, currencies: deal.currencies||[],
+          notes: `Auto-generated when the deal "${deal.title}" was marked Won.`
+        });
+        render();
+        toast(`Invoice created for "${deal.title}" — ${Number(deal.value||0).toLocaleString()}`);
+        celebrate();
+        return;
+      }
+      render();
+      await dbUpdate('deals', deal);
+    };
   });
   document.querySelectorAll('[data-order]').forEach(el=>{
     el.onclick = ()=>{
@@ -2299,8 +2717,30 @@ function attachContentHandlers(){
       openPlaceOrderModal(typeMap[table], id, item.name);
     };
   });
-  wireIOView();
-  wireSetupView();
+  const finExportBtn = document.getElementById('finExportBtn');
+  // The browser's print dialog is the PDF writer -- "Save as PDF" as the destination.
+  if(finExportBtn) finExportBtn.onclick = ()=>window.print();
+  const finDemoBtn = document.getElementById('finDemoBtn');
+  // Deliberately not persisted: every page load starts on real figures.
+  if(finDemoBtn) finDemoBtn.onclick = ()=>{ state.financeDemo = !state.financeDemo; render(); };
+  const ioExportBtn = document.getElementById('ioExportBtn');
+  if(ioExportBtn) ioExportBtn.onclick = ()=>{
+    exportWorkbook();
+    const s = document.getElementById('ioExportStatus');
+    if(s) s.textContent = 'Downloaded.';
+  };
+  const ioImportBtn = document.getElementById('ioImportBtn');
+  const ioImportFile = document.getElementById('ioImportFile');
+  if(ioImportBtn && ioImportFile){
+    ioImportBtn.onclick = ()=>ioImportFile.click();
+    ioImportFile.onchange = ()=>{
+      const file = ioImportFile.files[0];
+      const nameEl = document.getElementById('ioFileName');
+      if(!file) return;
+      if(nameEl) nameEl.textContent = file.name;
+      importWorkbookFile(file);
+    };
+  }
 }
 
 /* ---------- Modal / forms ---------- */
@@ -2667,11 +3107,11 @@ async function saveModal(table, id){
     if(valErr) return alert(valErr);
   }
   if(!isEdit) state[table].push(obj);
-  await saveKey(KEYS[table], state[table]);
   const wasNew = !isEdit;
   const savedObj = obj;
   closeModal();
   render();
+  if(wasNew) await dbInsert(table, obj); else await dbUpdate(table, obj);
   if(wasNew){
     if(table==='deals' || table==='leads'){
       celebrate();
@@ -2714,10 +3154,10 @@ document.getElementById('viewingAs').onchange = (e)=>{ state.viewingAs = e.targe
 document.getElementById('resetBtn').onclick = async ()=>{
   if(!confirm('This clears ALL ledger data for the whole team (team member logins are kept). Continue?')) return;
   state.contacts=[]; state.deals=[]; state.orders=[]; state.customers=[]; state.suppliers=[];
-  state.tasks=[]; state.invoices=[]; state.leads=[]; state.distributors=[]; state.payments=[]; state.dashboards=[];
-  state.activeDashboardId = '';
-  await Promise.all(Object.entries(KEYS).filter(([k])=>k!=='team').map(([,v])=>saveKey(v,[])));
+  state.tasks=[]; state.invoices=[]; state.leads=[]; state.distributors=[]; state.payments=[];
   render();
+  const tables = ['contacts','deals','orders','customers','suppliers','tasks','invoices','leads','distributors','payments'];
+  await Promise.all(tables.map(t=>dbDeleteAll(t)));
 };
 
 /* ---------- Celebration + follow-up ---------- */
@@ -2728,20 +3168,20 @@ async function autoCreateFromContact(contact){
       name:contact.name, company:contact.company||'',
       email:contact.email||'', phone:contact.phone||'', notes:contact.notes||'' };
     state.suppliers.push(obj);
-    await saveKey(KEYS.suppliers, state.suppliers);
+    await dbInsert('suppliers', obj);
   } else if(type === 'Distributor'){
     const obj = { id:uid(), createdAt:Date.now(), owner:state.viewingAs,
       name:contact.name, company:contact.company||'',
       continents:[], subregions:[],
       email:contact.email||'', phone:contact.phone||'', notes:contact.notes||'' };
     state.distributors.push(obj);
-    await saveKey(KEYS.distributors, state.distributors);
+    await dbInsert('distributors', obj);
   } else if(type === 'Customer'){
     const obj = { id:uid(), createdAt:Date.now(), owner:state.viewingAs,
       name:contact.name, kind:contact.kind||'Individual', company:contact.company||'',
       email:contact.email||'', phone:contact.phone||'', notes:contact.notes||'' };
     state.customers.push(obj);
-    await saveKey(KEYS.customers, state.customers);
+    await dbInsert('customers', obj);
   }
   // Marketing type → no auto-create
 }
@@ -2759,12 +3199,12 @@ async function createPaidOrderAndInvoice({relatedType, relatedId, product, qty, 
     relatedType, relatedId, contactId: relatedType==='contact' ? relatedId : null,
     product, qty: qty||1, amount: amount||0, currencies: currencies||[], status:'Delivered' };
   state.orders.push(order);
-  await saveKey(KEYS.orders, state.orders);
+  await dbInsert('orders', order);
   const invoice = { id:uid(), createdAt:Date.now(), orderId: order.id,
     relatedType, relatedId, amount: amount||0, currencies: currencies||[],
     status:'Paid', dueDate:'', notes: notes||'' };
   state.invoices.push(invoice);
-  await saveKey(KEYS.invoices, state.invoices);
+  await dbInsert('invoices', invoice);
   return { order, invoice };
 }
 
