@@ -95,6 +95,9 @@
   .setup-gear:hover{color:var(--setup-blue);border-color:var(--setup-blue);}
   .setup-gear.active{background:var(--setup-blue);border-color:var(--setup-blue);color:#fff;}
   .setup-gear svg{width:15px;height:15px;}
+  .setup-back-btn{display:flex;align-items:center;gap:6px;padding:8px 14px 8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;flex-shrink:0;}
+  .setup-back-btn:hover{border-color:var(--setup-blue);color:var(--setup-blue);}
+  .setup-back-btn svg{width:15px;height:15px;}
   .navlink{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:6px;color:var(--ink-soft);cursor:pointer;margin-bottom:2px;font-size:13.5px;font-weight:500;transition:background .15s,color .15s;}
   .navlink:hover{background:rgba(42,40,32,0.06);}
   .navlink.active{color:#fff;}
@@ -208,7 +211,7 @@
   .empty .display{font-size:17px;color:var(--ink);margin-bottom:4px;}
 
   /* Kanban */
-  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:start;}
+  .kanban{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;align-items:start;}
   .kcol{background:var(--parchment);border-radius:8px;padding:10px;min-height:120px;border-top:3px solid var(--accent, var(--amber));transition:outline .1s;}
   .kcol.dragover{outline:2px dashed var(--accent, var(--amber));outline-offset:-4px;}
   .kcol-head{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink-soft);padding:2px 4px 10px;}
@@ -236,6 +239,7 @@
 
   .loading{padding:60px;text-align:center;color:var(--ink-soft);}
   .shared-note{font-size:11px;color:var(--ink-soft);margin-top:14px;line-height:1.5;}
+  .readonly-note{background:var(--cream);border:1px solid var(--border);color:var(--ink-soft);border-radius:8px;padding:9px 14px;font-size:12px;margin-bottom:14px;}
   .theme-toggle{display:flex;gap:2px;background:var(--cream);border:1px solid var(--border);border-radius:7px;padding:2px;margin-bottom:12px;}
   .theme-toggle button{flex:1;padding:5px 0;border:none;border-radius:5px;background:none;color:var(--ink-soft);font-family:inherit;font-size:11px;font-weight:500;cursor:pointer;}
   .theme-toggle button.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,0.08);}
@@ -401,7 +405,7 @@
 
   /* Import / Export */
   .io-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-  .io-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px 24px;}
+  .io-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px 24px;max-width:100%;overflow-x:auto;}
   .io-card h3{margin:0 0 4px;font-size:15px;font-weight:500;}
   .io-card p{color:var(--ink-soft);font-size:12.5px;margin:0 0 16px;line-height:1.5;}
   .io-dropzone{border:1px dashed var(--border);border-radius:8px;padding:20px;text-align:center;color:var(--ink-soft);font-size:12.5px;margin-top:12px;}
@@ -423,6 +427,9 @@
   .map-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;}
   .map-row{display:flex;align-items:center;gap:8px;}
   .map-field-name{font-size:12px;color:var(--ink-soft);min-width:90px;flex-shrink:0;}
+  .map-col-name{display:flex;flex-direction:column;min-width:110px;flex-shrink:0;max-width:160px;}
+  .map-col-header{font-size:12px;font-weight:600;color:var(--ink);word-break:break-word;}
+  .map-col-sample{font-size:10.5px;color:var(--ink-soft);font-style:italic;word-break:break-word;}
   .map-row select{flex:1;padding:5px 7px;border-radius:6px;border:1px solid var(--border);font-family:inherit;font-size:12.5px;background:var(--surface);color:var(--ink);}
 
   /* Lead status badges (reuse existing 5 stages) */
@@ -498,7 +505,7 @@
       <div class="shared-note">Shared with the whole SWG team — everyone sees the same data.</div>
     </div>
   </aside>
-  <main id="mainArea" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+  <main id="mainArea" style="display:flex;flex-direction:column;flex:1;min-width:0;overflow:hidden;">
     <nav class="topnav">
       <div class="topnav-group">
         <button class="topnav-btn" id="tn-dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.3"/><rect x="14" y="3" width="7" height="5" rx="1.3"/><rect x="14" y="12" width="7" height="9" rx="1.3"/><rect x="3" y="16" width="7" height="5" rx="1.3"/></svg>Dashboard</button>
@@ -515,13 +522,19 @@
         <button class="topnav-btn" id="tn-help" title="Hands-on Guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.3 9a2.7 2.7 0 1 1 3.9 2.4c-.9.5-1.2 1-1.2 2"/><circle cx="12" cy="16.6" r=".3" fill="currentColor"/></svg>Help</button>
       </div>
     </nav>
-    <div style="flex:1;overflow-y:auto;padding:28px 34px;">
+    <div style="flex:1;min-width:0;overflow-y:auto;overflow-x:hidden;padding:28px 34px;">
       <div class="topbar">
-        <div>
-          <h1 class="display" id="pageTitle">Dashboard</h1>
-          <div class="sub" id="pageSub">Overview of contacts, deals and orders</div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <button type="button" class="setup-back-btn" id="setupBackBtn" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg>Back</button>
+          <div>
+            <h1 class="display" id="pageTitle">Dashboard</h1>
+            <div class="sub" id="pageSub">Overview of contacts, deals and orders</div>
+          </div>
         </div>
-        <button class="btn" id="addBtn" style="display:none;">+ Add</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button type="button" class="setup-back-btn" id="topbarGuideBtn" title="Guide notes for this page" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.3 9a2.7 2.7 0 1 1 3.9 2.4c-.9.5-1.2 1-1.2 2"/><circle cx="12" cy="16.6" r=".3" fill="currentColor"/></svg>Guide</button>
+          <button class="btn" id="addBtn" style="display:none;">+ Add</button>
+        </div>
       </div>
       <div id="content"><div class="loading">Loading ledger…</div></div>
     </div>
@@ -534,7 +547,7 @@
 
 <script>
 const KEYS = { contacts:'crm_contacts', deals:'crm_deals', orders:'crm_orders', customers:'crm_customers', suppliers:'crm_suppliers', tasks:'crm_tasks', invoices:'crm_invoices', leads:'crm_leads', distributors:'crm_distributors', payments:'crm_payments', team:'crm_team', dashboards:'crm_dashboards', validationRules:'crm_validation_rules', automations:'crm_automations', sharingRules:'crm_sharing_rules', guideEntries:'crm_guide_entries', bigDealAlert:'crm_big_deal_alert', bigDealAlerts:'crm_big_deal_alerts', quickActionPrefs:'crm_quick_action_prefs' };
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut' };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard' };
 const STAGES = ['Lead','Contacted','Negotiation','Won','Lost'];
 const STAGES_NEW = ['Lead','Contacted','Negotiation','Won']; // creation only — no Lost
 const CTYPES = ['Supplier','Distributor','Customer','Marketing'];
@@ -670,6 +683,7 @@ function roleFor(name){
   return 'Sales Rep';
 }
 function canAccessSetup(){ return isAdmin() || roleFor(state.currentUser)==='Manager'; }
+function canEditGlobalSetup(){ return isAdmin(); }
 
 const DEFAULT_TEAM = [
   {name:'Ariel', email:'ariel@siddhayogaweb.com'},
@@ -916,6 +930,10 @@ function render(){
   if(state.view==='team' && !isAdmin()) state.view = 'dashboard';
   if(state.view==='setup' && !canAccessSetup()) state.view = 'dashboard';
   if(state.view==='leads' && !canSeeLeads()) state.view = 'dashboard';
+  const isSetupPage = state.view==='setup';
+  document.querySelector('.sidebar').style.display = isSetupPage ? 'none' : 'flex';
+  document.querySelector('.topnav').style.display = isSetupPage ? 'none' : 'grid';
+  document.getElementById('setupBackBtn').style.display = isSetupPage ? 'flex' : 'none';
   updateNavVisibility();
   populateViewingAsOptions();
   setActiveNav();
@@ -943,6 +961,8 @@ function render(){
   const noAdd = ['dashboard','home','search','rickroll','setup'];
   addBtn.style.display = noAdd.includes(state.view) ? 'none' : 'inline-block';
   addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
+  const guideBtn = document.getElementById('topbarGuideBtn');
+  guideBtn.style.display = state.guideEntries.some(g=>g.linkEntity===state.view) ? 'flex' : 'none';
 
   // topnav active highlights
   document.getElementById('tn-dashboard').classList.toggle('tnav-active', state.view==='dashboard');
@@ -1111,27 +1131,34 @@ function renderImportMapping(){
   if(!importTables.length) return '';
   return `<div class="io-card" style="margin-top:16px;">
     <h3 class="display">Map fields</h3>
-    <p>Match each column to a CRM field, or leave one blank to skip it. IDs and creation dates are detected automatically when present.</p>
+    <p>These are the columns found in your file. Pick which CRM field each one should fill in, or leave it as "Don't import".</p>
     ${importTables.map((t,ti)=>`
       <div class="map-table">
         <div class="map-table-head">
           <strong>${esc(t.name)}</strong>
-          <span style="color:var(--ink-soft);font-size:11.5px;">${t.rows.length} row${t.rows.length===1?'':'s'}</span>
+          <span style="color:var(--ink-soft);font-size:11.5px;">${t.rows.length} row${t.rows.length===1?'':'s'} · ${t.headers.length} column${t.headers.length===1?'':'s'} found</span>
           <select data-map-entity="${ti}">
             <option value="">— Skip this table —</option>
             ${EXPORT_SHEETS.map(s=>`<option value="${s.key}" ${t.entityKey===s.key?'selected':''}>${esc(s.label)}</option>`).join('')}
           </select>
         </div>
         ${t.entityKey ? `<div class="map-fields">
-          ${EXPORT_SHEETS.find(s=>s.key===t.entityKey).fields.filter(f=>f!=='id'&&f!=='createdAt').map(f=>`
-            <div class="map-row">
-              <span class="map-field-name">${esc(prettyField(f))}</span>
-              <select data-map-field="${ti}:${f}">
-                <option value="">— leave blank —</option>
-                ${t.headers.map(h=>`<option value="${esc(h)}" ${t.fieldMap[f]===h?'selected':''}>${esc(h)}</option>`).join('')}
+          ${t.headers.map(h=>{
+            const mappedField = Object.keys(t.fieldMap).find(f=>t.fieldMap[f]===h) || '';
+            const sampleRaw = t.rows[0] ? String(t.rows[0][h] ?? '').trim() : '';
+            const sample = sampleRaw.length>34 ? sampleRaw.slice(0,34)+'…' : sampleRaw;
+            return `<div class="map-row">
+              <div class="map-col-name">
+                <span class="map-col-header">${esc(h)}</span>
+                ${sample ? `<span class="map-col-sample">e.g. "${esc(sample)}"</span>` : ''}
+              </div>
+              <select data-map-ti="${ti}" data-map-header="${esc(h)}">
+                <option value="">— don't import —</option>
+                ${EXPORT_SHEETS.find(s=>s.key===t.entityKey).fields.filter(f=>f!=='id'&&f!=='createdAt').map(f=>`<option value="${f}" ${mappedField===f?'selected':''}>${esc(prettyField(f))}</option>`).join('')}
               </select>
-            </div>`).join('')}
-        </div>` : ''}
+            </div>`;
+          }).join('')}
+        </div>` : `<div style="color:var(--ink-soft);font-size:12px;padding:6px 2px 2px;">Columns in this sheet: ${t.headers.map(h=>esc(h)).join(', ')}</div>`}
       </div>`).join('')}
     <div class="modal-actions" style="justify-content:flex-start;">
       <button class="btn" id="ioRunImportBtn">Import mapped data</button>
@@ -1332,10 +1359,13 @@ function wireIOView(){
       rerenderIOView();
     };
   });
-  document.querySelectorAll('[data-map-field]').forEach(sel=>{
+  document.querySelectorAll('[data-map-ti][data-map-header]').forEach(sel=>{
     sel.onchange = ()=>{
-      const [ti,f] = sel.dataset.mapField.split(':');
-      importTables[Number(ti)].fieldMap[f] = sel.value;
+      const t = importTables[Number(sel.dataset.mapTi)];
+      const header = sel.dataset.mapHeader;
+      Object.keys(t.fieldMap).forEach(f=>{ if(t.fieldMap[f]===header) t.fieldMap[f] = ''; });
+      if(sel.value) t.fieldMap[sel.value] = header;
+      rerenderIOView();
     };
   });
 
@@ -2181,13 +2211,15 @@ function visibleRecords(entityKey, list){
 }
 
 function renderSetupRoles(){
+  const canEdit = canEditGlobalSetup();
   return `<div class="io-card">
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Assign each team member a role. Admins and Managers can open Setup; only Ariel can delete a team member.</p>
+    ${canEdit ? '' : `<div class="readonly-note">👁 View only — only an admin can change roles.</div>`}
     <table><thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody>
     ${state.team.map(t=>`<tr>
       <td>${esc(t.name)}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${esc(t.email||'—')}</td>
-      <td><select data-role-for="${t.id}" ${t.name===FULL_ADMIN?'disabled':''}>${ROLE_LIST.map(r=>`<option ${roleFor(t.name)===r?'selected':''}>${r}</option>`).join('')}</select></td>
+      <td><select data-role-for="${t.id}" ${(t.name===FULL_ADMIN || !canEdit)?'disabled':''}>${ROLE_LIST.map(r=>`<option ${roleFor(t.name)===r?'selected':''}>${r}</option>`).join('')}</select></td>
     </tr>`).join('')}
     </tbody></table>
   </div>`;
@@ -2195,8 +2227,10 @@ function renderSetupRoles(){
 
 function renderSetupValidation(){
   const rules = state.validationRules;
+  const canEdit = canEditGlobalSetup();
   return `<div class="io-card">
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Rules run whenever a record is added in that object. Saving is blocked with the message below until the rule passes.</p>
+    ${canEdit ? '' : `<div class="readonly-note">👁 View only — validation rules affect the whole team, so only an admin can add or remove them.</div>`}
     <table><thead><tr><th>Object</th><th>Field</th><th>Rule</th><th>Value</th><th>Message</th><th></th></tr></thead><tbody>
     ${rules.map(r=>`<tr>
       <td style="font-size:12px;">${esc(EXPORT_SHEETS.find(s=>s.key===r.entity)?.label||r.entity)}</td>
@@ -2204,52 +2238,62 @@ function renderSetupValidation(){
       <td style="font-size:12px;">${esc(RULE_TYPES.find(t=>t.key===r.type)?.label||r.type)}</td>
       <td style="font-size:12px;max-width:220px;word-break:break-word;" class="mono">${esc(r.value||'—')}</td>
       <td style="font-size:12px;color:var(--ink-soft);max-width:160px;">${esc(r.message||'—')}</td>
-      <td class="row-actions"><span data-del-rule="${r.id}">delete</span></td>
+      <td class="row-actions">${canEdit ? `<span data-del-rule="${r.id}">delete</span>` : ''}</td>
     </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:20px;">No validation rules yet.</td></tr>`}
     </tbody></table>
-    <button class="btn" id="addValidationBtn" style="margin-top:14px;">+ Add validation rule</button>
+    ${canEdit ? `<button class="btn" id="addValidationBtn" style="margin-top:14px;">+ Add validation rule</button>` : ''}
   </div>`;
 }
 
 function renderSetupAutomation(){
   const rules = state.automations;
+  const canEdit = canEditGlobalSetup();
   return `<div class="io-card">
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Runs automatically right after a new record is created in that object.</p>
+    ${canEdit ? '' : `<div class="readonly-note">👁 View only — automations affect the whole team, so only an admin can add or remove them.</div>`}
     <table><thead><tr><th>Name</th><th>Object</th><th>When</th><th>Then</th><th></th></tr></thead><tbody>
     ${rules.map(a=>`<tr>
       <td style="font-size:12px;">${esc(a.name)}</td>
       <td style="font-size:12px;">${esc(EXPORT_SHEETS.find(s=>s.key===a.entity)?.label||a.entity)} created</td>
       <td style="font-size:12px;color:var(--ink-soft);">${a.conditionOp==='any'?'always':`${esc(prettyField(a.conditionField))} ${esc(COND_OPS.find(o=>o.key===a.conditionOp)?.label||'')} "${esc(a.conditionValue)}"`}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${a.action==='create_task' ? 'Create a task' : `Set ${esc(prettyField(a.setField||''))} = "${esc(a.setValue||'')}"`}</td>
-      <td class="row-actions"><span data-del-automation="${a.id}">delete</span></td>
+      <td class="row-actions">${canEdit ? `<span data-del-automation="${a.id}">delete</span>` : ''}</td>
     </tr>`).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--ink-soft);padding:20px;">No automations yet.</td></tr>`}
     </tbody></table>
-    <button class="btn" id="addAutomationBtn" style="margin-top:14px;">+ Add automation</button>
+    ${canEdit ? `<button class="btn" id="addAutomationBtn" style="margin-top:14px;">+ Add automation</button>` : ''}
   </div>`;
 }
 
 function renderSetupSharing(){
+  const canEdit = canEditGlobalSetup();
   return `<div class="io-card">
-    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Controls which team members can see each object's records in lists. Only an admin or manager can change these — a regular user can't. Everyone always sees their own records; admins always see everything.</p>
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Controls which team members can see each object's records in lists. Only an admin can change these — they affect the whole team. Everyone always sees their own records; admins always see everything.</p>
+    ${canEdit ? '' : `<div class="readonly-note">👁 View only — only an admin can change sharing rules.</div>`}
     <table><thead><tr><th>Object</th><th>Visible to</th></tr></thead><tbody>
     ${SHARING_ENTITIES.map(key=>`<tr>
       <td style="font-size:13px;">${esc(EXPORT_SHEETS.find(s=>s.key===key).label)}</td>
-      <td><select data-sharing-for="${key}">${SHARING_MODES.map(m=>`<option value="${m.key}" ${(state.sharingRules[key]||'everyone')===m.key?'selected':''}>${m.label}</option>`).join('')}</select></td>
+      <td><select data-sharing-for="${key}" ${canEdit?'':'disabled'}>${SHARING_MODES.map(m=>`<option value="${m.key}" ${(state.sharingRules[key]||'everyone')===m.key?'selected':''}>${m.label}</option>`).join('')}</select></td>
     </tr>`).join('')}
     </tbody></table>
   </div>`;
 }
 
+function guideLinkLabel(g){
+  if(!g.linkEntity) return 'General';
+  const entLabel = EXPORT_SHEETS.find(s=>s.key===g.linkEntity)?.label || g.linkEntity;
+  return g.linkField ? `${entLabel} → ${prettyField(g.linkField)}` : entLabel;
+}
 function renderSetupGuide(){
   const entries = state.guideEntries;
   return `<div class="io-card">
-    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Write short how-to notes for your team — how a feature works, when to use it. They show up for everyone under the <strong>?</strong> Help button in the top bar.</p>
-    <table><thead><tr><th>Title</th><th>Note</th><th></th></tr></thead><tbody>
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Write short how-to notes for your team — how a feature works, when to use it. Link a note to an object (and optionally one of its fields) so it shows up right where it's relevant, or leave it general. Notes show up for everyone under the <strong>?</strong> Help button in the top bar, and under the Guide icon on a linked object's page.</p>
+    <table><thead><tr><th>Title</th><th>Note</th><th>Linked to</th><th></th></tr></thead><tbody>
     ${entries.map(g=>`<tr>
       <td style="font-size:12px;font-weight:600;max-width:150px;">${esc(g.title)}</td>
-      <td style="font-size:12px;color:var(--ink-soft);max-width:340px;">${esc(g.body)}</td>
+      <td style="font-size:12px;color:var(--ink-soft);max-width:300px;">${esc(g.body)}</td>
+      <td style="font-size:12px;color:var(--ink-soft);white-space:nowrap;">${esc(guideLinkLabel(g))}</td>
       <td class="row-actions"><span data-del-guide="${g.id}">delete</span></td>
-    </tr>`).join('') || `<tr><td colspan="3" style="text-align:center;color:var(--ink-soft);padding:20px;">No guide entries yet.</td></tr>`}
+    </tr>`).join('') || `<tr><td colspan="4" style="text-align:center;color:var(--ink-soft);padding:20px;">No guide entries yet.</td></tr>`}
     </tbody></table>
     <button class="btn" id="addGuideBtn" style="margin-top:14px;">+ Add guide entry</button>
   </div>`;
@@ -2258,12 +2302,14 @@ function renderSetupGuide(){
 function renderSetupBigDeal(){
   const cfg = state.bigDealAlert;
   const alerts = state.bigDealAlerts;
+  const canEdit = canEditGlobalSetup();
   return `<div class="io-card">
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">When a deal at or above this value is created or sits pending (not Lost), managers and admins are alerted — adjust it here, much like a sharing or validation rule.</p>
-    <div class="field"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="bda_enabled" ${cfg.enabled?'checked':''} style="width:auto;">Enable big deal alerts</label></div>
-    <div class="field"><label>Alert threshold</label><input type="number" id="bda_threshold" min="0" step="100" value="${cfg.threshold}"></div>
-    <div class="field"><label>Currency</label><select id="bda_currency">${CURRENCIES.map(c=>`<option value="${c}" ${cfg.currency===c?'selected':''}>${c} (${esc(CURRENCY_SYMBOLS[c]||'')})</option>`).join('')}</select></div>
-    <button class="btn" id="bda_saveBtn" style="margin-top:6px;">Save alert settings</button>
+    ${canEdit ? '' : `<div class="readonly-note">👁 View only — this threshold applies company-wide, so only an admin can change it.</div>`}
+    <div class="field"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="bda_enabled" ${cfg.enabled?'checked':''} style="width:auto;" ${canEdit?'':'disabled'}>Enable big deal alerts</label></div>
+    <div class="field"><label>Alert threshold</label><input type="number" id="bda_threshold" min="0" step="100" value="${cfg.threshold}" ${canEdit?'':'disabled'}></div>
+    <div class="field"><label>Currency</label><select id="bda_currency" ${canEdit?'':'disabled'}>${CURRENCIES.map(c=>`<option value="${c}" ${cfg.currency===c?'selected':''}>${c} (${esc(CURRENCY_SYMBOLS[c]||'')})</option>`).join('')}</select></div>
+    ${canEdit ? `<button class="btn" id="bda_saveBtn" style="margin-top:6px;">Save alert settings</button>` : ''}
   </div>
   <div class="io-card" style="margin-top:16px;">
     <p style="font-size:12.5px;font-weight:600;margin:0 0 10px;">Triggered alerts</p>
@@ -2274,7 +2320,7 @@ function renderSetupBigDeal(){
       <td style="font-size:12px;color:var(--ink-soft);">${esc(a.owner||'—')}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${esc(a.stage||'—')}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${new Date(a.createdAt).toLocaleDateString()}</td>
-      <td class="row-actions"><span data-del-bigdeal="${a.id}">dismiss</span></td>
+      <td class="row-actions">${canEdit ? `<span data-del-bigdeal="${a.id}">dismiss</span>` : ''}</td>
     </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:20px;">No big deal alerts triggered yet.</td></tr>`}
     </tbody></table>
   </div>`;
@@ -2317,6 +2363,7 @@ function insertAtCursor(textareaId, text){
 const FORMULA_OPS = ['AND','OR','NOT','==','!=','>=','<=','>','<','+','-','(',')'];
 
 function openValidationRuleModal(){
+  if(!canEditGlobalSetup()) return;
   document.getElementById('modalBody').innerHTML = `<h2 class="display">New validation rule</h2>
     <div class="field"><label>Object</label><select id="vr_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}">${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
     <div class="field"><label>Rule</label><select id="vr_type">${RULE_TYPES.map(t=>`<option value="${t.key}">${t.label}</option>`).join('')}</select></div>
@@ -2406,18 +2453,33 @@ function openValidationRuleModal(){
   };
 }
 
-function openGuideEntryModal(){
+function openGuideEntryModal(presetEntity){
   document.getElementById('modalBody').innerHTML = `<h2 class="display">New guide entry</h2>
     <div class="field"><label>Title</label><input id="ge_title" placeholder="e.g. How to log a new deal"></div>
+    <div class="field"><label>Applies to</label><select id="ge_entity">
+      <option value="">General (not linked to a specific object)</option>
+      ${SETUP_ENTITIES.map(e=>`<option value="${e}" ${presetEntity===e?'selected':''}>${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}
+    </select></div>
+    <div class="field" id="ge_fieldWrap" style="display:none;"><label>Section (optional)</label><select id="ge_field"><option value="">— Whole object —</option></select></div>
     <div class="field"><label>Note</label><textarea id="ge_body" style="min-height:100px;" placeholder="Explain the feature in plain language, for anyone on the team."></textarea></div>
     <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="ge_saveBtn">Add entry</button></div>`;
   document.getElementById('overlay').classList.add('show');
   document.getElementById('cancelBtn').onclick = closeModal;
+  function refreshFieldOptions(){
+    const entity = document.getElementById('ge_entity').value;
+    document.getElementById('ge_fieldWrap').style.display = entity ? 'block' : 'none';
+    document.getElementById('ge_field').innerHTML = `<option value="">— Whole object —</option>` +
+      entityFieldsFor(entity).map(f=>`<option value="${f}">${esc(prettyField(f))}</option>`).join('');
+  }
+  document.getElementById('ge_entity').onchange = refreshFieldOptions;
+  refreshFieldOptions();
   document.getElementById('ge_saveBtn').onclick = async ()=>{
     const title = document.getElementById('ge_title').value.trim();
     const body = document.getElementById('ge_body').value.trim();
     if(!title || !body){ alert('Fill in a title and a note.'); return; }
-    state.guideEntries.push({id:uid(), title, body});
+    const linkEntity = document.getElementById('ge_entity').value;
+    const linkField = linkEntity ? document.getElementById('ge_field').value : '';
+    state.guideEntries.push({id:uid(), title, body, linkEntity, linkField});
     await saveKey(KEYS.guideEntries, state.guideEntries);
     closeModal();
     rerenderSetupView();
@@ -2425,6 +2487,7 @@ function openGuideEntryModal(){
 }
 
 function openAutomationModal(){
+  if(!canEditGlobalSetup()) return;
   document.getElementById('modalBody').innerHTML = `<h2 class="display">New automation</h2>
     <div class="field"><label>Name</label><input id="au_name" placeholder="e.g. Welcome task for new leads"></div>
     <div class="field"><label>When this object is created</label><select id="au_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}">${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
@@ -2496,6 +2559,7 @@ function wireSetupView(){
   });
   document.querySelectorAll('[data-role-for]').forEach(sel=>{
     sel.onchange = async ()=>{
+      if(!canEditGlobalSetup()) return;
       const rec = state.team.find(t=>t.id===sel.dataset.roleFor);
       if(rec){ rec.role = sel.value; await saveKey(KEYS.team, state.team); toast(`${rec.name} is now ${rec.role}.`); }
     };
@@ -2504,6 +2568,7 @@ function wireSetupView(){
   if(addValBtn) addValBtn.onclick = openValidationRuleModal;
   document.querySelectorAll('[data-del-rule]').forEach(el=>{
     el.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
       if(!confirm('Delete this validation rule?')) return;
       state.validationRules = state.validationRules.filter(r=>r.id!==el.dataset.delRule);
       await saveKey(KEYS.validationRules, state.validationRules);
@@ -2514,6 +2579,7 @@ function wireSetupView(){
   if(addAutoBtn) addAutoBtn.onclick = openAutomationModal;
   document.querySelectorAll('[data-del-automation]').forEach(el=>{
     el.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
       if(!confirm('Delete this automation?')) return;
       state.automations = state.automations.filter(a=>a.id!==el.dataset.delAutomation);
       await saveKey(KEYS.automations, state.automations);
@@ -2522,13 +2588,14 @@ function wireSetupView(){
   });
   document.querySelectorAll('[data-sharing-for]').forEach(sel=>{
     sel.onchange = async ()=>{
+      if(!canEditGlobalSetup()) return;
       state.sharingRules[sel.dataset.sharingFor] = sel.value;
       await saveKey(KEYS.sharingRules, state.sharingRules);
       toast('Sharing rule updated.');
     };
   });
   const addGuideBtn = document.getElementById('addGuideBtn');
-  if(addGuideBtn) addGuideBtn.onclick = openGuideEntryModal;
+  if(addGuideBtn) addGuideBtn.onclick = ()=> openGuideEntryModal();
   document.querySelectorAll('[data-del-guide]').forEach(el=>{
     el.onclick = async ()=>{
       if(!confirm('Delete this guide entry?')) return;
@@ -2540,6 +2607,7 @@ function wireSetupView(){
   const bdaSaveBtn = document.getElementById('bda_saveBtn');
   if(bdaSaveBtn){
     bdaSaveBtn.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
       state.bigDealAlert = {
         enabled: document.getElementById('bda_enabled').checked,
         threshold: Number(document.getElementById('bda_threshold').value)||0,
@@ -2551,6 +2619,7 @@ function wireSetupView(){
   }
   document.querySelectorAll('[data-del-bigdeal]').forEach(el=>{
     el.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
       state.bigDealAlerts = state.bigDealAlerts.filter(a=>a.id!==el.dataset.delBigdeal);
       await saveKey(KEYS.bigDealAlerts, state.bigDealAlerts);
       rerenderSetupView();
@@ -2895,13 +2964,17 @@ function openConfirmModal({title, message, confirmLabel, cancelLabel, onConfirm}
 }
 
 /* ---------- Hands-on Guide viewer ---------- */
-function openGuideViewerModal(){
-  const entries = state.guideEntries;
-  document.getElementById('modalBody').innerHTML = `<h2 class="display">Hands-on Guide</h2>
-    <p style="color:var(--ink-soft);font-size:12.5px;line-height:1.5;margin:0 0 14px;">Quick notes from the team on how things work. ${canAccessSetup() ? 'Add more under Setup → Hands-on Guide.' : ''}</p>
+function openGuideViewerModal(scopeEntity){
+  const entries = scopeEntity ? state.guideEntries.filter(g=>g.linkEntity===scopeEntity) : state.guideEntries;
+  const scopeLabel = scopeEntity ? (EXPORT_SHEETS.find(s=>s.key===scopeEntity)?.label || scopeEntity) : '';
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">${scopeEntity ? `${esc(scopeLabel)} Guide` : 'Hands-on Guide'}</h2>
+    <p style="color:var(--ink-soft);font-size:12.5px;line-height:1.5;margin:0 0 14px;">${scopeEntity ? `Notes linked to ${esc(scopeLabel)}.` : 'Quick notes from the team on how things work.'} ${canAccessSetup() ? 'Add more under Setup → Hands-on Guide.' : ''}</p>
     <div style="display:flex;flex-direction:column;gap:10px;max-height:52vh;overflow-y:auto;">
       ${entries.map(g=>`<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;">
-        <div style="font-weight:600;font-size:13px;margin-bottom:4px;">${esc(g.title)}</div>
+        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+          <div style="font-weight:600;font-size:13px;">${esc(g.title)}</div>
+          ${(!scopeEntity || g.linkField) ? `<span style="font-size:10.5px;color:var(--setup-blue);background:var(--setup-blue-soft);border-radius:10px;padding:1px 8px;">${esc(guideLinkLabel(g))}</span>` : ''}
+        </div>
         <div style="color:var(--ink-soft);font-size:12.5px;line-height:1.5;">${esc(g.body)}</div>
       </div>`).join('') || `<p style="color:var(--ink-soft);font-size:13px;text-align:center;padding:20px 0;">No guide entries yet — ${canAccessSetup() ? 'add the first one from Setup.' : 'check back once your admin adds some.'}</p>`}
     </div>
@@ -3114,7 +3187,8 @@ document.getElementById('tn-home').onclick = ()=>{ state.view='home'; render(); 
 document.getElementById('tn-contacts').onclick = ()=>{ state.view='contacts'; render(); };
 document.getElementById('tn-export').onclick = ()=>{ state.view='rickroll'; render(); };
 document.getElementById('tn-search').onclick = ()=>{ state.view='search'; render(); };
-document.getElementById('tn-help').onclick = openGuideViewerModal;
+document.getElementById('tn-help').onclick = ()=> openGuideViewerModal();
+document.getElementById('topbarGuideBtn').onclick = ()=> openGuideViewerModal(state.view);
 document.getElementById('setupGearBtn').onclick = ()=>{
   if(state.view==='setup') return;
   openConfirmModal({
@@ -3122,9 +3196,10 @@ document.getElementById('setupGearBtn').onclick = ()=>{
     message:"You're about to open the backend of the CRM — roles, validation rules, automation and sharing rules live here, and changes affect the whole team.",
     confirmLabel:'Continue',
     cancelLabel:'Go back',
-    onConfirm: ()=>{ state.view='setup'; render(); },
+    onConfirm: ()=>{ state.returnView = state.view; state.view='setup'; render(); },
   });
 };
+document.getElementById('setupBackBtn').onclick = ()=>{ state.view = state.returnView || 'dashboard'; render(); };
 document.addEventListener('keydown', (e)=>{
   if(e.key!=='/' || !document.getElementById('app') || document.getElementById('app').style.display==='none') return;
   const tag = (document.activeElement && document.activeElement.tagName) || '';
