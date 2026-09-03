@@ -546,8 +546,8 @@
 </div>
 
 <script>
-const KEYS = { contacts:'crm_contacts', deals:'crm_deals', orders:'crm_orders', customers:'crm_customers', suppliers:'crm_suppliers', tasks:'crm_tasks', invoices:'crm_invoices', leads:'crm_leads', distributors:'crm_distributors', payments:'crm_payments', team:'crm_team', dashboards:'crm_dashboards', validationRules:'crm_validation_rules', automations:'crm_automations', sharingRules:'crm_sharing_rules', guideEntries:'crm_guide_entries', bigDealAlert:'crm_big_deal_alert', bigDealAlerts:'crm_big_deal_alerts', quickActionPrefs:'crm_quick_action_prefs' };
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard' };
+const KEYS = { contacts:'crm_contacts', deals:'crm_deals', orders:'crm_orders', customers:'crm_customers', suppliers:'crm_suppliers', tasks:'crm_tasks', invoices:'crm_invoices', leads:'crm_leads', distributors:'crm_distributors', payments:'crm_payments', team:'crm_team', dashboards:'crm_dashboards', validationRules:'crm_validation_rules', automations:'crm_automations', sharingRules:'crm_sharing_rules', guideEntries:'crm_guide_entries', bigDealAlert:'crm_big_deal_alert', bigDealAlerts:'crm_big_deal_alerts', quickActionPrefs:'crm_quick_action_prefs', guideDismissed:'crm_guide_dismissed' };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard' };
 const STAGES = ['Lead','Contacted','Negotiation','Won','Lost'];
 const STAGES_NEW = ['Lead','Contacted','Negotiation','Won']; // creation only — no Lost
 const CTYPES = ['Supplier','Distributor','Customer','Marketing'];
@@ -730,12 +730,13 @@ async function saveKey(key, arr){
 }
 
 async function loadAll(){
-  const [c,d,o,cu,su,ta,inv,le,di,pa,db,vr,au,sr,ge,bda,bdal,qap] = await Promise.all([
+  const [c,d,o,cu,su,ta,inv,le,di,pa,db,vr,au,sr,ge,bda,bdal,qap,gd] = await Promise.all([
     loadKey(KEYS.contacts), loadKey(KEYS.deals), loadKey(KEYS.orders),
     loadKey(KEYS.customers), loadKey(KEYS.suppliers), loadKey(KEYS.tasks), loadKey(KEYS.invoices),
     loadKey(KEYS.leads), loadKey(KEYS.distributors), loadKey(KEYS.payments), loadKey(KEYS.dashboards),
     loadKey(KEYS.validationRules), loadKey(KEYS.automations), loadKey(KEYS.sharingRules),
-    loadKey(KEYS.guideEntries), loadKey(KEYS.bigDealAlert), loadKey(KEYS.bigDealAlerts), loadKey(KEYS.quickActionPrefs)
+    loadKey(KEYS.guideEntries), loadKey(KEYS.bigDealAlert), loadKey(KEYS.bigDealAlerts), loadKey(KEYS.quickActionPrefs),
+    loadKey(KEYS.guideDismissed)
   ]);
   state.contacts = c; state.deals = d; state.orders = o;
   state.customers = cu; state.suppliers = su; state.tasks = ta; state.invoices = inv;
@@ -746,6 +747,7 @@ async function loadAll(){
   state.bigDealAlert = (bda && !Array.isArray(bda)) ? bda : {enabled:false, threshold:10000, currency:'USD'};
   state.bigDealAlerts = bdal;
   state.quickActionPrefs = (qap && !Array.isArray(qap)) ? qap : {};
+  state.guideDismissed = (gd && !Array.isArray(gd)) ? gd : {};
   state.loaded = true;
 }
 
@@ -2983,6 +2985,57 @@ function openGuideViewerModal(scopeEntity){
   document.getElementById('cancelBtn').onclick = closeModal;
 }
 
+/* ---------- Guide intro before creating a record ---------- */
+function guideEntriesFor(entityKey){ return state.guideEntries.filter(g=>g.linkEntity===entityKey); }
+
+function openObjectGuideIntroModal(entityKey, onContinue){
+  const entries = guideEntriesFor(entityKey);
+  const label = EXPORT_SHEETS.find(s=>s.key===entityKey)?.label || entityKey;
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">Before you add a ${esc(label.replace(/s$/,''))}…</h2>
+    <p style="color:var(--ink-soft);font-size:12.5px;line-height:1.5;margin:0 0 14px;">Here's everything your team has noted about ${esc(label)}.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;max-height:46vh;overflow-y:auto;">
+      ${entries.map(g=>`<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;">
+        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+          <div style="font-weight:600;font-size:13px;">${esc(g.title)}</div>
+          ${g.linkField ? `<span style="font-size:10.5px;color:var(--setup-blue);background:var(--setup-blue-soft);border-radius:10px;padding:1px 8px;">${esc(prettyField(g.linkField))}</span>` : ''}
+        </div>
+        <div style="color:var(--ink-soft);font-size:12.5px;line-height:1.5;">${esc(g.body)}</div>
+      </div>`).join('')}
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:12px;color:var(--ink-soft);cursor:pointer;">
+      <input type="checkbox" id="og_dontShow" style="width:auto;">Don't show this again for ${esc(label)}
+    </label>
+    <div class="modal-actions">
+      <button class="btn secondary" id="og_skipBtn">Skip</button>
+      <button class="btn" id="og_continueBtn">Continue to add ${esc(label.replace(/s$/,''))}</button>
+    </div>`;
+  document.getElementById('overlay').classList.add('show');
+  const proceed = async ()=>{
+    if(document.getElementById('og_dontShow').checked){
+      const list = state.guideDismissed[state.currentUser] || [];
+      if(!list.includes(entityKey)){
+        list.push(entityKey);
+        state.guideDismissed[state.currentUser] = list;
+        await saveKey(KEYS.guideDismissed, state.guideDismissed);
+      }
+    }
+    closeModal();
+    onContinue();
+  };
+  document.getElementById('og_skipBtn').onclick = proceed;
+  document.getElementById('og_continueBtn').onclick = proceed;
+}
+
+function startAddRecord(entityKey){
+  const entries = guideEntriesFor(entityKey);
+  const dismissed = (state.guideDismissed[state.currentUser] || []).includes(entityKey);
+  if(entries.length && !dismissed){
+    openObjectGuideIntroModal(entityKey, ()=> openModal(entityKey, null));
+  } else {
+    openModal(entityKey, null);
+  }
+}
+
 /* ---------- Customizable quick actions ---------- */
 function renderTopnavQuickActions(){
   const wrap = document.getElementById('topnavQa');
@@ -2997,7 +3050,7 @@ function renderTopnavQuickActions(){
       const qa = QUICK_ACTION_LIBRARY.find(q=>q.key===btn.dataset.qa);
       if(!qa) return;
       if(qa.view===null){ state.view = 'search'; render(); return; }
-      openModal(qa.view, null);
+      startAddRecord(qa.view);
     };
   });
   document.getElementById('qaAddBtn').onclick = openQuickActionsCustomizeModal;
@@ -3210,7 +3263,7 @@ document.addEventListener('keydown', (e)=>{
 });
 document.getElementById('addBtn').onclick = ()=>{
   const addable = ['contacts','leads','customers','distributors','suppliers','deals','tasks','invoices','payments','team'];
-  if(addable.includes(state.view)) openModal(state.view, null);
+  if(addable.includes(state.view)) startAddRecord(state.view);
 };
 document.getElementById('overlay').onclick = (e)=>{ if(e.target.id==='overlay') closeModal(); };
 document.getElementById('viewingAs').onchange = (e)=>{ state.viewingAs = e.target.value; render(); };
