@@ -230,6 +230,25 @@
   .overlay{display:none;position:fixed;inset:0;background:rgba(42,40,32,0.4);align-items:center;justify-content:center;z-index:50;}
   .overlay.show{display:flex;}
   .modal{background:var(--surface);border-radius:10px;padding:24px 26px;width:420px;max-width:90vw;max-height:86vh;overflow-y:auto;}
+  .modal.modal-guide{width:600px;max-width:92vw;padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:84vh;}
+  .guide-modal-head{background:linear-gradient(135deg,var(--setup-blue),#5B8FF6);color:#fff;padding:26px 30px 22px;flex-shrink:0;}
+  .guide-modal-head .gm-icon{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+  .guide-modal-head .gm-icon svg{width:20px;height:20px;}
+  .guide-modal-head h2{margin:0 0 5px;font-size:21px;color:#fff;}
+  .guide-modal-head p{margin:0;font-size:12.5px;opacity:0.9;line-height:1.5;}
+  .guide-modal-body{padding:8px 30px;overflow-y:auto;flex:1;}
+  .guide-modal-body.empty{padding:34px 30px;}
+  .guide-note{display:flex;gap:13px;padding:16px 0;border-bottom:1px solid var(--border);}
+  .guide-note:last-child{border-bottom:none;}
+  .guide-note-num{width:26px;height:26px;border-radius:50%;background:var(--setup-blue-soft);color:var(--setup-blue);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .guide-note-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
+  .guide-note-title{font-weight:700;font-size:13.5px;font-family:'Fraunces',serif;}
+  .guide-note-tag{font-size:10px;font-weight:700;color:var(--setup-blue);background:var(--setup-blue-soft);border-radius:10px;padding:2px 9px;text-transform:uppercase;letter-spacing:0.3px;}
+  .guide-note-body{color:var(--ink-soft);font-size:12.8px;line-height:1.6;}
+  .guide-modal-foot{padding:16px 30px 22px;border-top:1px solid var(--border);flex-shrink:0;}
+  .guide-dontshow{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-soft);cursor:pointer;margin-bottom:14px;}
+  .guide-dontshow input{width:auto;}
+  .guide-modal-actions{display:flex;justify-content:flex-end;gap:10px;}
   .modal h2{margin:0 0 16px;font-size:17px;font-weight:500;}
   .field{margin-bottom:12px;}
   .field label{display:block;font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;}
@@ -2951,7 +2970,7 @@ function openModal(table, id){
     }
   }
 }
-function closeModal(){ document.getElementById('overlay').classList.remove('show'); }
+function closeModal(){ document.getElementById('overlay').classList.remove('show'); document.getElementById('modalBody').className = 'modal'; }
 
 function openConfirmModal({title, message, confirmLabel, cancelLabel, onConfirm}){
   document.getElementById('modalBody').innerHTML = `<h2 class="display">${esc(title)}</h2>
@@ -2966,21 +2985,39 @@ function openConfirmModal({title, message, confirmLabel, cancelLabel, onConfirm}
 }
 
 /* ---------- Hands-on Guide viewer ---------- */
+const GUIDE_BOOK_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.3V5.7c0-.65.47-1.2 1.11-1.31L11 3.3v16.9l-5.72 1.1a1.1 1.1 0 0 1-1.28-1Z"/><path d="M20 19.3V5.7c0-.65-.47-1.2-1.11-1.31L13 3.3v16.9l5.72 1.1a1.1 1.1 0 0 0 1.28-1Z"/></svg>`;
+
+function renderGuideNoteCards(entries, tagFn){
+  return entries.map((g,i)=>`<div class="guide-note">
+    <div class="guide-note-num">${i+1}</div>
+    <div>
+      <div class="guide-note-title-row">
+        <div class="guide-note-title">${esc(g.title)}</div>
+        ${tagFn(g) ? `<span class="guide-note-tag">${esc(tagFn(g))}</span>` : ''}
+      </div>
+      <div class="guide-note-body">${esc(g.body)}</div>
+    </div>
+  </div>`).join('');
+}
+
 function openGuideViewerModal(scopeEntity){
   const entries = scopeEntity ? state.guideEntries.filter(g=>g.linkEntity===scopeEntity) : state.guideEntries;
   const scopeLabel = scopeEntity ? (EXPORT_SHEETS.find(s=>s.key===scopeEntity)?.label || scopeEntity) : '';
-  document.getElementById('modalBody').innerHTML = `<h2 class="display">${scopeEntity ? `${esc(scopeLabel)} Guide` : 'Hands-on Guide'}</h2>
-    <p style="color:var(--ink-soft);font-size:12.5px;line-height:1.5;margin:0 0 14px;">${scopeEntity ? `Notes linked to ${esc(scopeLabel)}.` : 'Quick notes from the team on how things work.'} ${canAccessSetup() ? 'Add more under Setup → Hands-on Guide.' : ''}</p>
-    <div style="display:flex;flex-direction:column;gap:10px;max-height:52vh;overflow-y:auto;">
-      ${entries.map(g=>`<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;">
-        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
-          <div style="font-weight:600;font-size:13px;">${esc(g.title)}</div>
-          ${(!scopeEntity || g.linkField) ? `<span style="font-size:10.5px;color:var(--setup-blue);background:var(--setup-blue-soft);border-radius:10px;padding:1px 8px;">${esc(guideLinkLabel(g))}</span>` : ''}
-        </div>
-        <div style="color:var(--ink-soft);font-size:12.5px;line-height:1.5;">${esc(g.body)}</div>
-      </div>`).join('') || `<p style="color:var(--ink-soft);font-size:13px;text-align:center;padding:20px 0;">No guide entries yet — ${canAccessSetup() ? 'add the first one from Setup.' : 'check back once your admin adds some.'}</p>`}
+  const modalEl = document.getElementById('modalBody');
+  modalEl.className = 'modal modal-guide';
+  modalEl.innerHTML = `
+    <div class="guide-modal-head">
+      <div class="gm-icon">${GUIDE_BOOK_ICON}</div>
+      <h2 class="display">${scopeEntity ? `${esc(scopeLabel)} Guide` : 'Hands-on Guide'}</h2>
+      <p>${scopeEntity ? `Everything your team has noted about ${esc(scopeLabel)}.` : 'Quick notes from the team on how things work.'}</p>
     </div>
-    <div class="modal-actions"><button class="btn" id="cancelBtn">Close</button></div>`;
+    <div class="guide-modal-body ${entries.length?'':'empty'}">
+      ${entries.length ? renderGuideNoteCards(entries, g => (!scopeEntity || g.linkField) ? guideLinkLabel(g) : '')
+        : `<p style="color:var(--ink-soft);font-size:13px;text-align:center;">No guide entries yet — ${canAccessSetup() ? 'add the first one from Setup → Hands-on Guide.' : 'check back once your admin adds some.'}</p>`}
+    </div>
+    <div class="guide-modal-foot">
+      <div class="guide-modal-actions"><button class="btn" id="cancelBtn">Close</button></div>
+    </div>`;
   document.getElementById('overlay').classList.add('show');
   document.getElementById('cancelBtn').onclick = closeModal;
 }
@@ -2991,23 +3028,24 @@ function guideEntriesFor(entityKey){ return state.guideEntries.filter(g=>g.linkE
 function openObjectGuideIntroModal(entityKey, onContinue){
   const entries = guideEntriesFor(entityKey);
   const label = EXPORT_SHEETS.find(s=>s.key===entityKey)?.label || entityKey;
-  document.getElementById('modalBody').innerHTML = `<h2 class="display">Before you add a ${esc(label.replace(/s$/,''))}…</h2>
-    <p style="color:var(--ink-soft);font-size:12.5px;line-height:1.5;margin:0 0 14px;">Here's everything your team has noted about ${esc(label)}.</p>
-    <div style="display:flex;flex-direction:column;gap:10px;max-height:46vh;overflow-y:auto;">
-      ${entries.map(g=>`<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;">
-        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
-          <div style="font-weight:600;font-size:13px;">${esc(g.title)}</div>
-          ${g.linkField ? `<span style="font-size:10.5px;color:var(--setup-blue);background:var(--setup-blue-soft);border-radius:10px;padding:1px 8px;">${esc(prettyField(g.linkField))}</span>` : ''}
-        </div>
-        <div style="color:var(--ink-soft);font-size:12.5px;line-height:1.5;">${esc(g.body)}</div>
-      </div>`).join('')}
+  const singular = label.replace(/s$/,'');
+  const modalEl = document.getElementById('modalBody');
+  modalEl.className = 'modal modal-guide';
+  modalEl.innerHTML = `
+    <div class="guide-modal-head">
+      <div class="gm-icon">${GUIDE_BOOK_ICON}</div>
+      <h2 class="display">Before you add a ${esc(singular)}</h2>
+      <p>Everything your team has noted about ${esc(label)}, so nothing gets missed.</p>
     </div>
-    <label style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:12px;color:var(--ink-soft);cursor:pointer;">
-      <input type="checkbox" id="og_dontShow" style="width:auto;">Don't show this again for ${esc(label)}
-    </label>
-    <div class="modal-actions">
-      <button class="btn secondary" id="og_skipBtn">Skip</button>
-      <button class="btn" id="og_continueBtn">Continue to add ${esc(label.replace(/s$/,''))}</button>
+    <div class="guide-modal-body">
+      ${renderGuideNoteCards(entries, g => g.linkField ? prettyField(g.linkField) : '')}
+    </div>
+    <div class="guide-modal-foot">
+      <label class="guide-dontshow"><input type="checkbox" id="og_dontShow">Don't show this again for ${esc(label)}</label>
+      <div class="guide-modal-actions">
+        <button class="btn secondary" id="og_skipBtn">Skip</button>
+        <button class="btn" id="og_continueBtn">Continue to add ${esc(singular)}</button>
+      </div>
     </div>`;
   document.getElementById('overlay').classList.add('show');
   const proceed = async ()=>{
