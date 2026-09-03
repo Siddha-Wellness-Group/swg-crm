@@ -249,6 +249,19 @@
   .guide-dontshow{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-soft);cursor:pointer;margin-bottom:14px;}
   .guide-dontshow input{width:auto;}
   .guide-modal-actions{display:flex;justify-content:flex-end;gap:10px;}
+
+  /* Interactive walkthrough */
+  .tour-overlay{position:fixed;inset:0;z-index:9990;}
+  .tour-blocker{position:fixed;inset:0;background:transparent;}
+  .tour-spot{position:fixed;border-radius:9px;box-shadow:0 0 0 9999px rgba(20,18,12,0.6);pointer-events:none;transition:top .25s ease,left .25s ease,width .25s ease,height .25s ease;outline:2px solid var(--setup-blue);outline-offset:2px;}
+  .tour-card{position:fixed;width:340px;max-width:calc(100vw - 32px);background:var(--surface);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,0.28);padding:18px 20px 16px;transition:top .25s ease,left .25s ease;}
+  .tour-card-eyebrow{font-size:10.5px;font-weight:700;color:var(--setup-blue);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;}
+  .tour-card-title{font-family:'Fraunces',serif;font-weight:700;font-size:15.5px;color:var(--ink);margin-bottom:6px;}
+  .tour-card-body{font-size:12.8px;color:var(--ink-soft);line-height:1.55;margin-bottom:12px;}
+  .tour-progress{display:flex;gap:4px;margin-bottom:14px;}
+  .tour-progress span{width:16px;height:3px;border-radius:2px;background:var(--border);}
+  .tour-progress span.on{background:var(--setup-blue);}
+  .tour-card-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;}
   .modal h2{margin:0 0 16px;font-size:17px;font-weight:500;}
   .field{margin-bottom:12px;}
   .field label{display:block;font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;}
@@ -355,7 +368,6 @@
   .topnav-btn svg{width:15px;height:15px;flex-shrink:0;opacity:0.85;}
   .topnav-btn:hover{background:rgba(255,255,255,0.06);color:#fff;}
   .topnav-btn.tnav-active{color:#fff;border-bottom-color:var(--setup-blue);background:rgba(255,255,255,0.04);}
-  .topnav-divider{width:1px;height:22px;background:rgba(255,255,255,0.12);margin:0 6px;}
   .topnav-qa{display:flex;align-items:center;gap:2px;}
   .qa-btn{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;font-family:'Work Sans',sans-serif;font-size:12px;font-weight:500;color:rgba(255,255,255,0.72);background:rgba(255,255,255,0.06);border:none;cursor:pointer;white-space:nowrap;}
   .qa-btn:hover{background:rgba(255,255,255,0.14);color:#fff;}
@@ -537,8 +549,6 @@
       </div>
       <div class="topnav-group topnav-group-right">
         <div class="topnav-qa" id="topnavQa"></div>
-        <div class="topnav-divider"></div>
-        <button class="topnav-btn" id="tn-help" title="Hands-on Guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.3 9a2.7 2.7 0 1 1 3.9 2.4c-.9.5-1.2 1-1.2 2"/><circle cx="12" cy="16.6" r=".3" fill="currentColor"/></svg>Help</button>
       </div>
     </nav>
     <div style="flex:1;min-width:0;overflow-y:auto;overflow-x:hidden;padding:28px 34px;">
@@ -551,7 +561,7 @@
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <button type="button" class="setup-back-btn" id="topbarGuideBtn" title="Guide notes for this page" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.3 9a2.7 2.7 0 1 1 3.9 2.4c-.9.5-1.2 1-1.2 2"/><circle cx="12" cy="16.6" r=".3" fill="currentColor"/></svg>Guide</button>
+          <button type="button" class="setup-back-btn" id="topbarGuideBtn" title="Take a guided walkthrough of this page" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.3 9a2.7 2.7 0 1 1 3.9 2.4c-.9.5-1.2 1-1.2 2"/><circle cx="12" cy="16.6" r=".3" fill="currentColor"/></svg>Guide</button>
           <button class="btn" id="addBtn" style="display:none;">+ Add</button>
         </div>
       </div>
@@ -703,6 +713,7 @@ function roleFor(name){
 }
 function canAccessSetup(){ return isAdmin() || roleFor(state.currentUser)==='Manager'; }
 function canEditGlobalSetup(){ return isAdmin(); }
+function canEditRoles(){ return state.currentUser===FULL_ADMIN || state.currentUser==='Daniel'; }
 
 const DEFAULT_TEAM = [
   {name:'Ariel', email:'ariel@siddhayogaweb.com'},
@@ -2232,10 +2243,10 @@ function visibleRecords(entityKey, list){
 }
 
 function renderSetupRoles(){
-  const canEdit = canEditGlobalSetup();
+  const canEdit = canEditRoles();
   return `<div class="io-card">
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Assign each team member a role. Admins and Managers can open Setup; only Ariel can delete a team member.</p>
-    ${canEdit ? '' : `<div class="readonly-note">👁 View only — only an admin can change roles.</div>`}
+    ${canEdit ? '' : `<div class="readonly-note">👁 View only — only Ariel or Daniel can change roles.</div>`}
     <table><thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody>
     ${state.team.map(t=>`<tr>
       <td>${esc(t.name)}</td>
@@ -2307,7 +2318,7 @@ function guideLinkLabel(g){
 function renderSetupGuide(){
   const entries = state.guideEntries;
   return `<div class="io-card">
-    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Write short how-to notes for your team — how a feature works, when to use it. Link a note to an object (and optionally one of its fields) so it shows up right where it's relevant, or leave it general. Notes show up for everyone under the <strong>?</strong> Help button in the top bar, and under the Guide icon on a linked object's page.</p>
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Write short how-to notes for your team. Each note is tied to an object (and optionally one of its fields) and becomes one step of that object's guided walkthrough — click <strong>Guide</strong> at the top of that object's page to take the tour.</p>
     <table><thead><tr><th>Title</th><th>Note</th><th>Linked to</th><th></th></tr></thead><tbody>
     ${entries.map(g=>`<tr>
       <td style="font-size:12px;font-weight:600;max-width:150px;">${esc(g.title)}</td>
@@ -2476,20 +2487,19 @@ function openValidationRuleModal(){
 
 function openGuideEntryModal(presetEntity){
   document.getElementById('modalBody').innerHTML = `<h2 class="display">New guide entry</h2>
+    <p style="color:var(--ink-soft);font-size:12px;margin:0 0 4px;">Each entry becomes one step in that object's guided walkthrough.</p>
     <div class="field"><label>Title</label><input id="ge_title" placeholder="e.g. How to log a new deal"></div>
-    <div class="field"><label>Applies to</label><select id="ge_entity">
-      <option value="">General (not linked to a specific object)</option>
-      ${SETUP_ENTITIES.map(e=>`<option value="${e}" ${presetEntity===e?'selected':''}>${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}
+    <div class="field"><label>Object</label><select id="ge_entity">
+      ${SETUP_ENTITIES.map(e=>`<option value="${e}" ${(presetEntity?presetEntity===e:e===SETUP_ENTITIES[0])?'selected':''}>${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}
     </select></div>
-    <div class="field" id="ge_fieldWrap" style="display:none;"><label>Section (optional)</label><select id="ge_field"><option value="">— Whole object —</option></select></div>
+    <div class="field" id="ge_fieldWrap"><label>Section (optional)</label><select id="ge_field"><option value="">— Whole object (intro step) —</option></select></div>
     <div class="field"><label>Note</label><textarea id="ge_body" style="min-height:100px;" placeholder="Explain the feature in plain language, for anyone on the team."></textarea></div>
     <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="ge_saveBtn">Add entry</button></div>`;
   document.getElementById('overlay').classList.add('show');
   document.getElementById('cancelBtn').onclick = closeModal;
   function refreshFieldOptions(){
     const entity = document.getElementById('ge_entity').value;
-    document.getElementById('ge_fieldWrap').style.display = entity ? 'block' : 'none';
-    document.getElementById('ge_field').innerHTML = `<option value="">— Whole object —</option>` +
+    document.getElementById('ge_field').innerHTML = `<option value="">— Whole object (intro step) —</option>` +
       entityFieldsFor(entity).map(f=>`<option value="${f}">${esc(prettyField(f))}</option>`).join('');
   }
   document.getElementById('ge_entity').onchange = refreshFieldOptions;
@@ -2580,7 +2590,7 @@ function wireSetupView(){
   });
   document.querySelectorAll('[data-role-for]').forEach(sel=>{
     sel.onchange = async ()=>{
-      if(!canEditGlobalSetup()) return;
+      if(!canEditRoles()) return;
       const rec = state.team.find(t=>t.id===sel.dataset.roleFor);
       if(rec){ rec.role = sel.value; await saveKey(KEYS.team, state.team); toast(`${rec.name} is now ${rec.role}.`); }
     };
@@ -3000,26 +3010,98 @@ function renderGuideNoteCards(entries, tagFn){
   </div>`).join('');
 }
 
-function openGuideViewerModal(scopeEntity){
-  const entries = scopeEntity ? state.guideEntries.filter(g=>g.linkEntity===scopeEntity) : state.guideEntries;
-  const scopeLabel = scopeEntity ? (EXPORT_SHEETS.find(s=>s.key===scopeEntity)?.label || scopeEntity) : '';
-  const modalEl = document.getElementById('modalBody');
-  modalEl.className = 'modal modal-guide';
-  modalEl.innerHTML = `
-    <div class="guide-modal-head">
-      <div class="gm-icon">${GUIDE_BOOK_ICON}</div>
-      <h2 class="display">${scopeEntity ? `${esc(scopeLabel)} Guide` : 'Hands-on Guide'}</h2>
-      <p>${scopeEntity ? `Everything your team has noted about ${esc(scopeLabel)}.` : 'Quick notes from the team on how things work.'}</p>
-    </div>
-    <div class="guide-modal-body ${entries.length?'':'empty'}">
-      ${entries.length ? renderGuideNoteCards(entries, g => (!scopeEntity || g.linkField) ? guideLinkLabel(g) : '')
-        : `<p style="color:var(--ink-soft);font-size:13px;text-align:center;">No guide entries yet — ${canAccessSetup() ? 'add the first one from Setup → Hands-on Guide.' : 'check back once your admin adds some.'}</p>`}
-    </div>
-    <div class="guide-modal-foot">
-      <div class="guide-modal-actions"><button class="btn" id="cancelBtn">Close</button></div>
+/* ---------- Interactive object walkthrough ---------- */
+let tourState = null;
+
+function tourStepsFor(entityKey){
+  const entries = guideEntriesFor(entityKey);
+  return [...entries.filter(g=>!g.linkField), ...entries.filter(g=>g.linkField)];
+}
+
+function resolveTourTarget(step){
+  if(step.linkField){
+    const wanted = prettyField(step.linkField).toLowerCase();
+    const ths = Array.from(document.querySelectorAll('#content th'));
+    const match = ths.find(th=>{
+      const t = th.textContent.trim().toLowerCase();
+      return t && (t.includes(wanted) || wanted.includes(t));
+    });
+    if(match) return match;
+  }
+  return document.querySelector('.topbar') || document.getElementById('content');
+}
+
+function tourCardStyle(rect){
+  const cardW = 340, cardH = 210, margin = 16;
+  let top = rect.bottom + margin;
+  if(top + cardH > window.innerHeight) top = Math.max(margin, rect.top - cardH - margin);
+  let left = rect.left;
+  if(left + cardW > window.innerWidth - margin) left = window.innerWidth - cardW - margin;
+  if(left < margin) left = margin;
+  return `top:${top}px;left:${left}px;`;
+}
+
+function endTour(){
+  tourState = null;
+  const el = document.getElementById('tourOverlay');
+  if(el) el.remove();
+  window.removeEventListener('resize', paintTourStep);
+}
+
+function paintTourStep(){
+  if(!tourState) return;
+  let overlay = document.getElementById('tourOverlay');
+  if(!overlay){
+    overlay = document.createElement('div');
+    overlay.id = 'tourOverlay';
+    overlay.className = 'tour-overlay';
+    document.body.appendChild(overlay);
+  }
+  const step = tourState.steps[tourState.idx];
+  const target = resolveTourTarget(step);
+  const rect = target.getBoundingClientRect();
+  const label = EXPORT_SHEETS.find(s=>s.key===tourState.entityKey)?.label || tourState.entityKey;
+  const isLast = tourState.idx === tourState.steps.length-1;
+  overlay.innerHTML = `
+    <div class="tour-blocker"></div>
+    <div class="tour-spot" style="top:${rect.top-6}px;left:${rect.left-6}px;width:${rect.width+12}px;height:${rect.height+12}px;"></div>
+    <div class="tour-card" style="${tourCardStyle(rect)}">
+      <div class="tour-card-eyebrow">${esc(label)} walkthrough · Step ${tourState.idx+1} of ${tourState.steps.length}</div>
+      <div class="tour-card-title">${esc(step.title)}</div>
+      <div class="tour-card-body">${esc(step.body)}</div>
+      <div class="tour-progress">${tourState.steps.map((s,i)=>`<span class="${i===tourState.idx?'on':''}"></span>`).join('')}</div>
+      <div class="tour-card-actions">
+        <button type="button" class="btn secondary" id="tourEndBtn">End tour</button>
+        <div style="display:flex;gap:8px;">
+          ${tourState.idx>0 ? `<button type="button" class="btn secondary" id="tourBackBtn">Back</button>` : ''}
+          <button type="button" class="btn" id="tourNextBtn">${isLast ? 'Finish' : 'Next'}</button>
+        </div>
+      </div>
     </div>`;
-  document.getElementById('overlay').classList.add('show');
-  document.getElementById('cancelBtn').onclick = closeModal;
+  document.getElementById('tourEndBtn').onclick = endTour;
+  document.getElementById('tourNextBtn').onclick = ()=>{
+    if(isLast){ endTour(); return; }
+    tourState.idx++;
+    advanceTourStep();
+  };
+  const backBtn = document.getElementById('tourBackBtn');
+  if(backBtn) backBtn.onclick = ()=>{ tourState.idx--; advanceTourStep(); };
+}
+
+function advanceTourStep(){
+  if(!tourState) return;
+  const step = tourState.steps[tourState.idx];
+  const target = resolveTourTarget(step);
+  if(target && target.scrollIntoView) target.scrollIntoView({block:'center', behavior:'auto'});
+  requestAnimationFrame(paintTourStep);
+}
+
+function startObjectWalkthrough(entityKey){
+  const steps = tourStepsFor(entityKey);
+  if(!steps.length) return;
+  tourState = { entityKey, steps, idx: 0 };
+  window.addEventListener('resize', paintTourStep);
+  advanceTourStep();
 }
 
 /* ---------- Guide intro before creating a record ---------- */
@@ -3278,8 +3360,7 @@ document.getElementById('tn-home').onclick = ()=>{ state.view='home'; render(); 
 document.getElementById('tn-contacts').onclick = ()=>{ state.view='contacts'; render(); };
 document.getElementById('tn-export').onclick = ()=>{ state.view='rickroll'; render(); };
 document.getElementById('tn-search').onclick = ()=>{ state.view='search'; render(); };
-document.getElementById('tn-help').onclick = ()=> openGuideViewerModal();
-document.getElementById('topbarGuideBtn').onclick = ()=> openGuideViewerModal(state.view);
+document.getElementById('topbarGuideBtn').onclick = ()=> startObjectWalkthrough(state.view);
 document.getElementById('setupGearBtn').onclick = ()=>{
   if(state.view==='setup') return;
   openConfirmModal({
