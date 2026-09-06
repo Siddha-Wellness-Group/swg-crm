@@ -633,7 +633,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut' };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard' };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -792,6 +792,22 @@ function isAdmin(){ return state.currentUser === FULL_ADMIN || CO_ADMINS.include
 function canDeleteUsers(){ return state.currentUser === FULL_ADMIN; }
 function canSeeLeads(){ return !LEAD_HIDDEN_FOR.includes(state.viewingAs); }
 function teamNames(){ return state.team.map(t=>t.name); }
+const AVATAR_COLORS = ['#6F4A30','#A8703C','#4C7A6B','#3E5C8A','#8A4B5C','#6B5B95','#B4682F','#2E6F5E'];
+function avatarInitials(name){
+  const parts = String(name||'').trim().split(/\s+/);
+  return ((parts[0]?.[0]||'') + (parts[1]?.[0]||'')).toUpperCase() || '?';
+}
+function avatarColor(name){
+  let hash = 0;
+  const s = String(name||'');
+  for(let i=0;i<s.length;i++) hash = s.charCodeAt(i) + ((hash<<5)-hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+function avatarHTML(name, size){
+  const px = size==='sm' ? 26 : 40;
+  const fontSize = size==='sm' ? 10.5 : 14;
+  return `<div class="avatar" style="width:${px}px;height:${px}px;background:${avatarColor(name)};font-size:${fontSize}px;">${esc(avatarInitials(name))}</div>`;
+}
 const ROLE_LIST = ['Admin','Manager','Sales Rep','Marketing','Support'];
 function currentTeamRecord(){ return state.team.find(t=>t.name===state.currentUser); }
 function roleFor(name){
@@ -890,16 +906,7 @@ async function loadAll(){
   ]);
   state.contacts = c; state.deals = d; state.orders = o;
   state.customers = cu; state.suppliers = su; state.tasks = ta; state.invoices = inv;
-  state.leads = le; state.distributors = di; state.payments = pa; state.dashboards = db;
-  state.validationRules = vr; state.automations = au;
-  state.sharingRules = (sr && !Array.isArray(sr)) ? sr : {};
-  state.guideEntries = ge;
-  state.bigDealAlert = (bda && !Array.isArray(bda)) ? bda : {enabled:false, threshold:10000, currency:'USD'};
-  state.bigDealAlerts = bdal;
-  state.quickActionPrefs = (qap && !Array.isArray(qap)) ? qap : {};
-  state.guideDismissed = (gd && !Array.isArray(gd)) ? gd : {};
-  state.dependentFields = df;
-  state.flows = fl;
+  state.leads = le; state.distributors = di; state.payments = pa;
   state.loaded = true;
 }
 
@@ -1406,108 +1413,54 @@ async function runImport(){
       if(idx>=0){ list[idx] = {...list[idx], ...obj}; updated++; }
       else { list.push(obj); added++; }
     });
-    if(!matchedSheets){
-      statusEl.textContent = 'No matching sheets found — export from this ledger first to see the expected format.';
-      statusEl.classList.add('error');
+    touched.add(t.entityKey);
+  });
+  await Promise.all(Array.from(touched).map(k=>dbUpsertMany(k, state[k])));
+  return {added, updated};
+}
+
+async function importWorkbookFile(file){
+  const statusEl = document.getElementById('ioImportStatus');
+  const setImportStatus = (msg, isError)=>{ if(statusEl){ statusEl.textContent = msg; statusEl.classList.toggle('error', !!isError); } };
+  setImportStatus('Reading file…', false);
+  try{
+    const rawTables = await parseExcelFile(file);
+    if(!rawTables.length) throw new Error('No readable sheets found in that file.');
+    const tables = buildImportTables(rawTables);
+    const matchedSheets = tables.filter(t=>t.entityKey);
+    if(!matchedSheets.length){
+      setImportStatus('No matching sheets found — export from this ledger first to see the expected format.', true);
       return;
     }
-    await Promise.all(EXPORT_SHEETS.map(s=>dbUpsertMany(s.key, state[s.key])));
-    statusEl.textContent = `Imported: ${totalAdded} added, ${totalUpdated} updated.`;
+    let totalAdded = 0, totalUpdated = 0;
+    const touched = new Set();
+    matchedSheets.forEach(t=>{
+      const sheetDef = EXPORT_SHEETS.find(s=>s.key===t.entityKey);
+      const list = state[t.entityKey];
+      const idHeader = t.headers.find(h=>normKey(h)==='id');
+      const createdHeader = t.headers.find(h=>['createdat','created','date'].includes(normKey(h)));
+      t.rows.forEach(row=>{
+        const obj = {};
+        sheetDef.fields.filter(f=>f!=='id'&&f!=='createdAt').forEach(f=>{
+          const h = t.fieldMap[f];
+          obj[f] = coerceFieldValue(f, h ? row[h] : '');
+        });
+        obj.id = idHeader && row[idHeader] ? String(row[idHeader]) : uid();
+        obj.createdAt = createdHeader && row[createdHeader] ? (new Date(row[createdHeader]).getTime()||Date.now()) : Date.now();
+        const idx = list.findIndex(x=>x.id===obj.id);
+        if(idx>=0){ list[idx] = {...list[idx], ...obj}; totalUpdated++; }
+        else { list.push(obj); totalAdded++; }
+        touched.add(t.entityKey);
+      });
+    });
+    await Promise.all(Array.from(touched).map(k=>dbUpsertMany(k, state[k])));
+    setImportStatus(`Imported: ${totalAdded} added, ${totalUpdated} updated.`, false);
     toast(`Import complete — ${totalAdded} added, ${totalUpdated} updated.`);
+    render();
   }catch(e){
     console.error(e);
-    statusEl.textContent = 'Could not read that file. Make sure it is a .xlsx or .csv file.';
-    statusEl.classList.add('error');
+    setImportStatus('Could not read that file. Make sure it is a .xlsx or .csv file.', true);
   }
-
-  const fileInput = document.getElementById('ioImportFile');
-  const fileBtn = document.getElementById('ioImportBtn');
-  if(fileBtn && fileInput){
-    fileBtn.onclick = ()=>fileInput.click();
-    fileInput.onchange = async ()=>{
-      const file = fileInput.files[0];
-      if(!file) return;
-      document.getElementById('ioFileName').textContent = file.name;
-      setStatus('Reading file…', false);
-      try{
-        const tables = await parseExcelFile(file);
-        if(!tables.length) throw new Error('No readable sheets found in that file.');
-        importTables = buildImportTables(tables);
-        setStatus(`Found ${tables.length} sheet${tables.length===1?'':'s'} — map the fields below.`, false);
-        rerenderIOView();
-      }catch(e){ console.error(e); setStatus('Could not read that file. Make sure it is a .xlsx or .csv file.', true); }
-    };
-  }
-
-  const gsheetBtn = document.getElementById('ioGsheetBtn');
-  if(gsheetBtn){
-    gsheetBtn.onclick = async ()=>{
-      const url = document.getElementById('ioGsheetUrl').value.trim();
-      if(!url) return setStatus('Paste a Google Sheets link first.', true);
-      setStatus('Fetching sheet…', false);
-      try{
-        const tables = await parseGoogleSheetUrl(url);
-        if(!tables.length) throw new Error('No data found in that sheet.');
-        importTables = buildImportTables(tables);
-        setStatus(`Fetched ${tables.length} sheet${tables.length===1?'':'s'} — map the fields below.`, false);
-        rerenderIOView();
-      }catch(e){ console.error(e); setStatus(e.message || 'Could not fetch that sheet.', true); }
-    };
-  }
-
-  const pdfInput = document.getElementById('ioImportPdf');
-  const pdfBtn = document.getElementById('ioImportPdfBtn');
-  if(pdfBtn && pdfInput){
-    pdfBtn.onclick = ()=>pdfInput.click();
-    pdfInput.onchange = async ()=>{
-      const file = pdfInput.files[0];
-      if(!file) return;
-      document.getElementById('ioPdfName').textContent = file.name;
-      setStatus('Extracting tables from PDF…', false);
-      try{
-        const tables = await parsePdfFile(file);
-        if(!tables.length) throw new Error('Could not find a clear table in that PDF — try exporting it as Excel or CSV instead.');
-        importTables = buildImportTables(tables);
-        setStatus(`Extracted ${tables.length} table${tables.length===1?'':'s'} — check the mapping below carefully.`, false);
-        rerenderIOView();
-      }catch(e){ console.error(e); setStatus(e.message || 'Could not read that PDF.', true); }
-    };
-  }
-
-  document.querySelectorAll('[data-map-entity]').forEach(sel=>{
-    sel.onchange = ()=>{
-      const ti = Number(sel.dataset.mapEntity);
-      const t = importTables[ti];
-      t.entityKey = sel.value;
-      if(t.entityKey){
-        const sheetDef = EXPORT_SHEETS.find(s=>s.key===t.entityKey);
-        t.fieldMap = {};
-        sheetDef.fields.filter(f=>f!=='id'&&f!=='createdAt').forEach(f=>{ t.fieldMap[f] = autoMatchHeader(f, t.headers); });
-      }
-      rerenderIOView();
-    };
-  });
-  document.querySelectorAll('[data-map-ti][data-map-header]').forEach(sel=>{
-    sel.onchange = ()=>{
-      const t = importTables[Number(sel.dataset.mapTi)];
-      const header = sel.dataset.mapHeader;
-      Object.keys(t.fieldMap).forEach(f=>{ if(t.fieldMap[f]===header) t.fieldMap[f] = ''; });
-      if(sel.value) t.fieldMap[sel.value] = header;
-      rerenderIOView();
-    };
-  });
-
-  const runBtn = document.getElementById('ioRunImportBtn');
-  if(runBtn) runBtn.onclick = async ()=>{
-    const result = await runImport();
-    toast(`Import complete — ${result.added} added, ${result.updated} updated.`);
-    importTables = [];
-    rerenderIOView();
-    const freshStatus = document.getElementById('ioImportStatus');
-    if(freshStatus) freshStatus.textContent = `Imported: ${result.added} added, ${result.updated} updated.`;
-  };
-  const cancelBtn = document.getElementById('ioCancelImportBtn');
-  if(cancelBtn) cancelBtn.onclick = ()=>{ importTables = []; rerenderIOView(); };
 }
 
 function renderHome(){
@@ -3524,6 +3477,7 @@ function attachContentHandlers(){
       importWorkbookFile(file);
     };
   }
+  if(state.view==='setup') wireSetupView();
 }
 
 /* ---------- Modal / forms ---------- */
