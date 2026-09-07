@@ -65,6 +65,7 @@
   .navlink[data-view="payments"] .dot{background:var(--rust);}
   .navlink[data-view="team"] .dot{background:var(--ink);}
   .navlink[data-view="finance"] .dot{background:var(--sage);}
+  .navlink[data-view="emails"] .dot{background:var(--umber);}
   .navlink[data-view="dashboard"].active{background:var(--ink);}
   .navlink[data-view="home"].active{background:var(--amber);}
   .navlink[data-view="contacts"].active{background:var(--amber);}
@@ -79,6 +80,7 @@
   .navlink[data-view="payments"].active{background:var(--rust);}
   .navlink[data-view="team"].active{background:var(--ink);}
   .navlink[data-view="finance"].active{background:var(--sage);}
+  .navlink[data-view="emails"].active{background:var(--umber);}
   .navlink.hidden-role{display:none;}
   .sidebar-foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--border);}
   .foot-label{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
@@ -158,6 +160,39 @@
   .kcard select{font-size:11px;padding:3px 4px;border-radius:5px;border:1px solid var(--border);font-family:inherit;background:var(--surface);}
   .kcard .kowner{font-size:10.5px;color:var(--ink-soft);}
   .kcard .kdel{cursor:pointer;color:var(--clay);font-size:11px;}
+
+  /* Emails -- automated email service */
+  .eml-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:14px;}
+  .eml-card{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:16px 18px 15px;overflow:hidden;}
+  .eml-card::before{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:var(--eml-accent);}
+  .eml-card h4{margin:0;font-size:13.5px;font-weight:600;color:var(--ink);}
+  .eml-card .eml-desc{font-size:12px;line-height:1.65;color:var(--ink-soft);margin:7px 0 12px;}
+  .eml-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .eml-chip{font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;padding:3px 9px;border-radius:20px;background:var(--parchment);color:var(--ink-soft);}
+  .eml-chip.on{background:var(--eml-accent-soft);color:var(--eml-accent);}
+  .eml-fn{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);background:var(--cream);border:1px solid var(--border);border-radius:6px;padding:6px 9px;margin-bottom:12px;overflow-x:auto;white-space:nowrap;}
+  .eml-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;border:1px solid var(--border);background:var(--surface);font-family:inherit;font-size:12px;color:var(--ink);cursor:pointer;transition:background .15s,border-color .15s;}
+  .eml-btn:hover{background:var(--cream);border-color:var(--ink-soft);}
+  .eml-kv{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--parchment);font-size:12.5px;}
+  .eml-kv:last-child{border-bottom:none;}
+  .eml-kv .k{color:var(--ink-soft);}
+  .eml-kv .v{color:var(--ink);text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11.5px;word-break:break-all;}
+  .eml-envs{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+  .eml-env{font-family:'IBM Plex Mono',monospace;font-size:10.5px;padding:3px 8px;border-radius:5px;background:var(--cream);border:1px solid var(--border);color:var(--ink-soft);}
+  .eml-note{font-size:11.5px;line-height:1.7;color:var(--ink-soft);margin-top:14px;padding-top:12px;border-top:1px solid var(--parchment);}
+  /* Preview overlay -- wider than the record modal, holds a full email */
+  .eml-prev-overlay{display:none;position:fixed;inset:0;background:rgba(42,40,32,0.5);align-items:center;justify-content:center;z-index:60;padding:24px;}
+  .eml-prev-overlay.show{display:flex;}
+  .eml-prev-shell{background:var(--surface);border-radius:12px;width:720px;max-width:96vw;height:86vh;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border);}
+  .eml-prev-head{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:15px 20px;border-bottom:1px solid var(--border);}
+  .eml-prev-head .t{font-size:14px;font-weight:600;color:var(--ink);}
+  .eml-prev-head .s{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .eml-prev-close{cursor:pointer;font-size:20px;line-height:1;color:var(--ink-soft);background:none;border:none;padding:0 4px;}
+  .eml-prev-close:hover{color:var(--ink);}
+  .eml-prev-body{flex:1;background:var(--cream);overflow:auto;}
+  .eml-prev-body iframe{width:100%;height:100%;border:none;background:#F6F1E7;}
+  .eml-prev-msg{padding:34px 30px;text-align:center;color:var(--ink-soft);font-size:13px;line-height:1.8;}
+  .eml-prev-msg code{font-family:'IBM Plex Mono',monospace;font-size:11.5px;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:2px 6px;}
 
   /* Modal */
   .overlay{display:none;position:fixed;inset:0;background:rgba(42,40,32,0.4);align-items:center;justify-content:center;z-index:50;}
@@ -433,6 +468,7 @@
     <div class="navlink" data-view="invoices"><span class="dot"></span>Invoices</div>
     <div class="navlink" data-view="payments"><span class="dot"></span>Payments</div>
     <div class="navlink" data-view="finance"><span class="dot"></span>Finance</div>
+    <div class="navlink" data-view="emails"><span class="dot"></span>Emails</div>
     <div class="navlink" data-view="team"><span class="dot"></span>Team</div>
     <div class="sidebar-foot">
       <div id="identityAdmin" style="display:none;">
@@ -478,12 +514,25 @@
   <div class="modal" id="modalBody"></div>
 </div>
 
+<div class="eml-prev-overlay" id="emlPrevOverlay">
+  <div class="eml-prev-shell">
+    <div class="eml-prev-head">
+      <div>
+        <div class="t" id="emlPrevTitle">Email preview</div>
+        <div class="s" id="emlPrevSub"></div>
+      </div>
+      <button class="eml-prev-close" id="emlPrevClose" title="Close">&times;</button>
+    </div>
+    <div class="eml-prev-body" id="emlPrevBody"></div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut' };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', emailLog:[], emailPreview:null };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -570,7 +619,7 @@ const ACCENTS = {
   dashboard:'var(--ink)', home:'var(--amber)', contacts:'var(--amber)', leads:'var(--ochre)', customers:'var(--sage)',
   distributors:'var(--umber)', suppliers:'var(--clay)', deals:'var(--ochre)', orders:'var(--umber)',
   tasks:'var(--olive)', invoices:'var(--rust)', payments:'var(--rust)', team:'var(--ink)', finance:'var(--sage)',
-  search:'var(--ink)', rickroll:'var(--ink)'
+  emails:'var(--umber)', search:'var(--ink)', rickroll:'var(--ink)'
 };
 const CONTINENTS = ['Africa','Asia','Europe','North America','South America','Oceania','Middle East'];
 const SUBREGIONS = {
@@ -711,7 +760,7 @@ async function loadAll(){
   const [c,d,o,cu,su,ta,inv,le,di,pa] = await Promise.all([
     loadTable('contacts'), loadTable('deals'), loadTable('orders'),
     loadTable('customers'), loadTable('suppliers'), loadTable('tasks'), loadTable('invoices'),
-    loadTable('leads'), loadTable('distributors'), loadTable('payments'), loadFxRates()
+    loadTable('leads'), loadTable('distributors'), loadTable('payments'), loadFxRates(), loadEmailLog()
   ]);
   state.contacts = c; state.deals = d; state.orders = o;
   state.customers = cu; state.suppliers = su; state.tasks = ta; state.invoices = inv;
@@ -906,6 +955,7 @@ function render(){
     payments:['Payments','Track what SWG owes and pays out'],
     finance:['Finance','Revenue vs. payments, by source and over time'],
     team:['Team','Manage who has access to the ledger'],
+    emails:['Emails','Automated messages the CRM sends on your behalf'],
     search:['Search','Find anything across all tabs'],
     rickroll:['Import / Export','Move data in and out of the ledger']};
   document.getElementById('pageTitle').innerHTML = `<span class="accent-dot"></span>${titleMap[state.view]?titleMap[state.view][0]:state.view}`;
@@ -913,7 +963,7 @@ function render(){
   document.getElementById('mainArea').style.setProperty('--accent', ACCENTS[state.view] || 'var(--amber)');
   const addLabels = {contacts:'contact', leads:'lead', customers:'customer', distributors:'distributor', suppliers:'supplier', deals:'deal', tasks:'task', invoices:'invoice', payments:'payment', team:'team member'};
   const addBtn = document.getElementById('addBtn');
-  const noAdd = ['dashboard','home','search','rickroll','finance'];
+  const noAdd = ['dashboard','home','search','rickroll','finance','emails'];
   addBtn.style.display = noAdd.includes(state.view) ? 'none' : 'inline-block';
   addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
 
@@ -938,6 +988,7 @@ function render(){
   if(state.view==='invoices') c.innerHTML = renderInvoices();
   if(state.view==='payments') c.innerHTML = renderPayments();
   if(state.view==='finance') c.innerHTML = renderFinance();
+  if(state.view==='emails') c.innerHTML = renderEmails();
   if(state.view==='team') c.innerHTML = renderTeam();
   if(state.view==='search') c.innerHTML = renderSearch();
   if(state.view==='rickroll') c.innerHTML = renderImportExport();
@@ -1785,6 +1836,299 @@ function renderFinance(){
     + `<div class="fin-cols">${renderDealPie(f)}${renderReceivables(f)}</div>`;
 }
 
+/* ---------- Emails: the automated email service ---------- */
+/* A window onto src/services/email -- the same four automations, the same
+   templates rendered from the same files on disk, and the delivery log the
+   Node service writes to email_log. Nothing here can send an email. */
+
+const EMAIL_SENDER = 'Siddha Yoga Web Services <customer@siddhayogaweb.com>';
+const EMAIL_TEMPLATE_DIR = 'src/services/email/templates/';
+
+/* Shared context the Node service injects into every template
+   (see renderTemplate in emailService.js). */
+const EMAIL_BRAND_CTX = {
+  lang:'he',
+  brandName:'Siddha Yoga Web Services',
+  brandTagline:'Siddha Wellness Group',
+  supportEmail:'customer@siddhayogaweb.com',
+  websiteUrl:'https://siddhayogaweb.com',
+  websiteLabel:'siddhayogaweb.com',
+  footerNoteHe:'\u05d0\u05dd \u05d9\u05e9 \u05dc\u05da \u05e9\u05d0\u05dc\u05d5\u05ea \u05e0\u05d5\u05e1\u05e4\u05d5\u05ea, \u05e0\u05d9\u05ea\u05df \u05dc\u05d4\u05e9\u05d9\u05d1 \u05dc\u05de\u05d9\u05d9\u05dc \u05d6\u05d4 \u05d0\u05d5 \u05dc\u05d9\u05e6\u05d5\u05e8 \u05e7\u05e9\u05e8 \u05d1\u05db\u05ea\u05d5\u05d1\u05ea customer@siddhayogaweb.com',
+  footerNoteEn:'If you have any further questions, simply reply to this email or write to us at customer@siddhayogaweb.com.',
+  transactionalNotice:'This is a transactional message about your order or enquiry with Siddha Yoga Web Services.',
+};
+
+const EMAIL_AUTOMATIONS = [
+  {
+    key:'orderConfirmation', name:'Order confirmation', accent:'var(--amber)', accentSoft:'var(--amber-soft)',
+    trigger:'Storefront order created', audience:'Customer', category:'order_confirmation',
+    desc:'Goes out the moment a Siddha Yoga order is paid. Lists every line item, the total and the delivery address.',
+    fn:'sendOrderConfirmation({ to, customerName, orderNumber, items, totalAmount, shippingAddress })',
+    subject:'Order SY-10241 confirmed | \u05d0\u05d9\u05e9\u05d5\u05e8 \u05d4\u05d6\u05de\u05e0\u05d4 SY-10241',
+    sample:{
+      headline:'Thank you for your order', greeting:'Hello', customerName:'\u05d3\u05e0\u05d4 \u05db\u05d4\u05df',
+      intro:'We have received your order and it is now being prepared. You will get a second email with tracking details the moment it ships.',
+      preheader:'We received order SY-10241.',
+      orderNumber:'SY-10241', orderDate:'01/09/2026',
+      items:[
+        {name:'Cinnamor Oregano Oil 30ml', variant:'30ml', quantity:2, lineTotal:'\u20aa178.00'},
+        {name:'Lavender Calm Blend 15ml', variant:'15ml', quantity:1, lineTotal:'\u20aa64.00'},
+      ],
+      totalAmount:'\u20aa242.00',
+      shippingAddress:'\u05d4\u05e8\u05e6\u05dc 12, \u05ea\u05dc \u05d0\u05d1\u05d9\u05d1, 6688218, Israel',
+      ctaUrl:'https://siddhayogaweb.com/orders/SY-10241', ctaLabel:'View your order',
+      labels:{orderNumber:'Order number', orderDate:'Order date', items:'What you ordered', total:'Total', shippingTo:'Shipping to'},
+    },
+  },
+  {
+    key:'shippingUpdate', name:'Shipping update', accent:'var(--sage)', accentSoft:'var(--sage-soft)',
+    trigger:'Order marked shipped', audience:'Customer', category:'shipping_update',
+    desc:'Sent when a tracking number is attached to an order. Carries the carrier, the tracking reference and a direct tracking link.',
+    fn:'sendShippingUpdate({ to, customerName, orderNumber, trackingNumber, carrierName, trackingUrl })',
+    subject:'Order SY-10241 is on its way | \u05d4\u05d4\u05d6\u05de\u05e0\u05d4 \u05e9\u05dc\u05da \u05e0\u05e9\u05dc\u05d7\u05d4',
+    sample:{
+      statusLabel:'Shipped', headline:'Your order is on its way', greeting:'Hello', customerName:'Dana Cohen',
+      intro:'Your parcel has left us and is now with the carrier. Use the tracking details below to follow it.',
+      preheader:'Tracking IL748291043 with Israel Post.',
+      orderNumber:'SY-10241', carrierName:'Israel Post', trackingNumber:'IL748291043',
+      trackingUrl:'https://israelpost.co.il/itemtrace?itemcode=IL748291043',
+      estimatedDelivery:'Thursday, 4 September', ctaLabel:'Track your parcel',
+      labels:{orderNumber:'Order number', carrier:'Carrier', tracking:'Tracking number', eta:'Estimated delivery:'},
+    },
+  },
+  {
+    key:'internalAlert', name:'Internal alert', accent:'var(--ochre)', accentSoft:'var(--ochre-soft)',
+    trigger:'High-priority order or ticket', audience:'SWG team', category:'internal_alert',
+    desc:'Never reaches a customer. Raised to the team when an order clears the review threshold or a ticket needs a human now.',
+    fn:'sendInternalAlert({ subject, message, payloadData })',
+    subject:'[SWG High priority] High-value wholesale order SY-10241',
+    sample:{
+      alertKind:'High-priority order', alertTitle:'High-value wholesale order SY-10241',
+      message:'A wholesale order above the review threshold arrived from the storefront. Ops should confirm stock before the order is picked.',
+      preheader:'A wholesale order above the review threshold arrived.',
+      payloadRows:[
+        {key:'order', value:'SY-10241'}, {key:'total', value:'\u20aa4,820'},
+        {key:'customer', value:'Dana Cohen'}, {key:'channel', value:'Website'}, {key:'owner', value:'Omri'},
+      ],
+      priorityLabel:'High priority', priorityColor:'#B98A2E', priorityBg:'#F1E3C4',
+      ctaLabel:'Open in the CRM',
+      generatedAt:'2026-09-01T09:14:00.000Z',
+      internalNotice:'Internal notification generated by the SWG CRM email service. Not sent to the customer.',
+      labels:{details:'Details'},
+    },
+  },
+  {
+    key:'autoReply', name:'Support auto-reply', accent:'var(--umber)', accentSoft:'var(--umber-soft)',
+    trigger:'Support ticket opened', audience:'Customer', category:'auto_reply',
+    desc:'Acknowledges an enquiry straight away and hands the customer a reference to quote back to us.',
+    fn:'sendAutoReply({ to, customerName, ticketId })',
+    subject:'We received your message | \u05e7\u05d9\u05d1\u05dc\u05e0\u05d5 \u05d0\u05ea \u05e4\u05e0\u05d9\u05d9\u05ea\u05da [TCK-4471]',
+    sample:{
+      headline:'We received your message', greeting:'Hello', customerName:'Dana',
+      intro:'Thank you for getting in touch. Your enquiry is logged and a member of the team will look at it personally.',
+      preheader:'Your enquiry is logged as TCK-4471.', ticketId:'TCK-4471',
+      responseTimeNote:'We usually reply within one business day. Keep this reference in any follow-up so we can find your conversation quickly.',
+      labels:{ticket:'Your reference'},
+    },
+  },
+];
+
+/* --- A very small Handlebars subset, enough to preview the real templates:
+   {{var}}, {{a.b}}, {{#if path}} and {{#each list}} with {{this.x}}. --- */
+function emlGet(ctx, path){
+  if(path==='this') return ctx['this'] !== undefined ? ctx['this'] : ctx;
+  return path.split('.').reduce(function(o,k){
+    if(o === null || o === undefined) return undefined;
+    return k==='this' ? (o['this']!==undefined?o['this']:o) : o[k];
+  }, ctx);
+}
+function emlVars(src, ctx){
+  return src.replace(/\{\{([^#\/!][^}]*)\}\}/g, function(m, expr){
+    const val = emlGet(ctx, expr.trim());
+    if(val === undefined || val === null) return '';
+    return esc(String(val));
+  });
+}
+function emlRender(src, ctx){
+  const open = /\{\{#(if|each)\s+([\w.]+)\}\}/;
+  let out = '', rest = src;
+  for(;;){
+    const m = open.exec(rest);
+    if(!m){ out += emlVars(rest, ctx); break; }
+    out += emlVars(rest.slice(0, m.index), ctx);
+    const tag = m[1], path = m[2];
+    const bodyStart = m.index + m[0].length;
+    const scan = /\{\{#(?:if|each)\s+[\w.]+\}\}|\{\{\/(?:if|each)\}\}/g;
+    scan.lastIndex = bodyStart;
+    let depth = 1, close = -1, after = rest.length, hit;
+    while((hit = scan.exec(rest))){
+      if(hit[0].charAt(2) === '#'){ depth++; }
+      else if(--depth === 0){ close = hit.index; after = hit.index + hit[0].length; break; }
+    }
+    if(close < 0){ out += emlVars(rest.slice(bodyStart), ctx); break; }
+    const body = rest.slice(bodyStart, close);
+    const val = emlGet(ctx, path);
+    if(tag === 'each'){
+      (Array.isArray(val) ? val : []).forEach(function(item){
+        const scoped = Object.assign({}, ctx, (item && typeof item === 'object') ? item : {}, {'this':item});
+        out += emlRender(body, scoped);
+      });
+    }else if(val && !(Array.isArray(val) && !val.length)){
+      out += emlRender(body, ctx);
+    }
+    rest = rest.slice(after);
+  }
+  return out;
+}
+
+async function openEmailPreview(key){
+  const auto = EMAIL_AUTOMATIONS.find(a=>a.key===key);
+  if(!auto) return;
+  const overlay = document.getElementById('emlPrevOverlay');
+  const body = document.getElementById('emlPrevBody');
+  document.getElementById('emlPrevTitle').textContent = auto.name;
+  document.getElementById('emlPrevSub').textContent = auto.subject;
+  body.innerHTML = `<div class="eml-prev-msg">Rendering ${esc(auto.name)}...</div>`;
+  overlay.classList.add('show');
+
+  const path = EMAIL_TEMPLATE_DIR + auto.key + '.html';
+  try{
+    const res = await fetch(path, {cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const src = await res.text();
+    const html = emlRender(src, Object.assign({}, EMAIL_BRAND_CTX, {subject:auto.subject}, auto.sample));
+    const frame = document.createElement('iframe');
+    frame.setAttribute('sandbox', '');
+    frame.setAttribute('title', auto.name + ' preview');
+    frame.srcdoc = html;
+    body.innerHTML = '';
+    body.appendChild(frame);
+  }catch(err){
+    body.innerHTML = `<div class="eml-prev-msg">
+      The template could not be read from <code>${esc(path)}</code>.<br>
+      Previews render the real template files, so the CRM has to be served over http
+      rather than opened straight off the disk.<br><br>
+      Run <code>npx serve .</code> in the repo, or generate the files with
+      <code>node test-email.js --dry-run --save email-previews</code>.
+      <br><br><span style="opacity:.7;">${esc(String((err && err.message) || err))}</span>
+    </div>`;
+  }
+}
+function closeEmailPreview(){
+  document.getElementById('emlPrevOverlay').classList.remove('show');
+  document.getElementById('emlPrevBody').innerHTML = '';
+}
+
+/* Delivery log. The table is written by the Node service; the CRM only reads
+   it, and stays usable when it is empty or not yet migrated. */
+async function loadEmailLog(){
+  try{
+    const { data, error } = await sb.from('email_log').select('*').order('created_at', { ascending:false }).limit(200);
+    state.emailLog = error ? [] : (data||[]).map(fromRow);
+  }catch(e){ state.emailLog = []; }
+}
+
+function emailStats(){
+  const log = state.emailLog || [];
+  const cutoff = Date.now() - 30*86400000;
+  const recent = log.filter(r=>Number(r.createdAt||0) >= cutoff);
+  const sent = recent.filter(r=>r.status==='sent' || r.status==='dry-run').length;
+  const failed = recent.filter(r=>r.status==='failed').length;
+  const queued = log.filter(r=>r.status==='queued').length;
+  return { log, sent, failed, queued, total: log.length };
+}
+
+function renderEmailKPIs(st){
+  const cards = [
+    {accent:'var(--sage)',  cls:'sage',  val:String(st.sent),   lbl:'Sent, last 30 days'},
+    {accent:'var(--amber)', cls:'amber', val:String(st.queued), lbl:'Waiting in queue'},
+    {accent:'var(--rust)',  cls:'rust',  val:String(st.failed), lbl:'Failed, last 30 days'},
+    {accent:'var(--umber)', cls:'umber', val:String(EMAIL_AUTOMATIONS.length), lbl:'Automations live'},
+  ];
+  return `<div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(168px,1fr));">${cards.map(c=>
+    `<div class="stat-card kpi-card ${c.cls}" style="--kpi-accent:${c.accent};">
+       <div class="num mono">${c.val}</div><div class="lbl">${c.lbl}</div>
+     </div>`).join('')}</div>`;
+}
+
+function renderEmailAutomations(){
+  const cards = EMAIL_AUTOMATIONS.map(a=>`
+    <div class="eml-card" style="--eml-accent:${a.accent};--eml-accent-soft:${a.accentSoft};">
+      <h4>${esc(a.name)}</h4>
+      <div class="eml-desc">${esc(a.desc)}</div>
+      <div class="eml-meta">
+        <span class="eml-chip on">${esc(a.trigger)}</span>
+        <span class="eml-chip">To: ${esc(a.audience)}</span>
+      </div>
+      <div class="eml-fn">${esc(a.fn)}</div>
+      <button class="eml-btn" data-eml-preview="${a.key}">Preview email</button>
+    </div>`).join('');
+  return `<div class="panel">
+    ${panelHead('Automated messages', 'What the CRM sends without anyone pressing send',
+      EMAIL_AUTOMATIONS.length + ' automations')}
+    <div class="eml-grid">${cards}</div>
+  </div>`;
+}
+
+function renderEmailConfig(){
+  const rows = [
+    ['Sender', EMAIL_SENDER],
+    ['Reply-to', 'customer@siddhayogaweb.com'],
+    ['Transport', 'Google OAuth2, SMTP fallback'],
+    ['Retries', 'up to 3 attempts, exponential backoff'],
+    ['Queue', 'in-process, 2 concurrent sends'],
+    ['Module', 'src/services/email/emailService.js'],
+    ['Delivery log', 'email_log'],
+  ].map(kv=>`<div class="eml-kv"><span class="k">${esc(kv[0])}</span><span class="v">${esc(kv[1])}</span></div>`).join('');
+  const envs = ['EMAIL_HOST','EMAIL_PORT','EMAIL_USER','EMAIL_PASS','OAUTH_CLIENT_ID','OAUTH_CLIENT_SECRET','OAUTH_REFRESH_TOKEN']
+    .map(e=>`<span class="eml-env">${e}</span>`).join('');
+  return `<div class="panel">
+    ${panelHead('Service configuration', 'Set on the server, never in this page')}
+    ${rows}
+    <div class="eml-envs">${envs}</div>
+    <div class="eml-note">Credentials live in the server environment only. Nothing in this
+    section can send an email; it reads what the service has already done.</div>
+  </div>`;
+}
+
+function renderEmailDeliveries(st){
+  if(!st.log.length){
+    return `<div class="panel">${panelHead('Recent deliveries','Every message the service has sent')}
+      <div class="fin-empty">No deliveries recorded yet. Rows appear here once the email
+      service starts writing to the <strong>email_log</strong> table.</div></div>`;
+  }
+  const badgeFor = (status)=>{
+    const map = {sent:'paid', 'dry-run':'muted', queued:'pending', failed:'overdue'};
+    return `<span class="badge ${map[status]||'muted'}">${esc(status)}</span>`;
+  };
+  const rows = st.log.slice(0,12).map(r=>`
+    <tr>
+      <td style="font-size:12px;">${r.createdAt ? new Date(Number(r.createdAt)).toLocaleString() : '-'}</td>
+      <td style="font-size:12px;">${esc(r.recipient||'-')}</td>
+      <td style="font-size:12px;">${esc((r.category||'-').replace(/_/g,' '))}</td>
+      <td>${badgeFor(r.status||'')}</td>
+      <td class="mono" style="font-size:12px;">${esc(String(r.attempts==null?'-':r.attempts))}</td>
+    </tr>`).join('');
+  const more = st.log.length>12 ? `<div class="fin-empty">+ ${st.log.length-12} older deliveries in email_log.</div>` : '';
+  return `<div class="panel">
+    ${panelHead('Recent deliveries','Every message the service has sent', st.total + ' logged')}
+    <table><thead><tr><th>When</th><th>To</th><th>Type</th><th>Status</th><th>Tries</th></tr></thead>
+    <tbody>${rows}</tbody></table>${more}
+  </div>`;
+}
+
+function renderEmails(){
+  const st = emailStats();
+  const head = `<div class="fin-head">
+      <div class="fin-asof">Everything below is sent as <strong>${esc(EMAIL_SENDER)}</strong>
+        by the service in <span class="mono">src/services/email</span>.</div>
+    </div>`;
+  return head
+    + renderEmailKPIs(st)
+    + renderEmailAutomations()
+    + `<div class="fin-cols">${renderEmailConfig()}${renderEmailDeliveries(st)}</div>`;
+}
+
 function renderTeam(){
   const del = canDeleteUsers();
   return `<table><thead><tr><th>No.</th><th>Name</th><th>Email</th><th>Role</th><th></th></tr></thead><tbody>
@@ -1808,6 +2152,9 @@ function esc(s){ return String(s??'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'
 function attachContentHandlers(){
   document.querySelectorAll('[data-navigate]').forEach(el=>{
     el.onclick = ()=>{ state.view = el.dataset.navigate; render(); };
+  });
+  document.querySelectorAll('[data-eml-preview]').forEach(el=>{
+    el.onclick = ()=>{ openEmailPreview(el.dataset.emlPreview); };
   });
   // Live search
   const si = document.getElementById('searchInput');
@@ -2287,6 +2634,11 @@ document.getElementById('addBtn').onclick = ()=>{
   if(addable.includes(state.view)) openModal(state.view, null);
 };
 document.getElementById('overlay').onclick = (e)=>{ if(e.target.id==='overlay') closeModal(); };
+document.getElementById('emlPrevOverlay').onclick = (e)=>{ if(e.target.id==='emlPrevOverlay') closeEmailPreview(); };
+document.getElementById('emlPrevClose').onclick = closeEmailPreview;
+document.addEventListener('keydown', (e)=>{
+  if(e.key==='Escape' && document.getElementById('emlPrevOverlay').classList.contains('show')) closeEmailPreview();
+});
 document.getElementById('viewingAs').onchange = (e)=>{ state.viewingAs = e.target.value; render(); };
 document.getElementById('resetBtn').onclick = async ()=>{
   if(!confirm('This clears ALL ledger data for the whole team (team member logins are kept). Continue?')) return;

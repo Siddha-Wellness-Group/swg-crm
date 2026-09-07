@@ -1,0 +1,107 @@
+<!doctype html>
+<html dir="auto" lang="{{lang}}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <title>{{subject}}</title>
+    <style>
+      body { margin: 0; padding: 0; background: #f6f1e7; }
+      table { border-collapse: collapse; }
+      .swg-card { width: 600px; max-width: 100%; }
+      @media only screen and (max-width: 620px) {
+        .swg-card { width: 100% !important; }
+        .swg-pad { padding-left: 20px !important; padding-right: 20px !important; }
+        .swg-h1 { font-size: 22px !important; }
+      }
+    </style>
+  </head>
+  <body style="margin:0; padding:0; background:#f6f1e7;">
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0;">
+      {{preheader}}&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;
+    </div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f1e7;">
+      <tr>
+        <td align="center" style="padding:28px 12px;">
+          <table role="presentation" class="swg-card" width="600" cellpadding="0" cellspacing="0"
+                 style="width:600px; max-width:100%; background:#ffffff; border:1px solid #ded4be; border-radius:14px; overflow:hidden;">
+
+            <tr>
+              <td class="swg-pad" style="padding:26px 34px 20px; border-bottom:1px solid #ded4be;">
+                <div style="font-family:Georgia,'Times New Roman',serif; font-size:17px; font-weight:600; color:#2a2820;">
+                  {{brandName}}
+                </div>
+                <div style="font-family:Helvetica,Arial,sans-serif; font-size:11px; color:#7a7462; letter-spacing:1.4px; text-transform:uppercase; margin-top:4px;">
+                  {{brandTagline}}
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="swg-pad" dir="auto" style="padding:30px 34px 6px; unicode-bidi:plaintext;">
+                <h1 class="swg-h1" style="margin:0; font-family:Georgia,'Times New Roman',serif; font-size:24px; line-height:1.35; font-weight:600; color:#2a2820;">
+                  {{headline}}
+                </h1>
+                <p style="margin:12px 0 0; font-family:Helvetica,Arial,sans-serif; font-size:15px; line-height:1.7; color:#4a4739;">
+                  {{greeting}} {{customerName}},<br />
+                  {{intro}}
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="swg-pad" style="padding:22px 34px 0;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                       style="background:#f6f1e7; border:1px solid #ded4be; border-radius:10px;">
+                  <tr>
+                    <td dir="auto" style="padding:15px 18px; font-family:Helvetica,Arial,sans-serif; font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:#7a7462; unicode-bidi:plaintext;">
+                      {{labels.ticket}}
+                      <div style="font-family:'Courier New',Courier,monospace; font-size:16px; letter-spacing:.5px; text-transform:none; color:#a8703c; margin-top:4px;">
+                        {{ticketId}}
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="swg-pad" dir="auto" style="padding:22px 34px 0; unicode-bidi:plaintext;">
+                <p style="margin:0; font-family:Helvetica,Arial,sans-serif; font-size:14px; line-height:1.75; color:#4a4739;">
+                  {{responseTimeNote}}
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="swg-pad" style="padding:28px 34px 32px;">
+                <div style="border-top:1px solid #ded4be; padding-top:18px;">
+                  <p dir="auto" style="margin:0 0 10px; font-family:Helvetica,Arial,sans-serif; font-size:13px; line-height:1.7; color:#4a4739; unicode-bidi:plaintext;">
+                    {{footerNoteHe}}
+                  </p>
+                  <p dir="auto" style="margin:0 0 14px; font-family:Helvetica,Arial,sans-serif; font-size:12.5px; line-height:1.7; color:#7a7462; unicode-bidi:plaintext;">
+                    {{footerNoteEn}}
+                  </p>
+                  <p style="margin:0; font-family:Helvetica,Arial,sans-serif; font-size:12px; line-height:1.8; color:#7a7462;">
+                    {{brandName}}<br />
+                    <a href="mailto:{{supportEmail}}" style="color:#a8703c; text-decoration:none;">{{supportEmail}}</a>
+                    {{#if websiteUrl}}
+                    &nbsp;&middot;&nbsp;
+                    <a href="{{websiteUrl}}" style="color:#a8703c; text-decoration:none;">{{websiteLabel}}</a>
+                    {{/if}}
+                  </p>
+                </div>
+              </td>
+            </tr>
+          </table>
+
+          <div style="font-family:Helvetica,Arial,sans-serif; font-size:11px; color:#9a937f; padding:16px 10px 0; max-width:600px;">
+            {{transactionalNotice}}
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
