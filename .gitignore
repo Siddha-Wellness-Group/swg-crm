@@ -4,3 +4,4 @@ node_modules/
 *.log
 email-previews/
 .claude/launch.json
+supabase/.temp/
