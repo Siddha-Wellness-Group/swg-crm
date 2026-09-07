@@ -910,6 +910,7 @@ const FIELD_MAP = {
   payeeType:'payee_type', _autoInvoiced:'auto_invoiced',
   paymentStatus:'payment_status', paymentProvider:'payment_provider', paymentReference:'payment_reference',
   shippingAddress:'shipping_address', externalOrderNumber:'external_order_number',
+  trackingNumber:'tracking_number', carrierName:'carrier_name', trackingUrl:'tracking_url',
 };
 const FIELD_MAP_REV = Object.fromEntries(Object.entries(FIELD_MAP).map(([a,b])=>[b,a]));
 function toRow(obj){ const row={}; for(const k in obj){ row[FIELD_MAP[k]||k] = obj[k]; } return row; }
@@ -3855,13 +3856,21 @@ function openModal(table, id){
   } else if(table==='orders'){
     const selCurr = item && item.currencies ? item.currencies : [];
     const statusOpts = isEdit ? OSTATUS : OSTATUS_NEW;
+    const contact = item && state.contacts.find(c=>c.id===item.contactId);
+    const shipWrapStyle = item && item.status==='Shipped' ? '' : 'display:none;';
     html = `<h2 class="display">${isEdit?'Edit':'Add'} order</h2>
       <div class="field"><label>Contact</label><select id="f_contact">${state.contacts.map(c=>`<option value="${c.id}" ${item&&item.contactId===c.id?'selected':''}>${esc(c.name)}</option>`).join('') || '<option value="">No contacts yet</option>'}</select></div>
       <div class="field"><label>Product</label><input id="f_product" value="${item?esc(item.product):''}" placeholder="e.g. Cinnamor Oregano 10ml"></div>
       <div class="field"><label>Quantity</label><input id="f_qty" type="number" value="${item?item.qty:1}"></div>
       <div class="field"><label>Cost</label><input id="f_amount" type="number" value="${item?item.amount:''}"></div>
       <div class="field"><label>Currencies accepted</label>${msHTML('f_curr_order', CURRENCIES, selCurr)}</div>
-      <div class="field"><label>Status</label><select id="f_status">${statusOpts.map(s=>`<option ${item&&item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>`;
+      <div class="field"><label>Status</label><select id="f_status">${statusOpts.map(s=>`<option ${item&&item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div id="f_shipWrap" style="${shipWrapStyle}">
+        <div class="field"><label>Tracking number</label><input id="f_tracking" value="${item?esc(item.trackingNumber||''):''}"></div>
+        <div class="field"><label>Carrier</label><input id="f_carrier" value="${item?esc(item.carrierName||''):''}" placeholder="e.g. Israel Post"></div>
+        <div class="field"><label>Tracking URL</label><input id="f_trackingUrl" value="${item?esc(item.trackingUrl||''):''}" placeholder="https://..."></div>
+        <div class="shared-note">${contact && contact.email ? `Shipping email will be sent to ${esc(contact.email)} once tracking number and carrier are filled in.` : 'This contact has no email on file, so no shipping email can be sent.'}</div>
+      </div>`;
   } else if(table==='leads'){
     const kind = item ? (item.kind||'Individual') : 'Individual';
     const selSrc = item && item.sources ? item.sources : [];
@@ -4027,6 +4036,15 @@ function openModal(table, id){
           const inp = document.getElementById('f_company');
           if(inp) inp.value = '';
         }
+      };
+    }
+  }
+  if(table==='orders'){
+    const statusSel = document.getElementById('f_status');
+    if(statusSel){
+      statusSel.onchange = (e)=>{
+        const wrap = document.getElementById('f_shipWrap');
+        if(wrap) wrap.style.display = e.target.value==='Shipped' ? 'block' : 'none';
       };
     }
   }
@@ -4302,6 +4320,7 @@ function openQuickActionsCustomizeModal(){
 async function saveModal(table, id){
   const isEdit = !!id;
   let obj = isEdit ? state[table].find(x=>x.id===id) : { id: uid(), createdAt: Date.now(), owner: state.viewingAs };
+  const prevOrderStatus = (table==='orders' && isEdit) ? obj.status : null;
   const readCompany = ()=>{
     const kind = document.getElementById('f_kind') ? document.getElementById('f_kind').value : 'Company';
     if(kind==='Individual') return '';
@@ -4333,6 +4352,9 @@ async function saveModal(table, id){
     obj.amount = Number(document.getElementById('f_amount').value)||0;
     obj.currencies = msRead('f_curr_order');
     obj.status = document.getElementById('f_status').value;
+    obj.trackingNumber = document.getElementById('f_tracking').value.trim();
+    obj.carrierName = document.getElementById('f_carrier').value.trim();
+    obj.trackingUrl = document.getElementById('f_trackingUrl').value.trim();
   } else if(table==='customers'){
     obj.name = document.getElementById('f_name').value.trim();
     if(!obj.name) return alert('Name is required.');
@@ -4430,6 +4452,7 @@ async function saveModal(table, id){
   closeModal();
   render();
   if(wasNew) await dbInsert(table, obj); else await dbUpdate(table, obj);
+  if(table==='orders') await checkOrderStatusChange(savedObj, prevOrderStatus);
   if(wasNew){
     if(table==='deals' || table==='leads'){
       celebrate();
@@ -4558,6 +4581,46 @@ async function checkBigDealAlert(deal){
   if(personaIsAdmin() || roleFor(state.viewingAs)==='Manager'){
     toast(`🚨 Big deal alert: "${deal.title}" — ${Number(deal.value||0).toLocaleString()} ${cfg.currency}`);
   }
+}
+
+/* Human-readable order number shown to customers: the storefront's own
+   number when there is one (external_order_number), otherwise a short code
+   derived from the internal id so orders created directly in the CRM still
+   get something presentable in a shipping email. */
+function orderDisplayNumber(order){
+  return order.externalOrderNumber || ('SWG-' + order.id.slice(-6).toUpperCase());
+}
+
+/* Item 3/4 hook: fires from saveModal when an order's status is edited in
+   the CRM. Only entering 'Shipped' queues anything -- editing other fields,
+   or moving between any other two statuses, is a no-op. Queues a row in
+   email_outbox rather than sending directly, so the real Gmail credentials
+   never need to reach the browser (see src/server/emailWorker.js). */
+async function checkOrderStatusChange(order, prevStatus){
+  if(prevStatus === order.status || order.status !== 'Shipped') return;
+  const contact = state.contacts.find(c=>c.id===order.contactId);
+  if(!contact || !contact.email){
+    toast('Order marked Shipped, but the linked contact has no email on file — no shipping email was queued.');
+    return;
+  }
+  if(!order.trackingNumber || !order.carrierName){
+    toast('Order marked Shipped, but tracking number and carrier are needed before a shipping email can be queued.');
+    return;
+  }
+  const { error } = await sb.from('email_outbox').insert(toRow({
+    id: uid(), createdAt: Date.now(), type:'shippingUpdate', status:'queued',
+    payload: {
+      to: contact.email,
+      customerName: contact.name,
+      orderNumber: orderDisplayNumber(order),
+      trackingNumber: order.trackingNumber,
+      carrierName: order.carrierName,
+      trackingUrl: order.trackingUrl || undefined,
+    },
+    relatedType:'orders', relatedId: order.id,
+  }));
+  if(error){ console.error('queue shippingUpdate failed', error); toast('Order marked Shipped, but queuing the shipping email failed — check the console.'); return; }
+  toast(`Shipping email queued for ${contact.email}`);
 }
 
 async function setDealStage(dealId, newStage){
