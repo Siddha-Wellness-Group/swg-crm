@@ -6,25 +6,26 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
   :root{
-    --cream:#F6F1E7;
-    --parchment:#EFE8D8;
+    --cream:#F2EEE3;
+    --parchment:#EAE3D2;
     --surface:#FFFFFF;
-    --ink:#2A2820;
-    --ink-soft:#7A7462;
-    --border:#DED4BE;
+    --ink:#23211B;
+    --ink-soft:#736C5B;
+    --border:#DACEB2;
     --amber:#A8703C;
     --amber-soft:#EADFC8;
-    --sage:#5B6B4C;
+    --sage:#55654A;
     --sage-soft:#E1E6D5;
     --clay:#9C5B48;
     --clay-soft:#F0DDD5;
-    --ochre:#B98A2E;
+    --ochre:#AC8029;
     --ochre-soft:#F1E3C4;
     --umber:#6F4A30;
     --umber-soft:#E4D6C8;
-    --olive:#748047;
+    --olive:#6C7A42;
     --olive-soft:#E4E8D3;
     --rust:#A6472B;
     --rust-soft:#F0DBD2;
@@ -37,7 +38,7 @@
     --rev-other:#8A7A5C;
   }
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--cream);color:var(--ink);font-family:'Work Sans',sans-serif;font-size:14px;}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:'Work Sans',sans-serif;font-size:14px;transition:background .15s,color .15s;}
   .display{font-family:'Fraunces',serif;}
   .mono{font-family:'IBM Plex Mono',monospace;}
   #app{display:flex;min-height:100vh;}
@@ -46,12 +47,20 @@
   .sidebar{width:200px;background:var(--parchment);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:22px 16px;flex-shrink:0;}
   .brand{font-size:19px;font-weight:600;letter-spacing:0.3px;margin-bottom:2px;}
   .brand-sub{font-size:10.5px;color:var(--ink-soft);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:28px;}
+  .brand-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;}
+  .brand-row .brand{margin-bottom:0;}
+  .setup-gear{width:27px;height:27px;border-radius:8px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);flex-shrink:0;padding:0;}
+  .setup-gear:hover{color:var(--setup-blue);border-color:var(--setup-blue);}
+  .setup-gear.active{background:var(--setup-blue);border-color:var(--setup-blue);color:#fff;}
+  .setup-gear svg{width:15px;height:15px;}
+  .setup-back-btn{display:flex;align-items:center;gap:6px;padding:8px 14px 8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;flex-shrink:0;}
+  .setup-back-btn:hover{border-color:var(--setup-blue);color:var(--setup-blue);}
+  .setup-back-btn svg{width:15px;height:15px;}
   .navlink{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:6px;color:var(--ink-soft);cursor:pointer;margin-bottom:2px;font-size:13.5px;font-weight:500;transition:background .15s,color .15s;}
   .navlink:hover{background:rgba(42,40,32,0.06);}
   .navlink.active{color:#fff;}
   .navlink .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-  .navlink[data-view="dashboard"] .dot{background:var(--ink);}
-  .navlink[data-view="dashboard"] .dot{background:var(--ink);}
+  .navlink[data-view="dashboard"] .dot{background:var(--ink-fixed);}
   .navlink[data-view="home"] .dot{background:var(--amber);}
   .navlink[data-view="contacts"] .dot{background:var(--amber);}
   .navlink[data-view="leads"] .dot{background:var(--ochre);}
@@ -103,6 +112,22 @@
   .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 18px;}
   .stat-card .num{font-family:'Fraunces',serif;font-size:28px;font-weight:600;}
   .stat-card .lbl{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.6px;margin-top:2px;}
+  .stat-delta{display:flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;margin-top:6px;}
+  .stat-delta.up{color:var(--sage);}
+  .stat-delta.down{color:var(--rust);}
+  .stat-delta svg{width:11px;height:11px;flex:none;}
+
+  /* Team cards + avatars */
+  .avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex:none;font-family:'IBM Plex Mono',monospace;}
+  .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;}
+  .team-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;}
+  .team-top{display:flex;align-items:center;gap:11px;}
+  .team-name{font-weight:600;font-size:14.5px;}
+  .team-role{font-size:11.5px;color:var(--ink-soft);}
+  .team-stats{display:flex;gap:16px;border-top:1px solid var(--border);padding-top:10px;}
+  .team-stat b{display:block;font-size:14px;}
+  .team-stat span{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .identity-row{display:flex;align-items:center;gap:8px;}
   .stat-card.amber .num{color:var(--amber);}
   .stat-card.sage .num{color:var(--sage);}
   .stat-card.clay .num{color:var(--clay);}
@@ -116,7 +141,7 @@
   /* Filters */
   .filters{display:flex;gap:6px;margin-bottom:14px;}
   .filter-chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-size:12px;cursor:pointer;color:var(--ink-soft);}
-  .filter-chip.active{background:var(--accent, var(--ink));color:#fff;border-color:var(--accent, var(--ink));}
+  .filter-chip.active{background:var(--accent, var(--ink-fixed));color:#fff;border-color:var(--accent, var(--ink-fixed));}
 
   /* Table */
   table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
@@ -134,7 +159,7 @@
   .badge.customer{background:var(--sage-soft);color:var(--sage);}
   .badge.marketing{background:var(--umber-soft);color:var(--umber);}
   .badge.pending{background:var(--amber-soft);color:var(--amber);}
-  .badge.shipped{background:#E4E1D6;color:var(--ink-soft);}
+  .badge.shipped{background:var(--border);color:var(--ink-soft);}
   .badge.delivered{background:var(--sage-soft);color:var(--sage);}
   .badge.cancelled{background:var(--clay-soft);color:var(--clay);}
   .badge.open{background:var(--amber-soft);color:var(--amber);}
@@ -142,16 +167,18 @@
   .badge.unpaid{background:var(--amber-soft);color:var(--amber);}
   .badge.paid{background:var(--sage-soft);color:var(--sage);}
   .badge.overdue{background:var(--clay-soft);color:var(--clay);}
-  .badge.muted{background:#E4E1D6;color:var(--ink-soft);}
+  .badge.muted{background:var(--border);color:var(--ink-soft);}
 
   .empty{padding:40px 20px;text-align:center;color:var(--ink-soft);border:1px dashed var(--border);border-radius:8px;background:var(--surface);}
   .empty .display{font-size:17px;color:var(--ink);margin-bottom:4px;}
 
   /* Kanban */
-  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:start;}
-  .kcol{background:var(--parchment);border-radius:8px;padding:10px;min-height:120px;border-top:3px solid var(--accent, var(--amber));}
+  .kanban{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;align-items:start;}
+  .kcol{background:var(--parchment);border-radius:8px;padding:10px;min-height:120px;border-top:3px solid var(--accent, var(--amber));transition:outline .1s;}
+  .kcol.dragover{outline:2px dashed var(--accent, var(--amber));outline-offset:-4px;}
   .kcol-head{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink-soft);padding:2px 4px 10px;}
-  .kcard{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:10px 11px;margin-bottom:9px;position:relative;}
+  .kcard{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:10px 11px;margin-bottom:9px;position:relative;cursor:grab;}
+  .kcard.dragging{opacity:0.4;}
   .kcard .ledger-no{position:absolute;top:8px;right:10px;}
   .kcard .ktitle{font-weight:500;font-size:13px;margin-bottom:4px;padding-right:36px;}
   .kcard .kcontact{font-size:11.5px;color:var(--ink-soft);margin-bottom:6px;}
@@ -198,6 +225,38 @@
   .overlay{display:none;position:fixed;inset:0;background:rgba(42,40,32,0.4);align-items:center;justify-content:center;z-index:50;}
   .overlay.show{display:flex;}
   .modal{background:var(--surface);border-radius:10px;padding:24px 26px;width:420px;max-width:90vw;max-height:86vh;overflow-y:auto;}
+  .modal.modal-guide{width:600px;max-width:92vw;padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:84vh;}
+  .guide-modal-head{background:linear-gradient(135deg,var(--setup-blue),#5B8FF6);color:#fff;padding:26px 30px 22px;flex-shrink:0;}
+  .guide-modal-head .gm-icon{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+  .guide-modal-head .gm-icon svg{width:20px;height:20px;}
+  .guide-modal-head h2{margin:0 0 5px;font-size:21px;color:#fff;}
+  .guide-modal-head p{margin:0;font-size:12.5px;opacity:0.9;line-height:1.5;}
+  .guide-modal-body{padding:8px 30px;overflow-y:auto;flex:1;}
+  .guide-modal-body.empty{padding:34px 30px;}
+  .guide-note{display:flex;gap:13px;padding:16px 0;border-bottom:1px solid var(--border);}
+  .guide-note:last-child{border-bottom:none;}
+  .guide-note-num{width:26px;height:26px;border-radius:50%;background:var(--setup-blue-soft);color:var(--setup-blue);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .guide-note-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
+  .guide-note-title{font-weight:700;font-size:13.5px;font-family:'Fraunces',serif;}
+  .guide-note-tag{font-size:10px;font-weight:700;color:var(--setup-blue);background:var(--setup-blue-soft);border-radius:10px;padding:2px 9px;text-transform:uppercase;letter-spacing:0.3px;}
+  .guide-note-body{color:var(--ink-soft);font-size:12.8px;line-height:1.6;}
+  .guide-modal-foot{padding:16px 30px 22px;border-top:1px solid var(--border);flex-shrink:0;}
+  .guide-dontshow{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-soft);cursor:pointer;margin-bottom:14px;}
+  .guide-dontshow input{width:auto;}
+  .guide-modal-actions{display:flex;justify-content:flex-end;gap:10px;}
+
+  /* Interactive walkthrough */
+  .tour-overlay{position:fixed;inset:0;z-index:9990;}
+  .tour-blocker{position:fixed;inset:0;background:transparent;}
+  .tour-spot{position:fixed;border-radius:9px;box-shadow:0 0 0 9999px rgba(20,18,12,0.6);pointer-events:none;transition:top .25s ease,left .25s ease,width .25s ease,height .25s ease;outline:2px solid var(--setup-blue);outline-offset:2px;}
+  .tour-card{position:fixed;width:340px;max-width:calc(100vw - 32px);background:var(--surface);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,0.28);padding:18px 20px 16px;transition:top .25s ease,left .25s ease;}
+  .tour-card-eyebrow{font-size:10.5px;font-weight:700;color:var(--setup-blue);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;}
+  .tour-card-title{font-family:'Fraunces',serif;font-weight:700;font-size:15.5px;color:var(--ink);margin-bottom:6px;}
+  .tour-card-body{font-size:12.8px;color:var(--ink-soft);line-height:1.55;margin-bottom:12px;}
+  .tour-progress{display:flex;gap:4px;margin-bottom:14px;}
+  .tour-progress span{width:16px;height:3px;border-radius:2px;background:var(--border);}
+  .tour-progress span.on{background:var(--setup-blue);}
+  .tour-card-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;}
   .modal h2{margin:0 0 16px;font-size:17px;font-weight:500;}
   .field{margin-bottom:12px;}
   .field label{display:block;font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;}
@@ -207,11 +266,47 @@
 
   .loading{padding:60px;text-align:center;color:var(--ink-soft);}
   .shared-note{font-size:11px;color:var(--ink-soft);margin-top:14px;line-height:1.5;}
+  .readonly-note{background:var(--cream);border:1px solid var(--border);color:var(--ink-soft);border-radius:8px;padding:9px 14px;font-size:12px;margin-bottom:14px;}
+  .required-field-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px 12px;}
+  .required-field-row{display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer;}
+  .required-field-row input{width:auto;}
+  .flow-steps{display:flex;flex-direction:column;gap:8px;margin:6px 0;}
+  .flow-step-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:8px 10px;}
+  .flow-step-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:0.3px;flex-shrink:0;}
+  .flow-step-badge.cond{background:var(--setup-blue-soft);color:var(--setup-blue);}
+  .flow-step-badge.act{background:var(--amber-soft);color:var(--amber);}
+  .flow-step-row select,.flow-step-row input{padding:5px 8px;border-radius:6px;border:1px solid var(--border);font-family:inherit;font-size:12px;background:var(--surface);color:var(--ink);}
+  .flow-step-remove{margin-left:auto;cursor:pointer;color:var(--ink-soft);font-size:13px;padding:2px 4px;flex-shrink:0;}
+  .flow-step-remove:hover{color:#B4232C;}
+  .schema-legend{display:flex;gap:20px;margin-top:14px;font-size:11.5px;color:var(--ink-soft);flex-wrap:wrap;}
+  .schema-legend-line{display:inline-block;width:24px;height:0;border-top:2px solid var(--setup-blue);margin-right:6px;vertical-align:middle;}
+  .schema-legend-line.dashed{border-top:1.5px dashed var(--ink-soft);}
+  .theme-toggle{display:flex;gap:2px;background:var(--cream);border:1px solid var(--border);border-radius:7px;padding:2px;margin-bottom:12px;}
+  .theme-toggle button{flex:1;padding:5px 0;border:none;border-radius:5px;background:none;color:var(--ink-soft);font-family:inherit;font-size:11px;font-weight:500;cursor:pointer;}
+  .theme-toggle button.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,0.08);}
 
   /* Dashboard hello + donut */
   .hello{margin-bottom:22px;}
   .hello .hi{font-size:30px;font-weight:500;margin:0;}
   .hello .sub2{color:var(--ink-soft);font-size:13px;margin-top:4px;}
+  .dash-tabs{display:flex;align-items:center;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+  .dash-tab{padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-family:inherit;font-size:12.5px;color:var(--ink-soft);cursor:pointer;}
+  .dash-tab.active{background:var(--ink-fixed);color:#fff;border-color:var(--ink-fixed);}
+  .setup-tabs .dash-tab.active{background:var(--setup-blue);border-color:var(--setup-blue);}
+  .setup-banner{background:var(--setup-blue-soft);color:var(--setup-blue);border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .help-tip{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--border);color:var(--ink-soft);font-size:10px;font-weight:700;cursor:help;margin-left:5px;vertical-align:middle;}
+  .formula-wizard{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:8px;}
+  .formula-wizard .fw-label{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 6px;}
+  .formula-wizard .fw-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .fw-chip{padding:4px 10px;border-radius:14px;border:1px solid var(--border);background:var(--surface);font-family:inherit;font-size:11.5px;color:var(--ink);cursor:pointer;}
+  .fw-chip:hover{border-color:var(--setup-blue);color:var(--setup-blue);}
+  .fw-chip.op{font-family:'IBM Plex Mono',monospace;font-weight:600;}
+  #vr_formula{width:100%;min-height:64px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;padding:9px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink);resize:vertical;box-sizing:border-box;}
+  .fw-test-result{font-size:12px;margin-top:8px;padding:7px 10px;border-radius:7px;display:none;}
+  .fw-test-result.ok{display:block;background:var(--setup-blue-soft);color:var(--setup-blue);}
+  .fw-test-result.err{display:block;background:#FCE7E7;color:#B4232C;}
+  .dash-tab-add{background:none;border-style:dashed;color:var(--amber);}
+  .dash-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;}
   .donut-wrap{display:flex;align-items:center;gap:34px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-bottom:24px;flex-wrap:wrap;}
   .donut{width:220px;height:220px;border-radius:50%;flex-shrink:0;position:relative;}
   .donut-hole{position:absolute;top:50%;left:50%;width:128px;height:128px;background:var(--surface);border-radius:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;}
@@ -226,7 +321,7 @@
   .donut-empty{color:var(--ink-soft);font-size:13px;}
   .chart-toggle{display:flex;gap:4px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
   .chart-toggle-btn{padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:var(--cream);font-family:inherit;font-size:11.5px;color:var(--ink-soft);cursor:pointer;}
-  .chart-toggle-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .chart-toggle-btn.active{background:var(--ink-fixed);color:#fff;border-color:var(--ink-fixed);}
   .bar-chart{display:flex;flex-direction:column;gap:10px;flex:1;min-width:280px;}
   .bar-row{display:grid;grid-template-columns:90px 1fr 32px;align-items:center;gap:10px;cursor:pointer;}
   .bar-label{font-size:12.5px;color:var(--ink-soft);}
@@ -308,7 +403,7 @@
   }
 
   /* Toast */
-  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;box-shadow:0 8px 24px rgba(42,40,32,0.25);opacity:0;transition:opacity .25s,transform .25s;z-index:300;max-width:80vw;text-align:center;}
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--ink-fixed);color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,0.3);opacity:0;transition:opacity .25s,transform .25s;z-index:300;max-width:80vw;text-align:center;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
   /* Login screen */
@@ -326,7 +421,7 @@
   .identity-name{font-size:13px;font-weight:500;color:var(--ink);padding:6px 0 2px;}
 
   /* Individual / Company badges */
-  .badge.individual{background:#E4E1D6;color:var(--ink-soft);}
+  .badge.individual{background:var(--border);color:var(--ink-soft);}
   .badge.company{background:var(--olive-soft);color:var(--olive);}
 
   /* Currency picklist + chips */
@@ -347,13 +442,29 @@
   .dpipe-step.current .dpipe-label{color:var(--ink);font-weight:600;}
 
   /* Top navbar */
-  .topnav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:var(--ink);padding:0 22px;height:44px;flex-shrink:0;}
-  .topnav-group{display:flex;align-items:center;gap:4px;}
+  .topnav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:var(--ink-fixed);padding:0 22px;height:46px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,0.08);}
+  .topnav-group{display:flex;align-items:center;gap:2px;height:100%;}
+  .topnav-group-right{justify-content:flex-end;gap:10px;}
   .topnav-center{display:flex;justify-content:center;}
-  .topnav-btn{display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:6px;font-family:'Work Sans',sans-serif;font-size:12.5px;font-weight:500;color:rgba(255,255,255,0.72);background:none;border:none;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
-  .topnav-btn:hover{background:rgba(255,255,255,0.1);color:#fff;}
-  .topnav-btn.tnav-active{background:rgba(255,255,255,0.15);color:#fff;}
-  .topnav-icon{font-size:14px;line-height:1;}
+  .topnav-btn{display:flex;align-items:center;gap:7px;padding:0 12px;height:100%;font-family:'Work Sans',sans-serif;font-size:12.5px;font-weight:500;letter-spacing:0.1px;color:rgba(255,255,255,0.66);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:background .15s,color .15s,border-color .15s;white-space:nowrap;}
+  .topnav-btn svg{width:15px;height:15px;flex-shrink:0;opacity:0.85;}
+  .topnav-btn:hover{background:rgba(255,255,255,0.06);color:#fff;}
+  .topnav-btn.tnav-active{color:#fff;border-bottom-color:var(--setup-blue);background:rgba(255,255,255,0.04);}
+  .topnav-qa{display:flex;align-items:center;gap:2px;}
+  .topnav-qa-scroll{overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;max-width:340px;}
+  .topnav-qa-scroll::-webkit-scrollbar{display:none;}
+  .qa-scroll-btn{background:none;border:none;color:rgba(255,255,255,0.55);cursor:pointer;padding:0 3px;font-size:16px;line-height:1;flex-shrink:0;}
+  .qa-scroll-btn:hover{color:#fff;}
+  .qa-btn{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;font-family:'Work Sans',sans-serif;font-size:12px;font-weight:500;color:rgba(255,255,255,0.72);background:rgba(255,255,255,0.06);border:none;cursor:pointer;white-space:nowrap;}
+  .qa-btn:hover{background:rgba(255,255,255,0.14);color:#fff;}
+  .qa-btn svg{width:13px;height:13px;flex-shrink:0;}
+  .qa-add-btn{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;border:1px dashed rgba(255,255,255,0.3);background:none;color:rgba(255,255,255,0.55);cursor:pointer;flex-shrink:0;}
+  .qa-add-btn:hover{color:#fff;border-color:rgba(255,255,255,0.6);}
+  .qa-add-btn svg{width:13px;height:13px;}
+  .qa-picker-list{display:flex;flex-direction:column;gap:2px;margin:8px 0 4px;}
+  .qa-picker-opt{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;}
+  .qa-picker-opt:hover{background:var(--cream);}
+  .qa-picker-opt input{width:auto;}
 
   /* Search screen */
   .search-bar-wrap{display:flex;gap:10px;margin-bottom:20px;}
@@ -411,12 +522,32 @@
 
   /* Import / Export */
   .io-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-  .io-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px 24px;}
+  .io-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px 24px;max-width:100%;overflow-x:auto;}
   .io-card h3{margin:0 0 4px;font-size:15px;font-weight:500;}
   .io-card p{color:var(--ink-soft);font-size:12.5px;margin:0 0 16px;line-height:1.5;}
   .io-dropzone{border:1px dashed var(--border);border-radius:8px;padding:20px;text-align:center;color:var(--ink-soft);font-size:12.5px;margin-top:12px;}
   .io-status{margin-top:12px;font-size:12.5px;color:var(--sage);min-height:1.2em;}
   .io-status.error{color:var(--rust);}
+  .export-check-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;max-height:200px;overflow-y:auto;padding-right:4px;}
+  .export-check-row{display:flex;align-items:center;gap:8px;font-size:13px;}
+  .export-check-row input{accent-color:var(--amber);width:14px;height:14px;margin:0;}
+  .export-check-actions{display:flex;gap:10px;margin-bottom:10px;}
+  .export-check-actions span{font-size:11.5px;color:var(--amber);cursor:pointer;text-decoration:underline;}
+  .io-source-tabs{display:flex;gap:6px;margin-bottom:14px;}
+  .io-source-tab{padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--cream);font-size:12px;cursor:pointer;color:var(--ink-soft);}
+  .io-source-tab.active{background:var(--ink-fixed);color:#fff;border-color:var(--ink-fixed);}
+  .io-source-pane{display:none;}
+  .io-source-pane.active{display:block;}
+  .map-table{border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:12px;background:var(--cream);}
+  .map-table-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+  .map-table-head select{padding:5px 8px;border-radius:6px;border:1px solid var(--border);font-family:inherit;font-size:12.5px;background:var(--surface);color:var(--ink);}
+  .map-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;}
+  .map-row{display:flex;align-items:center;gap:8px;}
+  .map-field-name{font-size:12px;color:var(--ink-soft);min-width:90px;flex-shrink:0;}
+  .map-col-name{display:flex;flex-direction:column;min-width:110px;flex-shrink:0;max-width:160px;}
+  .map-col-header{font-size:12px;font-weight:600;color:var(--ink);word-break:break-word;}
+  .map-col-sample{font-size:10.5px;color:var(--ink-soft);font-style:italic;word-break:break-word;}
+  .map-row select{flex:1;padding:5px 7px;border-radius:6px;border:1px solid var(--border);font-family:inherit;font-size:12.5px;background:var(--surface);color:var(--ink);}
 
   /* Lead status badges (reuse existing 5 stages) */
   .badge.new{background:var(--amber-soft);color:var(--amber);}
@@ -454,10 +585,14 @@
 
 <div id="app" style="display:none;">
   <aside class="sidebar">
-    <div class="brand display">SWG</div>
-    <div class="brand-sub">CRM Ledger</div>
-    <div class="navlink active" data-view="dashboard"><span class="dot"></span>Dashboard</div>
+    <div class="brand-row">
+      <div class="brand display">SWG</div>
+      <button type="button" id="setupGearBtn" class="setup-gear" title="Setup" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 13.5a1.7 1.7 0 0 0 .34 1.87l.06.06a2.06 2.06 0 1 1-2.92 2.92l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V20a2.06 2.06 0 1 1-4.12 0v-.09a1.7 1.7 0 0 0-1.11-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2.06 2.06 0 1 1-2.92-2.92l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H4a2.06 2.06 0 1 1 0-4.12h.09a1.7 1.7 0 0 0 1.55-1.11 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2.06 2.06 0 1 1 2.92-2.92l.06.06a1.7 1.7 0 0 0 1.87.34H10a1.7 1.7 0 0 0 1-1.55V4a2.06 2.06 0 1 1 4.12 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2.06 2.06 0 1 1 2.92 2.92l-.06.06a1.7 1.7 0 0 0-.34 1.87V10a1.7 1.7 0 0 0 1.55 1H20a2.06 2.06 0 1 1 0 4.12h-.09a1.7 1.7 0 0 0-1.55 1Z"/></svg>
+      </button>
+    </div>
     <div class="navlink" data-view="home"><span class="dot"></span>Home</div>
+    <div class="navlink active" data-view="dashboard"><span class="dot"></span>Dashboard</div>
     <div class="navlink" data-view="contacts"><span class="dot"></span>Contacts</div>
     <div class="navlink" data-view="leads"><span class="dot"></span>Leads</div>
     <div class="navlink" data-view="customers"><span class="dot"></span>Customers</div>
@@ -471,39 +606,54 @@
     <div class="navlink" data-view="emails"><span class="dot"></span>Emails</div>
     <div class="navlink" data-view="team"><span class="dot"></span>Team</div>
     <div class="sidebar-foot">
+      <div class="theme-toggle" id="themeToggle">
+        <button type="button" data-theme-choice="system" title="Match system">Auto</button>
+        <button type="button" data-theme-choice="light" title="Light theme">Light</button>
+        <button type="button" data-theme-choice="dark" title="Dark theme">Dark</button>
+      </div>
       <div id="identityAdmin" style="display:none;">
         <div class="foot-label">Viewing as</div>
         <select id="viewingAs"></select>
       </div>
       <div id="identityStatic" style="display:none;">
         <div class="foot-label">Logged in as</div>
-        <div class="identity-name" id="identityName">—</div>
+        <div class="identity-row" id="identityRow"><div class="identity-name" id="identityName">—</div></div>
       </div>
       <button class="reset-btn" id="logoutBtn" style="margin-top:10px;">Log out</button>
       <button class="reset-btn" id="resetBtn">Clear all data</button>
       <div class="shared-note">Shared with the whole SWG team — everyone sees the same data.</div>
     </div>
   </aside>
-  <main id="mainArea" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+  <main id="mainArea" style="display:flex;flex-direction:column;flex:1;min-width:0;overflow:hidden;">
     <nav class="topnav">
       <div class="topnav-group">
-        <button class="topnav-btn" id="tn-dashboard"><span class="topnav-icon">📊</span>Dashboard</button>
-        <button class="topnav-btn" id="tn-contacts"><span class="topnav-icon">👥</span>Contacts</button>
-        <button class="topnav-btn" id="tn-home"><span class="topnav-icon">🏠</span>Home</button>
-        <button class="topnav-btn" id="tn-export"><span class="topnav-icon">📤</span>Import / Export</button>
+        <button class="topnav-btn" id="tn-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9.5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V10"/></svg>Home</button>
+        <button class="topnav-btn" id="tn-dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.3"/><rect x="14" y="3" width="7" height="5" rx="1.3"/><rect x="14" y="12" width="7" height="9" rx="1.3"/><rect x="3" y="16" width="7" height="5" rx="1.3"/></svg>Dashboard</button>
+        <button class="topnav-btn" id="tn-contacts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="9" r="2.4"/><path d="M15.8 14.2c2.7.4 4.7 2.7 4.7 5.4"/></svg>Contacts</button>
+        <button class="topnav-btn" id="tn-export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 19h16"/></svg>Import / Export</button>
       </div>
       <div class="topnav-center">
-        <button class="topnav-btn" id="tn-search"><span class="topnav-icon">🔍</span>Search</button>
+        <button class="topnav-btn" id="tn-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.3-4.3"/></svg>Search</button>
       </div>
-      <div class="topnav-group"></div>
+      <div class="topnav-group topnav-group-right">
+        <button type="button" class="qa-scroll-btn" id="qaScrollLeft" title="Scroll quick actions left" style="display:none;">‹</button>
+        <div class="topnav-qa-scroll" id="topnavQaScroll"><div class="topnav-qa" id="topnavQa"></div></div>
+        <button type="button" class="qa-scroll-btn" id="qaScrollRight" title="Scroll quick actions right" style="display:none;">›</button>
+      </div>
     </nav>
-    <div style="flex:1;overflow-y:auto;padding:28px 34px;">
+    <div style="flex:1;min-width:0;overflow-y:auto;overflow-x:hidden;padding:28px 34px;">
       <div class="topbar">
-        <div>
-          <h1 class="display" id="pageTitle">Dashboard</h1>
-          <div class="sub" id="pageSub">Overview of contacts, deals and orders</div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <button type="button" class="setup-back-btn" id="setupBackBtn" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg>Back</button>
+          <div>
+            <h1 class="display" id="pageTitle">Dashboard</h1>
+            <div class="sub" id="pageSub">Overview of contacts, deals and orders</div>
+          </div>
         </div>
-        <button class="btn" id="addBtn" style="display:none;">+ Add</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button type="button" class="setup-back-btn" id="topbarGuideBtn" title="Take a guided walkthrough of this page" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.3 9a2.7 2.7 0 1 1 3.9 2.4c-.9.5-1.2 1-1.2 2"/><circle cx="12" cy="16.6" r=".3" fill="currentColor"/></svg>Guide</button>
+          <button class="btn" id="addBtn" style="display:none;">+ Add</button>
+        </div>
       </div>
       <div id="content"><div class="loading">Loading ledger…</div></div>
     </div>
@@ -532,7 +682,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', emailLog:[], emailPreview:null };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -582,13 +732,23 @@ const TSTATUS = ['Open','Done'];
 const TSTATUS_NEW = ['Open']; // no Done on creation
 const ISTATUS = ['Unpaid','Paid','Overdue'];
 const PAYEE_TYPES = [
-  {key:'team', label:'Team member'},
-  {key:'supplier', label:'Supplier'},
-  {key:'distributor', label:'Distributor'},
-  {key:'customer', label:'Customer'},
-  {key:'other', label:'Other'},
+  {key:'team', label:'Team member (monthly work)'},
+  {key:'supplier', label:'External payee — Supplier'},
+  {key:'distributor', label:'External payee — Distributor'},
+  {key:'customer', label:'External payee — Customer'},
+  {key:'other', label:'External payee — Other'},
 ];
 const PSTATUS = ['Pending','Paid'];
+const QUICK_ACTION_LIBRARY = [
+  {key:'new_contact', label:'New Contact', view:'contacts', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="9" r="2.4"/><path d="M15.8 14.2c2.7.4 4.7 2.7 4.7 5.4"/></svg>'},
+  {key:'new_lead', label:'New Lead', view:'leads', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>'},
+  {key:'new_deal', label:'New Deal', view:'deals', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h6l2-3 4 6 2-3h4"/></svg>'},
+  {key:'new_task', label:'New Task', view:'tasks', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11.5 11 13.5 15.5 9"/><rect x="3.5" y="4" width="17" height="16" rx="2.3"/></svg>'},
+  {key:'new_invoice', label:'New Invoice', view:'invoices', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M9 10h6M9 14h6M9 18h3"/></svg>'},
+  {key:'new_payment', label:'New Payment', view:'payments', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>'},
+  {key:'go_search', label:'Search', view:null, icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.3-4.3"/></svg>'},
+];
+const QUICK_ACTION_MAX = 3;
 function payeeSelectHTML(type, item){
   const selected = item ? item.payee : '';
   if(type==='team') return `<select id="f_payeeSel">${teamNames().map(n=>`<option ${selected===n?'selected':''}>${esc(n)}</option>`).join('')}</select>`;
@@ -616,7 +776,7 @@ const LINKTYPES_PRIV = [
 ];
 const COUNTRIES = ['Afghanistan','Albania','Algeria','Andorra','Angola','Antigua and Barbuda','Argentina','Armenia','Australia','Austria','Azerbaijan','Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize','Benin','Bhutan','Bolivia','Bosnia and Herzegovina','Botswana','Brazil','Brunei','Bulgaria','Burkina Faso','Burundi','Cabo Verde','Cambodia','Cameroon','Canada','Central African Republic','Chad','Chile','China','Colombia','Comoros','Congo','Costa Rica','Croatia','Cuba','Cyprus','Czech Republic','Denmark','Djibouti','Dominica','Dominican Republic','Ecuador','Egypt','El Salvador','Equatorial Guinea','Eritrea','Estonia','Eswatini','Ethiopia','Fiji','Finland','France','Gabon','Gambia','Georgia','Germany','Ghana','Greece','Grenada','Guatemala','Guinea','Guinea-Bissau','Guyana','Haiti','Honduras','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Jamaica','Japan','Jordan','Kazakhstan','Kenya','Kiribati','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Lesotho','Liberia','Libya','Liechtenstein','Lithuania','Luxembourg','Madagascar','Malawi','Malaysia','Maldives','Mali','Malta','Marshall Islands','Mauritania','Mauritius','Mexico','Micronesia','Moldova','Monaco','Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nauru','Nepal','Netherlands','New Zealand','Nicaragua','Niger','Nigeria','North Korea','North Macedonia','Norway','Oman','Pakistan','Palau','Palestine','Panama','Papua New Guinea','Paraguay','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Rwanda','Saint Kitts and Nevis','Saint Lucia','Saint Vincent and the Grenadines','Samoa','San Marino','Sao Tome and Principe','Saudi Arabia','Senegal','Serbia','Seychelles','Sierra Leone','Singapore','Slovakia','Slovenia','Solomon Islands','Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka','Sudan','Suriname','Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Timor-Leste','Togo','Tonga','Trinidad and Tobago','Tunisia','Turkey','Turkmenistan','Tuvalu','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States','Uruguay','Uzbekistan','Vanuatu','Vatican City','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe'];
 const ACCENTS = {
-  dashboard:'var(--ink)', home:'var(--amber)', contacts:'var(--amber)', leads:'var(--ochre)', customers:'var(--sage)',
+  dashboard:'var(--ink-fixed)', home:'var(--amber)', contacts:'var(--amber)', leads:'var(--ochre)', customers:'var(--sage)',
   distributors:'var(--umber)', suppliers:'var(--clay)', deals:'var(--ochre)', orders:'var(--umber)',
   tasks:'var(--olive)', invoices:'var(--rust)', payments:'var(--rust)', team:'var(--ink)', finance:'var(--sage)',
   emails:'var(--umber)', search:'var(--ink)', rickroll:'var(--ink)'
@@ -681,6 +841,38 @@ function isAdmin(){ return state.currentUser === FULL_ADMIN || CO_ADMINS.include
 function canDeleteUsers(){ return state.currentUser === FULL_ADMIN; }
 function canSeeLeads(){ return !LEAD_HIDDEN_FOR.includes(state.viewingAs); }
 function teamNames(){ return state.team.map(t=>t.name); }
+const AVATAR_COLORS = ['#6F4A30','#A8703C','#4C7A6B','#3E5C8A','#8A4B5C','#6B5B95','#B4682F','#2E6F5E'];
+function avatarInitials(name){
+  const parts = String(name||'').trim().split(/\s+/);
+  return ((parts[0]?.[0]||'') + (parts[1]?.[0]||'')).toUpperCase() || '?';
+}
+function avatarColor(name){
+  let hash = 0;
+  const s = String(name||'');
+  for(let i=0;i<s.length;i++) hash = s.charCodeAt(i) + ((hash<<5)-hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+function avatarHTML(name, size){
+  const px = size==='sm' ? 26 : 40;
+  const fontSize = size==='sm' ? 10.5 : 14;
+  return `<div class="avatar" style="width:${px}px;height:${px}px;background:${avatarColor(name)};font-size:${fontSize}px;">${esc(avatarInitials(name))}</div>`;
+}
+const ROLE_LIST = ['Admin','Manager','Sales Rep','Marketing','Support'];
+function currentTeamRecord(){ return state.team.find(t=>t.name===state.currentUser); }
+function roleFor(name){
+  const rec = state.team.find(t=>t.name===name);
+  if(rec && rec.role) return rec.role;
+  if(name===FULL_ADMIN) return 'Admin';
+  if(CO_ADMINS.includes(name)) return 'Manager';
+  return 'Sales Rep';
+}
+function canAccessSetup(){ return isAdmin() || roleFor(state.currentUser)==='Manager'; }
+function canEditGlobalSetup(){ return isAdmin(); }
+function isArielOrDaniel(){ return state.currentUser===FULL_ADMIN || state.currentUser==='Daniel'; }
+function canEditRoles(){ return isArielOrDaniel(); }
+function canEditBigDealAlert(){ return isArielOrDaniel(); }
+function canEditRequiredFields(){ return isAdmin() || state.currentUser==='Daniel'; }
+function canEditDependentFields(){ return isAdmin(); }
 
 const DEFAULT_TEAM = [
   {name:'Ariel', email:'ariel@siddhayogaweb.com'},
@@ -689,7 +881,6 @@ const DEFAULT_TEAM = [
   {name:'Kfir', email:'kfir@siddhayogaweb.com'},
   {name:'David', email:'david@siddhayogaweb.com'},
   {name:'Nishant', email:'nishant@siddhayogaweb.com'},
-  {name:'Elianna', email:'elianna@siddhayogaweb.com'},
 ];
 const APP_PASSWORD = 'siddhayoga';
 let teamLoadPromise = null;
@@ -825,16 +1016,17 @@ function linkItemsFor(type){
 }
 
 /* Multi-select picklist builder */
-function msHTML(id, options, selected=[]){
+function msHTML(id, options, selected=[], maxSelect=null){
   const label = selected.length ? selected.map(s=>`${s} (${CURRENCY_SYMBOLS[s]||s})`).join(', ') : 'Select…';
   return `<div class="ms-wrap" id="${id}_wrap">
     <button type="button" class="ms-trigger" id="${id}_btn">
       <span class="ms-chips" id="${id}_label">${esc(label)}</span>
       <span class="ms-arrow">▾</span>
     </button>
-    <div class="ms-dropdown" id="${id}_dd">
+    <div class="ms-dropdown" id="${id}_dd" ${maxSelect?`data-max-select="${maxSelect}"`:''}>
       ${options.map(o=>`<label class="ms-option"><input type="checkbox" value="${esc(o)}" ${selected.includes(o)?'checked':''}> ${esc(o)}${CURRENCY_SYMBOLS[o]?' ('+CURRENCY_SYMBOLS[o]+')':''}</label>`).join('')}
     </div>
+    ${maxSelect?`<div style="color:var(--ink-soft);font-size:11px;margin-top:4px;">Up to ${maxSelect} currencies.</div>`:''}
   </div>`;
 }
 function msRead(id){
@@ -845,6 +1037,7 @@ function msInit(id){
   const dd = document.getElementById(`${id}_dd`);
   const lbl = document.getElementById(`${id}_label`);
   if(!btn||!dd) return;
+  const maxSelect = Number(dd.dataset.maxSelect) || null;
   btn.onclick = (e)=>{ e.preventDefault(); dd.classList.toggle('open'); };
   document.addEventListener('mousedown', function handler(e){
     const wrap = document.getElementById(`${id}_wrap`);
@@ -852,6 +1045,11 @@ function msInit(id){
   });
   dd.querySelectorAll('input').forEach(cb=>{
     cb.onchange = ()=>{
+      if(maxSelect && cb.checked && msRead(id).length > maxSelect){
+        cb.checked = false;
+        toast(`You can select up to ${maxSelect} currencies.`);
+        return;
+      }
       const vals = msRead(id);
       lbl.textContent = vals.length ? vals.map(v=>`${v}${CURRENCY_SYMBOLS[v]?' ('+CURRENCY_SYMBOLS[v]+')':''}`).join(', ') : 'Select…';
     };
@@ -928,8 +1126,14 @@ function updateNavVisibility(){
   if(financeLink) financeLink.classList.toggle('hidden-role', !isPrivileged());
   const teamLink = document.querySelector('.navlink[data-view="team"]');
   if(teamLink) teamLink.classList.toggle('hidden-role', !isAdmin());
+  const setupGear = document.getElementById('setupGearBtn');
+  if(setupGear){
+    setupGear.style.display = canAccessSetup() ? 'flex' : 'none';
+    setupGear.classList.toggle('active', state.view==='setup');
+  }
   const leadLink = document.querySelector('.navlink[data-view="leads"]');
   if(leadLink) leadLink.classList.toggle('hidden-role', !canSeeLeads());
+  renderTopnavQuickActions();
 }
 
 function render(){
@@ -937,7 +1141,12 @@ function render(){
   if(state.view==='payments' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='finance' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='team' && !isAdmin()) state.view = 'dashboard';
+  if(state.view==='setup' && !canAccessSetup()) state.view = 'dashboard';
   if(state.view==='leads' && !canSeeLeads()) state.view = 'dashboard';
+  const isSetupPage = state.view==='setup';
+  document.querySelector('.sidebar').style.display = isSetupPage ? 'none' : 'flex';
+  document.querySelector('.topnav').style.display = isSetupPage ? 'none' : 'grid';
+  document.getElementById('setupBackBtn').style.display = isSetupPage ? 'flex' : 'none';
   updateNavVisibility();
   populateViewingAsOptions();
   setActiveNav();
@@ -956,6 +1165,7 @@ function render(){
     finance:['Finance','Revenue vs. payments, by source and over time'],
     team:['Team','Manage who has access to the ledger'],
     emails:['Emails','Automated messages the CRM sends on your behalf'],
+    setup:['Setup','Roles, validation rules, automation and sharing'],
     search:['Search','Find anything across all tabs'],
     rickroll:['Import / Export','Move data in and out of the ledger']};
   document.getElementById('pageTitle').innerHTML = `<span class="accent-dot"></span>${titleMap[state.view]?titleMap[state.view][0]:state.view}`;
@@ -966,6 +1176,8 @@ function render(){
   const noAdd = ['dashboard','home','search','rickroll','finance','emails'];
   addBtn.style.display = noAdd.includes(state.view) ? 'none' : 'inline-block';
   addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
+  const guideBtn = document.getElementById('topbarGuideBtn');
+  guideBtn.style.display = state.guideEntries.some(g=>g.linkEntity===state.view) ? 'flex' : 'none';
 
   // topnav active highlights
   document.getElementById('tn-dashboard').classList.toggle('tnav-active', state.view==='dashboard');
@@ -990,7 +1202,8 @@ function render(){
   if(state.view==='finance') c.innerHTML = renderFinance();
   if(state.view==='emails') c.innerHTML = renderEmails();
   if(state.view==='team') c.innerHTML = renderTeam();
-  if(state.view==='search') c.innerHTML = renderSearch();
+  if(state.view==='setup') c.innerHTML = renderSetup();
+  if(state.view==='search') c.innerHTML = renderSearchShell();
   if(state.view==='rickroll') c.innerHTML = renderImportExport();
   attachContentHandlers();
 }
@@ -1005,31 +1218,215 @@ const EXPORT_SHEETS = [
   {key:'orders', label:'Orders', fields:['id','relatedType','relatedId','contactId','product','qty','amount','currencies','status','owner','createdAt']},
   {key:'tasks', label:'Tasks', fields:['id','title','dueDate','owner','status','linkType','linkId','notes','createdAt']},
   {key:'invoices', label:'Invoices', fields:['id','relatedType','relatedId','orderId','amount','currencies','status','dueDate','notes','createdAt']},
-  {key:'payments', label:'Payments', fields:['id','payeeType','payee','purpose','amount','currencies','status','dueDate','notes','owner','createdAt']},
+  {key:'payments', label:'Payments', fields:['id','payeeType','payee','purpose','amount','currency','status','dueDate','notes','owner','createdAt']},
 ];
+
+const EXPORT_ARRAY_FIELDS = new Set(['currencies','continents','subregions']);
+const FIELD_ALIASES = {
+  name:['fullname','contactname','clientname'], email:['emailaddress','e-mail','mail'],
+  phone:['phonenumber','tel','telephone','mobile'], amount:['value','total','price','cost'],
+  company:['companyname','organization','organisation','business'], notes:['note','comments','comment','description'],
+  status:['stage'], dueDate:['due','duedate','deadline'], title:['name','subject'],
+  purpose:['reason','description'], payee:['name','recipient'], product:['item','sku'],
+};
+function normKey(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,''); }
+function prettyField(f){
+  const s = f.replace(/Id$/,' Id').replace(/([a-z0-9])([A-Z])/g,'$1 $2');
+  return s.charAt(0).toUpperCase()+s.slice(1);
+}
+function autoMatchHeader(field, headers){
+  const nf = normKey(field);
+  let m = headers.find(h=>normKey(h)===nf);
+  if(m) return m;
+  const aliases = FIELD_ALIASES[field]||[];
+  m = headers.find(h=>aliases.some(a=>normKey(h)===normKey(a)));
+  return m || '';
+}
+function guessEntityForTable(name, headers){
+  const byName = EXPORT_SHEETS.find(s=>normKey(s.label)===normKey(name) || normKey(s.key)===normKey(name));
+  if(byName) return byName.key;
+  let best=null, bestScore=0;
+  EXPORT_SHEETS.forEach(s=>{
+    const score = s.fields.filter(f=>f!=='id'&&f!=='createdAt').filter(f=>headers.some(h=>normKey(h)===normKey(f))).length;
+    if(score>bestScore){ bestScore=score; best=s.key; }
+  });
+  return bestScore>=1 ? best : '';
+}
+function buildImportTables(raw){
+  return raw.map(t=>{
+    const entityKey = guessEntityForTable(t.name, t.headers);
+    const fieldMap = {};
+    if(entityKey){
+      const sheetDef = EXPORT_SHEETS.find(s=>s.key===entityKey);
+      sheetDef.fields.filter(f=>f!=='id'&&f!=='createdAt').forEach(f=>{ fieldMap[f] = autoMatchHeader(f, t.headers); });
+    }
+    return { name:t.name, headers:t.headers, rows:t.rows, entityKey, fieldMap };
+  });
+}
+function coerceFieldValue(field, raw){
+  if(raw===undefined || raw===null || raw==='') return EXPORT_ARRAY_FIELDS.has(field) ? [] : '';
+  if(EXPORT_ARRAY_FIELDS.has(field)) return String(raw).split(',').map(s=>s.trim()).filter(Boolean);
+  if(field==='value' || field==='amount' || field==='qty') return Number(raw)||0;
+  return String(raw).trim();
+}
+function tablesFromWorkbook(wb){
+  return wb.SheetNames.map(name=>{
+    const ws = wb.Sheets[name];
+    const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+    const headers = rows.length ? Object.keys(rows[0]) : (XLSX.utils.sheet_to_json(ws, {header:1})[0]||[]);
+    return { name, headers, rows };
+  }).filter(t=>t.headers.length && t.rows.length);
+}
+async function parseExcelFile(file){
+  const data = await file.arrayBuffer();
+  const wb = XLSX.read(data, {type:'array'});
+  return tablesFromWorkbook(wb);
+}
+async function parseGoogleSheetUrl(url){
+  const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  if(!m) throw new Error("That doesn't look like a Google Sheets link.");
+  const gidMatch = url.match(/[?#&]gid=([0-9]+)/);
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${m[1]}/export?format=csv&gid=${gidMatch?gidMatch[1]:'0'}`;
+  const res = await fetch(csvUrl);
+  if(!res.ok) throw new Error('Could not fetch that sheet. Make sure sharing is set to "Anyone with the link can view".');
+  const csvText = await res.text();
+  const wb = XLSX.read(csvText, {type:'string'});
+  return tablesFromWorkbook(wb);
+}
+async function parsePdfFile(file){
+  if(typeof pdfjsLib==='undefined') throw new Error('PDF support failed to load — check your connection and try again.');
+  if(!parsePdfFile._workerSet){
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    parsePdfFile._workerSet = true;
+  }
+  const data = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data}).promise;
+  const tables = [];
+  for(let p=1; p<=pdf.numPages; p++){
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    const lines = [];
+    let curY = null, curLine = [];
+    content.items.forEach(it=>{
+      const y = Math.round(it.transform[5]);
+      if(curY===null || Math.abs(y-curY)>3){
+        if(curLine.length) lines.push(curLine);
+        curLine = [it.str]; curY = y;
+      } else {
+        curLine.push(it.str);
+      }
+    });
+    if(curLine.length) lines.push(curLine);
+    const textLines = lines.map(l=>l.join(' ').trim()).filter(Boolean);
+    if(textLines.length<2) continue;
+    const split = l => l.split(/\s{2,}|\t/).map(s=>s.trim()).filter(Boolean);
+    const headerCells = split(textLines[0]);
+    if(headerCells.length<2) continue;
+    const rows = [];
+    for(let i=1;i<textLines.length;i++){
+      const cells = split(textLines[i]);
+      if(cells.length!==headerCells.length) continue;
+      const row = {};
+      headerCells.forEach((h,idx)=>row[h]=cells[idx]);
+      rows.push(row);
+    }
+    if(rows.length) tables.push({name:`PDF page ${p}`, headers:headerCells, rows});
+  }
+  return tables;
+}
+
+let importTables = [];
+
+function renderExportChecklist(){
+  return `<div class="export-check-actions"><span data-export-all="1">Select all</span><span data-export-none="1">Select none</span></div>
+  <div class="export-check-list">
+    ${EXPORT_SHEETS.map(s=>`<label class="export-check-row"><input type="checkbox" data-export-key="${s.key}" checked> ${esc(s.label)} <span class="mono" style="color:var(--ink-soft);font-size:11px;">(${(state[s.key]||[]).length})</span></label>`).join('')}
+  </div>`;
+}
+
+function renderImportMapping(){
+  if(!importTables.length) return '';
+  return `<div class="io-card" style="margin-top:16px;">
+    <h3 class="display">Map fields</h3>
+    <p>These are the columns found in your file. Pick which CRM field each one should fill in, or leave it as "Don't import".</p>
+    ${importTables.map((t,ti)=>`
+      <div class="map-table">
+        <div class="map-table-head">
+          <strong>${esc(t.name)}</strong>
+          <span style="color:var(--ink-soft);font-size:11.5px;">${t.rows.length} row${t.rows.length===1?'':'s'} · ${t.headers.length} column${t.headers.length===1?'':'s'} found</span>
+          <select data-map-entity="${ti}">
+            <option value="">— Skip this table —</option>
+            ${EXPORT_SHEETS.map(s=>`<option value="${s.key}" ${t.entityKey===s.key?'selected':''}>${esc(s.label)}</option>`).join('')}
+          </select>
+        </div>
+        ${t.entityKey ? `<div class="map-fields">
+          ${t.headers.map(h=>{
+            const mappedField = Object.keys(t.fieldMap).find(f=>t.fieldMap[f]===h) || '';
+            const sampleRaw = t.rows[0] ? String(t.rows[0][h] ?? '').trim() : '';
+            const sample = sampleRaw.length>34 ? sampleRaw.slice(0,34)+'…' : sampleRaw;
+            return `<div class="map-row">
+              <div class="map-col-name">
+                <span class="map-col-header">${esc(h)}</span>
+                ${sample ? `<span class="map-col-sample">e.g. "${esc(sample)}"</span>` : ''}
+              </div>
+              <select data-map-ti="${ti}" data-map-header="${esc(h)}">
+                <option value="">— don't import —</option>
+                ${EXPORT_SHEETS.find(s=>s.key===t.entityKey).fields.filter(f=>f!=='id'&&f!=='createdAt').map(f=>`<option value="${f}" ${mappedField===f?'selected':''}>${esc(prettyField(f))}</option>`).join('')}
+              </select>
+            </div>`;
+          }).join('')}
+        </div>` : `<div style="color:var(--ink-soft);font-size:12px;padding:6px 2px 2px;">Columns in this sheet: ${t.headers.map(h=>esc(h)).join(', ')}</div>`}
+      </div>`).join('')}
+    <div class="modal-actions" style="justify-content:flex-start;">
+      <button class="btn" id="ioRunImportBtn">Import mapped data</button>
+      <button class="btn secondary" id="ioCancelImportBtn">Cancel</button>
+    </div>
+  </div>`;
+}
 
 function renderImportExport(){
   return `<div class="io-grid">
     <div class="io-card">
       <h3 class="display">Export to Excel</h3>
-      <p>Downloads every tab in the ledger as one .xlsx workbook, one sheet per tab. Open it directly, or import it into Google Sheets via File → Import.</p>
+      <p>Choose what to include, then download one .xlsx workbook — one sheet per selection. Open it directly, or import it into Google Sheets via File → Import.</p>
+      ${renderExportChecklist()}
       <button class="btn" id="ioExportBtn">Download .xlsx</button>
       <div class="io-status" id="ioExportStatus"></div>
     </div>
     <div class="io-card">
-      <h3 class="display">Import from Excel</h3>
-      <p>Upload a workbook exported from here (or a matching .csv). Rows are matched by sheet name and merged into the ledger — existing records with the same ID are updated, new ones are added.</p>
-      <input type="file" id="ioImportFile" accept=".xlsx,.xls,.csv" style="display:none;">
-      <button class="btn secondary" id="ioImportBtn">Choose file…</button>
-      <div class="io-dropzone" id="ioFileName">No file selected</div>
+      <h3 class="display">Import data</h3>
+      <p>Bring records in from a file, a Google Sheet, or a PDF. You'll map columns to CRM fields before anything is added.</p>
+      <div class="io-source-tabs">
+        <button type="button" class="io-source-tab active" data-io-source="file">Excel / CSV</button>
+        <button type="button" class="io-source-tab" data-io-source="gsheet">Google Sheet</button>
+        <button type="button" class="io-source-tab" data-io-source="pdf">PDF</button>
+      </div>
+      <div class="io-source-pane active" id="ioPane-file">
+        <input type="file" id="ioImportFile" accept=".xlsx,.xls,.csv" style="display:none;">
+        <button class="btn secondary" id="ioImportBtn">Choose file…</button>
+        <div class="io-dropzone" id="ioFileName">No file selected</div>
+      </div>
+      <div class="io-source-pane" id="ioPane-gsheet">
+        <div class="field"><label>Google Sheet link</label><input id="ioGsheetUrl" placeholder="https://docs.google.com/spreadsheets/d/…"></div>
+        <div class="shared-note">The sheet must be shared as "Anyone with the link can view".</div>
+        <button class="btn secondary" id="ioGsheetBtn" style="margin-top:8px;">Fetch sheet</button>
+      </div>
+      <div class="io-source-pane" id="ioPane-pdf">
+        <input type="file" id="ioImportPdf" accept=".pdf" style="display:none;">
+        <button class="btn secondary" id="ioImportPdfBtn">Choose PDF…</button>
+        <div class="io-dropzone" id="ioPdfName">No file selected</div>
+        <div class="shared-note">Best-effort: works well for simple tables with clear columns, and may need manual cleanup for complex layouts.</div>
+      </div>
       <div class="io-status" id="ioImportStatus"></div>
     </div>
-  </div>`;
+  </div>
+  ${renderImportMapping()}`;
 }
 
-function exportWorkbook(){
+function exportWorkbook(selectedKeys){
+  const keys = (selectedKeys && selectedKeys.length) ? selectedKeys : EXPORT_SHEETS.map(s=>s.key);
   const wb = XLSX.utils.book_new();
-  EXPORT_SHEETS.forEach(sheet=>{
+  EXPORT_SHEETS.filter(s=>keys.includes(s.key)).forEach(sheet=>{
     const rows = (state[sheet.key]||[]).map(item=>{
       const row = {};
       sheet.fields.forEach(f=>{
@@ -1046,59 +1443,74 @@ function exportWorkbook(){
   XLSX.writeFile(wb, `swg-crm-export-${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
+async function runImport(){
+  let added=0, updated=0;
+  const touched = new Set();
+  importTables.forEach(t=>{
+    if(!t.entityKey) return;
+    const sheetDef = EXPORT_SHEETS.find(s=>s.key===t.entityKey);
+    const list = state[t.entityKey];
+    const idHeader = t.headers.find(h=>normKey(h)==='id');
+    const createdHeader = t.headers.find(h=>['createdat','created','date'].includes(normKey(h)));
+    t.rows.forEach(row=>{
+      const obj = {};
+      sheetDef.fields.filter(f=>f!=='id'&&f!=='createdAt').forEach(f=>{
+        const h = t.fieldMap[f];
+        obj[f] = coerceFieldValue(f, h ? row[h] : '');
+      });
+      obj.id = idHeader && row[idHeader] ? String(row[idHeader]) : uid();
+      obj.createdAt = createdHeader && row[createdHeader] ? (new Date(row[createdHeader]).getTime()||Date.now()) : Date.now();
+      const idx = list.findIndex(x=>x.id===obj.id);
+      if(idx>=0){ list[idx] = {...list[idx], ...obj}; updated++; }
+      else { list.push(obj); added++; }
+    });
+    touched.add(t.entityKey);
+  });
+  await Promise.all(Array.from(touched).map(k=>dbUpsertMany(k, state[k])));
+  return {added, updated};
+}
+
 async function importWorkbookFile(file){
   const statusEl = document.getElementById('ioImportStatus');
-  if(!statusEl) return;
-  statusEl.textContent = 'Reading file…';
-  statusEl.classList.remove('error');
+  const setImportStatus = (msg, isError)=>{ if(statusEl){ statusEl.textContent = msg; statusEl.classList.toggle('error', !!isError); } };
+  setImportStatus('Reading file…', false);
   try{
-    const data = await file.arrayBuffer();
-    const wb = XLSX.read(data, {type:'array'});
-    let totalAdded = 0, totalUpdated = 0, matchedSheets = 0;
-    wb.SheetNames.forEach(sheetName=>{
-      let sheetDef = EXPORT_SHEETS.find(s=>s.label.toLowerCase()===sheetName.toLowerCase() || s.key.toLowerCase()===sheetName.toLowerCase());
-      const ws = wb.Sheets[sheetName];
-      if(!sheetDef && wb.SheetNames.length===1){
-        const headerRow = XLSX.utils.sheet_to_json(ws, {header:1})[0] || [];
-        let best=null, bestScore=0;
-        EXPORT_SHEETS.forEach(s=>{
-          const score = s.fields.filter(f=>headerRow.includes(f)).length;
-          if(score>bestScore){ bestScore=score; best=s; }
-        });
-        if(best && bestScore>=2) sheetDef = best;
-      }
-      if(!sheetDef) return;
-      matchedSheets++;
-      const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
-      const list = state[sheetDef.key];
-      rows.forEach(row=>{
+    const rawTables = await parseExcelFile(file);
+    if(!rawTables.length) throw new Error('No readable sheets found in that file.');
+    const tables = buildImportTables(rawTables);
+    const matchedSheets = tables.filter(t=>t.entityKey);
+    if(!matchedSheets.length){
+      setImportStatus('No matching sheets found — export from this ledger first to see the expected format.', true);
+      return;
+    }
+    let totalAdded = 0, totalUpdated = 0;
+    const touched = new Set();
+    matchedSheets.forEach(t=>{
+      const sheetDef = EXPORT_SHEETS.find(s=>s.key===t.entityKey);
+      const list = state[t.entityKey];
+      const idHeader = t.headers.find(h=>normKey(h)==='id');
+      const createdHeader = t.headers.find(h=>['createdat','created','date'].includes(normKey(h)));
+      t.rows.forEach(row=>{
         const obj = {};
-        sheetDef.fields.forEach(f=>{
-          let v = row[f];
-          if(v===''||v==null){ v = (f==='currencies'||f==='continents'||f==='subregions') ? [] : ''; }
-          else if(f==='currencies'||f==='continents'||f==='subregions'){ v = String(v).split(',').map(s=>s.trim()).filter(Boolean); }
-          else if(f==='value'||f==='amount'||f==='qty'){ v = Number(v)||0; }
-          else if(f==='createdAt'){ const t=new Date(v).getTime(); v = isNaN(t)?Date.now():t; }
-          obj[f] = v;
+        sheetDef.fields.filter(f=>f!=='id'&&f!=='createdAt').forEach(f=>{
+          const h = t.fieldMap[f];
+          obj[f] = coerceFieldValue(f, h ? row[h] : '');
         });
-        if(!obj.id) obj.id = uid();
+        obj.id = idHeader && row[idHeader] ? String(row[idHeader]) : uid();
+        obj.createdAt = createdHeader && row[createdHeader] ? (new Date(row[createdHeader]).getTime()||Date.now()) : Date.now();
         const idx = list.findIndex(x=>x.id===obj.id);
         if(idx>=0){ list[idx] = {...list[idx], ...obj}; totalUpdated++; }
         else { list.push(obj); totalAdded++; }
+        touched.add(t.entityKey);
       });
     });
-    if(!matchedSheets){
-      statusEl.textContent = 'No matching sheets found — export from this ledger first to see the expected format.';
-      statusEl.classList.add('error');
-      return;
-    }
-    await Promise.all(EXPORT_SHEETS.map(s=>dbUpsertMany(s.key, state[s.key])));
-    statusEl.textContent = `Imported: ${totalAdded} added, ${totalUpdated} updated.`;
+    await Promise.all(Array.from(touched).map(k=>dbUpsertMany(k, state[k])));
+    setImportStatus(`Imported: ${totalAdded} added, ${totalUpdated} updated.`, false);
     toast(`Import complete — ${totalAdded} added, ${totalUpdated} updated.`);
+    render();
   }catch(e){
     console.error(e);
-    statusEl.textContent = 'Could not read that file. Make sure it is a .xlsx or .csv file.';
-    statusEl.classList.add('error');
+    setImportStatus('Could not read that file. Make sure it is a .xlsx or .csv file.', true);
   }
 }
 
@@ -1159,25 +1571,147 @@ function renderSearch(query=''){
 
   const empty = q && !hits ? `<div class="search-empty">No results for "<strong>${esc(q)}</strong>"</div>` : (!q ? `<div class="search-empty">Start typing to search across all tabs…</div>` : '');
 
+  return rows||empty;
+}
+
+function renderSearchShell(query=''){
   return `<div class="search-bar-wrap">
     <input id="searchInput" type="text" placeholder="Search contacts, deals, orders, tasks…" value="${esc(query)}" autofocus>
   </div>
-  ${rows||empty}`;
+  <div id="searchResultsWrap">${renderSearch(query)}</div>`;
+}
+
+const TREND_UP_PATH = 'M5 15l7-7 7 7';
+const TREND_DOWN_PATH = 'M5 9l7 7 7-7';
+function trendArrow(up){
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="${up?TREND_UP_PATH:TREND_DOWN_PATH}" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+function deltaHTML(text, up){
+  return `<div class="stat-delta ${up?'up':'down'}">${trendArrow(up)}${esc(text)}</div>`;
+}
+function pctDelta(thisPeriod, lastPeriod){
+  if(thisPeriod===0 && lastPeriod===0) return {text:'steady this week', up:true};
+  if(lastPeriod===0) return {text:'new this week', up:true};
+  const pct = Math.round(((thisPeriod-lastPeriod)/lastPeriod)*100);
+  return {text:`${pct>=0?'+':''}${pct}% vs last week`, up:pct>=0};
 }
 
 function renderDashboard(){
+  const priv = isPrivileged();
+  const myDashboards = state.dashboards.filter(d=>d.owner===state.viewingAs);
+  const tabs = `<div class="dash-tabs">
+    <button type="button" class="dash-tab ${!state.activeDashboardId?'active':''}" data-dash-tab="">Overview</button>
+    ${myDashboards.map(d=>`<button type="button" class="dash-tab ${state.activeDashboardId===d.id?'active':''}" data-dash-tab="${d.id}">${esc(d.name)}</button>`).join('')}
+    <button type="button" class="dash-tab dash-tab-add" id="dashAddBtn">+ New dashboard</button>
+  </div>`;
+  const active = myDashboards.find(d=>d.id===state.activeDashboardId);
+  return tabs + (active ? renderCustomDashboard(active, priv) : renderOverviewDashboard(priv));
+}
+
+function widgetKPI(label, value, colorClass){
+  return `<div class="stat-card ${colorClass}"><div class="num mono">${value}</div><div class="lbl">${esc(label)}</div></div>`;
+}
+const WIDGET_DEFS = [
+  {key:'kpi_pipeline', label:'Pipeline value', priv:false, render:()=>{ const v=state.deals.filter(d=>d.stage!=='Won'&&d.stage!=='Lost').reduce((s,d)=>s+(Number(d.value)||0),0); return widgetKPI('Pipeline value', v.toLocaleString(), 'ochre'); }},
+  {key:'kpi_customers', label:'Customers', priv:false, render:()=>widgetKPI('Customers', state.customers.length, 'sage')},
+  {key:'kpi_leads', label:'Leads', priv:false, render:()=>canSeeLeads() ? widgetKPI('Leads', state.leads.length, 'ochre') : ''},
+  {key:'kpi_deals', label:'Open deals', priv:false, render:()=>widgetKPI('Open deals', state.deals.filter(d=>d.stage!=='Won'&&d.stage!=='Lost').length, 'ochre')},
+  {key:'kpi_tasks', label:'Open tasks', priv:false, render:()=>widgetKPI('Open tasks', state.tasks.filter(t=>t.status!=='Done').length, 'olive')},
+  {key:'kpi_suppliers', label:'Suppliers', priv:false, render:()=>widgetKPI('Suppliers', state.suppliers.length, 'clay')},
+  {key:'kpi_distributors', label:'Distributors', priv:false, render:()=>widgetKPI('Distributors', state.distributors.length, 'umber')},
+  {key:'kpi_won', label:'Won value', priv:false, render:()=>{ const v = state.deals.filter(d=>d.stage==='Won').reduce((s,d)=>s+(Number(d.value)||0),0); return widgetKPI('Won value', v.toLocaleString(), 'sage'); }},
+  {key:'kpi_invoices', label:'Unpaid invoices', priv:true, render:()=>{ const v=state.invoices.filter(i=>i.status!=='Paid').reduce((s,i)=>s+(Number(i.amount)||0),0); return widgetKPI('Unpaid invoices', v.toLocaleString(), 'rust'); }},
+  {key:'kpi_payments', label:'Pending payments', priv:true, render:()=>{ const v=state.payments.filter(p=>p.status!=='Paid').reduce((s,p)=>s+(Number(p.amount)||0),0); return widgetKPI('Pending payments', v.toLocaleString(), 'clay'); }},
+  {key:'chart_breakdown', label:'Ledger breakdown chart', priv:false, wide:true, render:(priv)=>renderChart(priv)},
+  {key:'chart_revenue', label:'Revenue trend', priv:true, wide:true, render:()=>`<div class="donut-wrap">${renderRevenueChart()}</div>`},
+  {key:'list_recent', label:'Recent activity', priv:false, wide:true, render:()=>`<div class="section-title">Recent activity</div>${renderRecent()}`},
+  {key:'list_mytasks', label:'My open tasks', priv:false, wide:true, render:()=>{
+    const mine = state.tasks.filter(t=>t.status!=='Done' && t.owner===state.viewingAs);
+    if(!mine.length) return `<div class="section-title">My open tasks</div><div class="empty"><div class="display">All clear!</div>No open tasks assigned to you.</div>`;
+    return `<div class="section-title">My open tasks</div><table><thead><tr><th>Task</th><th>Due</th><th>Status</th></tr></thead><tbody>${mine.slice(0,8).map(t=>`<tr><td>${esc(t.title)}</td><td style="font-size:12px;">${t.dueDate?new Date(t.dueDate).toLocaleDateString():'—'}</td><td><span class="badge ${t.status.toLowerCase()}">${t.status}</span></td></tr>`).join('')}</tbody></table>`;
+  }},
+];
+function renderCustomDashboard(dash, priv){
+  const widgets = dash.widgets.map(k=>WIDGET_DEFS.find(w=>w.key===k)).filter(w=>w && (!w.priv || priv));
+  const kpis = widgets.filter(w=>!w.wide);
+  const wides = widgets.filter(w=>w.wide);
+  return `
+    <div class="dash-head">
+      <p class="hi display" style="margin:0;">${esc(dash.name)}</p>
+      <div class="row-actions"><span id="dashEditBtn" data-dash-id="${dash.id}">edit widgets</span><span id="dashDeleteBtn" data-dash-id="${dash.id}">delete</span></div>
+    </div>
+    ${kpis.length ? `<div class="stat-grid" style="grid-template-columns:repeat(${Math.min(kpis.length,4)},1fr);margin-top:14px;">${kpis.map(w=>w.render(priv)).join('')}</div>` : ''}
+    ${wides.map(w=>`<div style="margin-top:18px;">${w.render(priv)}</div>`).join('')}
+    ${!widgets.length ? `<div class="empty" style="margin-top:16px;"><div class="display">No widgets yet</div>Click "edit widgets" to add some.</div>` : ''}
+  `;
+}
+function openNewDashboardModal(){
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">New dashboard</h2>
+    <div class="field"><label>Name</label><input id="f_dashName" placeholder="e.g. My Sales Snapshot"></div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="dashCreateBtn">Create</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  document.getElementById('dashCreateBtn').onclick = async ()=>{
+    const name = document.getElementById('f_dashName').value.trim();
+    if(!name) return alert('Give it a name.');
+    const dash = {id:uid(), owner:state.viewingAs, name, widgets:[], createdAt:Date.now()};
+    state.dashboards.push(dash);
+    await saveKey(KEYS.dashboards, state.dashboards);
+    state.activeDashboardId = dash.id;
+    closeModal();
+    render();
+    openDashboardWidgetPicker(dash.id);
+  };
+}
+function openDashboardWidgetPicker(dashId){
+  const dash = state.dashboards.find(d=>d.id===dashId);
+  if(!dash) return;
+  const priv = isPrivileged();
+  const avail = WIDGET_DEFS.filter(w=>!w.priv||priv);
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">Edit widgets — ${esc(dash.name)}</h2>
+    <div class="field">
+      ${avail.map(w=>`<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;"><input type="checkbox" data-widget-key="${w.key}" ${dash.widgets.includes(w.key)?'checked':''} style="accent-color:var(--amber);"> ${esc(w.label)}</label>`).join('')}
+    </div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Close</button><button class="btn" id="dashSaveWidgetsBtn">Save</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  document.getElementById('dashSaveWidgetsBtn').onclick = async ()=>{
+    dash.widgets = Array.from(document.querySelectorAll('[data-widget-key]:checked')).map(cb=>cb.dataset.widgetKey);
+    await saveKey(KEYS.dashboards, state.dashboards);
+    closeModal();
+    render();
+  };
+}
+
+function renderOverviewDashboard(priv){
   const openDeals = state.deals.filter(d=>d.stage!=='Won' && d.stage!=='Lost');
   const openValue = openDeals.reduce((s,d)=>s+(Number(d.value)||0),0);
   const openTasks = state.tasks.filter(t=>t.status!=='Done');
   const unpaidInvoices = state.invoices.filter(i=>i.status!=='Paid');
   const unpaidValue = unpaidInvoices.reduce((s,i)=>s+(Number(i.amount)||0),0);
-  const priv = isPrivileged();
+
+  const now = Date.now(), week = 7*24*60*60*1000;
+  const inRange = (ts,from,to) => ts>=from && ts<to;
+  const dealValInWeek = (from,to) => state.deals.filter(d=>inRange(d.createdAt||0,from,to)).reduce((s,d)=>s+(Number(d.value)||0),0);
+  const pipelineDelta = pctDelta(dealValInWeek(now-week,now), dealValInWeek(now-2*week,now-week));
+
+  const newCustomers = state.customers.filter(c=>inRange(c.createdAt||0, now-week, now)).length;
+  const customerDelta = newCustomers>0
+    ? {text:`${newCustomers} new this week`, up:true}
+    : {text:'no new signups this week', up:false};
+
+  const today = new Date().setHours(0,0,0,0);
+  const overdueTasks = state.tasks.filter(t=>t.status!=='Done' && t.dueDate && new Date(t.dueDate).getTime()<today).length;
+  const taskDelta = overdueTasks>0 ? {text:`${overdueTasks} overdue`, up:false} : {text:'on track', up:true};
+
+  const overdueInvoices = state.invoices.filter(i=>i.status==='Overdue').length;
+  const invoiceDelta = overdueInvoices>0 ? {text:`${overdueInvoices} overdue`, up:false} : {text:'all current', up:true};
 
   let secondary = `
-    <div class="stat-card ochre"><div class="num mono">${openValue.toLocaleString()}</div><div class="lbl">Pipeline value</div></div>
-    <div class="stat-card sage"><div class="num mono">${state.customers.length}</div><div class="lbl">Customers</div></div>
-    <div class="stat-card olive"><div class="num mono">${openTasks.length}</div><div class="lbl">Open tasks</div></div>`;
-  if(priv) secondary += `<div class="stat-card rust"><div class="num mono">${unpaidValue.toLocaleString()}</div><div class="lbl">Unpaid invoices</div></div>`;
+    <div class="stat-card ochre"><div class="num mono">${openValue.toLocaleString()}</div><div class="lbl">Pipeline value</div>${deltaHTML(pipelineDelta.text,pipelineDelta.up)}</div>
+    <div class="stat-card sage"><div class="num mono">${state.customers.length}</div><div class="lbl">Customers</div>${deltaHTML(customerDelta.text,customerDelta.up)}</div>
+    <div class="stat-card olive"><div class="num mono">${openTasks.length}</div><div class="lbl">Open tasks</div>${deltaHTML(taskDelta.text,taskDelta.up)}</div>`;
+  if(priv) secondary += `<div class="stat-card rust"><div class="num mono">${unpaidValue.toLocaleString()}</div><div class="lbl">Unpaid invoices</div>${deltaHTML(invoiceDelta.text,invoiceDelta.up)}</div>`;
 
   return `
     <div class="hello">
@@ -1215,6 +1749,7 @@ const CHART_TYPES = [
   {key:'donut', label:'Donut'},
   {key:'pie', label:'Pie'},
   {key:'bar', label:'Bar'},
+  {key:'revenue', label:'Revenue', priv:true},
 ];
 function loadChartPref(){
   try{
@@ -1226,10 +1761,88 @@ function saveChartPref(type){
   try{ localStorage.setItem('crm_chart_pref', type); }catch(e){}
 }
 
+function applyThemePref(pref){
+  const root = document.documentElement;
+  if(pref==='light' || pref==='dark') root.dataset.theme = pref;
+  else delete root.dataset.theme;
+  document.querySelectorAll('#themeToggle button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.themeChoice===pref);
+  });
+}
+function loadThemePref(){
+  let pref = 'system';
+  try{ pref = localStorage.getItem('crm_theme_pref') || 'system'; }catch(e){}
+  applyThemePref(pref);
+}
+document.querySelectorAll('#themeToggle button').forEach(b=>{
+  b.onclick = ()=>{
+    const pref = b.dataset.themeChoice;
+    try{ localStorage.setItem('crm_theme_pref', pref); }catch(e){}
+    applyThemePref(pref);
+  };
+});
+loadThemePref();
+
+function revenueByMonth(){
+  const months = [];
+  const now = new Date();
+  for(let i=5;i>=0;i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    months.push({key: d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'), label: d.toLocaleDateString(undefined,{month:'short'}), total:0});
+  }
+  const byKey = Object.fromEntries(months.map(m=>[m.key,m]));
+  state.invoices.filter(i=>i.status==='Paid').forEach(inv=>{
+    const d = new Date(inv.createdAt||0);
+    const k = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    if(byKey[k]) byKey[k].total += Number(inv.amount)||0;
+  });
+  return months;
+}
+function renderRevenueChart(){
+  const months = revenueByMonth();
+  const W=520,H=160,padL=8,padR=8,padT=10,padB=22;
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+  const maxV = Math.max(...months.map(m=>m.total), 1) * 1.15;
+  const stepX = months.length>1 ? plotW/(months.length-1) : 0;
+  const pts = months.map((m,i)=>[padL+i*stepX, padT+plotH-(m.total/maxV)*plotH]);
+  const line = pts.map((p,i)=>(i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const area = line + ` L${pts[pts.length-1][0].toFixed(1)},${(padT+plotH).toFixed(1)} L${pts[0][0].toFixed(1)},${(padT+plotH).toFixed(1)} Z`;
+  let grid='';
+  for(let i=0;i<=3;i++){
+    const y = padT + plotH*i/3;
+    grid += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="var(--border)" stroke-width="1"/>`;
+  }
+  const axis = months.map((m,i)=>`<text x="${pts[i][0].toFixed(1)}" y="${H-4}" text-anchor="middle" style="font-size:10px;fill:var(--ink-soft);font-family:'IBM Plex Mono',monospace;">${esc(m.label)}</text>`).join('');
+  const dots = pts.map((p,i)=> i===pts.length-1
+    ? `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="var(--sage)" stroke="var(--surface)" stroke-width="2"/>`
+    : `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.5" fill="var(--surface)" stroke="var(--sage)" stroke-width="1.6"/>`
+  ).join('');
+  const total = months.reduce((s,m)=>s+m.total,0);
+  return `<div style="width:100%;min-width:280px;">
+    <div style="font-size:12px;color:var(--ink-soft);margin-bottom:6px;">${total.toLocaleString()} across the last ${months.length} months · paid invoices</div>
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:160px;">
+      <defs><linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--sage)" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="var(--sage)" stop-opacity="0"/>
+      </linearGradient></defs>
+      ${grid}
+      <path d="${area}" fill="url(#revGrad)"/>
+      <path d="${line}" fill="none" stroke="var(--sage)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      ${dots}${axis}
+    </svg>
+  </div>`;
+}
+
 function renderChart(priv){
   const segs = chartSegments(priv);
   const total = segs.reduce((s,x)=>s+x.count,0);
-  const toggle = `<div class="chart-toggle">${CHART_TYPES.map(c=>`<button type="button" class="chart-toggle-btn ${state.chartType===c.key?'active':''}" data-chart="${c.key}">${c.label}</button>`).join('')}</div>`;
+  const chartType = (state.chartType==='revenue' && !priv) ? 'donut' : state.chartType;
+  const availableTypes = CHART_TYPES.filter(c=>!c.priv || priv);
+  const toggle = `<div class="chart-toggle">${availableTypes.map(c=>`<button type="button" class="chart-toggle-btn ${chartType===c.key?'active':''}" data-chart="${c.key}">${c.label}</button>`).join('')}</div>`;
+
+  if(chartType==='revenue'){
+    return `<div class="donut-wrap">${renderRevenueChart()}${toggle}</div>`;
+  }
 
   if(!total){
     return `<div class="donut-wrap"><div class="donut" style="background:var(--parchment);"></div>
@@ -1243,7 +1856,7 @@ function renderChart(priv){
       <span class="legend-count mono">${s.count}</span>
     </div>`).join('');
 
-  if(state.chartType==='bar'){
+  if(chartType==='bar'){
     const max = Math.max(...segs.map(s=>s.count), 1);
     const bars = segs.map(s=>`
       <div class="bar-row" data-navigate="${s.key}">
@@ -1262,7 +1875,7 @@ function renderChart(priv){
     return `${s.color} ${start}deg ${end}deg`;
   }).join(', ');
 
-  const hole = state.chartType==='donut' ? `<div class="donut-hole"><div class="dnum mono">${total}</div><div class="dlbl">Total records</div></div>` : '';
+  const hole = chartType==='donut' ? `<div class="donut-hole"><div class="dnum mono">${total}</div><div class="dlbl">Total records</div></div>` : '';
 
   return `<div class="donut-wrap">
       <div class="donut" style="background:conic-gradient(${stops});">${hole}</div>
@@ -1292,7 +1905,8 @@ function renderRecent(){
 }
 
 function renderContacts(){
-  const filtered = state.contactFilter==='all' ? state.contacts : state.contacts.filter(c=>c.type===state.contactFilter);
+  const visible = visibleRecords('contacts', state.contacts);
+  const filtered = state.contactFilter==='all' ? visible : visible.filter(c=>c.type===state.contactFilter);
   const chips = ['all',...CTYPES].map(t=>`<div class="filter-chip ${state.contactFilter===t?'active':''}" data-filter="${t}">${t==='all'?'All':t}</div>`).join('');
   let rows;
   if(!filtered.length){
@@ -1316,12 +1930,13 @@ function renderContacts(){
 }
 
 function renderDeals(){
+  const visible = visibleRecords('deals', state.deals);
   return `<div class="kanban">${STAGES.map(stage=>{
-    const items = state.deals.filter(d=>d.stage===stage);
-    return `<div class="kcol">
+    const items = visible.filter(d=>d.stage===stage);
+    return `<div class="kcol" data-stage-col="${stage}">
       <div class="kcol-head"><span>${stage}</span><span>${items.length}</span></div>
       ${items.map(d=>`
-        <div class="kcard">
+        <div class="kcard" draggable="true" data-deal-id="${d.id}">
           <div class="ledger-no mono">#${d.id.slice(-4)}</div>
           <div class="ktitle">${esc(d.title)}</div>
           <div class="kcontact">${esc(contactName(d.contactId))}</div>
@@ -1359,9 +1974,10 @@ function renderOrders(){
 }
 
 function renderLeads(){
-  if(!state.leads.length) return `<div class="empty"><div class="display">No leads yet</div>Add a prospect to warm up before they become a customer.</div>`;
+  const visible = visibleRecords('leads', state.leads);
+  if(!visible.length) return `<div class="empty"><div class="display">No leads yet</div>Add a prospect to warm up before they become a customer.</div>`;
   return `<table><thead><tr><th>No.</th><th>Name</th><th>Kind</th><th>Company Name</th><th>Source</th><th>Email / Phone</th><th>Status</th><th>Owner</th><th></th></tr></thead><tbody>
-  ${state.leads.map((l,i)=>`
+  ${visible.map((l,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
       <td>${esc(l.name)}</td>
@@ -1405,9 +2021,10 @@ function renderCustomers(){
 }
 
 function renderSuppliers(){
-  if(!state.suppliers.length) return `<div class="empty"><div class="display">No suppliers yet</div>Add who you source oils and materials from.</div>`;
+  const visible = visibleRecords('suppliers', state.suppliers);
+  if(!visible.length) return `<div class="empty"><div class="display">No suppliers yet</div>Add who you source oils and materials from.</div>`;
   return `<table><thead><tr><th>No.</th><th>Name</th><th>Company Name</th><th>Email / Phone</th><th>Owner</th><th></th></tr></thead><tbody>
-  ${state.suppliers.map((s,i)=>`
+  ${visible.map((s,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
       <td>${esc(s.name)}</td>
@@ -1420,9 +2037,10 @@ function renderSuppliers(){
 }
 
 function renderDistributors(){
-  if(!state.distributors.length) return `<div class="empty"><div class="display">No distributors yet</div>Add the partners who distribute SWG products.</div>`;
+  const visible = visibleRecords('distributors', state.distributors);
+  if(!visible.length) return `<div class="empty"><div class="display">No distributors yet</div>Add the partners who distribute SWG products.</div>`;
   return `<table><thead><tr><th>No.</th><th>Name</th><th>Company Name</th><th>Continents</th><th>Sub-regions</th><th>Email / Phone</th><th>Owner</th><th></th></tr></thead><tbody>
-  ${state.distributors.map((d,i)=>`
+  ${visible.map((d,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
       <td>${esc(d.name)}</td>
@@ -1438,8 +2056,9 @@ function renderDistributors(){
 
 
 function renderTasks(){
-  if(!state.tasks.length) return `<div class="empty"><div class="display">No tasks yet</div>Add a follow-up or a general to-do.</div>`;
-  const sorted = [...state.tasks].sort((a,b)=>(a.status==='Done')-(b.status==='Done') || new Date(a.dueDate||0)-new Date(b.dueDate||0));
+  const visible = visibleRecords('tasks', state.tasks);
+  if(!visible.length) return `<div class="empty"><div class="display">No tasks yet</div>Add a follow-up or a general to-do.</div>`;
+  const sorted = [...visible].sort((a,b)=>(a.status==='Done')-(b.status==='Done') || new Date(a.dueDate||0)-new Date(b.dueDate||0));
   return `<table><thead><tr><th>No.</th><th>Task</th><th>Related to</th><th>Due</th><th>Assignee</th><th>Status</th><th></th></tr></thead><tbody>
   ${sorted.map((t,i)=>`
     <tr>
@@ -1473,19 +2092,22 @@ function renderInvoices(){
 
 function renderPayments(){
   if(!state.payments.length) return `<div class="empty"><div class="display">No payments yet</div>Log a payment to a team member, supplier or distributor.</div>`;
-  return `<table><thead><tr><th>No.</th><th>Payee</th><th>Type</th><th>Purpose</th><th>Amount</th><th>Currencies</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody>
-  ${state.payments.map((p,i)=>`
+  return `<table><thead><tr><th>No.</th><th>Payee</th><th>Type</th><th>Purpose</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody>
+  ${state.payments.map((p,i)=>{
+    const cur = p.currency || (p.currencies && p.currencies[0]) || '';
+    return `
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
       <td>${esc(p.payee)}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${esc(PAYEE_TYPES.find(t=>t.key===p.payeeType)?.label||'—')}</td>
       <td style="font-size:12px;color:var(--ink-soft);max-width:160px;">${esc(p.purpose||'—')}</td>
       <td class="mono">${Number(p.amount||0).toLocaleString()}</td>
-      <td>${(p.currencies&&p.currencies.length) ? p.currencies.map(cur=>`<span class="currency-chip">${esc(cur)} (${esc(CURRENCY_SYMBOLS[cur]||'')})</span>`).join('') : '<span style="color:var(--ink-soft);font-size:12px;">—</span>'}</td>
+      <td>${cur ? `<span class="currency-chip">${esc(cur)} (${esc(CURRENCY_SYMBOLS[cur]||'')})</span>` : '<span style="color:var(--ink-soft);font-size:12px;">—</span>'}</td>
       <td><span class="badge ${p.status.toLowerCase()}">${p.status}</span></td>
       <td style="font-size:12px;">${p.dueDate ? new Date(p.dueDate).toLocaleDateString() : '—'}</td>
       <td class="row-actions"><span data-edit="payments:${p.id}">edit</span><span data-del="payments:${p.id}">delete</span></td>
-    </tr>`).join('')}
+    </tr>`;
+  }).join('')}
   </tbody></table>`;
 }
 
@@ -2131,19 +2753,961 @@ function renderEmails(){
 
 function renderTeam(){
   const del = canDeleteUsers();
-  return `<table><thead><tr><th>No.</th><th>Name</th><th>Email</th><th>Role</th><th></th></tr></thead><tbody>
-  ${state.team.map((t,i)=>{
-    const role = t.name===FULL_ADMIN ? 'Admin' : CO_ADMINS.includes(t.name) ? 'Co-admin' : 'Member';
+  return `<div class="team-grid">${state.team.map(t=>{
+    const role = roleFor(t.name);
     const canDel = del && t.name!==FULL_ADMIN;
-    return `<tr>
-      <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
+    const myDeals = state.deals.filter(d=>d.owner===t.name);
+    const openDeals = myDeals.filter(d=>d.stage!=='Won' && d.stage!=='Lost').length;
+    const wonValue = myDeals.filter(d=>d.stage==='Won').reduce((s,d)=>s+(Number(d.value)||0),0);
+    const openTasks = state.tasks.filter(x=>x.owner===t.name && x.status!=='Done').length;
+    return `<div class="team-card">
+      <div class="team-top">
+        ${avatarHTML(t.name)}
+        <div>
+          <div class="team-name">${esc(t.name)}</div>
+          <div class="team-role">${role}${t.email?' · '+esc(t.email):''}</div>
+        </div>
+      </div>
+      <div class="team-stats">
+        <div class="team-stat"><b class="mono">${openDeals}</b><span>Deals</span></div>
+        <div class="team-stat"><b class="mono">${openTasks}</b><span>Tasks</span></div>
+        <div class="team-stat"><b class="mono">${wonValue.toLocaleString()}</b><span>Won</span></div>
+      </div>
+      <div class="row-actions"><span data-edit="team:${t.id}">edit</span>${canDel?`<span data-del="team:${t.id}">delete</span>`:''}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+/* ---------- Setup: roles, validation rules, automation, sharing ---------- */
+const SETUP_TABS = [
+  {key:'roles', label:'Roles'},
+  {key:'validation', label:'Validation Rules'},
+  {key:'dependent', label:'Dependent Fields'},
+  {key:'required', label:'Required Fields'},
+  {key:'automation', label:'Automation'},
+  {key:'flows', label:'Flows'},
+  {key:'sharing', label:'Sharing Rules'},
+  {key:'guide', label:'Hands-on Guide'},
+  {key:'bigdeal', label:'Big Deal Alerts'},
+  {key:'schema', label:'Schema Visualizer'},
+];
+const SETUP_ENTITIES = ['contacts','leads','customers','distributors','suppliers','deals','tasks','invoices','payments'];
+const SHARING_ENTITIES = ['contacts','leads','customers','distributors','suppliers','deals','tasks'];
+const RULE_TYPES = [
+  {key:'required', label:'Required (not empty)'},
+  {key:'min', label:'Minimum value'},
+  {key:'max', label:'Maximum value'},
+  {key:'regex', label:'Must match pattern (regex)'},
+  {key:'formula', label:'Custom formula'},
+];
+const COND_OPS = [
+  {key:'any', label:'— always run —'},
+  {key:'equals', label:'equals'},
+  {key:'contains', label:'contains'},
+  {key:'gt', label:'is greater than'},
+  {key:'lt', label:'is less than'},
+];
+const SHARING_MODES = [
+  {key:'everyone', label:'Everyone on the team'},
+  {key:'owner_and_admins', label:'Just me + my manager'},
+  {key:'owner', label:'Just me'},
+];
+
+function entityFieldsFor(entityKey){
+  const sheet = EXPORT_SHEETS.find(s=>s.key===entityKey);
+  return sheet ? sheet.fields.filter(f=>f!=='id'&&f!=='createdAt') : [];
+}
+
+/* ---------- Safe formula mini-language (no eval/Function — tokenize/parse/evaluate) ---------- */
+function tokenizeFormula(src){
+  const tokens = []; let i = 0; const n = src.length;
+  while(i < n){
+    const c = src[i];
+    if(/\s/.test(c)){ i++; continue; }
+    if(c==='{'){
+      const end = src.indexOf('}', i);
+      if(end===-1) throw new Error('Missing closing } in formula.');
+      tokens.push({type:'field', value: src.slice(i+1, end).trim()});
+      i = end+1; continue;
+    }
+    if(c==='"' || c==="'"){
+      const quote = c; let j = i+1, s='';
+      while(j<n && src[j]!==quote){ s+=src[j]; j++; }
+      if(j>=n) throw new Error('Unterminated text value in formula.');
+      tokens.push({type:'string', value:s}); i = j+1; continue;
+    }
+    if(/[0-9]/.test(c) || (c==='.' && /[0-9]/.test(src[i+1]||''))){
+      let j=i, s='';
+      while(j<n && /[0-9.]/.test(src[j])){ s+=src[j]; j++; }
+      tokens.push({type:'number', value:Number(s)}); i=j; continue;
+    }
+    if(/[A-Za-z_]/.test(c)){
+      let j=i, s='';
+      while(j<n && /[A-Za-z_0-9]/.test(src[j])){ s+=src[j]; j++; }
+      const upper = s.toUpperCase();
+      if(['AND','OR','NOT','TRUE','FALSE'].includes(upper)){ tokens.push({type:'kw', value:upper}); }
+      else { throw new Error(`Unknown word "${s}" — field names must be wrapped like {${s}}.`); }
+      i=j; continue;
+    }
+    if(c==='='&&src[i+1]==='='){ tokens.push({type:'op',value:'=='}); i+=2; continue; }
+    if(c==='!'&&src[i+1]==='='){ tokens.push({type:'op',value:'!='}); i+=2; continue; }
+    if(c==='>'&&src[i+1]==='='){ tokens.push({type:'op',value:'>='}); i+=2; continue; }
+    if(c==='<'&&src[i+1]==='='){ tokens.push({type:'op',value:'<='}); i+=2; continue; }
+    if('><+-*/()'.includes(c)){ tokens.push({type:'op', value:c}); i++; continue; }
+    throw new Error(`Unexpected character "${c}" in formula.`);
+  }
+  return tokens;
+}
+function parseFormula(tokens){
+  let pos = 0;
+  const peek = ()=>tokens[pos];
+  const next = ()=>tokens[pos++];
+  const expectOp = (val)=>{ const t=next(); if(!t||t.value!==val) throw new Error(`Expected "${val}" in formula.`); return t; };
+  function parseOr(){ let l=parseAnd(); while(peek()&&peek().type==='kw'&&peek().value==='OR'){ next(); l={type:'or',left:l,right:parseAnd()}; } return l; }
+  function parseAnd(){ let l=parseNot(); while(peek()&&peek().type==='kw'&&peek().value==='AND'){ next(); l={type:'and',left:l,right:parseNot()}; } return l; }
+  function parseNot(){ if(peek()&&peek().type==='kw'&&peek().value==='NOT'){ next(); return {type:'not', expr:parseNot()}; } return parseCompare(); }
+  function parseCompare(){
+    let l = parseAdd();
+    if(peek() && peek().type==='op' && ['==','!=','>','<','>=','<='].includes(peek().value)){
+      const op = next().value; return {type:'cmp', op, left:l, right:parseAdd()};
+    }
+    return l;
+  }
+  function parseAdd(){ let l=parseMul(); while(peek()&&peek().type==='op'&&(peek().value==='+'||peek().value==='-')){ const op=next().value; l={type:'arith',op,left:l,right:parseMul()}; } return l; }
+  function parseMul(){ let l=parseUnary(); while(peek()&&peek().type==='op'&&(peek().value==='*'||peek().value==='/')){ const op=next().value; l={type:'arith',op,left:l,right:parseUnary()}; } return l; }
+  function parseUnary(){ if(peek()&&peek().type==='op'&&peek().value==='-'){ next(); return {type:'neg', expr:parseUnary()}; } return parsePrimary(); }
+  function parsePrimary(){
+    const t = peek();
+    if(!t) throw new Error('Formula ended unexpectedly.');
+    if(t.type==='number'){ next(); return {type:'lit', value:t.value}; }
+    if(t.type==='string'){ next(); return {type:'lit', value:t.value}; }
+    if(t.type==='field'){ next(); return {type:'field', name:t.value}; }
+    if(t.type==='kw' && (t.value==='TRUE'||t.value==='FALSE')){ next(); return {type:'lit', value:t.value==='TRUE'}; }
+    if(t.type==='op' && t.value==='('){ next(); const inner=parseOr(); expectOp(')'); return inner; }
+    throw new Error(`Unexpected "${t.value}" in formula.`);
+  }
+  const ast = parseOr();
+  if(pos !== tokens.length) throw new Error('Unexpected extra text at the end of the formula.');
+  return ast;
+}
+function evalFormulaAst(node, ctx){
+  switch(node.type){
+    case 'lit': return node.value;
+    case 'field': { const v = ctx[node.name]; return v===undefined ? '' : v; }
+    case 'or': return !!(evalFormulaAst(node.left,ctx) || evalFormulaAst(node.right,ctx));
+    case 'and': return !!(evalFormulaAst(node.left,ctx) && evalFormulaAst(node.right,ctx));
+    case 'not': return !evalFormulaAst(node.expr,ctx);
+    case 'neg': return -Number(evalFormulaAst(node.expr,ctx));
+    case 'arith': {
+      const l = evalFormulaAst(node.left,ctx), r = evalFormulaAst(node.right,ctx);
+      if(node.op==='+') return (typeof l==='string'||typeof r==='string') ? String(l)+String(r) : Number(l)+Number(r);
+      if(node.op==='-') return Number(l)-Number(r);
+      if(node.op==='*') return Number(l)*Number(r);
+      if(node.op==='/') return Number(l)/Number(r);
+      break;
+    }
+    case 'cmp': {
+      const l = evalFormulaAst(node.left,ctx), r = evalFormulaAst(node.right,ctx);
+      const numeric = l!=='' && r!=='' && !isNaN(Number(l)) && !isNaN(Number(r));
+      if(node.op==='==') return numeric ? Number(l)===Number(r) : String(l).toLowerCase()===String(r).toLowerCase();
+      if(node.op==='!=') return numeric ? Number(l)!==Number(r) : String(l).toLowerCase()!==String(r).toLowerCase();
+      if(node.op==='>') return Number(l) > Number(r);
+      if(node.op==='<') return Number(l) < Number(r);
+      if(node.op==='>=') return Number(l) >= Number(r);
+      if(node.op==='<=') return Number(l) <= Number(r);
+      break;
+    }
+  }
+  return false;
+}
+function runFormula(src, ctx){
+  return !!evalFormulaAst(parseFormula(tokenizeFormula(src)), ctx);
+}
+
+function isEmptyFieldValue(val){
+  return val===undefined || val===null || val==='' || (Array.isArray(val)&&!val.length);
+}
+
+function validateAgainstRules(entityKey, obj){
+  const rules = state.validationRules.filter(r=>r.entity===entityKey);
+  for(const r of rules){
+    if(r.type==='formula'){
+      try{
+        if(!runFormula(r.value, obj)) return r.message || 'This record does not satisfy a configured formula rule.';
+      }catch(e){ return `Formula error in a validation rule: ${e.message}`; }
+      continue;
+    }
+    const val = obj[r.field];
+    if(r.type==='required'){
+      if(isEmptyFieldValue(val)) return r.message || `${prettyField(r.field)} is required.`;
+    } else if(r.type==='min'){
+      if(Number(val) < Number(r.value)) return r.message || `${prettyField(r.field)} must be at least ${r.value}.`;
+    } else if(r.type==='max'){
+      if(Number(val) > Number(r.value)) return r.message || `${prettyField(r.field)} must be at most ${r.value}.`;
+    } else if(r.type==='regex'){
+      try{ if(!new RegExp(r.value).test(String(val||''))) return r.message || `${prettyField(r.field)} is not valid.`; }catch(e){}
+    }
+  }
+  const depRules = state.dependentFields.filter(r=>r.entity===entityKey);
+  for(const r of depRules){
+    if(!isEmptyFieldValue(obj[r.controllingField]) && isEmptyFieldValue(obj[r.dependentField])){
+      return r.message || `${prettyField(r.dependentField)} is required once ${prettyField(r.controllingField)} is filled in.`;
+    }
+  }
+  return null;
+}
+
+function evalCondition(op, actualVal, expectedVal){
+  if(op==='any' || !op) return true;
+  if(op==='equals') return String(actualVal||'').toLowerCase()===String(expectedVal||'').toLowerCase();
+  if(op==='contains') return String(actualVal||'').toLowerCase().includes(String(expectedVal||'').toLowerCase());
+  if(op==='gt') return Number(actualVal) > Number(expectedVal);
+  if(op==='lt') return Number(actualVal) < Number(expectedVal);
+  return true;
+}
+
+async function runAutomations(entityKey, obj){
+  const rules = state.automations.filter(a=>a.entity===entityKey);
+  for(const a of rules){
+    const match = (a.conditionOp==='any' || !a.conditionField) ? true : evalCondition(a.conditionOp, obj[a.conditionField], a.conditionValue);
+    if(!match) continue;
+    if(a.action==='create_task'){
+      const due = a.taskDueInDays ? new Date(Date.now()+Number(a.taskDueInDays)*86400000).toISOString().slice(0,10) : '';
+      const subject = obj.name || obj.title || obj.payee || '';
+      const task = { id:uid(), createdAt:Date.now(), title:(a.taskTitle||'Follow up').replace('{name}', subject),
+        dueDate:due, owner:a.taskOwner||obj.owner||state.viewingAs, status:'Open', linkType:'none', linkId:null,
+        notes:`Auto-created by automation "${a.name}".` };
+      state.tasks.push(task);
+      await saveKey(KEYS.tasks, state.tasks);
+    } else if(a.action==='set_field' && a.setField){
+      const list = state[entityKey];
+      const rec = list.find(x=>x.id===obj.id);
+      if(rec){ rec[a.setField] = a.setValue; await saveKey(KEYS[entityKey], list); }
+    }
+  }
+}
+
+async function runFlowAction(step, entityKey, obj, flowName){
+  if(step.action==='create_task'){
+    const due = step.taskDueInDays ? new Date(Date.now()+Number(step.taskDueInDays)*86400000).toISOString().slice(0,10) : '';
+    const subject = obj.name || obj.title || obj.payee || '';
+    const task = { id:uid(), createdAt:Date.now(), title:(step.taskTitle||'Follow up').replace('{name}', subject),
+      dueDate:due, owner:obj.owner||state.viewingAs, status:'Open', linkType:'none', linkId:null,
+      notes:`Auto-created by flow "${flowName}".` };
+    state.tasks.push(task);
+    await saveKey(KEYS.tasks, state.tasks);
+  } else if(step.action==='set_field' && step.field){
+    const list = state[entityKey];
+    const rec = list.find(x=>x.id===obj.id);
+    if(rec){ rec[step.field] = step.value; await saveKey(KEYS[entityKey], list); }
+  } else if(step.action==='toast'){
+    toast(step.message || `Flow "${flowName}" ran.`);
+  }
+}
+
+async function runFlows(entityKey, obj){
+  const flows = state.flows.filter(f=>f.entity===entityKey);
+  for(const flow of flows){
+    const passed = flow.steps.filter(s=>s.type==='condition').every(s=>evalCondition(s.op, obj[s.field], s.value));
+    if(!passed) continue;
+    for(const step of flow.steps.filter(s=>s.type==='action')){
+      await runFlowAction(step, entityKey, obj, flow.name);
+    }
+  }
+}
+
+function personaIsAdmin(){ return state.viewingAs===FULL_ADMIN || CO_ADMINS.includes(state.viewingAs); }
+function visibleRecords(entityKey, list){
+  if(personaIsAdmin()) return list;
+  const mode = state.sharingRules[entityKey] || 'everyone';
+  if(mode==='everyone') return list;
+  if(mode==='owner_and_admins' && roleFor(state.viewingAs)==='Manager') return list;
+  return list.filter(x=>x.owner===state.viewingAs);
+}
+
+function renderSetupRoles(){
+  const canEdit = canEditRoles();
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Assign each team member a role. Admins and Managers can open Setup; only Ariel can delete a team member.</p>
+    ${canEdit ? '' : `<div class="readonly-note">👁 View only — only Ariel or Daniel can change roles.</div>`}
+    <table><thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody>
+    ${state.team.map(t=>`<tr>
       <td>${esc(t.name)}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${esc(t.email||'—')}</td>
-      <td><span class="badge ${role==='Admin'?'company':role==='Co-admin'?'customer':'individual'}">${role}</span></td>
-      <td class="row-actions"><span data-edit="team:${t.id}">edit</span>${canDel?`<span data-del="team:${t.id}">delete</span>`:''}</td>
-    </tr>`;
-  }).join('')}
-  </tbody></table>`;
+      <td><select data-role-for="${t.id}" ${(t.name===FULL_ADMIN || !canEdit)?'disabled':''}>${ROLE_LIST.map(r=>`<option ${roleFor(t.name)===r?'selected':''}>${r}</option>`).join('')}</select></td>
+    </tr>`).join('')}
+    </tbody></table>
+  </div>`;
+}
+
+function renderSetupValidation(){
+  const rules = state.validationRules;
+  const canEdit = canEditGlobalSetup();
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Rules run whenever a record is added in that object. Saving is blocked with the message below until the rule passes.</p>
+    ${canEdit ? '' : `<div class="readonly-note">👁 View only — validation rules affect the whole team, so only an admin can add or remove them.</div>`}
+    <table><thead><tr><th>Object</th><th>Field</th><th>Rule</th><th>Value</th><th>Message</th><th></th></tr></thead><tbody>
+    ${rules.map(r=>`<tr>
+      <td style="font-size:12px;">${esc(EXPORT_SHEETS.find(s=>s.key===r.entity)?.label||r.entity)}</td>
+      <td style="font-size:12px;">${r.type==='formula' ? '—' : esc(prettyField(r.field))}</td>
+      <td style="font-size:12px;">${esc(RULE_TYPES.find(t=>t.key===r.type)?.label||r.type)}</td>
+      <td style="font-size:12px;max-width:220px;word-break:break-word;" class="mono">${esc(r.value||'—')}</td>
+      <td style="font-size:12px;color:var(--ink-soft);max-width:160px;">${esc(r.message||'—')}</td>
+      <td class="row-actions">${canEdit ? `<span data-del-rule="${r.id}">delete</span>` : ''}</td>
+    </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:20px;">No validation rules yet.</td></tr>`}
+    </tbody></table>
+    ${canEdit ? `<button class="btn" id="addValidationBtn" style="margin-top:14px;">+ Add validation rule</button>` : ''}
+  </div>`;
+}
+
+function renderSetupDependent(){
+  const canEdit = canEditDependentFields();
+  const rules = state.dependentFields;
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Make one field required only once another is filled in — e.g. require a City as soon as a Country is picked. Runs alongside validation rules when a record is saved.</p>
+    ${canEdit ? '' : `<div class="readonly-note">👁 View only — only an admin can add or remove dependent field rules.</div>`}
+    <table><thead><tr><th>Object</th><th>When this is filled in</th><th>…this becomes required</th><th>Message</th><th></th></tr></thead><tbody>
+    ${rules.map(r=>`<tr>
+      <td style="font-size:12px;">${esc(EXPORT_SHEETS.find(s=>s.key===r.entity)?.label||r.entity)}</td>
+      <td style="font-size:12px;">${esc(prettyField(r.controllingField))}</td>
+      <td style="font-size:12px;">${esc(prettyField(r.dependentField))}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(r.message||'—')}</td>
+      <td class="row-actions">${canEdit ? `<span data-del-dependent="${r.id}">delete</span>` : ''}</td>
+    </tr>`).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--ink-soft);padding:20px;">No dependent field rules yet.</td></tr>`}
+    </tbody></table>
+    ${canEdit ? `<button class="btn" id="addDependentBtn" style="margin-top:14px;">+ Add dependency</button>` : ''}
+  </div>`;
+}
+
+function isFieldRequired(entity, field){
+  return state.validationRules.some(r=>r.entity===entity && r.field===field && r.type==='required');
+}
+function renderSetupRequired(){
+  const canEdit = canEditRequiredFields();
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Mark fields that must be filled in before a record can be saved. Toggling one on or off adds or removes a "Required" validation rule behind the scenes.</p>
+    ${canEdit ? '' : `<div class="readonly-note">👁 View only — only Ariel, David or Daniel can change which fields are required.</div>`}
+    ${SETUP_ENTITIES.map(entity=>`
+      <div style="margin-bottom:18px;">
+        <p style="font-size:12.5px;font-weight:700;margin:0 0 8px;">${esc(EXPORT_SHEETS.find(s=>s.key===entity).label)}</p>
+        <div class="required-field-grid">
+          ${entityFieldsFor(entity).map(f=>`<label class="required-field-row">
+            <input type="checkbox" data-req-entity="${entity}" data-req-field="${f}" ${isFieldRequired(entity,f)?'checked':''} ${canEdit?'':'disabled'}>
+            <span>${esc(prettyField(f))}</span>
+          </label>`).join('')}
+        </div>
+      </div>`).join('')}
+  </div>`;
+}
+
+function renderSetupAutomation(){
+  const rules = state.automations;
+  const canEdit = canEditGlobalSetup();
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Runs automatically right after a new record is created in that object.</p>
+    ${canEdit ? '' : `<div class="readonly-note">👁 View only — automations affect the whole team, so only an admin can add or remove them.</div>`}
+    <table><thead><tr><th>Name</th><th>Object</th><th>When</th><th>Then</th><th></th></tr></thead><tbody>
+    ${rules.map(a=>`<tr>
+      <td style="font-size:12px;">${esc(a.name)}</td>
+      <td style="font-size:12px;">${esc(EXPORT_SHEETS.find(s=>s.key===a.entity)?.label||a.entity)} created</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${a.conditionOp==='any'?'always':`${esc(prettyField(a.conditionField))} ${esc(COND_OPS.find(o=>o.key===a.conditionOp)?.label||'')} "${esc(a.conditionValue)}"`}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${a.action==='create_task' ? 'Create a task' : `Set ${esc(prettyField(a.setField||''))} = "${esc(a.setValue||'')}"`}</td>
+      <td class="row-actions">${canEdit ? `<span data-del-automation="${a.id}">delete</span>` : ''}</td>
+    </tr>`).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--ink-soft);padding:20px;">No automations yet.</td></tr>`}
+    </tbody></table>
+    ${canEdit ? `<button class="btn" id="addAutomationBtn" style="margin-top:14px;">+ Add automation</button>` : ''}
+  </div>`;
+}
+
+function renderSetupFlows(){
+  const flows = state.flows;
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Build multi-step automations — a chain of conditions that must all pass, followed by one or more actions. Like Automation, but for more than one rule at a time. Open to everyone with Setup access.</p>
+    <table><thead><tr><th>Name</th><th>Object</th><th>Steps</th><th></th></tr></thead><tbody>
+    ${flows.map(f=>{
+      const nCond = f.steps.filter(s=>s.type==='condition').length;
+      const nAct = f.steps.filter(s=>s.type==='action').length;
+      return `<tr>
+      <td style="font-size:12px;font-weight:600;">${esc(f.name)}</td>
+      <td style="font-size:12px;">${esc(EXPORT_SHEETS.find(s=>s.key===f.entity)?.label||f.entity)}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${nCond} condition${nCond===1?'':'s'}, ${nAct} action${nAct===1?'':'s'}</td>
+      <td class="row-actions"><span data-del-flow="${f.id}">delete</span></td>
+    </tr>`;}).join('') || `<tr><td colspan="4" style="text-align:center;color:var(--ink-soft);padding:20px;">No flows yet.</td></tr>`}
+    </tbody></table>
+    <button class="btn" id="addFlowBtn" style="margin-top:14px;">+ Create flow</button>
+  </div>`;
+}
+
+const SCHEMA_ENTITIES = ['contacts','leads','customers','distributors','suppliers','deals','orders','tasks','invoices','payments'];
+const SCHEMA_RELATIONSHIPS = [
+  {from:'deals', to:'contacts', solid:true},
+  {from:'orders', to:'contacts', solid:true},
+  {from:'orders', to:'customers', solid:false},
+  {from:'orders', to:'suppliers', solid:false},
+  {from:'orders', to:'distributors', solid:false},
+  {from:'invoices', to:'orders', solid:true},
+  {from:'invoices', to:'contacts', solid:false},
+  {from:'invoices', to:'customers', solid:false},
+  {from:'invoices', to:'suppliers', solid:false},
+  {from:'invoices', to:'distributors', solid:false},
+  {from:'tasks', to:'contacts', solid:false},
+  {from:'tasks', to:'customers', solid:false},
+  {from:'tasks', to:'suppliers', solid:false},
+  {from:'tasks', to:'deals', solid:false},
+  {from:'tasks', to:'orders', solid:false},
+  {from:'payments', to:'suppliers', solid:false},
+  {from:'payments', to:'distributors', solid:false},
+  {from:'payments', to:'customers', solid:false},
+];
+function schemaNodePos(i, n, cx, cy, r){
+  const angle = (i/n) * 2*Math.PI - Math.PI/2;
+  return { x: cx + r*Math.cos(angle), y: cy + r*Math.sin(angle) };
+}
+function renderSetupSchema(){
+  const n = SCHEMA_ENTITIES.length;
+  const cx=380, cy=290, r=225;
+  const pos = {};
+  SCHEMA_ENTITIES.forEach((e,i)=>{ pos[e] = schemaNodePos(i,n,cx,cy,r); });
+  const lines = SCHEMA_RELATIONSHIPS.map(rel=>{
+    const a = pos[rel.from], b = pos[rel.to];
+    return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${rel.solid?'var(--setup-blue)':'var(--ink-soft)'}" stroke-width="${rel.solid?2:1.3}" stroke-dasharray="${rel.solid?'':'4 4'}" opacity="${rel.solid?0.85:0.55}"/>`;
+  }).join('');
+  const nodes = SCHEMA_ENTITIES.map(e=>{
+    const p = pos[e];
+    const label = EXPORT_SHEETS.find(s=>s.key===e)?.label || e;
+    return `<g><rect x="${p.x-58}" y="${p.y-18}" width="116" height="36" rx="9" fill="var(--surface)" stroke="var(--ink-fixed)" stroke-width="1.4"/>
+      <text x="${p.x}" y="${p.y+5}" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink)">${esc(label)}</text></g>`;
+  }).join('');
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">How your CRM objects connect to each other. Visible to everyone with Setup access.</p>
+    <div style="overflow-x:auto;">
+      <svg viewBox="0 0 760 580" style="width:100%;max-width:760px;height:auto;display:block;margin:0 auto;">${lines}${nodes}</svg>
+    </div>
+    <div class="schema-legend">
+      <span><span class="schema-legend-line"></span>Direct link (always points to one record)</span>
+      <span><span class="schema-legend-line dashed"></span>Flexible link (depends on the record)</span>
+    </div>
+  </div>`;
+}
+
+function renderSetupSharing(){
+  const canEdit = canEditGlobalSetup();
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Controls which team members can see each object's records in lists. Only an admin can change these — they affect the whole team. Everyone always sees their own records; admins always see everything.</p>
+    ${canEdit ? '' : `<div class="readonly-note">👁 View only — only an admin can change sharing rules.</div>`}
+    <table><thead><tr><th>Object</th><th>Visible to</th></tr></thead><tbody>
+    ${SHARING_ENTITIES.map(key=>`<tr>
+      <td style="font-size:13px;">${esc(EXPORT_SHEETS.find(s=>s.key===key).label)}</td>
+      <td><select data-sharing-for="${key}" ${canEdit?'':'disabled'}>${SHARING_MODES.map(m=>`<option value="${m.key}" ${(state.sharingRules[key]||'everyone')===m.key?'selected':''}>${m.label}</option>`).join('')}</select></td>
+    </tr>`).join('')}
+    </tbody></table>
+  </div>`;
+}
+
+function guideLinkLabel(g){
+  if(!g.linkEntity) return 'General';
+  const entLabel = EXPORT_SHEETS.find(s=>s.key===g.linkEntity)?.label || g.linkEntity;
+  return g.linkField ? `${entLabel} → ${prettyField(g.linkField)}` : entLabel;
+}
+function renderSetupGuide(){
+  const entries = state.guideEntries;
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Write short how-to notes for your team. Each note is tied to an object (and optionally one of its fields) and becomes one step of that object's guided walkthrough — click <strong>Guide</strong> at the top of that object's page to take the tour.</p>
+    <table><thead><tr><th>Title</th><th>Note</th><th>Linked to</th><th></th></tr></thead><tbody>
+    ${entries.map(g=>`<tr>
+      <td style="font-size:12px;font-weight:600;max-width:150px;">${esc(g.title)}</td>
+      <td style="font-size:12px;color:var(--ink-soft);max-width:300px;">${esc(g.body)}</td>
+      <td style="font-size:12px;color:var(--ink-soft);white-space:nowrap;">${esc(guideLinkLabel(g))}</td>
+      <td class="row-actions"><span data-del-guide="${g.id}">delete</span></td>
+    </tr>`).join('') || `<tr><td colspan="4" style="text-align:center;color:var(--ink-soft);padding:20px;">No guide entries yet.</td></tr>`}
+    </tbody></table>
+    <button class="btn" id="addGuideBtn" style="margin-top:14px;">+ Add guide entry</button>
+  </div>`;
+}
+
+function renderSetupBigDeal(){
+  const cfg = state.bigDealAlert;
+  const alerts = state.bigDealAlerts;
+  const canEdit = canEditBigDealAlert();
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">When a deal at or above this value is created or sits pending (not Lost), managers and admins are alerted — adjust it here, much like a sharing or validation rule.</p>
+    ${canEdit ? '' : `<div class="readonly-note">👁 View only — only Ariel or Daniel can change big deal alert settings.</div>`}
+    <div class="field"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="bda_enabled" ${cfg.enabled?'checked':''} style="width:auto;" ${canEdit?'':'disabled'}>Enable big deal alerts</label></div>
+    <div class="field"><label>Alert threshold</label><input type="number" id="bda_threshold" min="0" step="100" value="${cfg.threshold}" ${canEdit?'':'disabled'}></div>
+    <div class="field"><label>Currency</label><select id="bda_currency" ${canEdit?'':'disabled'}>${CURRENCIES.map(c=>`<option value="${c}" ${cfg.currency===c?'selected':''}>${c} (${esc(CURRENCY_SYMBOLS[c]||'')})</option>`).join('')}</select></div>
+    ${canEdit ? `<button class="btn" id="bda_saveBtn" style="margin-top:6px;">Save alert settings</button>` : ''}
+  </div>
+  <div class="io-card" style="margin-top:16px;">
+    <p style="font-size:12.5px;font-weight:600;margin:0 0 10px;">Triggered alerts</p>
+    <table><thead><tr><th>Deal</th><th>Value</th><th>Owner</th><th>Stage</th><th>When</th><th></th></tr></thead><tbody>
+    ${alerts.map(a=>`<tr>
+      <td style="font-size:12px;font-weight:600;">${esc(a.title)}</td>
+      <td style="font-size:12px;">${Number(a.value||0).toLocaleString()}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(a.owner||'—')}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(a.stage||'—')}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${new Date(a.createdAt).toLocaleDateString()}</td>
+      <td class="row-actions">${canEdit ? `<span data-del-bigdeal="${a.id}">dismiss</span>` : ''}</td>
+    </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:20px;">No big deal alerts triggered yet.</td></tr>`}
+    </tbody></table>
+  </div>`;
+}
+
+function renderSetupTabBody(){
+  if(state.setupTab==='roles') return renderSetupRoles();
+  if(state.setupTab==='validation') return renderSetupValidation();
+  if(state.setupTab==='dependent') return renderSetupDependent();
+  if(state.setupTab==='required') return renderSetupRequired();
+  if(state.setupTab==='automation') return renderSetupAutomation();
+  if(state.setupTab==='flows') return renderSetupFlows();
+  if(state.setupTab==='sharing') return renderSetupSharing();
+  if(state.setupTab==='guide') return renderSetupGuide();
+  if(state.setupTab==='bigdeal') return renderSetupBigDeal();
+  if(state.setupTab==='schema') return renderSetupSchema();
+  return '';
+}
+function renderSetup(){
+  return `<div class="setup-banner">🔧 You're in the backend — changes here affect the whole team.</div>
+  <div class="dash-tabs setup-tabs">
+    ${SETUP_TABS.map(t=>`<button type="button" class="dash-tab ${state.setupTab===t.key?'active':''}" data-setup-tab="${t.key}">${t.label}</button>`).join('')}
+  </div>
+  <div id="setupTabBody">${renderSetupTabBody()}</div>`;
+}
+
+function rerenderSetupView(){
+  const c = document.getElementById('content');
+  if(!c) return;
+  c.innerHTML = renderSetup();
+  wireSetupView();
+}
+
+function insertAtCursor(textareaId, text){
+  const el = document.getElementById(textareaId);
+  if(!el) return;
+  const start = el.selectionStart ?? el.value.length;
+  const end = el.selectionEnd ?? el.value.length;
+  el.value = el.value.slice(0,start) + text + el.value.slice(end);
+  el.focus();
+  el.selectionStart = el.selectionEnd = start + text.length;
+}
+
+const FORMULA_OPS = ['AND','OR','NOT','==','!=','>=','<=','>','<','+','-','(',')'];
+
+function openValidationRuleModal(){
+  if(!canEditGlobalSetup()) return;
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">New validation rule</h2>
+    <div class="field"><label>Object</label><select id="vr_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}">${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
+    <div class="field"><label>Rule</label><select id="vr_type">${RULE_TYPES.map(t=>`<option value="${t.key}">${t.label}</option>`).join('')}</select></div>
+    <div id="vr_simpleWrap">
+      <div class="field"><label>Field</label><select id="vr_field"></select></div>
+      <div class="field" id="vr_valueWrap"><label>Value <span class="help-tip" id="vr_regexHelp" title="A regex (regular expression) is a small pattern used to check the shape of text — e.g. it can require an email to contain an @ sign, or a phone number to be all digits. If this feels technical, ask Kfir or David to help write one." style="display:none;">?</span></label>
+        <input id="vr_value" placeholder="e.g. 0, or a regex pattern">
+        <div id="vr_regexHint" style="display:none;color:var(--ink-soft);font-size:11.5px;margin-top:5px;line-height:1.5;">A regex is just a text pattern that checks the shape of a value (e.g. "must contain @", "must be all digits"). Not sure how to write one? Ask Kfir or David.</div>
+      </div>
+    </div>
+    <div id="vr_formulaWrap" style="display:none;">
+      <div class="field"><label>Formula (must evaluate to true for the record to be allowed)</label>
+        <textarea id="vr_formula" placeholder='e.g. {amount} > 0 AND {status} != "Lost"'></textarea>
+      </div>
+      <div class="formula-wizard">
+        <p class="fw-label">Insert a field</p>
+        <div class="fw-chips" id="vr_fieldChips"></div>
+        <p class="fw-label">Insert an operator</p>
+        <div class="fw-chips" id="vr_opChips">${FORMULA_OPS.map(o=>`<button type="button" class="fw-chip op" data-fw-op="${esc(o)}">${esc(o)}</button>`).join('')}</div>
+        <button type="button" class="btn secondary" id="vr_testFormula" style="margin-top:2px;">Test formula</button>
+        <div class="fw-test-result" id="vr_testResult"></div>
+      </div>
+    </div>
+    <div class="field"><label>Error message (optional)</label><input id="vr_message" placeholder="Shown when the rule fails"></div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="vr_saveBtn">Add rule</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  function refreshFields(){
+    const fields = entityFieldsFor(document.getElementById('vr_entity').value);
+    document.getElementById('vr_field').innerHTML = fields.map(f=>`<option value="${f}">${esc(prettyField(f))}</option>`).join('');
+    document.getElementById('vr_fieldChips').innerHTML = fields.map(f=>`<button type="button" class="fw-chip" data-fw-field="${esc(f)}">${esc(prettyField(f))}</button>`).join('');
+    document.getElementById('vr_fieldChips').querySelectorAll('[data-fw-field]').forEach(btn=>{
+      btn.onclick = ()=> insertAtCursor('vr_formula', `{${btn.dataset.fwField}}`);
+    });
+  }
+  document.getElementById('vr_opChips').querySelectorAll('[data-fw-op]').forEach(btn=>{
+    btn.onclick = ()=> insertAtCursor('vr_formula', ` ${btn.dataset.fwOp} `);
+  });
+  document.getElementById('vr_entity').onchange = refreshFields;
+  refreshFields();
+  function refreshTypeUI(){
+    const type = document.getElementById('vr_type').value;
+    document.getElementById('vr_simpleWrap').style.display = type==='formula' ? 'none' : 'block';
+    document.getElementById('vr_formulaWrap').style.display = type==='formula' ? 'block' : 'none';
+    document.getElementById('vr_valueWrap').style.display = (type==='required'||type==='formula') ? 'none' : 'block';
+    document.getElementById('vr_regexHelp').style.display = type==='regex' ? 'inline-flex' : 'none';
+    document.getElementById('vr_regexHint').style.display = type==='regex' ? 'block' : 'none';
+  }
+  document.getElementById('vr_type').onchange = refreshTypeUI;
+  refreshTypeUI();
+  document.getElementById('vr_testFormula').onclick = ()=>{
+    const resultEl = document.getElementById('vr_testResult');
+    try{
+      parseFormula(tokenizeFormula(document.getElementById('vr_formula').value));
+      resultEl.className = 'fw-test-result ok';
+      resultEl.textContent = '✓ Formula syntax looks valid.';
+    }catch(e){
+      resultEl.className = 'fw-test-result err';
+      resultEl.textContent = `✗ ${e.message}`;
+    }
+  };
+  document.getElementById('vr_saveBtn').onclick = async ()=>{
+    const type = document.getElementById('vr_type').value;
+    const entity = document.getElementById('vr_entity').value;
+    const message = document.getElementById('vr_message').value.trim();
+    let rule;
+    if(type==='formula'){
+      const formula = document.getElementById('vr_formula').value.trim();
+      if(!formula){ alert('Write a formula first.'); return; }
+      try{ parseFormula(tokenizeFormula(formula)); }
+      catch(e){ alert(`This formula has a syntax problem: ${e.message}`); return; }
+      rule = { id: uid(), entity, type:'formula', value: formula, message };
+    }else{
+      rule = {
+        id: uid(),
+        entity,
+        field: document.getElementById('vr_field').value,
+        type,
+        value: document.getElementById('vr_value').value.trim(),
+        message,
+      };
+    }
+    state.validationRules.push(rule);
+    await saveKey(KEYS.validationRules, state.validationRules);
+    closeModal();
+    rerenderSetupView();
+  };
+}
+
+function openGuideEntryModal(presetEntity){
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">New guide entry</h2>
+    <p style="color:var(--ink-soft);font-size:12px;margin:0 0 4px;">Each entry becomes one step in that object's guided walkthrough.</p>
+    <div class="field"><label>Title</label><input id="ge_title" placeholder="e.g. How to log a new deal"></div>
+    <div class="field"><label>Object</label><select id="ge_entity">
+      ${SETUP_ENTITIES.map(e=>`<option value="${e}" ${(presetEntity?presetEntity===e:e===SETUP_ENTITIES[0])?'selected':''}>${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}
+    </select></div>
+    <div class="field" id="ge_fieldWrap"><label>Section (optional)</label><select id="ge_field"><option value="">— Whole object (intro step) —</option></select></div>
+    <div class="field"><label>Note</label><textarea id="ge_body" style="min-height:100px;" placeholder="Explain the feature in plain language, for anyone on the team."></textarea></div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="ge_saveBtn">Add entry</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  function refreshFieldOptions(){
+    const entity = document.getElementById('ge_entity').value;
+    document.getElementById('ge_field').innerHTML = `<option value="">— Whole object (intro step) —</option>` +
+      entityFieldsFor(entity).map(f=>`<option value="${f}">${esc(prettyField(f))}</option>`).join('');
+  }
+  document.getElementById('ge_entity').onchange = refreshFieldOptions;
+  refreshFieldOptions();
+  document.getElementById('ge_saveBtn').onclick = async ()=>{
+    const title = document.getElementById('ge_title').value.trim();
+    const body = document.getElementById('ge_body').value.trim();
+    if(!title || !body){ alert('Fill in a title and a note.'); return; }
+    const linkEntity = document.getElementById('ge_entity').value;
+    const linkField = linkEntity ? document.getElementById('ge_field').value : '';
+    state.guideEntries.push({id:uid(), title, body, linkEntity, linkField});
+    await saveKey(KEYS.guideEntries, state.guideEntries);
+    closeModal();
+    rerenderSetupView();
+  };
+}
+
+function openDependentFieldModal(){
+  if(!canEditDependentFields()) return;
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">New dependent field rule</h2>
+    <div class="field"><label>Object</label><select id="df_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}">${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
+    <div class="field"><label>When this field is filled in</label><select id="df_controlling"></select></div>
+    <div class="field"><label>…this field becomes required</label><select id="df_dependent"></select></div>
+    <div class="field"><label>Message (optional)</label><input id="df_message" placeholder="Shown when the dependent field is missing"></div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="df_saveBtn">Add rule</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  function refreshFields(){
+    const opts = entityFieldsFor(document.getElementById('df_entity').value).map(f=>`<option value="${f}">${esc(prettyField(f))}</option>`).join('');
+    document.getElementById('df_controlling').innerHTML = opts;
+    document.getElementById('df_dependent').innerHTML = opts;
+  }
+  document.getElementById('df_entity').onchange = refreshFields;
+  refreshFields();
+  document.getElementById('df_saveBtn').onclick = async ()=>{
+    const entity = document.getElementById('df_entity').value;
+    const controllingField = document.getElementById('df_controlling').value;
+    const dependentField = document.getElementById('df_dependent').value;
+    if(controllingField===dependentField){ alert('Pick two different fields.'); return; }
+    const message = document.getElementById('df_message').value.trim();
+    state.dependentFields.push({id:uid(), entity, controllingField, dependentField, message});
+    await saveKey(KEYS.dependentFields, state.dependentFields);
+    closeModal();
+    rerenderSetupView();
+  };
+}
+
+let flowBuilderSteps = [];
+
+function renderFlowActionSub(idx, step, fields){
+  if(step.action==='set_field'){
+    return `<select data-flow-idx="${idx}" data-flow-part="field">${fields.map(f=>`<option value="${f}" ${step.field===f?'selected':''}>${esc(prettyField(f))}</option>`).join('')}</select>
+      <input data-flow-idx="${idx}" data-flow-part="value" value="${esc(step.value||'')}" placeholder="value">`;
+  }
+  if(step.action==='toast'){
+    return `<input data-flow-idx="${idx}" data-flow-part="message" value="${esc(step.message||'')}" placeholder="Message to show" style="min-width:220px;">`;
+  }
+  return `<input data-flow-idx="${idx}" data-flow-part="taskTitle" value="${esc(step.taskTitle||'')}" placeholder="Task title — try {name}">
+    <input type="number" data-flow-idx="${idx}" data-flow-part="taskDueInDays" value="${esc(step.taskDueInDays||'')}" placeholder="Due in days" style="max-width:110px;">`;
+}
+function renderFlowStepRow(step, idx, fields){
+  if(step.type==='condition'){
+    return `<div class="flow-step-row">
+      <span class="flow-step-badge cond">If</span>
+      <select data-flow-idx="${idx}" data-flow-part="field">${fields.map(f=>`<option value="${f}" ${step.field===f?'selected':''}>${esc(prettyField(f))}</option>`).join('')}</select>
+      <select data-flow-idx="${idx}" data-flow-part="op">${COND_OPS.filter(o=>o.key!=='any').map(o=>`<option value="${o.key}" ${step.op===o.key?'selected':''}>${o.label}</option>`).join('')}</select>
+      <input data-flow-idx="${idx}" data-flow-part="value" value="${esc(step.value||'')}" placeholder="value">
+      <span class="flow-step-remove" data-flow-remove="${idx}" title="Remove step">✕</span>
+    </div>`;
+  }
+  return `<div class="flow-step-row">
+    <span class="flow-step-badge act">Then</span>
+    <select data-flow-idx="${idx}" data-flow-part="action">
+      <option value="create_task" ${step.action==='create_task'?'selected':''}>Create a task</option>
+      <option value="set_field" ${step.action==='set_field'?'selected':''}>Set a field</option>
+      <option value="toast" ${step.action==='toast'?'selected':''}>Show a message</option>
+    </select>
+    ${renderFlowActionSub(idx, step, fields)}
+    <span class="flow-step-remove" data-flow-remove="${idx}" title="Remove step">✕</span>
+  </div>`;
+}
+
+function openFlowModal(){
+  flowBuilderSteps = [];
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">New flow</h2>
+    <div class="field"><label>Flow name</label><input id="fl_name" placeholder="e.g. Welcome new customers"></div>
+    <div class="field"><label>Runs when this object is created</label><select id="fl_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}">${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
+    <p style="font-size:11.5px;color:var(--ink-soft);margin:10px 0 2px;">Steps run in order: every condition must pass, then every action runs.</p>
+    <div class="flow-steps" id="flowStepsWrap"></div>
+    <div style="display:flex;gap:8px;margin:10px 0 4px;">
+      <button type="button" class="btn secondary" id="fl_addCond">+ Add condition</button>
+      <button type="button" class="btn secondary" id="fl_addAction">+ Add action</button>
+    </div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="fl_saveBtn">Save flow</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+
+  function currentFields(){ return entityFieldsFor(document.getElementById('fl_entity').value); }
+  function refreshStepsList(){
+    const fields = currentFields();
+    const wrap = document.getElementById('flowStepsWrap');
+    wrap.innerHTML = flowBuilderSteps.length ? flowBuilderSteps.map((s,i)=>renderFlowStepRow(s,i,fields)).join('')
+      : `<p style="color:var(--ink-soft);font-size:12px;padding:4px 0;">No steps yet — add a condition or an action below.</p>`;
+    wrap.querySelectorAll('[data-flow-idx]').forEach(el=>{
+      el.addEventListener('change', ()=>{
+        const idx = Number(el.dataset.flowIdx), part = el.dataset.flowPart;
+        flowBuilderSteps[idx][part] = el.value;
+        if(part==='action') refreshStepsList();
+      });
+    });
+    wrap.querySelectorAll('[data-flow-remove]').forEach(el=>{
+      el.onclick = ()=>{ flowBuilderSteps.splice(Number(el.dataset.flowRemove),1); refreshStepsList(); };
+    });
+  }
+  document.getElementById('fl_entity').onchange = refreshStepsList;
+  document.getElementById('fl_addCond').onclick = ()=>{
+    flowBuilderSteps.push({type:'condition', field:currentFields()[0]||'', op:'equals', value:''});
+    refreshStepsList();
+  };
+  document.getElementById('fl_addAction').onclick = ()=>{
+    flowBuilderSteps.push({type:'action', action:'create_task', taskTitle:'', taskDueInDays:''});
+    refreshStepsList();
+  };
+  refreshStepsList();
+
+  document.getElementById('fl_saveBtn').onclick = async ()=>{
+    const name = document.getElementById('fl_name').value.trim();
+    if(!name){ alert('Give the flow a name.'); return; }
+    if(!flowBuilderSteps.length){ alert('Add at least one condition or action.'); return; }
+    const flow = { id:uid(), name, entity: document.getElementById('fl_entity').value, steps: flowBuilderSteps };
+    state.flows.push(flow);
+    await saveKey(KEYS.flows, state.flows);
+    closeModal();
+    rerenderSetupView();
+  };
+}
+
+function openAutomationModal(){
+  if(!canEditGlobalSetup()) return;
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">New automation</h2>
+    <div class="field"><label>Name</label><input id="au_name" placeholder="e.g. Welcome task for new leads"></div>
+    <div class="field"><label>When this object is created</label><select id="au_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}">${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
+    <div class="field"><label>Condition</label><select id="au_op">${COND_OPS.map(o=>`<option value="${o.key}">${o.label}</option>`).join('')}</select></div>
+    <div class="field" id="au_condFieldWrap"><label>Field</label><select id="au_condField"></select></div>
+    <div class="field" id="au_condValueWrap"><label>Value</label><input id="au_condValue"></div>
+    <div class="field"><label>Then</label><select id="au_action">
+      <option value="create_task">Create a follow-up task</option>
+      <option value="set_field">Set a field on the record</option>
+    </select></div>
+    <div id="au_taskFields">
+      <div class="field"><label>Task title</label><input id="au_taskTitle" placeholder="e.g. Welcome {name}"></div>
+      <div class="field"><label>Assign to</label><select id="au_taskOwner">${teamNames().map(n=>`<option>${esc(n)}</option>`).join('')}</select></div>
+      <div class="field"><label>Due in (days)</label><input id="au_taskDue" type="number" placeholder="e.g. 3"></div>
+    </div>
+    <div id="au_setFields" style="display:none;">
+      <div class="field"><label>Field to set</label><select id="au_setField"></select></div>
+      <div class="field"><label>New value</label><input id="au_setValue"></div>
+    </div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="au_saveBtn">Add automation</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  function refreshCondField(){
+    document.getElementById('au_condField').innerHTML = entityFieldsFor(document.getElementById('au_entity').value).map(f=>`<option value="${f}">${esc(prettyField(f))}</option>`).join('');
+  }
+  function refreshSetField(){
+    document.getElementById('au_setField').innerHTML = entityFieldsFor(document.getElementById('au_entity').value).map(f=>`<option value="${f}">${esc(prettyField(f))}</option>`).join('');
+  }
+  document.getElementById('au_entity').onchange = ()=>{ refreshCondField(); refreshSetField(); };
+  refreshCondField(); refreshSetField();
+  function toggleCondValue(){
+    const isAny = document.getElementById('au_op').value==='any';
+    document.getElementById('au_condFieldWrap').style.display = isAny?'none':'block';
+    document.getElementById('au_condValueWrap').style.display = isAny?'none':'block';
+  }
+  document.getElementById('au_op').onchange = toggleCondValue;
+  toggleCondValue();
+  document.getElementById('au_action').onchange = ()=>{
+    const isTask = document.getElementById('au_action').value==='create_task';
+    document.getElementById('au_taskFields').style.display = isTask?'block':'none';
+    document.getElementById('au_setFields').style.display = isTask?'none':'block';
+  };
+  document.getElementById('au_saveBtn').onclick = async ()=>{
+    const name = document.getElementById('au_name').value.trim();
+    if(!name) return alert('Give the automation a name.');
+    const automation = {
+      id: uid(), name,
+      entity: document.getElementById('au_entity').value,
+      conditionOp: document.getElementById('au_op').value,
+      conditionField: document.getElementById('au_condField').value,
+      conditionValue: document.getElementById('au_condValue').value.trim(),
+      action: document.getElementById('au_action').value,
+      taskTitle: document.getElementById('au_taskTitle').value.trim(),
+      taskOwner: document.getElementById('au_taskOwner').value,
+      taskDueInDays: document.getElementById('au_taskDue').value,
+      setField: document.getElementById('au_setField').value,
+      setValue: document.getElementById('au_setValue').value.trim(),
+    };
+    state.automations.push(automation);
+    await saveKey(KEYS.automations, state.automations);
+    closeModal();
+    rerenderSetupView();
+  };
+}
+
+function wireSetupView(){
+  document.querySelectorAll('[data-setup-tab]').forEach(btn=>{
+    btn.onclick = ()=>{ state.setupTab = btn.dataset.setupTab; rerenderSetupView(); };
+  });
+  document.querySelectorAll('[data-role-for]').forEach(sel=>{
+    sel.onchange = async ()=>{
+      if(!canEditRoles()) return;
+      const rec = state.team.find(t=>t.id===sel.dataset.roleFor);
+      if(rec){ rec.role = sel.value; await saveKey(KEYS.team, state.team); toast(`${rec.name} is now ${rec.role}.`); }
+    };
+  });
+  const addValBtn = document.getElementById('addValidationBtn');
+  if(addValBtn) addValBtn.onclick = openValidationRuleModal;
+  document.querySelectorAll('[data-del-rule]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
+      if(!confirm('Delete this validation rule?')) return;
+      state.validationRules = state.validationRules.filter(r=>r.id!==el.dataset.delRule);
+      await saveKey(KEYS.validationRules, state.validationRules);
+      rerenderSetupView();
+    };
+  });
+  const addDependentBtn = document.getElementById('addDependentBtn');
+  if(addDependentBtn) addDependentBtn.onclick = openDependentFieldModal;
+  document.querySelectorAll('[data-del-dependent]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!canEditDependentFields()) return;
+      if(!confirm('Delete this dependent field rule?')) return;
+      state.dependentFields = state.dependentFields.filter(r=>r.id!==el.dataset.delDependent);
+      await saveKey(KEYS.dependentFields, state.dependentFields);
+      rerenderSetupView();
+    };
+  });
+  document.querySelectorAll('[data-req-entity]').forEach(cb=>{
+    cb.onchange = async ()=>{
+      if(!canEditRequiredFields()){ cb.checked = !cb.checked; return; }
+      const entity = cb.dataset.reqEntity, field = cb.dataset.reqField;
+      if(cb.checked){
+        if(!isFieldRequired(entity,field)) state.validationRules.push({id:uid(), entity, field, type:'required', value:'', message:''});
+      } else {
+        state.validationRules = state.validationRules.filter(r=>!(r.entity===entity && r.field===field && r.type==='required'));
+      }
+      await saveKey(KEYS.validationRules, state.validationRules);
+      toast(`${prettyField(field)} ${cb.checked?'is now required':'is no longer required'} for ${EXPORT_SHEETS.find(s=>s.key===entity).label}.`);
+    };
+  });
+  const addAutoBtn = document.getElementById('addAutomationBtn');
+  if(addAutoBtn) addAutoBtn.onclick = openAutomationModal;
+  document.querySelectorAll('[data-del-automation]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
+      if(!confirm('Delete this automation?')) return;
+      state.automations = state.automations.filter(a=>a.id!==el.dataset.delAutomation);
+      await saveKey(KEYS.automations, state.automations);
+      rerenderSetupView();
+    };
+  });
+  const addFlowBtn = document.getElementById('addFlowBtn');
+  if(addFlowBtn) addFlowBtn.onclick = openFlowModal;
+  document.querySelectorAll('[data-del-flow]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!confirm('Delete this flow?')) return;
+      state.flows = state.flows.filter(f=>f.id!==el.dataset.delFlow);
+      await saveKey(KEYS.flows, state.flows);
+      rerenderSetupView();
+    };
+  });
+  document.querySelectorAll('[data-sharing-for]').forEach(sel=>{
+    sel.onchange = async ()=>{
+      if(!canEditGlobalSetup()) return;
+      state.sharingRules[sel.dataset.sharingFor] = sel.value;
+      await saveKey(KEYS.sharingRules, state.sharingRules);
+      toast('Sharing rule updated.');
+    };
+  });
+  const addGuideBtn = document.getElementById('addGuideBtn');
+  if(addGuideBtn) addGuideBtn.onclick = ()=> openGuideEntryModal();
+  document.querySelectorAll('[data-del-guide]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!confirm('Delete this guide entry?')) return;
+      state.guideEntries = state.guideEntries.filter(g=>g.id!==el.dataset.delGuide);
+      await saveKey(KEYS.guideEntries, state.guideEntries);
+      rerenderSetupView();
+    };
+  });
+  const bdaSaveBtn = document.getElementById('bda_saveBtn');
+  if(bdaSaveBtn){
+    bdaSaveBtn.onclick = async ()=>{
+      if(!canEditBigDealAlert()) return;
+      state.bigDealAlert = {
+        enabled: document.getElementById('bda_enabled').checked,
+        threshold: Number(document.getElementById('bda_threshold').value)||0,
+        currency: document.getElementById('bda_currency').value,
+      };
+      await saveKey(KEYS.bigDealAlert, state.bigDealAlert);
+      toast('Big deal alert settings saved.');
+    };
+  }
+  document.querySelectorAll('[data-del-bigdeal]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!canEditBigDealAlert()) return;
+      state.bigDealAlerts = state.bigDealAlerts.filter(a=>a.id!==el.dataset.delBigdeal);
+      await saveKey(KEYS.bigDealAlerts, state.bigDealAlerts);
+      rerenderSetupView();
+    };
+  });
 }
 
 function esc(s){ return String(s??'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
@@ -2160,10 +3724,13 @@ function attachContentHandlers(){
   const si = document.getElementById('searchInput');
   if(si){
     si.focus();
+    si.selectionStart = si.selectionEnd = si.value.length;
     si.oninput = ()=>{
-      const c = document.getElementById('content');
-      c.innerHTML = renderSearch(si.value);
-      attachContentHandlers();
+      const wrap = document.getElementById('searchResultsWrap');
+      wrap.innerHTML = renderSearch(si.value);
+      wrap.querySelectorAll('[data-navigate]').forEach(el=>{
+        el.onclick = ()=>{ state.view = el.dataset.navigate; render(); };
+      });
     };
   }
   document.querySelectorAll('[data-filter]').forEach(el=>{
@@ -2172,12 +3739,28 @@ function attachContentHandlers(){
   document.querySelectorAll('[data-chart]').forEach(el=>{
     el.onclick = ()=>{ state.chartType = el.dataset.chart; saveChartPref(state.chartType); render(); };
   });
+  document.querySelectorAll('[data-dash-tab]').forEach(btn=>{
+    btn.onclick = ()=>{ state.activeDashboardId = btn.dataset.dashTab; render(); };
+  });
+  const dashAddBtn = document.getElementById('dashAddBtn');
+  if(dashAddBtn) dashAddBtn.onclick = openNewDashboardModal;
+  const dashEditBtn = document.getElementById('dashEditBtn');
+  if(dashEditBtn) dashEditBtn.onclick = ()=>openDashboardWidgetPicker(dashEditBtn.dataset.dashId);
+  const dashDeleteBtn = document.getElementById('dashDeleteBtn');
+  if(dashDeleteBtn) dashDeleteBtn.onclick = async ()=>{
+    if(!confirm('Delete this dashboard?')) return;
+    state.dashboards = state.dashboards.filter(d=>d.id!==dashDeleteBtn.dataset.dashId);
+    await saveKey(KEYS.dashboards, state.dashboards);
+    state.activeDashboardId = '';
+    render();
+  };
   document.querySelectorAll('[data-edit]').forEach(el=>{
     el.onclick = ()=>{ const [table,id] = el.dataset.edit.split(':'); openModal(table, id); };
   });
   document.querySelectorAll('[data-del]').forEach(el=>{
     el.onclick = async ()=>{
       const [table,id] = el.dataset.del.split(':');
+      if(table==='team' && !canDeleteUsers()) return alert('Only Ariel can delete team members.');
       if(!confirm('Delete this entry?')) return;
       state[table] = state[table].filter(x=>x.id!==id);
       render();
@@ -2241,6 +3824,7 @@ function attachContentHandlers(){
       importWorkbookFile(file);
     };
   }
+  if(state.view==='setup') wireSetupView();
 }
 
 /* ---------- Modal / forms ---------- */
@@ -2264,7 +3848,7 @@ function openModal(table, id){
     html = `<h2 class="display">${isEdit?'Edit':'Add'} deal</h2>
       <div class="field"><label>Title</label><input id="f_title" value="${item?esc(item.title):''}"></div>
       <div class="field"><label>Contact</label><select id="f_contact">${state.contacts.map(c=>`<option value="${c.id}" ${item&&item.contactId===c.id?'selected':''}>${esc(c.name)}</option>`).join('') || '<option value="">No contacts yet</option>'}</select></div>
-      <div class="field"><label>Currencies accepted</label>${msHTML('f_curr_deal', CURRENCIES, selCurr)}</div>
+      <div class="field"><label>Currencies accepted</label>${msHTML('f_curr_deal', CURRENCIES, selCurr, 3)}</div>
       <div class="field"><label>Value</label><input id="f_value" type="number" value="${item?item.value:''}"></div>
       <div class="field"><label>Stage</label><select id="f_stage">${stagesForModal.map(s=>`<option ${item&&item.stage===s?'selected':''}>${s}</option>`).join('')}</select></div>
       <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
@@ -2351,19 +3935,19 @@ function openModal(table, id){
       <div class="field"><label>${REL_TYPES.find(r=>r.key===relType).label}</label><select id="f_relId">${relItems.map(o=>`<option value="${o.id}" ${item&&item.relatedId===o.id?'selected':''}>${esc(o.label)}</option>`).join('') || '<option value="">None available yet</option>'}</select></div>
       <div class="field"><label>Link to order (optional)</label><select id="f_order"><option value="">— standalone —</option>${state.orders.map(o=>`<option value="${o.id}" ${item&&item.orderId===o.id?'selected':''}>${esc(orderLabel(o.id))}</option>`).join('')}</select></div>
       <div class="field"><label>Currencies accepted</label>${msHTML('f_curr_inv', CURRENCIES, selCurr)}</div>
-      <div class="field"><label>Amount</label><input id="f_amount" type="number" value="${item?item.amount:''}"></div>
+      <div class="field"><label>Amount (money)</label><input id="f_amount" type="number" value="${item?item.amount:''}"></div>
       <div class="field"><label>Status</label><select id="f_status">${ISTATUS.map(s=>`<option ${item&&item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
       <div class="field"><label>Due date</label><input id="f_dueDate" type="date" value="${item&&item.dueDate?item.dueDate:''}"></div>
       <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
   } else if(table==='payments'){
-    const selCurr = item && item.currencies ? item.currencies : [];
+    const curVal = item ? (item.currency || (item.currencies && item.currencies[0]) || 'USD') : 'USD';
     const payeeType = item ? (item.payeeType||'team') : 'team';
     html = `<h2 class="display">${isEdit?'Edit':'Add'} payment</h2>
-      <div class="field"><label>Payee type</label><select id="f_payeeType">${PAYEE_TYPES.map(p=>`<option value="${p.key}" ${payeeType===p.key?'selected':''}>${p.label}</option>`).join('')}</select></div>
-      <div class="field" id="f_payeeSelWrap"><label>Payee</label>${payeeSelectHTML(payeeType, item)}</div>
+      <div class="field"><label>Payment for</label><select id="f_payeeType">${PAYEE_TYPES.map(p=>`<option value="${p.key}" ${payeeType===p.key?'selected':''}>${p.label}</option>`).join('')}</select></div>
+      <div class="field" id="f_payeeSelWrap"><label>${payeeType==='team'?'Team member':'Payee'}</label>${payeeSelectHTML(payeeType, item)}</div>
       <div class="field"><label>Purpose</label><input id="f_purpose" value="${item?esc(item.purpose||''):''}" placeholder="e.g. October commission, oil shipment"></div>
       <div class="field"><label>Amount</label><input id="f_amount" type="number" value="${item?item.amount:''}"></div>
-      <div class="field"><label>Currencies</label>${msHTML('f_curr_pay', CURRENCIES, selCurr)}</div>
+      <div class="field"><label>Currency</label><select id="f_currency">${CURRENCIES.map(c=>`<option value="${c}" ${curVal===c?'selected':''}>${c} (${esc(CURRENCY_SYMBOLS[c]||'')})</option>`).join('')}</select></div>
       <div class="field"><label>Status</label><select id="f_status">${PSTATUS.map(s=>`<option ${item&&item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
       <div class="field"><label>Date</label><input id="f_dueDate" type="date" value="${item&&item.dueDate?item.dueDate:''}"></div>
       <div class="field"><label>Notes</label><textarea id="f_notes">${item?esc(item.notes||''):''}</textarea></div>`;
@@ -2385,7 +3969,6 @@ function openModal(table, id){
   if(table==='deals') msInit('f_curr_deal');
   if(table==='orders') msInit('f_curr_order');
   if(table==='invoices') msInit('f_curr_inv');
-  if(table==='payments') msInit('f_curr_pay');
   if(table==='distributors'){
     const prevItem = item;
     msInitSrc('f_conts');
@@ -2430,7 +4013,8 @@ function openModal(table, id){
   if(table==='payments'){
     document.getElementById('f_payeeType').onchange = (e)=>{
       const wrap = document.getElementById('f_payeeSelWrap');
-      wrap.innerHTML = `<label>Payee</label>${payeeSelectHTML(e.target.value, null)}`;
+      const label = e.target.value==='team' ? 'Team member' : 'Payee';
+      wrap.innerHTML = `<label>${label}</label>${payeeSelectHTML(e.target.value, null)}`;
     };
   }
   if(['contacts','leads'].includes(table)){
@@ -2481,7 +4065,239 @@ function openModal(table, id){
     }
   }
 }
-function closeModal(){ document.getElementById('overlay').classList.remove('show'); }
+function closeModal(){ document.getElementById('overlay').classList.remove('show'); document.getElementById('modalBody').className = 'modal'; }
+
+function openConfirmModal({title, message, confirmLabel, cancelLabel, onConfirm}){
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">${esc(title)}</h2>
+    <p style="color:var(--ink-soft);font-size:13px;line-height:1.5;margin:0 0 4px;">${esc(message)}</p>
+    <div class="modal-actions">
+      <button class="btn secondary" id="confirmGoBack">${esc(cancelLabel||'Go back')}</button>
+      <button class="btn" id="confirmContinue">${esc(confirmLabel||'Continue')}</button>
+    </div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('confirmGoBack').onclick = closeModal;
+  document.getElementById('confirmContinue').onclick = ()=>{ closeModal(); onConfirm(); };
+}
+
+/* ---------- Hands-on Guide viewer ---------- */
+const GUIDE_BOOK_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.3V5.7c0-.65.47-1.2 1.11-1.31L11 3.3v16.9l-5.72 1.1a1.1 1.1 0 0 1-1.28-1Z"/><path d="M20 19.3V5.7c0-.65-.47-1.2-1.11-1.31L13 3.3v16.9l5.72 1.1a1.1 1.1 0 0 0 1.28-1Z"/></svg>`;
+
+function renderGuideNoteCards(entries, tagFn){
+  return entries.map((g,i)=>`<div class="guide-note">
+    <div class="guide-note-num">${i+1}</div>
+    <div>
+      <div class="guide-note-title-row">
+        <div class="guide-note-title">${esc(g.title)}</div>
+        ${tagFn(g) ? `<span class="guide-note-tag">${esc(tagFn(g))}</span>` : ''}
+      </div>
+      <div class="guide-note-body">${esc(g.body)}</div>
+    </div>
+  </div>`).join('');
+}
+
+/* ---------- Interactive object walkthrough ---------- */
+let tourState = null;
+
+function tourStepsFor(entityKey){
+  const entries = guideEntriesFor(entityKey);
+  return [...entries.filter(g=>!g.linkField), ...entries.filter(g=>g.linkField)];
+}
+
+function resolveTourTarget(step){
+  if(step.linkField){
+    const wanted = prettyField(step.linkField).toLowerCase();
+    const ths = Array.from(document.querySelectorAll('#content th'));
+    const match = ths.find(th=>{
+      const t = th.textContent.trim().toLowerCase();
+      return t && (t.includes(wanted) || wanted.includes(t));
+    });
+    if(match) return match;
+  }
+  return document.querySelector('.topbar') || document.getElementById('content');
+}
+
+function tourCardStyle(rect){
+  const cardW = 340, cardH = 210, margin = 16;
+  let top = rect.bottom + margin;
+  if(top + cardH > window.innerHeight) top = Math.max(margin, rect.top - cardH - margin);
+  let left = rect.left;
+  if(left + cardW > window.innerWidth - margin) left = window.innerWidth - cardW - margin;
+  if(left < margin) left = margin;
+  return `top:${top}px;left:${left}px;`;
+}
+
+function endTour(){
+  tourState = null;
+  const el = document.getElementById('tourOverlay');
+  if(el) el.remove();
+  window.removeEventListener('resize', paintTourStep);
+}
+
+function paintTourStep(){
+  if(!tourState) return;
+  let overlay = document.getElementById('tourOverlay');
+  if(!overlay){
+    overlay = document.createElement('div');
+    overlay.id = 'tourOverlay';
+    overlay.className = 'tour-overlay';
+    document.body.appendChild(overlay);
+  }
+  const step = tourState.steps[tourState.idx];
+  const target = resolveTourTarget(step);
+  const rect = target.getBoundingClientRect();
+  const label = EXPORT_SHEETS.find(s=>s.key===tourState.entityKey)?.label || tourState.entityKey;
+  const isLast = tourState.idx === tourState.steps.length-1;
+  overlay.innerHTML = `
+    <div class="tour-blocker"></div>
+    <div class="tour-spot" style="top:${rect.top-6}px;left:${rect.left-6}px;width:${rect.width+12}px;height:${rect.height+12}px;"></div>
+    <div class="tour-card" style="${tourCardStyle(rect)}">
+      <div class="tour-card-eyebrow">${esc(label)} walkthrough · Step ${tourState.idx+1} of ${tourState.steps.length}</div>
+      <div class="tour-card-title">${esc(step.title)}</div>
+      <div class="tour-card-body">${esc(step.body)}</div>
+      <div class="tour-progress">${tourState.steps.map((s,i)=>`<span class="${i===tourState.idx?'on':''}"></span>`).join('')}</div>
+      <div class="tour-card-actions">
+        <button type="button" class="btn secondary" id="tourEndBtn">End tour</button>
+        <div style="display:flex;gap:8px;">
+          ${tourState.idx>0 ? `<button type="button" class="btn secondary" id="tourBackBtn">Back</button>` : ''}
+          <button type="button" class="btn" id="tourNextBtn">${isLast ? 'Finish' : 'Next'}</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('tourEndBtn').onclick = endTour;
+  document.getElementById('tourNextBtn').onclick = ()=>{
+    if(isLast){ endTour(); return; }
+    tourState.idx++;
+    advanceTourStep();
+  };
+  const backBtn = document.getElementById('tourBackBtn');
+  if(backBtn) backBtn.onclick = ()=>{ tourState.idx--; advanceTourStep(); };
+}
+
+function advanceTourStep(){
+  if(!tourState) return;
+  const step = tourState.steps[tourState.idx];
+  const target = resolveTourTarget(step);
+  if(target && target.scrollIntoView) target.scrollIntoView({block:'center', behavior:'auto'});
+  requestAnimationFrame(paintTourStep);
+}
+
+function startObjectWalkthrough(entityKey){
+  const steps = tourStepsFor(entityKey);
+  if(!steps.length) return;
+  tourState = { entityKey, steps, idx: 0 };
+  window.addEventListener('resize', paintTourStep);
+  advanceTourStep();
+}
+
+/* ---------- Guide intro before creating a record ---------- */
+function guideEntriesFor(entityKey){ return state.guideEntries.filter(g=>g.linkEntity===entityKey); }
+
+function openObjectGuideIntroModal(entityKey, onContinue){
+  const entries = guideEntriesFor(entityKey);
+  const label = EXPORT_SHEETS.find(s=>s.key===entityKey)?.label || entityKey;
+  const singular = label.replace(/s$/,'');
+  const modalEl = document.getElementById('modalBody');
+  modalEl.className = 'modal modal-guide';
+  modalEl.innerHTML = `
+    <div class="guide-modal-head">
+      <div class="gm-icon">${GUIDE_BOOK_ICON}</div>
+      <h2 class="display">Before you add a ${esc(singular)}</h2>
+      <p>Everything your team has noted about ${esc(label)}, so nothing gets missed.</p>
+    </div>
+    <div class="guide-modal-body">
+      ${renderGuideNoteCards(entries, g => g.linkField ? prettyField(g.linkField) : '')}
+    </div>
+    <div class="guide-modal-foot">
+      <label class="guide-dontshow"><input type="checkbox" id="og_dontShow">Don't show this again for ${esc(label)}</label>
+      <div class="guide-modal-actions">
+        <button class="btn secondary" id="og_skipBtn">Skip</button>
+        <button class="btn" id="og_continueBtn">Continue to add ${esc(singular)}</button>
+      </div>
+    </div>`;
+  document.getElementById('overlay').classList.add('show');
+  const proceed = async ()=>{
+    if(document.getElementById('og_dontShow').checked){
+      const list = state.guideDismissed[state.currentUser] || [];
+      if(!list.includes(entityKey)){
+        list.push(entityKey);
+        state.guideDismissed[state.currentUser] = list;
+        await saveKey(KEYS.guideDismissed, state.guideDismissed);
+      }
+    }
+    closeModal();
+    onContinue();
+  };
+  document.getElementById('og_skipBtn').onclick = proceed;
+  document.getElementById('og_continueBtn').onclick = proceed;
+}
+
+function startAddRecord(entityKey){
+  const entries = guideEntriesFor(entityKey);
+  const dismissed = (state.guideDismissed[state.currentUser] || []).includes(entityKey);
+  if(entries.length && !dismissed){
+    openObjectGuideIntroModal(entityKey, ()=> openModal(entityKey, null));
+  } else {
+    openModal(entityKey, null);
+  }
+}
+
+/* ---------- Customizable quick actions ---------- */
+function renderTopnavQuickActions(){
+  const wrap = document.getElementById('topnavQa');
+  if(!wrap) return;
+  const keys = state.quickActionPrefs[state.currentUser] || [];
+  wrap.innerHTML = keys.map(k=>{
+    const qa = QUICK_ACTION_LIBRARY.find(q=>q.key===k);
+    return qa ? `<button type="button" class="qa-btn" data-qa="${qa.key}" title="${esc(qa.label)}">${qa.icon}<span>${esc(qa.label)}</span></button>` : '';
+  }).join('') + `<button type="button" class="qa-add-btn" id="qaAddBtn" title="Customize your quick actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>`;
+  wrap.querySelectorAll('[data-qa]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const qa = QUICK_ACTION_LIBRARY.find(q=>q.key===btn.dataset.qa);
+      if(!qa) return;
+      if(qa.view===null){ state.view = 'search'; render(); return; }
+      startAddRecord(qa.view);
+    };
+  });
+  document.getElementById('qaAddBtn').onclick = openQuickActionsCustomizeModal;
+  updateQaScrollArrows();
+}
+function updateQaScrollArrows(){
+  const scroller = document.getElementById('topnavQaScroll');
+  const leftBtn = document.getElementById('qaScrollLeft');
+  const rightBtn = document.getElementById('qaScrollRight');
+  if(!scroller || !leftBtn || !rightBtn) return;
+  const overflowing = scroller.scrollWidth > scroller.clientWidth + 2;
+  leftBtn.style.display = overflowing ? 'block' : 'none';
+  rightBtn.style.display = overflowing ? 'block' : 'none';
+}
+function openQuickActionsCustomizeModal(){
+  const current = state.quickActionPrefs[state.currentUser] || [];
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">Your quick actions</h2>
+    <p style="color:var(--ink-soft);font-size:12.5px;line-height:1.5;margin:0 0 4px;">Pick up to ${QUICK_ACTION_MAX} shortcuts to keep in your top bar. Only you see this — everyone can set their own.</p>
+    <div class="qa-picker-list">
+      ${QUICK_ACTION_LIBRARY.map(qa=>`<label class="qa-picker-opt"><input type="checkbox" value="${qa.key}" ${current.includes(qa.key)?'checked':''}>${qa.icon}<span>${esc(qa.label)}</span></label>`).join('')}
+    </div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="qa_saveBtn">Save</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  const boxes = Array.from(document.querySelectorAll('.qa-picker-list input'));
+  boxes.forEach(cb=>{
+    cb.onchange = ()=>{
+      const checked = boxes.filter(b=>b.checked);
+      if(checked.length > QUICK_ACTION_MAX){
+        cb.checked = false;
+        toast(`You can pick up to ${QUICK_ACTION_MAX} quick actions.`);
+      }
+    };
+  });
+  document.getElementById('qa_saveBtn').onclick = async ()=>{
+    state.quickActionPrefs[state.currentUser] = boxes.filter(b=>b.checked).map(b=>b.value);
+    await saveKey(KEYS.quickActionPrefs, state.quickActionPrefs);
+    closeModal();
+    renderTopnavQuickActions();
+    toast('Quick actions updated.');
+  };
+}
 
 async function saveModal(table, id){
   const isEdit = !!id;
@@ -2589,11 +4405,13 @@ async function saveModal(table, id){
     if(!obj.payee) return alert('Payee is required.');
     obj.purpose = document.getElementById('f_purpose').value.trim();
     obj.amount = Number(document.getElementById('f_amount').value)||0;
-    obj.currencies = msRead('f_curr_pay');
+    obj.currency = document.getElementById('f_currency').value;
+    delete obj.currencies;
     obj.status = document.getElementById('f_status').value;
     obj.dueDate = document.getElementById('f_dueDate').value;
     obj.notes = document.getElementById('f_notes').value.trim();
   } else if(table==='team'){
+    if(!isAdmin()) return alert('Only an admin or co-admin can manage team members.');
     obj.name = document.getElementById('f_name').value.trim();
     if(!obj.name) return alert('Name is required.');
     obj.email = document.getElementById('f_email').value.trim().toLowerCase();
@@ -2601,9 +4419,14 @@ async function saveModal(table, id){
     const dupe = state.team.find(t=>t.email===obj.email && t.id!==obj.id);
     if(dupe) return alert('That email is already in use by another team member.');
   }
+  if(table!=='team'){
+    const valErr = validateAgainstRules(table, obj);
+    if(valErr) return alert(valErr);
+  }
   if(!isEdit) state[table].push(obj);
   const wasNew = !isEdit;
   const savedObj = obj;
+  if(table==='deals') await checkBigDealAlert(savedObj);
   closeModal();
   render();
   if(wasNew) await dbInsert(table, obj); else await dbUpdate(table, obj);
@@ -2615,6 +4438,10 @@ async function saveModal(table, id){
       // Auto-create linked entity based on contact type
       await autoCreateFromContact(savedObj);
       showContactFollowup(savedObj);
+    }
+    if(table!=='team'){
+      await runAutomations(table, savedObj);
+      await runFlows(table, savedObj);
     }
   }
 }
@@ -2629,9 +4456,32 @@ document.getElementById('tn-home').onclick = ()=>{ state.view='home'; render(); 
 document.getElementById('tn-contacts').onclick = ()=>{ state.view='contacts'; render(); };
 document.getElementById('tn-export').onclick = ()=>{ state.view='rickroll'; render(); };
 document.getElementById('tn-search').onclick = ()=>{ state.view='search'; render(); };
+document.getElementById('qaScrollLeft').onclick = ()=>{ document.getElementById('topnavQaScroll').scrollBy({left:-120, behavior:'smooth'}); };
+document.getElementById('qaScrollRight').onclick = ()=>{ document.getElementById('topnavQaScroll').scrollBy({left:120, behavior:'smooth'}); };
+window.addEventListener('resize', updateQaScrollArrows);
+document.getElementById('topbarGuideBtn').onclick = ()=> startObjectWalkthrough(state.view);
+document.getElementById('setupGearBtn').onclick = ()=>{
+  if(state.view==='setup') return;
+  openConfirmModal({
+    title:'Enter Setup?',
+    message:"You're about to open the backend of the CRM — roles, validation rules, automation and sharing rules live here, and changes affect the whole team.",
+    confirmLabel:'Continue',
+    cancelLabel:'Go back',
+    onConfirm: ()=>{ state.returnView = state.view; state.view='setup'; render(); },
+  });
+};
+document.getElementById('setupBackBtn').onclick = ()=>{ state.view = state.returnView || 'dashboard'; render(); };
+document.addEventListener('keydown', (e)=>{
+  if(e.key!=='/' || !document.getElementById('app') || document.getElementById('app').style.display==='none') return;
+  const tag = (document.activeElement && document.activeElement.tagName) || '';
+  if(tag==='INPUT' || tag==='TEXTAREA' || tag==='SELECT') return;
+  e.preventDefault();
+  state.view = 'search';
+  render();
+});
 document.getElementById('addBtn').onclick = ()=>{
   const addable = ['contacts','leads','customers','distributors','suppliers','deals','tasks','invoices','payments','team'];
-  if(addable.includes(state.view)) openModal(state.view, null);
+  if(addable.includes(state.view)) startAddRecord(state.view);
 };
 document.getElementById('overlay').onclick = (e)=>{ if(e.target.id==='overlay') closeModal(); };
 document.getElementById('emlPrevOverlay').onclick = (e)=>{ if(e.target.id==='emlPrevOverlay') closeEmailPreview(); };
@@ -2695,6 +4545,42 @@ async function createPaidOrderAndInvoice({relatedType, relatedId, product, qty, 
   state.invoices.push(invoice);
   await dbInsert('invoices', invoice);
   return { order, invoice };
+}
+
+async function checkBigDealAlert(deal){
+  const cfg = state.bigDealAlert;
+  if(!cfg || !cfg.enabled || !deal || deal.stage==='Lost') return;
+  if(Number(deal.value||0) < Number(cfg.threshold||0)) return;
+  if(state.bigDealAlerts.some(a=>a.dealId===deal.id)) return;
+  const alert = { id:uid(), dealId:deal.id, title:deal.title, value:deal.value, owner:deal.owner, stage:deal.stage, createdAt:Date.now() };
+  state.bigDealAlerts.unshift(alert);
+  await saveKey(KEYS.bigDealAlerts, state.bigDealAlerts);
+  if(personaIsAdmin() || roleFor(state.viewingAs)==='Manager'){
+    toast(`🚨 Big deal alert: "${deal.title}" — ${Number(deal.value||0).toLocaleString()} ${cfg.currency}`);
+  }
+}
+
+async function setDealStage(dealId, newStage){
+  const deal = state.deals.find(d=>d.id===dealId);
+  if(!deal || deal.stage===newStage) return;
+  const wasWon = deal.stage === 'Won';
+  deal.stage = newStage;
+  if(deal.stage==='Won' && !wasWon && !deal._autoInvoiced){
+    deal._autoInvoiced = true;
+    await saveKey(KEYS.deals, state.deals);
+    await createPaidOrderAndInvoice({
+      relatedType:'contact', relatedId: deal.contactId,
+      product: deal.title, qty:1, amount: deal.value||0, currencies: deal.currencies||[],
+      notes: `Auto-generated when the deal "${deal.title}" was marked Won.`
+    });
+    render();
+    toast(`Invoice created for "${deal.title}" — ${Number(deal.value||0).toLocaleString()}`);
+    celebrate();
+    return;
+  }
+  await saveKey(KEYS.deals, state.deals);
+  await checkBigDealAlert(deal);
+  render();
 }
 
 function openPlaceOrderModal(relatedType, relatedId, name){
@@ -2798,7 +4684,8 @@ function updateIdentityUI(){
   } else {
     adminBox.style.display = 'none';
     staticBox.style.display = 'block';
-    document.getElementById('identityName').textContent = state.currentUser;
+    const row = document.getElementById('identityRow');
+    row.innerHTML = avatarHTML(state.currentUser, 'sm') + `<div class="identity-name">${esc(state.currentUser)}</div>`;
   }
 }
 
