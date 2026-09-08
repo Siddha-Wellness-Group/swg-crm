@@ -24,18 +24,34 @@ loadDotenv();
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Fallback for testing only. It works solely because the ledger's RLS is
+// still the placeholder `to anon using (true)` policy, so anon can reach
+// email_outbox and email_log. The moment RLS is tightened to real per-user
+// policies this stops working, which is the correct outcome -- a background
+// worker should hold the service role key, not the key that ships publicly
+// inside swg_crm.html.
+const ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const key = SERVICE_ROLE_KEY || ANON_KEY;
 
-if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+if (!SUPABASE_URL || !key) {
   console.error(
     'Missing SUPABASE_URL and/or SUPABASE_SERVICE_ROLE_KEY in .env.\n' +
       'The worker needs the service role key (not the anon key from swg_crm.html) ' +
       'to read and write email_outbox / email_log regardless of RLS.\n' +
-      'Find it in the Supabase dashboard: Project Settings -> API -> service_role secret.',
+      'Find it in the Supabase dashboard: Project Settings -> API -> service_role secret.\n' +
+      'For a local test only, SUPABASE_ANON_KEY also works while RLS stays permissive.',
   );
   process.exit(1);
 }
 
-const supabaseClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+if (!SERVICE_ROLE_KEY) {
+  logger.warn('worker.using_anon_key', {
+    reason: 'SUPABASE_SERVICE_ROLE_KEY not set; falling back to the anon key',
+    note: 'Testing only. Set the service role key before running this anywhere permanent.',
+  });
+}
+
+const supabaseClient = createClient(SUPABASE_URL, key, {
   auth: { persistSession: false },
 });
 
