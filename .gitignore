@@ -1,0 +1,7 @@
+node_modules/
+.env
+.env.local
+*.log
+email-previews/
+.claude/launch.json
+supabase/.temp/
