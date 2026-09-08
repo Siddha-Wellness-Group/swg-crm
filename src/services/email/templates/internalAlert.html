@@ -1,0 +1,120 @@
+<!doctype html>
+<html dir="{{dir}}" lang="{{lang}}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <title>{{subject}}</title>
+    <style>
+      body { margin: 0; padding: 0; background: #f6f1e7; }
+      table { border-collapse: collapse; }
+      .swg-card { width: 600px; max-width: 100%; }
+      @media only screen and (max-width: 640px) {
+        .swg-card { width: 100% !important; }
+        .swg-pad { padding-left: 24px !important; padding-right: 24px !important; }
+        .swg-h1 { font-size: 19px !important; }
+      }
+    </style>
+  </head>
+  <body style="margin:0; padding:0; background:#f6f1e7;">
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0;">
+      {{preheader}}&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;
+    </div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f1e7;">
+      <tr>
+        <td align="center" style="padding:40px 12px;">
+          <table role="presentation" class="swg-card" width="600" cellpadding="0" cellspacing="0"
+                 style="width:600px; max-width:100%; background:#ffffff; border:1px solid #e4dfd3;">
+
+            <!-- Priority stripe -->
+            <tr>
+              <td style="height:3px; background:{{priorityColor}}; font-size:0; line-height:0;">&nbsp;</td>
+            </tr>
+
+            <tr>
+              <td class="swg-pad" style="text-align:{{align}}; padding:24px 34px 0;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="font-family:Helvetica,Arial,sans-serif; font-size:13px; color:#9a937f;">
+                      {{brandName}} &middot; {{alertKind}}
+                    </td>
+                    <td align="right" style="font-family:Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:{{priorityColor}};">
+                      {{priorityLabel}}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr><td class="swg-pad" style="text-align:{{align}}; padding:0 34px;"><div style="border-top:1px solid #e4dfd3; font-size:0; line-height:0; margin-top:18px;">&nbsp;</div></td></tr>
+
+            <tr>
+              <td class="swg-pad" dir="auto" style="padding:24px 34px 0; unicode-bidi:plaintext;">
+                <h1 class="swg-h1" style="margin:0; font-family:Helvetica,Arial,sans-serif; font-size:21px; line-height:1.4; font-weight:700; letter-spacing:-.2px; color:#2a2820;">
+                  {{alertTitle}}
+                </h1>
+                <p style="margin:12px 0 0; font-family:Helvetica,Arial,sans-serif; font-size:14px; line-height:1.7; color:#6b6553; white-space:pre-line;">
+                  {{message}}
+                </p>
+              </td>
+            </tr>
+
+            <!-- Payload -->
+            {{#if payloadRows.length}}
+            <tr><td class="swg-pad" style="text-align:{{align}}; padding:0 34px;"><div style="border-top:1px solid #e4dfd3; font-size:0; line-height:0; margin-top:22px;">&nbsp;</div></td></tr>
+            <tr>
+              <td class="swg-pad" style="text-align:{{align}}; padding:22px 34px 0;">
+                <div style="font-family:Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:#2a2820; padding-bottom:12px;">
+                  {{labels.details}}
+                </div>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  {{#each payloadRows}}
+                  <tr>
+                    <td dir="auto" width="34%" style="padding:9px 0; border-top:1px solid #eee7d8; font-family:Helvetica,Arial,sans-serif; font-size:13px; color:#9a937f; vertical-align:top; unicode-bidi:plaintext;">
+                      {{this.key}}
+                    </td>
+                    <td dir="auto" style="padding:9px 0; border-top:1px solid #eee7d8; font-family:Helvetica,Arial,sans-serif; font-size:13.5px; color:#2a2820; word-break:break-word; unicode-bidi:plaintext;">
+                      {{this.value}}
+                    </td>
+                  </tr>
+                  {{/each}}
+                </table>
+              </td>
+            </tr>
+            {{/if}}
+
+            {{#if ctaUrl}}
+            <tr>
+              <td class="swg-pad" style="text-align:{{align}}; padding:26px 34px 0;">
+                <a href="{{ctaUrl}}"
+                   style="display:inline-block; background:#2a2820; color:#ffffff; text-decoration:none; font-family:Helvetica,Arial,sans-serif; font-size:13.5px; font-weight:700; padding:12px 26px;">
+                  {{ctaLabel}}
+                </a>
+              </td>
+            </tr>
+            {{/if}}
+
+            <tr><td style="padding:8px 34px 0;"><div style="border-top:1px solid #e4dfd3; font-size:0; line-height:0; margin-top:24px;">&nbsp;</div></td></tr>
+            <tr>
+              <td class="swg-pad" style="text-align:{{align}}; padding:20px 34px 28px;">
+                <p style="margin:0 0 12px; font-family:Helvetica,Arial,sans-serif; font-size:12.5px; line-height:1.7; color:#9a937f;">
+                  {{internalNotice}}
+                </p>
+                <p dir="auto" style="margin:0 0 12px; font-family:Helvetica,Arial,sans-serif; font-size:12.5px; line-height:1.7; color:#6b6553; unicode-bidi:plaintext;">
+                  {{footerNote}}
+                </p>
+                <p style="margin:0; font-family:Helvetica,Arial,sans-serif; font-size:12.5px; line-height:1.8; color:#9a937f;">
+                  {{brandName}}
+                  &nbsp;&middot;&nbsp;
+                  <a dir="ltr" href="mailto:{{supportEmail}}" style="color:#9a937f;">{{supportEmail}}</a>
+                  &nbsp;&middot;&nbsp;<span dir="ltr">{{generatedAt}}</span>
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

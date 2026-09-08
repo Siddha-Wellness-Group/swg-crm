@@ -133,6 +133,8 @@
   .navlink[data-view="payments"] .dot{background:var(--rust);}
   .navlink[data-view="team"] .dot{background:var(--ink);}
   .navlink[data-view="finance"] .dot{background:var(--sage);}
+  .navlink[data-view="emails"] .dot{background:var(--umber);}
+  .navlink[data-view="tickets"] .dot{background:var(--clay);}
   .navlink[data-view="dashboard"].active{background:var(--ink);}
   .navlink[data-view="home"].active{background:var(--amber);}
   .navlink[data-view="contacts"].active{background:var(--amber);}
@@ -147,6 +149,8 @@
   .navlink[data-view="payments"].active{background:var(--rust);}
   .navlink[data-view="team"].active{background:var(--ink);}
   .navlink[data-view="finance"].active{background:var(--sage);}
+  .navlink[data-view="emails"].active{background:var(--umber);}
+  .navlink[data-view="tickets"].active{background:var(--clay);}
   .navlink.hidden-role{display:none;}
   .sidebar-foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--border);}
   .foot-label{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
@@ -244,6 +248,59 @@
   .kcard select{font-size:11px;padding:3px 4px;border-radius:5px;border:1px solid var(--border);font-family:inherit;background:var(--surface);}
   .kcard .kowner{font-size:10.5px;color:var(--ink-soft);}
   .kcard .kdel{cursor:pointer;color:var(--clay);font-size:11px;}
+
+  /* Tickets */
+  .tkt-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:12px;}
+  .tkt-card.is-new{border-inline-start:3px solid var(--clay);}
+  .tkt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;}
+  .tkt-who{font-size:13.5px;font-weight:600;color:var(--ink);}
+  .tkt-meta{font-size:11.5px;color:var(--ink-soft);margin-top:3px;}
+  .tkt-num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--clay);margin-top:3px;}
+  .tkt-msg{font-size:13.5px;line-height:1.75;color:var(--ink);white-space:pre-line;
+    unicode-bidi:plaintext;margin-top:12px;padding-top:12px;border-top:1px solid var(--parchment);}
+  .tkt-right{display:flex;align-items:center;gap:9px;flex-shrink:0;}
+  .tkt-status{font-family:inherit;font-size:12px;padding:5px 9px;border-radius:6px;
+    border:1px solid var(--border);background:var(--cream);color:var(--ink);cursor:pointer;}
+  .tkt-meta{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+  .tkt-status{font-family:inherit;font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--cream);color:var(--ink);}
+  .tkt-num{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--clay);}
+
+  /* Emails -- automated email service */
+  .eml-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:14px;}
+  .eml-card{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:16px 18px 15px;overflow:hidden;}
+  .eml-card::before{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:var(--eml-accent);}
+  .eml-card h4{margin:0;font-size:13.5px;font-weight:600;color:var(--ink);}
+  .eml-card .eml-desc{font-size:12px;line-height:1.65;color:var(--ink-soft);margin:7px 0 12px;}
+  .eml-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .eml-chip{font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;padding:3px 9px;border-radius:20px;background:var(--parchment);color:var(--ink-soft);}
+  .eml-chip.on{background:var(--eml-accent-soft);color:var(--eml-accent);}
+  .eml-fn{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);background:var(--cream);border:1px solid var(--border);border-radius:6px;padding:6px 9px;margin-bottom:12px;overflow-x:auto;white-space:nowrap;}
+  .eml-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;border:1px solid var(--border);background:var(--surface);font-family:inherit;font-size:12px;color:var(--ink);cursor:pointer;transition:background .15s,border-color .15s;}
+  .eml-btn:hover{background:var(--cream);border-color:var(--ink-soft);}
+  .eml-kv{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--parchment);font-size:12.5px;}
+  .eml-kv:last-child{border-bottom:none;}
+  .eml-kv .k{color:var(--ink-soft);}
+  .eml-kv .v{color:var(--ink);text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11.5px;word-break:break-all;}
+  .eml-envs{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+  .eml-env{font-family:'IBM Plex Mono',monospace;font-size:10.5px;padding:3px 8px;border-radius:5px;background:var(--cream);border:1px solid var(--border);color:var(--ink-soft);}
+  .eml-note{font-size:11.5px;line-height:1.7;color:var(--ink-soft);margin-top:14px;padding-top:12px;border-top:1px solid var(--parchment);}
+  /* Preview overlay -- wider than the record modal, holds a full email */
+  .eml-prev-overlay{display:none;position:fixed;inset:0;background:rgba(42,40,32,0.5);align-items:center;justify-content:center;z-index:60;padding:24px;}
+  .eml-prev-overlay.show{display:flex;}
+  .eml-prev-shell{background:var(--surface);border-radius:12px;width:720px;max-width:96vw;height:86vh;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border);}
+  .eml-prev-head{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:15px 20px;border-bottom:1px solid var(--border);}
+  .eml-prev-head .t{font-size:14px;font-weight:600;color:var(--ink);}
+  .eml-prev-head .s{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .eml-lang{display:inline-flex;border:1px solid var(--border);border-radius:7px;overflow:hidden;}
+  .eml-lang button{font-family:inherit;font-size:12px;padding:5px 12px;border:none;background:var(--surface);color:var(--ink-soft);cursor:pointer;}
+  .eml-lang button+button{border-inline-start:1px solid var(--border);}
+  .eml-lang button.on{background:var(--ink);color:#fff;}
+  .eml-prev-close{cursor:pointer;font-size:20px;line-height:1;color:var(--ink-soft);background:none;border:none;padding:0 4px;}
+  .eml-prev-close:hover{color:var(--ink);}
+  .eml-prev-body{flex:1;background:var(--cream);overflow:auto;}
+  .eml-prev-body iframe{width:100%;height:100%;border:none;background:#F6F1E7;}
+  .eml-prev-msg{padding:34px 30px;text-align:center;color:var(--ink-soft);font-size:13px;line-height:1.8;}
+  .eml-prev-msg code{font-family:'IBM Plex Mono',monospace;font-size:11.5px;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:2px 6px;}
 
   /* Modal */
   .overlay{display:none;position:fixed;inset:0;background:rgba(42,40,32,0.4);align-items:center;justify-content:center;z-index:50;}
@@ -627,6 +684,8 @@
     <div class="navlink" data-view="invoices"><span class="dot"></span>Invoices</div>
     <div class="navlink" data-view="payments"><span class="dot"></span>Payments</div>
     <div class="navlink" data-view="finance"><span class="dot"></span>Finance</div>
+    <div class="navlink" data-view="emails"><span class="dot"></span>Emails</div>
+    <div class="navlink" data-view="tickets"><span class="dot"></span>Tickets</div>
     <div class="navlink" data-view="team"><span class="dot"></span>Team</div>
     <div class="sidebar-foot">
       <div class="theme-toggle" id="themeToggle">
@@ -687,12 +746,31 @@
   <div class="modal" id="modalBody"></div>
 </div>
 
+<div class="eml-prev-overlay" id="emlPrevOverlay">
+  <div class="eml-prev-shell">
+    <div class="eml-prev-head">
+      <div>
+        <div class="t" id="emlPrevTitle">Email preview</div>
+        <div class="s" id="emlPrevSub"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="eml-lang" id="emlPrevLang">
+          <button type="button" data-eml-lang="he" class="on">עברית</button>
+          <button type="button" data-eml-lang="en">English</button>
+        </div>
+        <button class="eml-prev-close" id="emlPrevClose" title="Close">&times;</button>
+      </div>
+    </div>
+    <div class="eml-prev-body" id="emlPrevBody"></div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard' };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[] };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -789,7 +867,7 @@ const ACCENTS = {
   dashboard:'var(--ink-fixed)', home:'var(--amber)', contacts:'var(--amber)', leads:'var(--ochre)', customers:'var(--sage)',
   distributors:'var(--umber)', suppliers:'var(--clay)', deals:'var(--ochre)', orders:'var(--umber)',
   tasks:'var(--olive)', invoices:'var(--rust)', payments:'var(--rust)', team:'var(--ink)', finance:'var(--sage)',
-  search:'var(--ink)', rickroll:'var(--ink)'
+  emails:'var(--umber)', tickets:'var(--clay)', search:'var(--ink)', rickroll:'var(--ink)'
 };
 const CONTINENTS = ['Africa','Asia','Europe','North America','South America','Oceania','Middle East'];
 const SUBREGIONS = {
@@ -920,9 +998,26 @@ const FIELD_MAP = {
   payeeType:'payee_type', _autoInvoiced:'auto_invoiced',
   paymentStatus:'payment_status', paymentProvider:'payment_provider', paymentReference:'payment_reference',
   shippingAddress:'shipping_address', externalOrderNumber:'external_order_number',
+  trackingNumber:'tracking_number', carrierName:'carrier_name', trackingUrl:'tracking_url',
+  ticketNumber:'ticket_number', externalId:'external_id', assignedTo:'assigned_to',
 };
 const FIELD_MAP_REV = Object.fromEntries(Object.entries(FIELD_MAP).map(([a,b])=>[b,a]));
-function toRow(obj){ const row={}; for(const k in obj){ row[FIELD_MAP[k]||k] = obj[k]; } return row; }
+/* Columns Postgres types as `date`. An empty date input yields '', which
+   Postgres rejects with 22007 "invalid input syntax for type date" -- and
+   because dbInsert only logs, the record silently never saved. That hit
+   every task, invoice and payment left without a due date, plus the
+   auto-invoice on a won deal, which hardcodes dueDate:''. Normalised here
+   so it is fixed once rather than at each call site. */
+const DATE_COLUMNS = new Set(['due_date']);
+function toRow(obj){
+  const row={};
+  for(const k in obj){
+    const col = FIELD_MAP[k]||k;
+    const val = obj[k];
+    row[col] = (DATE_COLUMNS.has(col) && (val === '' || val === undefined)) ? null : val;
+  }
+  return row;
+}
 function fromRow(row){ if(!row) return row; const obj={}; for(const k in row){ obj[FIELD_MAP_REV[k]||k] = row[k]; } return obj; }
 
 async function loadTable(table){
@@ -957,11 +1052,72 @@ async function dbDeleteAll(table){
   if(error) console.error('delete-all failed', table, error);
 }
 
+/* ---------- Settings persistence ----------
+   The Setup features call saveKey(KEYS.x, value) in 27 places, but neither
+   KEYS nor saveKey was ever defined, so every call threw ReferenceError --
+   and since a throw abandons the rest of its function, the fallout went
+   well past settings: deal stage changes were never saved, marking a deal
+   Won never reached the auto-invoice, automation tasks were lost, and
+   checkBigDealAlert died before its own toast.
+
+   Eleven of the keys are settings-shaped and live in the `settings` table.
+   The other three (deals, tasks, team) already have real tables, so those
+   call sites use the existing db helpers instead of this. */
+
+const KEYS = {
+  validationRules: 'validationRules',
+  dashboards: 'dashboards',
+  automations: 'automations',
+  flows: 'flows',
+  guideEntries: 'guideEntries',
+  guideDismissed: 'guideDismissed',
+  dependentFields: 'dependentFields',
+  sharingRules: 'sharingRules',
+  quickActionPrefs: 'quickActionPrefs',
+  bigDealAlert: 'bigDealAlert',
+  bigDealAlerts: 'bigDealAlerts',
+};
+
+/* Which slice of state each key holds, so a reload can restore them. */
+const SETTING_DEFAULTS = {
+  validationRules: [], dashboards: [], automations: [], flows: [],
+  guideEntries: [], guideDismissed: {}, dependentFields: [],
+  sharingRules: {}, quickActionPrefs: {}, bigDealAlerts: [],
+  bigDealAlert: { enabled:false, threshold:10000, currency:'USD' },
+};
+
+/* Saves one settings key. Errors are logged rather than thrown: a failed
+   save must not abandon the caller mid-way, which is exactly how the
+   undefined version did its damage. */
+async function saveKey(key, value){
+  if(!key){ console.error('saveKey called without a key'); return false; }
+  const { error } = await sb.from('settings')
+    .upsert({ key, value, updated_at: Date.now() }, { onConflict:'key' });
+  if(error){ console.error('saveKey failed', key, error); toast('Could not save that setting.'); return false; }
+  return true;
+}
+
+/* Restores every settings key into state. Anything missing keeps its
+   default, so a fresh project behaves like an empty one rather than
+   breaking. */
+async function loadSettings(){
+  try{
+    const { data, error } = await sb.from('settings').select('key,value');
+    if(error){ console.error('load failed', 'settings', error); return; }
+    const byKey = Object.fromEntries((data||[]).map(r=>[r.key, r.value]));
+    for(const [key, fallback] of Object.entries(SETTING_DEFAULTS)){
+      const stored = byKey[key];
+      state[key] = (stored === undefined || stored === null) ? fallback : stored;
+    }
+  }catch(e){ console.error('load threw', 'settings', e); }
+}
+
 async function loadAll(){
   const [c,d,o,cu,su,ta,inv,le,di,pa] = await Promise.all([
     loadTable('contacts'), loadTable('deals'), loadTable('orders'),
     loadTable('customers'), loadTable('suppliers'), loadTable('tasks'), loadTable('invoices'),
-    loadTable('leads'), loadTable('distributors'), loadTable('payments'), loadFxRates()
+    loadTable('leads'), loadTable('distributors'), loadTable('payments'), loadFxRates(),
+    loadEmailLog(), loadTickets(), loadSettings()
   ]);
   state.contacts = c; state.deals = d; state.orders = o;
   state.customers = cu; state.suppliers = su; state.tasks = ta; state.invoices = inv;
@@ -1174,6 +1330,8 @@ function render(){
     payments:['Payments','Track what SWG owes and pays out'],
     finance:['Finance','Revenue vs. payments, by source and over time'],
     team:['Team','Manage who has access to the ledger'],
+    emails:['Emails','Automated messages the CRM sends on your behalf'],
+    tickets:['Tickets','Customer enquiries from the website and elsewhere'],
     setup:['Setup','Roles, validation rules, automation and sharing'],
     search:['Search','Find anything across all tabs'],
     rickroll:['Import / Export','Move data in and out of the ledger']};
@@ -1182,7 +1340,7 @@ function render(){
   document.getElementById('mainArea').style.setProperty('--accent', ACCENTS[state.view] || 'var(--amber)');
   const addLabels = {contacts:'contact', leads:'lead', customers:'customer', distributors:'distributor', suppliers:'supplier', deals:'deal', tasks:'task', invoices:'invoice', payments:'payment', team:'team member'};
   const addBtn = document.getElementById('addBtn');
-  const noAdd = ['dashboard','home','search','rickroll','finance'];
+  const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets'];
   addBtn.style.display = noAdd.includes(state.view) ? 'none' : 'inline-block';
   addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
   const guideBtn = document.getElementById('topbarGuideBtn');
@@ -1209,6 +1367,8 @@ function render(){
   if(state.view==='invoices') c.innerHTML = renderInvoices();
   if(state.view==='payments') c.innerHTML = renderPayments();
   if(state.view==='finance') c.innerHTML = renderFinance();
+  if(state.view==='emails') c.innerHTML = renderEmails();
+  if(state.view==='tickets') c.innerHTML = renderTickets();
   if(state.view==='team') c.innerHTML = renderTeam();
   if(state.view==='setup') c.innerHTML = renderSetup();
   if(state.view==='search') c.innerHTML = renderSearchShell();
@@ -2489,6 +2649,436 @@ function renderFinance(){
     + `<div class="fin-cols">${renderDealPie(f)}${renderReceivables(f)}</div>`;
 }
 
+/* ---------- Tickets (Hook 4) ---------- */
+/* Enquiries arrive from the storefront contact form via the
+   storefront-contact Edge Function, which also queues the customer's
+   auto-reply and the team's heads-up. This view is where they get worked. */
+
+const TICKET_STATUS = ['new','open','resolved','closed'];
+
+async function loadTickets(){
+  try{
+    const { data, error } = await sb.from('tickets').select('*').order('created_at', { ascending:false }).limit(300);
+    // Empty on failure so the rest of the ledger still loads, but say so --
+    // a silently empty list looks identical to "no enquiries yet".
+    if(error) console.error('load failed', 'tickets', error);
+    state.tickets = error ? [] : (data||[]).map(fromRow);
+  }catch(e){ console.error('load threw', 'tickets', e); state.tickets = []; }
+}
+
+async function setTicketStatus(id, status){
+  const t = state.tickets.find(x=>x.id===id);
+  if(!t || t.status===status) return;
+  t.status = status;
+  render();
+  const { error } = await sb.from('tickets').update({ status }).eq('id', id);
+  if(error){ console.error('ticket status update failed', error); toast('Could not save the status change.'); return; }
+  toast(`${t.ticketNumber || 'Ticket'} marked ${status}.`);
+}
+
+function renderTickets(){
+  const list = state.tickets || [];
+  if(!list.length){
+    return `<div class="empty"><div class="display">No enquiries yet</div>
+      Messages sent through the website contact form appear here, and the customer is
+      acknowledged automatically. Nothing needs to be logged by hand.</div>`;
+  }
+  const open = list.filter(t=>t.status==='new' || t.status==='open').length;
+  const head = `<div class="fin-head"><div class="fin-asof">
+    ${open} open of ${list.length} · the customer is auto-acknowledged on arrival, and the team is emailed
+  </div></div>`;
+  // Cards, not a table: the message is free text of any length and any
+  // direction, which a fixed column cannot hold legibly.
+  const cards = list.map(t=>`
+    <div class="tkt-card ${t.status==='new'?'is-new':''}">
+      <div class="tkt-head">
+        <div>
+          <div class="tkt-who">${esc(t.name||'—')}</div>
+          <div class="tkt-meta">${esc(t.email||'')}${t.phone?' · '+esc(t.phone):''}${t.source?' · '+esc(t.source):''}</div>
+          <div class="tkt-num">${esc(t.ticketNumber||'—')}</div>
+        </div>
+        <div class="tkt-right">
+          <span style="font-size:11.5px;color:var(--ink-soft);white-space:nowrap;">
+            ${t.createdAt ? new Date(Number(t.createdAt)).toLocaleString() : '—'}
+          </span>
+          <select class="tkt-status" data-tkt-status="${t.id}">
+            ${TICKET_STATUS.map(s=>`<option value="${s}" ${t.status===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="tkt-msg" dir="auto">${esc(t.message||'')}</div>
+    </div>`).join('');
+  return head + cards;
+}
+
+/* ---------- Emails: the automated email service ---------- */
+/* A window onto src/services/email -- the same four automations, the same
+   templates rendered from the same files on disk, and the delivery log the
+   Node service writes to email_log. Nothing here can send an email. */
+
+const EMAIL_SENDER = 'Siddha Yoga Web Services <customer@siddhayogaweb.com>';
+const EMAIL_TEMPLATE_DIR = 'src/services/email/templates/';
+
+/* Shared context the Node service injects into every template, per language
+   (see renderTemplate + i18n.js in src/services/email). Every email goes out
+   in ONE language; the preview can show either. */
+const EMAIL_BRAND_CTX = {
+  he: {
+    lang:'he', dir:'rtl', align:'right', alignOpposite:'left',
+    brandName:'Siddha Yoga Web Services',
+    brandTagline:'\u05e7\u05d1\u05d5\u05e6\u05ea \u05e1\u05d9\u05d3\u05d4\u05d4 \u05d5\u05d5\u05dc\u05e0\u05e1',
+    supportEmail:'customer@siddhayogaweb.com',
+    websiteUrl:'https://siddhayogaweb.com',
+    websiteLabel:'siddhayogaweb.com',
+    greeting:'\u05e9\u05dc\u05d5\u05dd',
+    footerNote:'\u05d0\u05dd \u05d9\u05e9 \u05dc\u05da \u05e9\u05d0\u05dc\u05d5\u05ea \u05e0\u05d5\u05e1\u05e4\u05d5\u05ea, \u05e0\u05d9\u05ea\u05df \u05dc\u05d4\u05e9\u05d9\u05d1 \u05dc\u05de\u05d9\u05d9\u05dc \u05d6\u05d4 \u05d0\u05d5 \u05dc\u05d9\u05e6\u05d5\u05e8 \u05e7\u05e9\u05e8 \u05d1\u05db\u05ea\u05d5\u05d1\u05ea customer@siddhayogaweb.com',
+    transactionalNotice:'\u05d6\u05d4\u05d5 \u05de\u05d9\u05d9\u05dc \u05ea\u05e4\u05e2\u05d5\u05dc\u05d9 \u05d1\u05e0\u05d5\u05d2\u05e2 \u05dc\u05d4\u05d6\u05de\u05e0\u05d4 \u05d0\u05d5 \u05dc\u05e4\u05e0\u05d9\u05d9\u05d4 \u05e9\u05dc\u05da \u05d0\u05dc Siddha Yoga Web Services.',
+  },
+  en: {
+    lang:'en', dir:'ltr', align:'left', alignOpposite:'right',
+    brandName:'Siddha Yoga Web Services',
+    brandTagline:'Siddha Wellness Group',
+    supportEmail:'customer@siddhayogaweb.com',
+    websiteUrl:'https://siddhayogaweb.com',
+    websiteLabel:'siddhayogaweb.com',
+    greeting:'Hello',
+    footerNote:'If you have any further questions, simply reply to this email or write to us at customer@siddhayogaweb.com.',
+    transactionalNotice:'This is a transactional message about your order or enquiry with Siddha Yoga Web Services.',
+  },
+};
+
+const EMAIL_AUTOMATIONS = [
+  {
+    key:'orderConfirmation', name:'Order confirmation', accent:'var(--amber)', accentSoft:'var(--amber-soft)',
+    trigger:'Storefront order created', audience:'Customer', category:'order_confirmation',
+    desc:'Goes out the moment a Siddha Yoga order is paid. Lists every line item, the total and the delivery address.',
+    fn:'sendOrderConfirmation({ to, customerName, orderNumber, items, totalAmount, shippingAddress })',
+    sample:{
+      he:{
+        subject:'אישור הזמנה SY-10241',
+        headline:'תודה על ההזמנה', customerName:'דנה כהן',
+        intro:'ההזמנה שלך התקבלה ואנחנו מכינים אותה עכשיו. ברגע שהיא תישלח, יגיע מייל נוסף עם פרטי המעקב.',
+        preheader:'קיבלנו את הזמנה SY-10241.',
+        orderNumber:'SY-10241', orderDate:'8 בספטמבר 2026',
+        items:[
+          {name:'Cinnamor Oregano Oil 30ml', variant:'30ml', quantity:2, lineTotal:'‏178.00 ₪'},
+          {name:'Lavender Calm Blend 15ml', variant:'15ml', quantity:1, lineTotal:'‏64.00 ₪'},
+        ],
+        totalAmount:'‏242.00 ₪',
+        shippingAddress:'הרצל 12, תל אביב, 6688218, ישראל',
+        ctaUrl:'https://siddhayogaweb.com/orders/SY-10241', ctaLabel:'לצפייה בהזמנה',
+        labels:{orderNumber:'מספר הזמנה', orderDate:'תאריך הזמנה', items:'הפריטים שהזמנת', total:'סה״כ', shippingTo:'כתובת למשלוח'},
+      },
+      en:{
+        subject:'Order SY-10241 confirmed',
+        headline:'Thank you for your order', customerName:'John Smith',
+        intro:'We have received your order and it is now being prepared. You will get a second email with tracking details the moment it ships.',
+        preheader:'We received order SY-10241.',
+        orderNumber:'SY-10241', orderDate:'September 8, 2026',
+        items:[
+          {name:'Cinnamor Oregano Oil 30ml', variant:'30ml', quantity:2, lineTotal:'$48.00'},
+          {name:'Lavender Calm Blend 15ml', variant:'15ml', quantity:1, lineTotal:'$17.00'},
+        ],
+        totalAmount:'$65.00',
+        shippingAddress:'2125 Chestnut St, San Francisco CA, 94123, United States',
+        ctaUrl:'https://siddhayogaweb.com/orders/SY-10241', ctaLabel:'View your order',
+        labels:{orderNumber:'Order number', orderDate:'Order date', items:'What you ordered', total:'Total', shippingTo:'Shipping to'},
+      },
+    },
+  },
+  {
+    key:'shippingUpdate', name:'Shipping update', accent:'var(--sage)', accentSoft:'var(--sage-soft)',
+    trigger:'Order marked shipped', audience:'Customer', category:'shipping_update',
+    desc:'Sent when a tracking number is attached to an order. Carries the carrier, the tracking reference and a direct tracking link.',
+    fn:'sendShippingUpdate({ to, customerName, orderNumber, trackingNumber, carrierName, trackingUrl })',
+    sample:{
+      he:{
+        subject:'ההזמנה שלך נשלחה · SY-10241',
+        statusLabel:'נשלח', headline:'ההזמנה שלך בדרך אליך', customerName:'דנה כהן',
+        intro:'החבילה יצאה מאיתנו ונמצאת אצל חברת השילוח. אפשר לעקוב אחריה בפרטים שלמטה.',
+        preheader:'מספר מעקב IL748291043 עם דואר ישראל.',
+        orderNumber:'SY-10241', carrierName:'דואר ישראל', trackingNumber:'IL748291043',
+        trackingUrl:'https://israelpost.co.il/itemtrace?itemcode=IL748291043',
+        estimatedDelivery:'יום חמישי, 11 בספטמבר', ctaLabel:'מעקב אחר המשלוח',
+        labels:{orderNumber:'מספר הזמנה', carrier:'חברת שילוח', tracking:'מספר מעקב', eta:'הגעה משוערת'},
+      },
+      en:{
+        subject:'Order SY-10241 is on its way',
+        statusLabel:'Shipped', headline:'Your order is on its way', customerName:'John Smith',
+        intro:'Your parcel has left us and is now with the carrier. Use the tracking details below to follow it.',
+        preheader:'Tracking IL748291043 with Israel Post.',
+        orderNumber:'SY-10241', carrierName:'Israel Post', trackingNumber:'IL748291043',
+        trackingUrl:'https://israelpost.co.il/itemtrace?itemcode=IL748291043',
+        estimatedDelivery:'Thursday, 11 September', ctaLabel:'Track your parcel',
+        labels:{orderNumber:'Order number', carrier:'Carrier', tracking:'Tracking number', eta:'Estimated delivery'},
+      },
+    },
+  },
+  {
+    key:'internalAlert', name:'Internal alert', accent:'var(--ochre)', accentSoft:'var(--ochre-soft)',
+    trigger:'High-priority order or ticket', audience:'SWG team', category:'internal_alert',
+    desc:'Never reaches a customer. Raised to the team when an order clears the review threshold or a ticket needs a human now.',
+    fn:'sendInternalAlert({ subject, message, payloadData })',
+    sample:{
+      he:{
+        subject:'[התראה עדיפות גבוהה] הזמנה סיטונאית גדולה SY-10241',
+        alertKind:'הזמנה בעדיפות גבוהה', alertTitle:'הזמנה סיטונאית גדולה SY-10241',
+        message:'התקבלה הזמנה סיטונאית מעל סף הבדיקה מהחנות. כדאי לוודא מלאי לפני ליקוט.',
+        preheader:'התקבלה הזמנה סיטונאית מעל סף הבדיקה.',
+        payloadRows:[
+          {key:'הזמנה', value:'SY-10241'}, {key:'סכום', value:'‏4,820 ₪'},
+          {key:'לקוח', value:'דנה כהן'}, {key:'ערוץ', value:'אתר'}, {key:'אחראי', value:'עומרי'},
+        ],
+        priorityLabel:'עדיפות גבוהה', priorityColor:'#B98A2E', priorityBg:'#F1E3C4',
+        ctaLabel:'פתיחה ב-CRM', generatedAt:'2026-09-08T09:14:00.000Z',
+        internalNotice:'התראה פנימית מתוך שירות המייל של ה-CRM. לא נשלחה ללקוח.',
+        labels:{details:'פרטים'},
+      },
+      en:{
+        subject:'[SWG High priority] High-value wholesale order SY-10241',
+        alertKind:'High-priority order', alertTitle:'High-value wholesale order SY-10241',
+        message:'A wholesale order above the review threshold arrived from the storefront. Ops should confirm stock before the order is picked.',
+        preheader:'A wholesale order above the review threshold arrived.',
+        payloadRows:[
+          {key:'order', value:'SY-10241'}, {key:'total', value:'$1,290'},
+          {key:'customer', value:'John Smith'}, {key:'channel', value:'Website'}, {key:'owner', value:'Omri'},
+        ],
+        priorityLabel:'High priority', priorityColor:'#B98A2E', priorityBg:'#F1E3C4',
+        ctaLabel:'Open in the CRM', generatedAt:'2026-09-08T09:14:00.000Z',
+        internalNotice:'Internal notification generated by the SWG CRM email service. Not sent to the customer.',
+        labels:{details:'Details'},
+      },
+    },
+  },
+  {
+    key:'autoReply', name:'Support auto-reply', accent:'var(--umber)', accentSoft:'var(--umber-soft)',
+    trigger:'Support ticket opened', audience:'Customer', category:'auto_reply',
+    desc:'Acknowledges an enquiry straight away and hands the customer a reference to quote back to us.',
+    fn:'sendAutoReply({ to, customerName, ticketId })',
+    sample:{
+      he:{
+        subject:'קיבלנו את פנייתך [TCK-4471]',
+        headline:'קיבלנו את פנייתך', customerName:'דנה כהן',
+        intro:'תודה שפנית אלינו. הפנייה נרשמה ואחד מאנשי הצוות יטפל בה אישית.',
+        preheader:'הפנייה שלך נרשמה תחת TCK-4471.', ticketId:'TCK-4471',
+        responseTimeNote:'בדרך כלל אנחנו חוזרים תוך יום עסקים אחד. כדאי לשמור את מספר הפנייה ולציין אותו בכל תכתובת נוספת.',
+        labels:{ticket:'מספר הפנייה שלך'},
+      },
+      en:{
+        subject:'We received your message [TCK-4471]',
+        headline:'We received your message', customerName:'John Smith',
+        intro:'Thank you for getting in touch. Your enquiry is logged and a member of the team will look at it personally.',
+        preheader:'Your enquiry is logged as TCK-4471.', ticketId:'TCK-4471',
+        responseTimeNote:'We usually reply within one business day. Keep this reference in any follow-up so we can find your conversation quickly.',
+        labels:{ticket:'Your reference'},
+      },
+    },
+  },
+];
+
+/* --- A very small Handlebars subset, enough to preview the real templates:
+   {{var}}, {{a.b}}, {{#if path}} and {{#each list}} with {{this.x}}. --- */
+function emlGet(ctx, path){
+  if(path==='this') return ctx['this'] !== undefined ? ctx['this'] : ctx;
+  return path.split('.').reduce(function(o,k){
+    if(o === null || o === undefined) return undefined;
+    return k==='this' ? (o['this']!==undefined?o['this']:o) : o[k];
+  }, ctx);
+}
+function emlVars(src, ctx){
+  return src.replace(/\{\{([^#\/!][^}]*)\}\}/g, function(m, expr){
+    const val = emlGet(ctx, expr.trim());
+    if(val === undefined || val === null) return '';
+    return esc(String(val));
+  });
+}
+function emlRender(src, ctx){
+  const open = /\{\{#(if|each)\s+([\w.]+)\}\}/;
+  let out = '', rest = src;
+  for(;;){
+    const m = open.exec(rest);
+    if(!m){ out += emlVars(rest, ctx); break; }
+    out += emlVars(rest.slice(0, m.index), ctx);
+    const tag = m[1], path = m[2];
+    const bodyStart = m.index + m[0].length;
+    const scan = /\{\{#(?:if|each)\s+[\w.]+\}\}|\{\{\/(?:if|each)\}\}/g;
+    scan.lastIndex = bodyStart;
+    let depth = 1, close = -1, after = rest.length, hit;
+    while((hit = scan.exec(rest))){
+      if(hit[0].charAt(2) === '#'){ depth++; }
+      else if(--depth === 0){ close = hit.index; after = hit.index + hit[0].length; break; }
+    }
+    if(close < 0){ out += emlVars(rest.slice(bodyStart), ctx); break; }
+    const body = rest.slice(bodyStart, close);
+    const val = emlGet(ctx, path);
+    if(tag === 'each'){
+      (Array.isArray(val) ? val : []).forEach(function(item){
+        const scoped = Object.assign({}, ctx, (item && typeof item === 'object') ? item : {}, {'this':item});
+        out += emlRender(body, scoped);
+      });
+    }else if(val && !(Array.isArray(val) && !val.length)){
+      out += emlRender(body, ctx);
+    }
+    rest = rest.slice(after);
+  }
+  return out;
+}
+
+async function openEmailPreview(key, locale){
+  const auto = EMAIL_AUTOMATIONS.find(a=>a.key===key);
+  if(!auto) return;
+  const loc = (locale === 'he' || locale === 'en') ? locale : state.emailPreviewLocale || 'he';
+  state.emailPreviewLocale = loc;
+  state.emailPreview = key;
+  const sample = auto.sample[loc];
+  const overlay = document.getElementById('emlPrevOverlay');
+  const body = document.getElementById('emlPrevBody');
+  document.getElementById('emlPrevTitle').textContent = auto.name;
+  document.getElementById('emlPrevSub').textContent = sample.subject;
+  document.querySelectorAll('#emlPrevLang [data-eml-lang]').forEach(el=>{
+    el.classList.toggle('on', el.dataset.emlLang === loc);
+  });
+  body.innerHTML = `<div class="eml-prev-msg">Rendering ${esc(auto.name)}...</div>`;
+  overlay.classList.add('show');
+
+  const path = EMAIL_TEMPLATE_DIR + auto.key + '.html';
+  try{
+    const res = await fetch(path, {cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const src = await res.text();
+    const html = emlRender(src, Object.assign({}, EMAIL_BRAND_CTX[loc], sample));
+    const frame = document.createElement('iframe');
+    frame.setAttribute('sandbox', '');
+    frame.setAttribute('title', auto.name + ' preview');
+    frame.srcdoc = html;
+    body.innerHTML = '';
+    body.appendChild(frame);
+  }catch(err){
+    body.innerHTML = `<div class="eml-prev-msg">
+      The template could not be read from <code>${esc(path)}</code>.<br>
+      Previews render the real template files, so the CRM has to be served over http
+      rather than opened straight off the disk.<br><br>
+      Run <code>npx serve .</code> in the repo, or generate the files with
+      <code>node test-email.js --dry-run --save email-previews</code>.
+      <br><br><span style="opacity:.7;">${esc(String((err && err.message) || err))}</span>
+    </div>`;
+  }
+}
+function closeEmailPreview(){
+  document.getElementById('emlPrevOverlay').classList.remove('show');
+  document.getElementById('emlPrevBody').innerHTML = '';
+}
+
+/* Delivery log. The table is written by the Node service; the CRM only reads
+   it, and stays usable when it is empty or not yet migrated. */
+async function loadEmailLog(){
+  try{
+    const { data, error } = await sb.from('email_log').select('*').order('created_at', { ascending:false }).limit(200);
+    state.emailLog = error ? [] : (data||[]).map(fromRow);
+  }catch(e){ state.emailLog = []; }
+}
+
+function emailStats(){
+  const log = state.emailLog || [];
+  const cutoff = Date.now() - 30*86400000;
+  const recent = log.filter(r=>Number(r.createdAt||0) >= cutoff);
+  const sent = recent.filter(r=>r.status==='sent' || r.status==='dry-run').length;
+  const failed = recent.filter(r=>r.status==='failed').length;
+  const queued = log.filter(r=>r.status==='queued').length;
+  return { log, sent, failed, queued, total: log.length };
+}
+
+function renderEmailKPIs(st){
+  const cards = [
+    {accent:'var(--sage)',  cls:'sage',  val:String(st.sent),   lbl:'Sent, last 30 days'},
+    {accent:'var(--amber)', cls:'amber', val:String(st.queued), lbl:'Waiting in queue'},
+    {accent:'var(--rust)',  cls:'rust',  val:String(st.failed), lbl:'Failed, last 30 days'},
+    {accent:'var(--umber)', cls:'umber', val:String(EMAIL_AUTOMATIONS.length), lbl:'Automations live'},
+  ];
+  return `<div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(168px,1fr));">${cards.map(c=>
+    `<div class="stat-card kpi-card ${c.cls}" style="--kpi-accent:${c.accent};">
+       <div class="num mono">${c.val}</div><div class="lbl">${c.lbl}</div>
+     </div>`).join('')}</div>`;
+}
+
+function renderEmailAutomations(){
+  const cards = EMAIL_AUTOMATIONS.map(a=>`
+    <div class="eml-card" style="--eml-accent:${a.accent};--eml-accent-soft:${a.accentSoft};">
+      <h4>${esc(a.name)}</h4>
+      <div class="eml-desc">${esc(a.desc)}</div>
+      <div class="eml-meta">
+        <span class="eml-chip on">${esc(a.trigger)}</span>
+        <span class="eml-chip">To: ${esc(a.audience)}</span>
+      </div>
+      <div class="eml-fn">${esc(a.fn)}</div>
+      <button class="eml-btn" data-eml-preview="${a.key}">Preview email</button>
+    </div>`).join('');
+  return `<div class="panel">
+    ${panelHead('Automated messages', 'What the CRM sends without anyone pressing send',
+      EMAIL_AUTOMATIONS.length + ' automations')}
+    <div class="eml-grid">${cards}</div>
+  </div>`;
+}
+
+function renderEmailConfig(){
+  const rows = [
+    ['Sender', EMAIL_SENDER],
+    ['Reply-to', 'customer@siddhayogaweb.com'],
+    ['Transport', 'Google OAuth2, SMTP fallback'],
+    ['Retries', 'up to 3 attempts, exponential backoff'],
+    ['Queue', 'in-process, 2 concurrent sends'],
+    ['Module', 'src/services/email/emailService.js'],
+    ['Delivery log', 'email_log'],
+  ].map(kv=>`<div class="eml-kv"><span class="k">${esc(kv[0])}</span><span class="v">${esc(kv[1])}</span></div>`).join('');
+  const envs = ['EMAIL_HOST','EMAIL_PORT','EMAIL_USER','EMAIL_PASS','OAUTH_CLIENT_ID','OAUTH_CLIENT_SECRET','OAUTH_REFRESH_TOKEN']
+    .map(e=>`<span class="eml-env">${e}</span>`).join('');
+  return `<div class="panel">
+    ${panelHead('Service configuration', 'Set on the server, never in this page')}
+    ${rows}
+    <div class="eml-envs">${envs}</div>
+    <div class="eml-note">Credentials live in the server environment only. Nothing in this
+    section can send an email; it reads what the service has already done.</div>
+  </div>`;
+}
+
+function renderEmailDeliveries(st){
+  if(!st.log.length){
+    return `<div class="panel">${panelHead('Recent deliveries','Every message the service has sent')}
+      <div class="fin-empty">No deliveries recorded yet. Rows appear here once the email
+      service starts writing to the <strong>email_log</strong> table.</div></div>`;
+  }
+  const badgeFor = (status)=>{
+    const map = {sent:'paid', 'dry-run':'muted', queued:'pending', failed:'overdue'};
+    return `<span class="badge ${map[status]||'muted'}">${esc(status)}</span>`;
+  };
+  const rows = st.log.slice(0,12).map(r=>`
+    <tr>
+      <td style="font-size:12px;">${r.createdAt ? new Date(Number(r.createdAt)).toLocaleString() : '-'}</td>
+      <td style="font-size:12px;">${esc(r.recipient||'-')}</td>
+      <td style="font-size:12px;">${esc((r.category||'-').replace(/_/g,' '))}</td>
+      <td>${badgeFor(r.status||'')}</td>
+      <td class="mono" style="font-size:12px;">${esc(String(r.attempts==null?'-':r.attempts))}</td>
+    </tr>`).join('');
+  const more = st.log.length>12 ? `<div class="fin-empty">+ ${st.log.length-12} older deliveries in email_log.</div>` : '';
+  return `<div class="panel">
+    ${panelHead('Recent deliveries','Every message the service has sent', st.total + ' logged')}
+    <table><thead><tr><th>When</th><th>To</th><th>Type</th><th>Status</th><th>Tries</th></tr></thead>
+    <tbody>${rows}</tbody></table>${more}
+  </div>`;
+}
+
+function renderEmails(){
+  const st = emailStats();
+  const head = `<div class="fin-head">
+      <div class="fin-asof">Everything below is sent as <strong>${esc(EMAIL_SENDER)}</strong>
+        by the service in <span class="mono">src/services/email</span>.</div>
+    </div>`;
+  return head
+    + renderEmailKPIs(st)
+    + renderEmailAutomations()
+    + `<div class="fin-cols">${renderEmailConfig()}${renderEmailDeliveries(st)}</div>`;
+}
+
 function renderTeam(){
   const del = canDeleteUsers();
   return `<div class="team-grid">${state.team.map(t=>{
@@ -3348,6 +3938,9 @@ function wireSetupView(){
     sel.onchange = async ()=>{
       if(!canEditRoles()) return;
       const rec = state.team.find(t=>t.id===sel.dataset.roleFor);
+      // Persists the choice now that team has a role column. It does not
+      // yet grant anything: permissions still come from the hardcoded
+      // FULL_ADMIN / CO_ADMINS / PRIVILEGED lists, which ignore this field.
       if(rec){ rec.role = sel.value; await dbUpdate('team', rec); toast(`${rec.name} is now ${rec.role}.`); }
     };
   });
@@ -3454,6 +4047,12 @@ function esc(s){ return String(s??'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'
 function attachContentHandlers(){
   document.querySelectorAll('[data-navigate]').forEach(el=>{
     el.onclick = ()=>{ state.view = el.dataset.navigate; render(); };
+  });
+  document.querySelectorAll('[data-eml-preview]').forEach(el=>{
+    el.onclick = ()=>{ openEmailPreview(el.dataset.emlPreview); };
+  });
+  document.querySelectorAll('[data-tkt-status]').forEach(el=>{
+    el.onchange = ()=>{ setTicketStatus(el.dataset.tktStatus, el.value); };
   });
   // Live search
   const si = document.getElementById('searchInput');
@@ -3590,13 +4189,30 @@ function openModal(table, id){
   } else if(table==='orders'){
     const selCurr = item && item.currencies ? item.currencies : [];
     const statusOpts = isEdit ? OSTATUS : OSTATUS_NEW;
+    const contact = item && state.contacts.find(c=>c.id===item.contactId);
+    const shipWrapStyle = item && item.status==='Shipped' ? '' : 'display:none;';
     html = `<h2 class="display">${isEdit?'Edit':'Add'} order</h2>
       <div class="field"><label>Contact</label><select id="f_contact">${state.contacts.map(c=>`<option value="${c.id}" ${item&&item.contactId===c.id?'selected':''}>${esc(c.name)}</option>`).join('') || '<option value="">No contacts yet</option>'}</select></div>
       <div class="field"><label>Product</label><input id="f_product" value="${item?esc(item.product):''}" placeholder="e.g. Cinnamor Oregano 10ml"></div>
       <div class="field"><label>Quantity</label><input id="f_qty" type="number" value="${item?item.qty:1}"></div>
       <div class="field"><label>Cost</label><input id="f_amount" type="number" value="${item?item.amount:''}"></div>
       <div class="field"><label>Currencies accepted</label>${msHTML('f_curr_order', CURRENCIES, selCurr)}</div>
-      <div class="field"><label>Status</label><select id="f_status">${statusOpts.map(s=>`<option ${item&&item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>`;
+      <div class="field"><label>Status</label><select id="f_status">${statusOpts.map(s=>`<option ${item&&item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      ${isEdit ? '' : `<div class="field" style="display:flex;align-items:flex-start;gap:9px;">
+        <input type="checkbox" id="f_sendConfirm" style="width:auto;margin-top:2px;">
+        <label for="f_sendConfirm" style="text-transform:none;letter-spacing:0;font-size:12.5px;color:var(--ink);cursor:pointer;">
+          Email an order confirmation to the customer
+          <span style="display:block;color:var(--ink-soft);font-size:11.5px;margin-top:2px;">
+            Off by default. Storefront orders confirm themselves automatically &mdash; tick this only for an order you are logging on the customer's behalf and they are expecting it.
+          </span>
+        </label>
+      </div>`}
+      <div id="f_shipWrap" style="${shipWrapStyle}">
+        <div class="field"><label>Tracking number</label><input id="f_tracking" value="${item?esc(item.trackingNumber||''):''}"></div>
+        <div class="field"><label>Carrier</label><input id="f_carrier" value="${item?esc(item.carrierName||''):''}" placeholder="e.g. Israel Post"></div>
+        <div class="field"><label>Tracking URL</label><input id="f_trackingUrl" value="${item?esc(item.trackingUrl||''):''}" placeholder="https://..."></div>
+        <div class="shared-note">${contact && contact.email ? `Shipping email will be sent to ${esc(contact.email)} once tracking number and carrier are filled in.` : 'This contact has no email on file, so no shipping email can be sent.'}</div>
+      </div>`;
   } else if(table==='leads'){
     const kind = item ? (item.kind||'Individual') : 'Individual';
     const selSrc = item && item.sources ? item.sources : [];
@@ -3762,6 +4378,15 @@ function openModal(table, id){
           const inp = document.getElementById('f_company');
           if(inp) inp.value = '';
         }
+      };
+    }
+  }
+  if(table==='orders'){
+    const statusSel = document.getElementById('f_status');
+    if(statusSel){
+      statusSel.onchange = (e)=>{
+        const wrap = document.getElementById('f_shipWrap');
+        if(wrap) wrap.style.display = e.target.value==='Shipped' ? 'block' : 'none';
       };
     }
   }
@@ -4037,6 +4662,8 @@ function openQuickActionsCustomizeModal(){
 async function saveModal(table, id){
   const isEdit = !!id;
   let obj = isEdit ? state[table].find(x=>x.id===id) : { id: uid(), createdAt: Date.now(), owner: state.viewingAs };
+  const prevOrderStatus = (table==='orders' && isEdit) ? obj.status : null;
+  let sendOrderConfirmationRequested = false;
   const readCompany = ()=>{
     const kind = document.getElementById('f_kind') ? document.getElementById('f_kind').value : 'Company';
     if(kind==='Individual') return '';
@@ -4068,6 +4695,11 @@ async function saveModal(table, id){
     obj.amount = Number(document.getElementById('f_amount').value)||0;
     obj.currencies = msRead('f_curr_order');
     obj.status = document.getElementById('f_status').value;
+    obj.trackingNumber = document.getElementById('f_tracking').value.trim();
+    obj.carrierName = document.getElementById('f_carrier').value.trim();
+    obj.trackingUrl = document.getElementById('f_trackingUrl').value.trim();
+    const confirmBox = document.getElementById('f_sendConfirm');
+    sendOrderConfirmationRequested = !!(confirmBox && confirmBox.checked);
   } else if(table==='customers'){
     obj.name = document.getElementById('f_name').value.trim();
     if(!obj.name) return alert('Name is required.');
@@ -4165,6 +4797,8 @@ async function saveModal(table, id){
   closeModal();
   render();
   if(wasNew) await dbInsert(table, obj); else await dbUpdate(table, obj);
+  if(table==='orders') await checkOrderStatusChange(savedObj, prevOrderStatus);
+  if(table==='orders' && wasNew && sendOrderConfirmationRequested) await queueOrderConfirmation(savedObj);
   if(wasNew){
     if(table==='deals' || table==='leads'){
       celebrate();
@@ -4219,6 +4853,14 @@ document.getElementById('addBtn').onclick = ()=>{
   if(addable.includes(state.view)) startAddRecord(state.view);
 };
 document.getElementById('overlay').onclick = (e)=>{ if(e.target.id==='overlay') closeModal(); };
+document.getElementById('emlPrevOverlay').onclick = (e)=>{ if(e.target.id==='emlPrevOverlay') closeEmailPreview(); };
+document.getElementById('emlPrevClose').onclick = closeEmailPreview;
+document.querySelectorAll('#emlPrevLang [data-eml-lang]').forEach(el=>{
+  el.onclick = ()=>{ if(state.emailPreview) openEmailPreview(state.emailPreview, el.dataset.emlLang); };
+});
+document.addEventListener('keydown', (e)=>{
+  if(e.key==='Escape' && document.getElementById('emlPrevOverlay').classList.contains('show')) closeEmailPreview();
+});
 document.getElementById('viewingAs').onchange = (e)=>{ state.viewingAs = e.target.value; render(); };
 document.getElementById('resetBtn').onclick = async ()=>{
   if(!confirm('This clears ALL ledger data for the whole team (team member logins are kept). Continue?')) return;
@@ -4288,6 +4930,114 @@ async function checkBigDealAlert(deal){
   if(personaIsAdmin() || roleFor(state.viewingAs)==='Manager'){
     toast(`🚨 Big deal alert: "${deal.title}" — ${Number(deal.value||0).toLocaleString()} ${cfg.currency}`);
   }
+  // Hook 3: the toast only reaches whoever happens to be looking, and it is
+  // gone the moment the page changes. Email the team as well so an alert
+  // raised at 2am is still there in the morning. Deliberately outside the
+  // role check above -- that governs who sees the popup, not who needs to
+  // know. The duplicate guard earlier in this function covers the email
+  // too, so a deal cannot alert twice.
+  await queueBigDealAlertEmail(deal, cfg);
+}
+
+/* Hook 3: sends the big-deal alert to the team. Recipients come from the
+   server's EMAIL_INTERNAL_RECIPIENTS, so who gets alerted is an ops setting
+   rather than something baked into this page. */
+async function queueBigDealAlertEmail(deal, cfg){
+  const contact = state.contacts.find(c=>c.id===deal.contactId);
+  const value = Number(deal.value||0);
+  const amount = value.toLocaleString() + ' ' + (cfg.currency || 'USD');
+  const { error } = await sb.from('email_outbox').insert(toRow({
+    id: uid(), createdAt: Date.now(), type:'internalAlert', status:'queued',
+    payload: {
+      subject: `Deal over threshold: ${deal.title}`,
+      message:
+        `"${deal.title}" is at ${amount}, above the ${Number(cfg.threshold||0).toLocaleString()} ${cfg.currency || 'USD'} alert threshold.\n` +
+        `Stage is ${deal.stage || 'unset'}. Worth a look before it moves further.`,
+      payloadData: {
+        deal: deal.title,
+        value: amount,
+        stage: deal.stage || '-',
+        owner: deal.owner || '-',
+        contact: contact ? contact.name : '-',
+        threshold: Number(cfg.threshold||0).toLocaleString() + ' ' + (cfg.currency || 'USD'),
+      },
+      priority: 'high',
+      alertKind: 'Deal over threshold',
+      ctaUrl: 'https://siddha-wellness-group.github.io/swg-crm/swg_crm.html',
+    },
+    relatedType:'deals', relatedId: deal.id,
+  }));
+  if(error){ console.error('queue internalAlert failed', error); return; }
+  if(personaIsAdmin() || roleFor(state.viewingAs)==='Manager') toast('Team alerted by email.');
+}
+
+/* Human-readable order number shown to customers: the storefront's own
+   number when there is one (external_order_number), otherwise a short code
+   derived from the internal id so orders created directly in the CRM still
+   get something presentable in a shipping email. */
+function orderDisplayNumber(order){
+  return order.externalOrderNumber || ('SWG-' + order.id.slice(-6).toUpperCase());
+}
+
+/* Hook 2, manual path: queues the customer's order confirmation for an
+   order logged by hand in the CRM. Deliberately opt-in per order rather
+   than automatic -- storefront orders confirm themselves, and a wholesale
+   order someone closed over the phone should not surprise the customer
+   with a "thank you for your order" they never asked for. */
+async function queueOrderConfirmation(order){
+  const contact = state.contacts.find(c=>c.id===order.contactId);
+  if(!contact || !contact.email){
+    toast('Order saved, but the linked contact has no email on file — no confirmation was queued.');
+    return;
+  }
+  const { error } = await sb.from('email_outbox').insert(toRow({
+    id: uid(), createdAt: Date.now(), type:'orderConfirmation', status:'queued',
+    payload: {
+      to: contact.email,
+      customerName: contact.name,
+      orderNumber: orderDisplayNumber(order),
+      items: [{ product_name: order.product, quantity: order.qty, unit_price: (Number(order.amount)||0) / (Number(order.qty)||1) }],
+      totalAmount: Number(order.amount)||0,
+      currency: (order.currencies && order.currencies[0]) || 'ILS',
+      shippingAddress: contact.address || null,
+      phone: contact.phone || '',
+    },
+    relatedType:'orders', relatedId: order.id,
+  }));
+  if(error){ console.error('queue orderConfirmation failed', error); toast('Order saved, but queuing the confirmation email failed — check the console.'); return; }
+  toast(`Order confirmation queued for ${contact.email}`);
+}
+
+/* Item 3/4 hook: fires from saveModal when an order's status is edited in
+   the CRM. Only entering 'Shipped' queues anything -- editing other fields,
+   or moving between any other two statuses, is a no-op. Queues a row in
+   email_outbox rather than sending directly, so the real Gmail credentials
+   never need to reach the browser (see src/server/emailWorker.js). */
+async function checkOrderStatusChange(order, prevStatus){
+  if(prevStatus === order.status || order.status !== 'Shipped') return;
+  const contact = state.contacts.find(c=>c.id===order.contactId);
+  if(!contact || !contact.email){
+    toast('Order marked Shipped, but the linked contact has no email on file — no shipping email was queued.');
+    return;
+  }
+  if(!order.trackingNumber || !order.carrierName){
+    toast('Order marked Shipped, but tracking number and carrier are needed before a shipping email can be queued.');
+    return;
+  }
+  const { error } = await sb.from('email_outbox').insert(toRow({
+    id: uid(), createdAt: Date.now(), type:'shippingUpdate', status:'queued',
+    payload: {
+      to: contact.email,
+      customerName: contact.name,
+      orderNumber: orderDisplayNumber(order),
+      trackingNumber: order.trackingNumber,
+      carrierName: order.carrierName,
+      trackingUrl: order.trackingUrl || undefined,
+    },
+    relatedType:'orders', relatedId: order.id,
+  }));
+  if(error){ console.error('queue shippingUpdate failed', error); toast('Order marked Shipped, but queuing the shipping email failed — check the console.'); return; }
+  toast(`Shipping email queued for ${contact.email}`);
 }
 
 async function setDealStage(dealId, newStage){
