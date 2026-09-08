@@ -1824,7 +1824,7 @@ function openNewDashboardModal(){
     if(!name) return alert('Give it a name.');
     const dash = {id:uid(), owner:state.viewingAs, name, widgets:[], createdAt:Date.now()};
     state.dashboards.push(dash);
-    saveLocalConfig('dashboards');
+    await saveKey(KEYS.dashboards, state.dashboards);
     state.activeDashboardId = dash.id;
     closeModal();
     render();
@@ -1845,7 +1845,7 @@ function openDashboardWidgetPicker(dashId){
   document.getElementById('cancelBtn').onclick = closeModal;
   document.getElementById('dashSaveWidgetsBtn').onclick = async ()=>{
     dash.widgets = Array.from(document.querySelectorAll('[data-widget-key]:checked')).map(cb=>cb.dataset.widgetKey);
-    saveLocalConfig('dashboards');
+    await saveKey(KEYS.dashboards, state.dashboards);
     closeModal();
     render();
   };
@@ -1928,30 +1928,6 @@ function loadChartPref(){
 function saveChartPref(type){
   try{ localStorage.setItem('crm_chart_pref', type); }catch(e){}
 }
-function loadQuickActionPrefs(){
-  try{
-    const v = JSON.parse(localStorage.getItem('crm_quick_action_prefs')||'null');
-    if(v) state.quickActionPrefs = v;
-  }catch(e){}
-}
-function saveQuickActionPrefs(){
-  try{ localStorage.setItem('crm_quick_action_prefs', JSON.stringify(state.quickActionPrefs)); }catch(e){}
-}
-/* Setup config features (validation rules, automations, flows, etc.) have no Supabase
-   table yet, so they persist to localStorage until a shared app_config table exists. */
-const LOCAL_CONFIG_KEYS = ['dashboards','validationRules','guideEntries','dependentFields','flows','automations','sharingRules','bigDealAlert','bigDealAlerts','guideDismissed'];
-function loadLocalConfig(){
-  LOCAL_CONFIG_KEYS.forEach(key=>{
-    try{
-      const v = localStorage.getItem('crm_cfg_'+key);
-      if(v!==null) state[key] = JSON.parse(v);
-    }catch(e){}
-  });
-}
-function saveLocalConfig(key){
-  try{ localStorage.setItem('crm_cfg_'+key, JSON.stringify(state[key])); }catch(e){}
-}
-
 function applyThemePref(pref){
   const root = document.documentElement;
   if(pref==='light' || pref==='dark') root.dataset.theme = pref;
@@ -3705,7 +3681,7 @@ function openValidationRuleModal(){
       };
     }
     state.validationRules.push(rule);
-    saveLocalConfig('validationRules');
+    await saveKey(KEYS.validationRules, state.validationRules);
     closeModal();
     rerenderSetupView();
   };
@@ -3737,7 +3713,7 @@ function openGuideEntryModal(presetEntity){
     const linkEntity = document.getElementById('ge_entity').value;
     const linkField = linkEntity ? document.getElementById('ge_field').value : '';
     state.guideEntries.push({id:uid(), title, body, linkEntity, linkField});
-    saveLocalConfig('guideEntries');
+    await saveKey(KEYS.guideEntries, state.guideEntries);
     closeModal();
     rerenderSetupView();
   };
@@ -3767,7 +3743,7 @@ function openDependentFieldModal(){
     if(controllingField===dependentField){ alert('Pick two different fields.'); return; }
     const message = document.getElementById('df_message').value.trim();
     state.dependentFields.push({id:uid(), entity, controllingField, dependentField, message});
-    saveLocalConfig('dependentFields');
+    await saveKey(KEYS.dependentFields, state.dependentFields);
     closeModal();
     rerenderSetupView();
   };
@@ -3857,7 +3833,7 @@ function openFlowModal(){
     if(!flowBuilderSteps.length){ alert('Add at least one condition or action.'); return; }
     const flow = { id:uid(), name, entity: document.getElementById('fl_entity').value, steps: flowBuilderSteps };
     state.flows.push(flow);
-    saveLocalConfig('flows');
+    await saveKey(KEYS.flows, state.flows);
     closeModal();
     rerenderSetupView();
   };
@@ -3924,7 +3900,7 @@ function openAutomationModal(){
       setValue: document.getElementById('au_setValue').value.trim(),
     };
     state.automations.push(automation);
-    saveLocalConfig('automations');
+    await saveKey(KEYS.automations, state.automations);
     closeModal();
     rerenderSetupView();
   };
@@ -3951,7 +3927,7 @@ function wireSetupView(){
       if(!canEditGlobalSetup()) return;
       if(!confirm('Delete this validation rule?')) return;
       state.validationRules = state.validationRules.filter(r=>r.id!==el.dataset.delRule);
-      saveLocalConfig('validationRules');
+      await saveKey(KEYS.validationRules, state.validationRules);
       rerenderSetupView();
     };
   });
@@ -3962,7 +3938,7 @@ function wireSetupView(){
       if(!canEditDependentFields()) return;
       if(!confirm('Delete this dependent field rule?')) return;
       state.dependentFields = state.dependentFields.filter(r=>r.id!==el.dataset.delDependent);
-      saveLocalConfig('dependentFields');
+      await saveKey(KEYS.dependentFields, state.dependentFields);
       rerenderSetupView();
     };
   });
@@ -3975,7 +3951,7 @@ function wireSetupView(){
       } else {
         state.validationRules = state.validationRules.filter(r=>!(r.entity===entity && r.field===field && r.type==='required'));
       }
-      saveLocalConfig('validationRules');
+      await saveKey(KEYS.validationRules, state.validationRules);
       toast(`${prettyField(field)} ${cb.checked?'is now required':'is no longer required'} for ${EXPORT_SHEETS.find(s=>s.key===entity).label}.`);
     };
   });
@@ -3986,7 +3962,7 @@ function wireSetupView(){
       if(!canEditGlobalSetup()) return;
       if(!confirm('Delete this automation?')) return;
       state.automations = state.automations.filter(a=>a.id!==el.dataset.delAutomation);
-      saveLocalConfig('automations');
+      await saveKey(KEYS.automations, state.automations);
       rerenderSetupView();
     };
   });
@@ -3996,7 +3972,7 @@ function wireSetupView(){
     el.onclick = async ()=>{
       if(!confirm('Delete this flow?')) return;
       state.flows = state.flows.filter(f=>f.id!==el.dataset.delFlow);
-      saveLocalConfig('flows');
+      await saveKey(KEYS.flows, state.flows);
       rerenderSetupView();
     };
   });
@@ -4004,7 +3980,7 @@ function wireSetupView(){
     sel.onchange = async ()=>{
       if(!canEditGlobalSetup()) return;
       state.sharingRules[sel.dataset.sharingFor] = sel.value;
-      saveLocalConfig('sharingRules');
+      await saveKey(KEYS.sharingRules, state.sharingRules);
       toast('Sharing rule updated.');
     };
   });
@@ -4014,7 +3990,7 @@ function wireSetupView(){
     el.onclick = async ()=>{
       if(!confirm('Delete this guide entry?')) return;
       state.guideEntries = state.guideEntries.filter(g=>g.id!==el.dataset.delGuide);
-      saveLocalConfig('guideEntries');
+      await saveKey(KEYS.guideEntries, state.guideEntries);
       rerenderSetupView();
     };
   });
@@ -4027,7 +4003,7 @@ function wireSetupView(){
         threshold: Number(document.getElementById('bda_threshold').value)||0,
         currency: document.getElementById('bda_currency').value,
       };
-      saveLocalConfig('bigDealAlert');
+      await saveKey(KEYS.bigDealAlert, state.bigDealAlert);
       toast('Big deal alert settings saved.');
     };
   }
@@ -4035,7 +4011,7 @@ function wireSetupView(){
     el.onclick = async ()=>{
       if(!canEditBigDealAlert()) return;
       state.bigDealAlerts = state.bigDealAlerts.filter(a=>a.id!==el.dataset.delBigdeal);
-      saveLocalConfig('bigDealAlerts');
+      await saveKey(KEYS.bigDealAlerts, state.bigDealAlerts);
       rerenderSetupView();
     };
   });
@@ -4084,7 +4060,7 @@ function attachContentHandlers(){
   if(dashDeleteBtn) dashDeleteBtn.onclick = async ()=>{
     if(!confirm('Delete this dashboard?')) return;
     state.dashboards = state.dashboards.filter(d=>d.id!==dashDeleteBtn.dataset.dashId);
-    saveLocalConfig('dashboards');
+    await saveKey(KEYS.dashboards, state.dashboards);
     state.activeDashboardId = '';
     render();
   };
@@ -4581,7 +4557,7 @@ function openObjectGuideIntroModal(entityKey, onContinue){
       if(!list.includes(entityKey)){
         list.push(entityKey);
         state.guideDismissed[state.currentUser] = list;
-        saveLocalConfig('guideDismissed');
+        await saveKey(KEYS.guideDismissed, state.guideDismissed);
       }
     }
     closeModal();
@@ -4652,7 +4628,7 @@ function openQuickActionsCustomizeModal(){
   });
   document.getElementById('qa_saveBtn').onclick = async ()=>{
     state.quickActionPrefs[state.currentUser] = boxes.filter(b=>b.checked).map(b=>b.value);
-    saveQuickActionPrefs();
+    await saveKey(KEYS.quickActionPrefs, state.quickActionPrefs);
     closeModal();
     renderTopnavQuickActions();
     toast('Quick actions updated.');
@@ -4926,7 +4902,7 @@ async function checkBigDealAlert(deal){
   if(state.bigDealAlerts.some(a=>a.dealId===deal.id)) return;
   const alert = { id:uid(), dealId:deal.id, title:deal.title, value:deal.value, owner:deal.owner, stage:deal.stage, createdAt:Date.now() };
   state.bigDealAlerts.unshift(alert);
-  saveLocalConfig('bigDealAlerts');
+  await saveKey(KEYS.bigDealAlerts, state.bigDealAlerts);
   if(personaIsAdmin() || roleFor(state.viewingAs)==='Manager'){
     toast(`🚨 Big deal alert: "${deal.title}" — ${Number(deal.value||0).toLocaleString()} ${cfg.currency}`);
   }
@@ -5208,8 +5184,6 @@ async function attemptLogin(){
 document.getElementById('loginBtn').onclick = attemptLogin;
 ensureTeamLoaded();
 loadChartPref();
-loadQuickActionPrefs();
-loadLocalConfig();
 document.getElementById('loginPassword').onkeydown = (e)=>{ if(e.key==='Enter') attemptLogin(); };
 document.getElementById('loginEmail').onkeydown = (e)=>{ if(e.key==='Enter') document.getElementById('loginPassword').focus(); };
 document.getElementById('logoutBtn').onclick = ()=>{
