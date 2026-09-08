@@ -2,3 +2,9 @@ project_id = "jrsefbwmumoadncygjsz"
 
 [functions.storefront-order]
 verify_jwt = false
+
+# The email worker is only ever invoked by our own database webhook and the
+# pg_cron sweep, both of which send the service role key. Keeping JWT
+# verification on means nobody else can poke it from the open internet.
+[functions.email-worker]
+verify_jwt = true

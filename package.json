@@ -9,7 +9,8 @@
     "test:email": "node test-email.js",
     "test:email:dry": "node test-email.js --dry-run",
     "email:oauth-setup": "node scripts/get-oauth-refresh-token.js",
-    "email:worker": "node src/server/runEmailWorker.js"
+    "email:worker": "node src/server/runEmailWorker.js",
+    "sync:edge": "node scripts/sync-edge-email.js"
   },
   "engines": {
     "node": ">=18.17.0"
