@@ -191,7 +191,17 @@
   .kcard .kdel{cursor:pointer;color:var(--clay);font-size:11px;}
 
   /* Tickets */
-  .tkt-msg{font-size:13px;line-height:1.7;color:var(--ink-soft);max-width:560px;white-space:pre-line;}
+  .tkt-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:12px;}
+  .tkt-card.is-new{border-inline-start:3px solid var(--clay);}
+  .tkt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;}
+  .tkt-who{font-size:13.5px;font-weight:600;color:var(--ink);}
+  .tkt-meta{font-size:11.5px;color:var(--ink-soft);margin-top:3px;}
+  .tkt-num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--clay);margin-top:3px;}
+  .tkt-msg{font-size:13.5px;line-height:1.75;color:var(--ink);white-space:pre-line;
+    unicode-bidi:plaintext;margin-top:12px;padding-top:12px;border-top:1px solid var(--parchment);}
+  .tkt-right{display:flex;align-items:center;gap:9px;flex-shrink:0;}
+  .tkt-status{font-family:inherit;font-size:12px;padding:5px 9px;border-radius:6px;
+    border:1px solid var(--border);background:var(--cream);color:var(--ink);cursor:pointer;}
   .tkt-meta{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
   .tkt-status{font-family:inherit;font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--cream);color:var(--ink);}
   .tkt-num{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--clay);}
@@ -2519,28 +2529,28 @@ function renderTickets(){
   const head = `<div class="fin-head"><div class="fin-asof">
     ${open} open of ${list.length} · the customer is auto-acknowledged on arrival, and the team is emailed
   </div></div>`;
-  const badgeFor = (s)=>({new:'pending', open:'unpaid', resolved:'paid', closed:'muted'})[s] || 'muted';
-  const rows = list.map((t,i)=>`
-    <tr>
-      <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
-      <td>
-        <div>${esc(t.name||'—')}</div>
-        <div class="tkt-meta">${esc(t.email||'')}${t.phone?' · '+esc(t.phone):''}</div>
-        <div class="tkt-num">${esc(t.ticketNumber||'—')}</div>
-      </td>
-      <td><div class="tkt-msg">${esc(t.message||'')}</div></td>
-      <td style="font-size:12px;">${esc(t.source||'—')}</td>
-      <td>
-        <select class="tkt-status" data-tkt-status="${t.id}">
-          ${TICKET_STATUS.map(s=>`<option value="${s}" ${t.status===s?'selected':''}>${s}</option>`).join('')}
-        </select>
-        <div style="margin-top:5px;"><span class="badge ${badgeFor(t.status)}">${esc(t.status||'new')}</span></div>
-      </td>
-      <td style="font-size:12px;color:var(--ink-soft);">${t.createdAt ? new Date(Number(t.createdAt)).toLocaleString() : '—'}</td>
-    </tr>`).join('');
-  return head + `<table><thead><tr>
-      <th>No.</th><th>From</th><th>Message</th><th>Source</th><th>Status</th><th>Received</th>
-    </tr></thead><tbody>${rows}</tbody></table>`;
+  // Cards, not a table: the message is free text of any length and any
+  // direction, which a fixed column cannot hold legibly.
+  const cards = list.map(t=>`
+    <div class="tkt-card ${t.status==='new'?'is-new':''}">
+      <div class="tkt-head">
+        <div>
+          <div class="tkt-who">${esc(t.name||'—')}</div>
+          <div class="tkt-meta">${esc(t.email||'')}${t.phone?' · '+esc(t.phone):''}${t.source?' · '+esc(t.source):''}</div>
+          <div class="tkt-num">${esc(t.ticketNumber||'—')}</div>
+        </div>
+        <div class="tkt-right">
+          <span style="font-size:11.5px;color:var(--ink-soft);white-space:nowrap;">
+            ${t.createdAt ? new Date(Number(t.createdAt)).toLocaleString() : '—'}
+          </span>
+          <select class="tkt-status" data-tkt-status="${t.id}">
+            ${TICKET_STATUS.map(s=>`<option value="${s}" ${t.status===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="tkt-msg" dir="auto">${esc(t.message||'')}</div>
+    </div>`).join('');
+  return head + cards;
 }
 
 /* ---------- Emails: the automated email service ---------- */
