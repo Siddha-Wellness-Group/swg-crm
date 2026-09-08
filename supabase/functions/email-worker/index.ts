@@ -304,7 +304,15 @@ async function processRow(row: Record<string, any>) {
     log('info', 'job_sent', {
       jobId: row.id, type: row.type, locale: built.locale, localeReason: built.reason,
       messageId: info.messageId, recipient: recipients[0], durationMs,
+      // What Gmail actually replied. messageId is generated locally and says
+      // nothing about acceptance; these separate "handed over" from "dropped".
+      smtpResponse: info.response,
+      acceptedCount: Array.isArray(info.accepted) ? info.accepted.length : undefined,
+      rejected: Array.isArray(info.rejected) && info.rejected.length ? info.rejected : undefined,
     });
+    if (Array.isArray(info.accepted) && info.accepted.length === 0) {
+      log('error', 'accepted_none', { jobId: row.id, recipient: recipients[0], smtpResponse: info.response });
+    }
   } catch (error) {
     const attempts = (row.attempts || 0) + 1;
     const message = error instanceof Error ? error.message : String(error);

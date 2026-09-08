@@ -427,7 +427,19 @@ export async function sendTemplatedMail({
         status: cfg.dryRun ? 'dry-run' : 'sent',
         attempts: attempt,
         durationMs: result.durationMs,
+        // What the receiving server actually said. messageId alone is
+        // generated locally and proves nothing about acceptance -- these are
+        // the fields that distinguish "handed over" from "quietly dropped".
+        smtpResponse: info.response,
+        acceptedCount: Array.isArray(info.accepted) ? info.accepted.length : undefined,
+        rejected: Array.isArray(info.rejected) && info.rejected.length ? info.rejected : undefined,
       });
+      // A resolved send with nothing accepted is not a success.
+      if (Array.isArray(info.accepted) && info.accepted.length === 0) {
+        logger.error('email.accepted_none', {
+          correlationId, category, recipient: result.to, smtpResponse: info.response,
+        });
+      }
       return result;
     } catch (error) {
       lastError = error;
