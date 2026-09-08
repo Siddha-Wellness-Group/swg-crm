@@ -489,6 +489,23 @@ export function formatAmount(amount, currency = 'ILS', locale = 'en') {
 }
 
 /**
+ * Formats an optional money field, returning an empty string when there is
+ * nothing to show. The templates use `{{#if}}` on the result, so a zero or
+ * absent amount omits its whole row rather than printing a bare 0.00.
+ *
+ * @param {number|string|null|undefined} amount - Amount to format, if any.
+ * @param {string} currency - ISO 4217 code.
+ * @param {string} locale - Target locale.
+ * @returns {string} Formatted amount, or '' when absent or zero.
+ */
+function money(amount, currency, locale) {
+  if (amount === null || amount === undefined || amount === '') return '';
+  const value = Number(amount);
+  if (!Number.isFinite(value) || value === 0) return '';
+  return formatAmountFor(value, currency, locale);
+}
+
+/**
  * Flattens a shipping address object into a display string.
  *
  * @param {string|Record<string, unknown>|null|undefined} address - Address to format.
@@ -568,6 +585,10 @@ export async function sendOrderConfirmation({
   ctaUrl,
   language,
   phone,
+  subtotal,
+  shippingCost,
+  discountAmount,
+  taxAmount,
 }) {
   /** @type {string[]} */
   const issues = [];
@@ -600,6 +621,13 @@ export async function sendOrderConfirmation({
       orderNumber: number,
       orderDate: orderDate || formatDateFor(new Date(), locale),
       items: items.map((item) => normaliseItem(item, currency, locale)),
+      // Only rendered when the order actually carries them, so a plain order
+      // shows just items and a total. Without these the customer sees an
+      // item at 148 and a total of 183 with the shipping unexplained.
+      subtotalAmount: money(subtotal, currency, locale),
+      shippingAmount: money(shippingCost, currency, locale),
+      discountAmountText: discountAmount ? '-' + formatAmountFor(Math.abs(Number(discountAmount)), currency, locale) : '',
+      taxAmountText: money(taxAmount, currency, locale),
       totalAmount: formatAmountFor(totalAmount, currency, locale),
       shippingAddress: formatAddress(shippingAddress),
       ctaUrl: ctaUrl || '',

@@ -88,6 +88,13 @@ Deno.serve(async (req) => {
     shipping_address: order.shipping_address || null,
     items: order.items || [],
     currency: order.currency || null,
+    // The money breakdown, so the customer's confirmation can explain what
+    // the total is made of instead of showing an unexplained gap.
+    subtotal: order.subtotal ?? null,
+    shipping_cost: order.shipping_cost ?? null,
+    discount_amount: order.discount_amount ?? null,
+    discount_code: order.discount_code || null,
+    tax_amount: order.tax_amount ?? null,
   };
 
   let existingOrder = null;
@@ -145,6 +152,10 @@ async function queueOrderConfirmation(sb, order, newOrder, email) {
         items: order.items || [],
         totalAmount: Number(order.total) || 0,
         currency: order.currency || 'ILS',
+        subtotal: order.subtotal ?? null,
+        shippingCost: order.shipping_cost ?? null,
+        discountAmount: order.discount_amount ?? null,
+        taxAmount: order.tax_amount ?? null,
         shippingAddress: order.shipping_address || null,
         phone: order.customer_phone || '',
       },

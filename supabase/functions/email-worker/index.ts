@@ -117,6 +117,17 @@ function htmlToText(html: string): string {
     .split('\n').map((l) => l.trim()).join('\n').trim();
 }
 
+/**
+ * Formats an optional money field, empty when there is nothing to show, so
+ * the template's {{#if}} omits the whole row instead of printing 0.00.
+ */
+function money(amount: unknown, currency: string, locale: string): string {
+  if (amount === null || amount === undefined || amount === '') return '';
+  const value = Number(amount);
+  if (!Number.isFinite(value) || value === 0) return '';
+  return formatAmountFor(value, currency, locale);
+}
+
 function formatAddress(address: unknown): string {
   if (!address) return '';
   if (typeof address === 'string') return address.trim();
@@ -155,6 +166,15 @@ function buildMessage(type: string, p: Record<string, any>) {
         customerName: p.customerName, orderNumber: p.orderNumber,
         orderDate: p.orderDate || formatDateFor(new Date(), locale),
         items: (p.items || []).map((i: any) => normaliseItem(i, currency, locale)),
+        // Only rendered when the order carries them, so a plain order shows
+        // just items and a total. Without these the customer sees an item at
+        // 148 and a total of 183 with the shipping unexplained.
+        subtotalAmount: money(p.subtotal, currency, locale),
+        shippingAmount: money(p.shippingCost, currency, locale),
+        discountAmountText: p.discountAmount
+          ? '-' + formatAmountFor(Math.abs(Number(p.discountAmount)), currency, locale)
+          : '',
+        taxAmountText: money(p.taxAmount, currency, locale),
         totalAmount: formatAmountFor(p.totalAmount, currency, locale),
         shippingAddress: formatAddress(p.shippingAddress),
         ctaUrl: p.ctaUrl || '', ctaLabel: t.ctaLabel, labels: t.labels,

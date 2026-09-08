@@ -312,11 +312,55 @@ export const TEMPLATES: Record<string, string> = {
                     </td>
                   </tr>
                   {{/each}}
+
+                  <!-- What the total is made of. Each line appears only when
+                       the order has it, so a simple order stays simple. -->
+                  {{#if subtotalAmount}}
                   <tr>
-                    <td dir="auto" style="padding:16px 0 0; border-top:1px solid #2a2820; font-family:Helvetica,Arial,sans-serif; font-size:15px; font-weight:700; color:#2a2820; unicode-bidi:plaintext;">
+                    <td dir="auto" style="padding:14px 0 0; border-top:1px solid #eee7d8; font-family:Helvetica,Arial,sans-serif; font-size:13.5px; color:#6b6553; unicode-bidi:plaintext;">
+                      {{labels.subtotal}}
+                    </td>
+                    <td dir="ltr" align="{{alignOpposite}}" style="padding:14px 0 0; border-top:1px solid #eee7d8; font-family:Helvetica,Arial,sans-serif; font-size:13.5px; color:#6b6553; white-space:nowrap;">
+                      {{subtotalAmount}}
+                    </td>
+                  </tr>
+                  {{/if}}
+                  {{#if shippingAmount}}
+                  <tr>
+                    <td dir="auto" style="padding:7px 0 0; font-family:Helvetica,Arial,sans-serif; font-size:13.5px; color:#6b6553; unicode-bidi:plaintext;">
+                      {{labels.shipping}}
+                    </td>
+                    <td dir="ltr" align="{{alignOpposite}}" style="padding:7px 0 0; font-family:Helvetica,Arial,sans-serif; font-size:13.5px; color:#6b6553; white-space:nowrap;">
+                      {{shippingAmount}}
+                    </td>
+                  </tr>
+                  {{/if}}
+                  {{#if discountAmountText}}
+                  <tr>
+                    <td dir="auto" style="padding:7px 0 0; font-family:Helvetica,Arial,sans-serif; font-size:13.5px; color:#5b6b4c; unicode-bidi:plaintext;">
+                      {{labels.discount}}
+                    </td>
+                    <td dir="ltr" align="{{alignOpposite}}" style="padding:7px 0 0; font-family:Helvetica,Arial,sans-serif; font-size:13.5px; color:#5b6b4c; white-space:nowrap;">
+                      {{discountAmountText}}
+                    </td>
+                  </tr>
+                  {{/if}}
+                  {{#if taxAmountText}}
+                  <tr>
+                    <td dir="auto" style="padding:7px 0 0; font-family:Helvetica,Arial,sans-serif; font-size:13.5px; color:#6b6553; unicode-bidi:plaintext;">
+                      {{labels.tax}}
+                    </td>
+                    <td dir="ltr" align="{{alignOpposite}}" style="padding:7px 0 0; font-family:Helvetica,Arial,sans-serif; font-size:13.5px; color:#6b6553; white-space:nowrap;">
+                      {{taxAmountText}}
+                    </td>
+                  </tr>
+                  {{/if}}
+
+                  <tr>
+                    <td dir="auto" style="padding:14px 0 0; border-top:1px solid #2a2820; font-family:Helvetica,Arial,sans-serif; font-size:15px; font-weight:700; color:#2a2820; unicode-bidi:plaintext;">
                       {{labels.total}}
                     </td>
-                    <td dir="ltr" align="{{alignOpposite}}" style="padding:16px 0 0; border-top:1px solid #2a2820; font-family:Helvetica,Arial,sans-serif; font-size:15px; font-weight:700; color:#2a2820; white-space:nowrap;">
+                    <td dir="ltr" align="{{alignOpposite}}" style="padding:14px 0 0; border-top:1px solid #2a2820; font-family:Helvetica,Arial,sans-serif; font-size:15px; font-weight:700; color:#2a2820; white-space:nowrap;">
                       {{totalAmount}}
                     </td>
                   </tr>
