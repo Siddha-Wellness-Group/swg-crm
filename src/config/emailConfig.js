@@ -136,6 +136,7 @@ function emailList(env, name, fallback, issues) {
  * @property {string} from                 Fully formatted From header.
  * @property {string} replyTo              Reply-To offered to customers.
  * @property {string[]} internalRecipients Recipients of internal alerts.
+ * @property {string} teamLocale           Language internal alerts are written in (`he`/`en`).
  * @property {number} maxAttempts          Total send attempts, first one included.
  * @property {number} retryBaseMs          Base delay for exponential backoff.
  * @property {number} queueConcurrency     Parallel sends in the background queue.
@@ -203,6 +204,12 @@ export function buildEmailConfig(env = process.env) {
     issues.push('EMAIL_INTERNAL_RECIPIENTS resolved to an empty list, so internal alerts would go nowhere.');
   }
 
+  // Language internal team alerts are written in. Customer mail picks its own
+  // language per recipient (see services/email/i18n.js resolveLocale).
+  const teamLocale = ['he', 'en'].includes(str(env, 'EMAIL_TEAM_LOCALE', 'en').toLowerCase())
+    ? str(env, 'EMAIL_TEAM_LOCALE', 'en').toLowerCase()
+    : 'en';
+
   const maxAttempts = int(env, 'EMAIL_MAX_ATTEMPTS', 3, { min: 1, max: 10 }, issues);
   const retryBaseMs = int(env, 'EMAIL_RETRY_BASE_MS', 500, { min: 50, max: 60000 }, issues);
   const queueConcurrency = int(env, 'EMAIL_QUEUE_CONCURRENCY', 2, { min: 1, max: 20 }, issues);
@@ -230,6 +237,7 @@ export function buildEmailConfig(env = process.env) {
     from: fromName + ' <' + user + '>',
     replyTo,
     internalRecipients: Object.freeze(internalRecipients),
+    teamLocale,
     maxAttempts,
     retryBaseMs,
     queueConcurrency,

@@ -1,5 +1,5 @@
 <!doctype html>
-<html dir="auto" lang="{{lang}}">
+<html dir="{{dir}}" lang="{{lang}}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -29,7 +29,7 @@
                  style="width:600px; max-width:100%; background:#ffffff; border:1px solid #e4dfd3;">
 
             <tr>
-              <td class="swg-pad" style="padding:28px 34px;">
+              <td class="swg-pad" style="text-align:{{align}}; padding:28px 34px;">
                 <span style="font-family:Georgia,'Times New Roman',serif; font-size:16px; font-weight:600; color:#2a2820;">{{brandName}}</span>
                 <span style="font-family:Helvetica,Arial,sans-serif; font-size:13px; color:#9a937f;"> &middot; {{brandTagline}}</span>
               </td>
@@ -49,9 +49,9 @@
             </tr>
 
             <tr>
-              <td class="swg-pad" style="padding:26px 34px 0;">
+              <td class="swg-pad" style="text-align:{{align}}; padding:26px 34px 0;">
                 <div style="font-size:13px; font-weight:700; color:#2a2820; font-family:Helvetica,Arial,sans-serif;">{{labels.ticket}}</div>
-                <div style="font-size:16px; color:#a8703c; font-weight:700; margin-top:5px; font-family:Helvetica,Arial,sans-serif;">{{ticketId}}</div>
+                <div dir="ltr" style="font-size:16px; color:#a8703c; font-weight:700; margin-top:5px; font-family:Helvetica,Arial,sans-serif; text-align:{{align}};">{{ticketId}}</div>
               </td>
             </tr>
 
@@ -65,20 +65,17 @@
 
             <tr><td style="padding:8px 34px 0;"><div style="border-top:1px solid #e4dfd3; font-size:0; line-height:0; margin-top:24px;">&nbsp;</div></td></tr>
             <tr>
-              <td class="swg-pad" style="padding:22px 34px 30px;">
-                <p dir="auto" style="margin:0 0 10px; font-family:Helvetica,Arial,sans-serif; font-size:13px; line-height:1.7; color:#6b6553; unicode-bidi:plaintext;">
-                  {{footerNoteHe}}
-                </p>
+              <td class="swg-pad" style="text-align:{{align}}; padding:22px 34px 30px;">
                 <p dir="auto" style="margin:0 0 16px; font-family:Helvetica,Arial,sans-serif; font-size:12.5px; line-height:1.7; color:#9a937f; unicode-bidi:plaintext;">
-                  {{footerNoteEn}}
+                  {{footerNote}}
                 </p>
                 <p style="margin:0; font-family:Helvetica,Arial,sans-serif; font-size:12.5px; line-height:1.8; color:#9a937f;">
                   {{brandName}}
                   &nbsp;&middot;&nbsp;
-                  <a href="mailto:{{supportEmail}}" style="color:#9a937f;">{{supportEmail}}</a>
+                  <a dir="ltr" href="mailto:{{supportEmail}}" style="color:#9a937f;">{{supportEmail}}</a>
                   {{#if websiteUrl}}
                   &nbsp;&middot;&nbsp;
-                  <a href="{{websiteUrl}}" style="color:#9a937f;">{{websiteLabel}}</a>
+                  <a dir="ltr" href="{{websiteUrl}}" style="color:#9a937f;">{{websiteLabel}}</a>
                   {{/if}}
                 </p>
               </td>

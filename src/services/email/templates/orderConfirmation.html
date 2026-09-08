@@ -1,5 +1,5 @@
 <!doctype html>
-<html dir="auto" lang="{{lang}}">
+<html dir="{{dir}}" lang="{{lang}}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -35,7 +35,7 @@
 
             <!-- Masthead -->
             <tr>
-              <td class="swg-pad" style="padding:28px 34px;">
+              <td class="swg-pad" style="text-align:{{align}}; padding:28px 34px;">
                 <span style="font-family:Georgia,'Times New Roman',serif; font-size:16px; font-weight:600; color:#2a2820;">{{brandName}}</span>
                 <span style="font-family:Helvetica,Arial,sans-serif; font-size:13px; color:#9a937f;"> &middot; {{brandTagline}}</span>
               </td>
@@ -44,7 +44,7 @@
 
             <!-- Headline -->
             <tr>
-              <td class="swg-pad swg-text" dir="auto" style="padding:32px 34px 4px; unicode-bidi:plaintext;">
+              <td class="swg-pad swg-text" dir="auto" style="text-align:{{align}}; padding:32px 34px 4px; unicode-bidi:plaintext;">
                 <h1 class="swg-h1" style="margin:0; font-family:Helvetica,Arial,sans-serif; font-size:24px; line-height:1.35; font-weight:700; letter-spacing:-.3px; color:#2a2820;">
                   {{headline}}
                 </h1>
@@ -57,12 +57,12 @@
 
             <!-- Order meta -->
             <tr>
-              <td class="swg-pad" style="padding:28px 34px 0;">
+              <td class="swg-pad" style="text-align:{{align}}; padding:28px 34px 0;">
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                   <tr>
                     <td dir="auto" width="50%" style="padding:0 0 22px; font-family:Helvetica,Arial,sans-serif; unicode-bidi:plaintext;">
                       <div style="font-size:13px; font-weight:700; color:#2a2820;">{{labels.orderNumber}}</div>
-                      <div style="font-size:14px; color:#6b6553; margin-top:5px;">{{orderNumber}}</div>
+                      <div dir="ltr" style="font-size:14px; color:#6b6553; margin-top:5px; text-align:{{align}};">{{orderNumber}}</div>
                     </td>
                     <td dir="auto" width="50%" style="padding:0 0 22px; font-family:Helvetica,Arial,sans-serif; unicode-bidi:plaintext;">
                       <div style="font-size:13px; font-weight:700; color:#2a2820;">{{labels.orderDate}}</div>
@@ -72,11 +72,11 @@
                 </table>
               </td>
             </tr>
-            <tr><td class="swg-pad" style="padding:0 34px;"><div style="border-top:1px solid #e4dfd3; font-size:0; line-height:0;">&nbsp;</div></td></tr>
+            <tr><td class="swg-pad" style="text-align:{{align}}; padding:0 34px;"><div style="border-top:1px solid #e4dfd3; font-size:0; line-height:0;">&nbsp;</div></td></tr>
 
             <!-- Items -->
             <tr>
-              <td class="swg-pad" style="padding:22px 34px 0;">
+              <td class="swg-pad" style="text-align:{{align}}; padding:22px 34px 0;">
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                   {{#each items}}
                   <tr>
@@ -87,7 +87,7 @@
                       {{/if}}
                       <div style="font-size:13px; color:#9a937f; margin-top:3px;">&times; {{this.quantity}}</div>
                     </td>
-                    <td align="right" style="padding:14px 0; border-top:1px solid #eee7d8; font-family:Helvetica,Arial,sans-serif; font-size:14px; color:#2a2820; white-space:nowrap; vertical-align:top;">
+                    <td dir="ltr" align="{{alignOpposite}}" style="padding:14px 0; border-top:1px solid #eee7d8; font-family:Helvetica,Arial,sans-serif; font-size:14px; color:#2a2820; white-space:nowrap; vertical-align:top;">
                       {{this.lineTotal}}
                     </td>
                   </tr>
@@ -96,7 +96,7 @@
                     <td dir="auto" style="padding:16px 0 0; border-top:1px solid #2a2820; font-family:Helvetica,Arial,sans-serif; font-size:15px; font-weight:700; color:#2a2820; unicode-bidi:plaintext;">
                       {{labels.total}}
                     </td>
-                    <td align="right" style="padding:16px 0 0; border-top:1px solid #2a2820; font-family:Helvetica,Arial,sans-serif; font-size:15px; font-weight:700; color:#2a2820; white-space:nowrap;">
+                    <td dir="ltr" align="{{alignOpposite}}" style="padding:16px 0 0; border-top:1px solid #2a2820; font-family:Helvetica,Arial,sans-serif; font-size:15px; font-weight:700; color:#2a2820; white-space:nowrap;">
                       {{totalAmount}}
                     </td>
                   </tr>
@@ -106,9 +106,9 @@
 
             <!-- Shipping address -->
             {{#if shippingAddress}}
-            <tr><td class="swg-pad" style="padding:0 34px;"><div style="border-top:1px solid #e4dfd3; font-size:0; line-height:0; margin-top:22px;">&nbsp;</div></td></tr>
+            <tr><td class="swg-pad" style="text-align:{{align}}; padding:0 34px;"><div style="border-top:1px solid #e4dfd3; font-size:0; line-height:0; margin-top:22px;">&nbsp;</div></td></tr>
             <tr>
-              <td class="swg-pad" style="padding:22px 34px 0;">
+              <td class="swg-pad" style="text-align:{{align}}; padding:22px 34px 0;">
                 <div dir="auto" style="font-family:Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:#2a2820; unicode-bidi:plaintext;">
                   {{labels.shippingTo}}
                 </div>
@@ -122,7 +122,7 @@
             <!-- CTA -->
             {{#if ctaUrl}}
             <tr>
-              <td class="swg-pad" style="padding:32px 34px 8px;">
+              <td class="swg-pad" style="text-align:{{align}}; padding:32px 34px 8px;">
                 <a class="swg-cta" href="{{ctaUrl}}"
                    style="display:inline-block; background:#a8703c; color:#ffffff; text-decoration:none; font-family:Helvetica,Arial,sans-serif; font-size:14px; font-weight:700; padding:13px 28px; unicode-bidi:plaintext;">
                   {{ctaLabel}}
@@ -134,20 +134,17 @@
             <!-- Footer -->
             <tr><td style="padding:8px 34px 0;"><div style="border-top:1px solid #e4dfd3; font-size:0; line-height:0; margin-top:24px;">&nbsp;</div></td></tr>
             <tr>
-              <td class="swg-pad" style="padding:22px 34px 30px;">
-                <p dir="auto" style="margin:0 0 10px; font-family:Helvetica,Arial,sans-serif; font-size:13px; line-height:1.7; color:#6b6553; unicode-bidi:plaintext;">
-                  {{footerNoteHe}}
-                </p>
+              <td class="swg-pad" style="text-align:{{align}}; padding:22px 34px 30px;">
                 <p dir="auto" style="margin:0 0 16px; font-family:Helvetica,Arial,sans-serif; font-size:12.5px; line-height:1.7; color:#9a937f; unicode-bidi:plaintext;">
-                  {{footerNoteEn}}
+                  {{footerNote}}
                 </p>
                 <p style="margin:0; font-family:Helvetica,Arial,sans-serif; font-size:12.5px; line-height:1.8; color:#9a937f;">
                   {{brandName}}
                   &nbsp;&middot;&nbsp;
-                  <a href="mailto:{{supportEmail}}" style="color:#9a937f;">{{supportEmail}}</a>
+                  <a dir="ltr" href="mailto:{{supportEmail}}" style="color:#9a937f;">{{supportEmail}}</a>
                   {{#if websiteUrl}}
                   &nbsp;&middot;&nbsp;
-                  <a href="{{websiteUrl}}" style="color:#9a937f;">{{websiteLabel}}</a>
+                  <a dir="ltr" href="{{websiteUrl}}" style="color:#9a937f;">{{websiteLabel}}</a>
                   {{/if}}
                 </p>
               </td>

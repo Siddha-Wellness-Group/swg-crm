@@ -214,6 +214,10 @@
   .eml-prev-head{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:15px 20px;border-bottom:1px solid var(--border);}
   .eml-prev-head .t{font-size:14px;font-weight:600;color:var(--ink);}
   .eml-prev-head .s{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .eml-lang{display:inline-flex;border:1px solid var(--border);border-radius:7px;overflow:hidden;}
+  .eml-lang button{font-family:inherit;font-size:12px;padding:5px 12px;border:none;background:var(--surface);color:var(--ink-soft);cursor:pointer;}
+  .eml-lang button+button{border-inline-start:1px solid var(--border);}
+  .eml-lang button.on{background:var(--ink);color:#fff;}
   .eml-prev-close{cursor:pointer;font-size:20px;line-height:1;color:var(--ink-soft);background:none;border:none;padding:0 4px;}
   .eml-prev-close:hover{color:var(--ink);}
   .eml-prev-body{flex:1;background:var(--cream);overflow:auto;}
@@ -671,7 +675,13 @@
         <div class="t" id="emlPrevTitle">Email preview</div>
         <div class="s" id="emlPrevSub"></div>
       </div>
-      <button class="eml-prev-close" id="emlPrevClose" title="Close">&times;</button>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="eml-lang" id="emlPrevLang">
+          <button type="button" data-eml-lang="he" class="on">עברית</button>
+          <button type="button" data-eml-lang="en">English</button>
+        </div>
+        <button class="eml-prev-close" id="emlPrevClose" title="Close">&times;</button>
+      </div>
     </div>
     <div class="eml-prev-body" id="emlPrevBody"></div>
   </div>
@@ -682,7 +692,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he' };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -2467,18 +2477,32 @@ function renderFinance(){
 const EMAIL_SENDER = 'Siddha Yoga Web Services <customer@siddhayogaweb.com>';
 const EMAIL_TEMPLATE_DIR = 'src/services/email/templates/';
 
-/* Shared context the Node service injects into every template
-   (see renderTemplate in emailService.js). */
+/* Shared context the Node service injects into every template, per language
+   (see renderTemplate + i18n.js in src/services/email). Every email goes out
+   in ONE language; the preview can show either. */
 const EMAIL_BRAND_CTX = {
-  lang:'he',
-  brandName:'Siddha Yoga Web Services',
-  brandTagline:'Siddha Wellness Group',
-  supportEmail:'customer@siddhayogaweb.com',
-  websiteUrl:'https://siddhayogaweb.com',
-  websiteLabel:'siddhayogaweb.com',
-  footerNoteHe:'\u05d0\u05dd \u05d9\u05e9 \u05dc\u05da \u05e9\u05d0\u05dc\u05d5\u05ea \u05e0\u05d5\u05e1\u05e4\u05d5\u05ea, \u05e0\u05d9\u05ea\u05df \u05dc\u05d4\u05e9\u05d9\u05d1 \u05dc\u05de\u05d9\u05d9\u05dc \u05d6\u05d4 \u05d0\u05d5 \u05dc\u05d9\u05e6\u05d5\u05e8 \u05e7\u05e9\u05e8 \u05d1\u05db\u05ea\u05d5\u05d1\u05ea customer@siddhayogaweb.com',
-  footerNoteEn:'If you have any further questions, simply reply to this email or write to us at customer@siddhayogaweb.com.',
-  transactionalNotice:'This is a transactional message about your order or enquiry with Siddha Yoga Web Services.',
+  he: {
+    lang:'he', dir:'rtl', align:'right', alignOpposite:'left',
+    brandName:'Siddha Yoga Web Services',
+    brandTagline:'\u05e7\u05d1\u05d5\u05e6\u05ea \u05e1\u05d9\u05d3\u05d4\u05d4 \u05d5\u05d5\u05dc\u05e0\u05e1',
+    supportEmail:'customer@siddhayogaweb.com',
+    websiteUrl:'https://siddhayogaweb.com',
+    websiteLabel:'siddhayogaweb.com',
+    greeting:'\u05e9\u05dc\u05d5\u05dd',
+    footerNote:'\u05d0\u05dd \u05d9\u05e9 \u05dc\u05da \u05e9\u05d0\u05dc\u05d5\u05ea \u05e0\u05d5\u05e1\u05e4\u05d5\u05ea, \u05e0\u05d9\u05ea\u05df \u05dc\u05d4\u05e9\u05d9\u05d1 \u05dc\u05de\u05d9\u05d9\u05dc \u05d6\u05d4 \u05d0\u05d5 \u05dc\u05d9\u05e6\u05d5\u05e8 \u05e7\u05e9\u05e8 \u05d1\u05db\u05ea\u05d5\u05d1\u05ea customer@siddhayogaweb.com',
+    transactionalNotice:'\u05d6\u05d4\u05d5 \u05de\u05d9\u05d9\u05dc \u05ea\u05e4\u05e2\u05d5\u05dc\u05d9 \u05d1\u05e0\u05d5\u05d2\u05e2 \u05dc\u05d4\u05d6\u05de\u05e0\u05d4 \u05d0\u05d5 \u05dc\u05e4\u05e0\u05d9\u05d9\u05d4 \u05e9\u05dc\u05da \u05d0\u05dc Siddha Yoga Web Services.',
+  },
+  en: {
+    lang:'en', dir:'ltr', align:'left', alignOpposite:'right',
+    brandName:'Siddha Yoga Web Services',
+    brandTagline:'Siddha Wellness Group',
+    supportEmail:'customer@siddhayogaweb.com',
+    websiteUrl:'https://siddhayogaweb.com',
+    websiteLabel:'siddhayogaweb.com',
+    greeting:'Hello',
+    footerNote:'If you have any further questions, simply reply to this email or write to us at customer@siddhayogaweb.com.',
+    transactionalNotice:'This is a transactional message about your order or enquiry with Siddha Yoga Web Services.',
+  },
 };
 
 const EMAIL_AUTOMATIONS = [
@@ -2487,20 +2511,37 @@ const EMAIL_AUTOMATIONS = [
     trigger:'Storefront order created', audience:'Customer', category:'order_confirmation',
     desc:'Goes out the moment a Siddha Yoga order is paid. Lists every line item, the total and the delivery address.',
     fn:'sendOrderConfirmation({ to, customerName, orderNumber, items, totalAmount, shippingAddress })',
-    subject:'Order SY-10241 confirmed | \u05d0\u05d9\u05e9\u05d5\u05e8 \u05d4\u05d6\u05de\u05e0\u05d4 SY-10241',
     sample:{
-      headline:'Thank you for your order', greeting:'Hello', customerName:'\u05d3\u05e0\u05d4 \u05db\u05d4\u05df',
-      intro:'We have received your order and it is now being prepared. You will get a second email with tracking details the moment it ships.',
-      preheader:'We received order SY-10241.',
-      orderNumber:'SY-10241', orderDate:'01/09/2026',
-      items:[
-        {name:'Cinnamor Oregano Oil 30ml', variant:'30ml', quantity:2, lineTotal:'\u20aa178.00'},
-        {name:'Lavender Calm Blend 15ml', variant:'15ml', quantity:1, lineTotal:'\u20aa64.00'},
-      ],
-      totalAmount:'\u20aa242.00',
-      shippingAddress:'\u05d4\u05e8\u05e6\u05dc 12, \u05ea\u05dc \u05d0\u05d1\u05d9\u05d1, 6688218, Israel',
-      ctaUrl:'https://siddhayogaweb.com/orders/SY-10241', ctaLabel:'View your order',
-      labels:{orderNumber:'Order number', orderDate:'Order date', items:'What you ordered', total:'Total', shippingTo:'Shipping to'},
+      he:{
+        subject:'אישור הזמנה SY-10241',
+        headline:'תודה על ההזמנה', customerName:'דנה כהן',
+        intro:'ההזמנה שלך התקבלה ואנחנו מכינים אותה עכשיו. ברגע שהיא תישלח, יגיע מייל נוסף עם פרטי המעקב.',
+        preheader:'קיבלנו את הזמנה SY-10241.',
+        orderNumber:'SY-10241', orderDate:'8 בספטמבר 2026',
+        items:[
+          {name:'Cinnamor Oregano Oil 30ml', variant:'30ml', quantity:2, lineTotal:'‏178.00 ₪'},
+          {name:'Lavender Calm Blend 15ml', variant:'15ml', quantity:1, lineTotal:'‏64.00 ₪'},
+        ],
+        totalAmount:'‏242.00 ₪',
+        shippingAddress:'הרצל 12, תל אביב, 6688218, ישראל',
+        ctaUrl:'https://siddhayogaweb.com/orders/SY-10241', ctaLabel:'לצפייה בהזמנה',
+        labels:{orderNumber:'מספר הזמנה', orderDate:'תאריך הזמנה', items:'הפריטים שהזמנת', total:'סה״כ', shippingTo:'כתובת למשלוח'},
+      },
+      en:{
+        subject:'Order SY-10241 confirmed',
+        headline:'Thank you for your order', customerName:'John Smith',
+        intro:'We have received your order and it is now being prepared. You will get a second email with tracking details the moment it ships.',
+        preheader:'We received order SY-10241.',
+        orderNumber:'SY-10241', orderDate:'September 8, 2026',
+        items:[
+          {name:'Cinnamor Oregano Oil 30ml', variant:'30ml', quantity:2, lineTotal:'$48.00'},
+          {name:'Lavender Calm Blend 15ml', variant:'15ml', quantity:1, lineTotal:'$17.00'},
+        ],
+        totalAmount:'$65.00',
+        shippingAddress:'2125 Chestnut St, San Francisco CA, 94123, United States',
+        ctaUrl:'https://siddhayogaweb.com/orders/SY-10241', ctaLabel:'View your order',
+        labels:{orderNumber:'Order number', orderDate:'Order date', items:'What you ordered', total:'Total', shippingTo:'Shipping to'},
+      },
     },
   },
   {
@@ -2508,15 +2549,27 @@ const EMAIL_AUTOMATIONS = [
     trigger:'Order marked shipped', audience:'Customer', category:'shipping_update',
     desc:'Sent when a tracking number is attached to an order. Carries the carrier, the tracking reference and a direct tracking link.',
     fn:'sendShippingUpdate({ to, customerName, orderNumber, trackingNumber, carrierName, trackingUrl })',
-    subject:'Order SY-10241 is on its way | \u05d4\u05d4\u05d6\u05de\u05e0\u05d4 \u05e9\u05dc\u05da \u05e0\u05e9\u05dc\u05d7\u05d4',
     sample:{
-      statusLabel:'Shipped', headline:'Your order is on its way', greeting:'Hello', customerName:'Dana Cohen',
-      intro:'Your parcel has left us and is now with the carrier. Use the tracking details below to follow it.',
-      preheader:'Tracking IL748291043 with Israel Post.',
-      orderNumber:'SY-10241', carrierName:'Israel Post', trackingNumber:'IL748291043',
-      trackingUrl:'https://israelpost.co.il/itemtrace?itemcode=IL748291043',
-      estimatedDelivery:'Thursday, 4 September', ctaLabel:'Track your parcel',
-      labels:{orderNumber:'Order number', carrier:'Carrier', tracking:'Tracking number', eta:'Estimated delivery:'},
+      he:{
+        subject:'ההזמנה שלך נשלחה · SY-10241',
+        statusLabel:'נשלח', headline:'ההזמנה שלך בדרך אליך', customerName:'דנה כהן',
+        intro:'החבילה יצאה מאיתנו ונמצאת אצל חברת השילוח. אפשר לעקוב אחריה בפרטים שלמטה.',
+        preheader:'מספר מעקב IL748291043 עם דואר ישראל.',
+        orderNumber:'SY-10241', carrierName:'דואר ישראל', trackingNumber:'IL748291043',
+        trackingUrl:'https://israelpost.co.il/itemtrace?itemcode=IL748291043',
+        estimatedDelivery:'יום חמישי, 11 בספטמבר', ctaLabel:'מעקב אחר המשלוח',
+        labels:{orderNumber:'מספר הזמנה', carrier:'חברת שילוח', tracking:'מספר מעקב', eta:'הגעה משוערת'},
+      },
+      en:{
+        subject:'Order SY-10241 is on its way',
+        statusLabel:'Shipped', headline:'Your order is on its way', customerName:'John Smith',
+        intro:'Your parcel has left us and is now with the carrier. Use the tracking details below to follow it.',
+        preheader:'Tracking IL748291043 with Israel Post.',
+        orderNumber:'SY-10241', carrierName:'Israel Post', trackingNumber:'IL748291043',
+        trackingUrl:'https://israelpost.co.il/itemtrace?itemcode=IL748291043',
+        estimatedDelivery:'Thursday, 11 September', ctaLabel:'Track your parcel',
+        labels:{orderNumber:'Order number', carrier:'Carrier', tracking:'Tracking number', eta:'Estimated delivery'},
+      },
     },
   },
   {
@@ -2524,20 +2577,35 @@ const EMAIL_AUTOMATIONS = [
     trigger:'High-priority order or ticket', audience:'SWG team', category:'internal_alert',
     desc:'Never reaches a customer. Raised to the team when an order clears the review threshold or a ticket needs a human now.',
     fn:'sendInternalAlert({ subject, message, payloadData })',
-    subject:'[SWG High priority] High-value wholesale order SY-10241',
     sample:{
-      alertKind:'High-priority order', alertTitle:'High-value wholesale order SY-10241',
-      message:'A wholesale order above the review threshold arrived from the storefront. Ops should confirm stock before the order is picked.',
-      preheader:'A wholesale order above the review threshold arrived.',
-      payloadRows:[
-        {key:'order', value:'SY-10241'}, {key:'total', value:'\u20aa4,820'},
-        {key:'customer', value:'Dana Cohen'}, {key:'channel', value:'Website'}, {key:'owner', value:'Omri'},
-      ],
-      priorityLabel:'High priority', priorityColor:'#B98A2E', priorityBg:'#F1E3C4',
-      ctaLabel:'Open in the CRM',
-      generatedAt:'2026-09-01T09:14:00.000Z',
-      internalNotice:'Internal notification generated by the SWG CRM email service. Not sent to the customer.',
-      labels:{details:'Details'},
+      he:{
+        subject:'[התראה עדיפות גבוהה] הזמנה סיטונאית גדולה SY-10241',
+        alertKind:'הזמנה בעדיפות גבוהה', alertTitle:'הזמנה סיטונאית גדולה SY-10241',
+        message:'התקבלה הזמנה סיטונאית מעל סף הבדיקה מהחנות. כדאי לוודא מלאי לפני ליקוט.',
+        preheader:'התקבלה הזמנה סיטונאית מעל סף הבדיקה.',
+        payloadRows:[
+          {key:'הזמנה', value:'SY-10241'}, {key:'סכום', value:'‏4,820 ₪'},
+          {key:'לקוח', value:'דנה כהן'}, {key:'ערוץ', value:'אתר'}, {key:'אחראי', value:'עומרי'},
+        ],
+        priorityLabel:'עדיפות גבוהה', priorityColor:'#B98A2E', priorityBg:'#F1E3C4',
+        ctaLabel:'פתיחה ב-CRM', generatedAt:'2026-09-08T09:14:00.000Z',
+        internalNotice:'התראה פנימית מתוך שירות המייל של ה-CRM. לא נשלחה ללקוח.',
+        labels:{details:'פרטים'},
+      },
+      en:{
+        subject:'[SWG High priority] High-value wholesale order SY-10241',
+        alertKind:'High-priority order', alertTitle:'High-value wholesale order SY-10241',
+        message:'A wholesale order above the review threshold arrived from the storefront. Ops should confirm stock before the order is picked.',
+        preheader:'A wholesale order above the review threshold arrived.',
+        payloadRows:[
+          {key:'order', value:'SY-10241'}, {key:'total', value:'$1,290'},
+          {key:'customer', value:'John Smith'}, {key:'channel', value:'Website'}, {key:'owner', value:'Omri'},
+        ],
+        priorityLabel:'High priority', priorityColor:'#B98A2E', priorityBg:'#F1E3C4',
+        ctaLabel:'Open in the CRM', generatedAt:'2026-09-08T09:14:00.000Z',
+        internalNotice:'Internal notification generated by the SWG CRM email service. Not sent to the customer.',
+        labels:{details:'Details'},
+      },
     },
   },
   {
@@ -2545,13 +2613,23 @@ const EMAIL_AUTOMATIONS = [
     trigger:'Support ticket opened', audience:'Customer', category:'auto_reply',
     desc:'Acknowledges an enquiry straight away and hands the customer a reference to quote back to us.',
     fn:'sendAutoReply({ to, customerName, ticketId })',
-    subject:'We received your message | \u05e7\u05d9\u05d1\u05dc\u05e0\u05d5 \u05d0\u05ea \u05e4\u05e0\u05d9\u05d9\u05ea\u05da [TCK-4471]',
     sample:{
-      headline:'We received your message', greeting:'Hello', customerName:'Dana',
-      intro:'Thank you for getting in touch. Your enquiry is logged and a member of the team will look at it personally.',
-      preheader:'Your enquiry is logged as TCK-4471.', ticketId:'TCK-4471',
-      responseTimeNote:'We usually reply within one business day. Keep this reference in any follow-up so we can find your conversation quickly.',
-      labels:{ticket:'Your reference'},
+      he:{
+        subject:'קיבלנו את פנייתך [TCK-4471]',
+        headline:'קיבלנו את פנייתך', customerName:'דנה כהן',
+        intro:'תודה שפנית אלינו. הפנייה נרשמה ואחד מאנשי הצוות יטפל בה אישית.',
+        preheader:'הפנייה שלך נרשמה תחת TCK-4471.', ticketId:'TCK-4471',
+        responseTimeNote:'בדרך כלל אנחנו חוזרים תוך יום עסקים אחד. כדאי לשמור את מספר הפנייה ולציין אותו בכל תכתובת נוספת.',
+        labels:{ticket:'מספר הפנייה שלך'},
+      },
+      en:{
+        subject:'We received your message [TCK-4471]',
+        headline:'We received your message', customerName:'John Smith',
+        intro:'Thank you for getting in touch. Your enquiry is logged and a member of the team will look at it personally.',
+        preheader:'Your enquiry is logged as TCK-4471.', ticketId:'TCK-4471',
+        responseTimeNote:'We usually reply within one business day. Keep this reference in any follow-up so we can find your conversation quickly.',
+        labels:{ticket:'Your reference'},
+      },
     },
   },
 ];
@@ -2604,13 +2682,20 @@ function emlRender(src, ctx){
   return out;
 }
 
-async function openEmailPreview(key){
+async function openEmailPreview(key, locale){
   const auto = EMAIL_AUTOMATIONS.find(a=>a.key===key);
   if(!auto) return;
+  const loc = (locale === 'he' || locale === 'en') ? locale : state.emailPreviewLocale || 'he';
+  state.emailPreviewLocale = loc;
+  state.emailPreview = key;
+  const sample = auto.sample[loc];
   const overlay = document.getElementById('emlPrevOverlay');
   const body = document.getElementById('emlPrevBody');
   document.getElementById('emlPrevTitle').textContent = auto.name;
-  document.getElementById('emlPrevSub').textContent = auto.subject;
+  document.getElementById('emlPrevSub').textContent = sample.subject;
+  document.querySelectorAll('#emlPrevLang [data-eml-lang]').forEach(el=>{
+    el.classList.toggle('on', el.dataset.emlLang === loc);
+  });
   body.innerHTML = `<div class="eml-prev-msg">Rendering ${esc(auto.name)}...</div>`;
   overlay.classList.add('show');
 
@@ -2619,7 +2704,7 @@ async function openEmailPreview(key){
     const res = await fetch(path, {cache:'no-store'});
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const src = await res.text();
-    const html = emlRender(src, Object.assign({}, EMAIL_BRAND_CTX, {subject:auto.subject}, auto.sample));
+    const html = emlRender(src, Object.assign({}, EMAIL_BRAND_CTX[loc], sample));
     const frame = document.createElement('iframe');
     frame.setAttribute('sandbox', '');
     frame.setAttribute('title', auto.name + ' preview');
@@ -4509,6 +4594,9 @@ document.getElementById('addBtn').onclick = ()=>{
 document.getElementById('overlay').onclick = (e)=>{ if(e.target.id==='overlay') closeModal(); };
 document.getElementById('emlPrevOverlay').onclick = (e)=>{ if(e.target.id==='emlPrevOverlay') closeEmailPreview(); };
 document.getElementById('emlPrevClose').onclick = closeEmailPreview;
+document.querySelectorAll('#emlPrevLang [data-eml-lang]').forEach(el=>{
+  el.onclick = ()=>{ if(state.emailPreview) openEmailPreview(state.emailPreview, el.dataset.emlLang); };
+});
 document.addEventListener('keydown', (e)=>{
   if(e.key==='Escape' && document.getElementById('emlPrevOverlay').classList.contains('show')) closeEmailPreview();
 });

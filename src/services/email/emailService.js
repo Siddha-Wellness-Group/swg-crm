@@ -22,6 +22,14 @@ import nodemailer from 'nodemailer';
 
 import { getEmailConfig, isValidEmail } from '../../config/emailConfig.js';
 import { logger } from './logger.js';
+import {
+  FOOTER_NOTE_EN,
+  FOOTER_NOTE_HE,
+  copyFor,
+  formatAmountFor,
+  formatDateFor,
+  resolveLocale,
+} from './i18n.js';
 
 const TEMPLATE_DIR = join(dirname(fileURLToPath(import.meta.url)), 'templates');
 
@@ -31,16 +39,7 @@ const WEBSITE_URL = 'https://siddhayogaweb.com';
 /** Support mailbox quoted in every footer. */
 const SUPPORT_EMAIL = 'customer@siddhayogaweb.com';
 
-/**
- * The footer line the business requires on every customer-facing message.
- * Kept as a single exported constant so wording changes happen in one place.
- */
-export const FOOTER_NOTE_HE =
-  'אם יש לך שאלות נוספות, ניתן להשיב למייל זה או ליצור קשר בכתובת customer@siddhayogaweb.com';
-
-/** English companion to {@link FOOTER_NOTE_HE}. */
-export const FOOTER_NOTE_EN =
-  'If you have any further questions, simply reply to this email or write to us at customer@siddhayogaweb.com.';
+export { FOOTER_NOTE_HE, FOOTER_NOTE_EN, resolveLocale };
 
 /**
  * Thrown when caller-supplied arguments cannot produce a valid message.
@@ -124,25 +123,32 @@ export function clearTemplateCache() {
 }
 
 /**
- * Renders a template with the shared brand context merged in.
+ * Renders a template with the locale's brand context merged in.
+ *
+ * Direction and alignment come from the locale, so one template file serves
+ * both languages instead of a per-language copy that can drift.
  *
  * @param {string} name - Template file name without the `.html` suffix.
- * @param {Record<string, unknown>} data - Template variables.
+ * @param {Record<string, unknown>} data - Template variables. `locale` selects the language.
  * @returns {Promise<string>} The rendered HTML document.
  */
-export async function renderTemplate(name, data) {
+export async function renderTemplate(name, data = {}) {
   const template = await loadTemplate(name);
+  const locale = data.locale || 'en';
+  const copy = copyFor(locale);
   return template({
-    lang: 'he',
+    lang: locale,
+    dir: copy.dir,
+    align: copy.align,
+    alignOpposite: copy.alignOpposite,
     brandName: 'Siddha Yoga Web Services',
-    brandTagline: 'Siddha Wellness Group',
+    brandTagline: copy.brandTagline,
     supportEmail: SUPPORT_EMAIL,
     websiteUrl: WEBSITE_URL,
     websiteLabel: 'siddhayogaweb.com',
-    footerNoteHe: FOOTER_NOTE_HE,
-    footerNoteEn: FOOTER_NOTE_EN,
-    transactionalNotice:
-      'This is a transactional message about your order or enquiry with Siddha Yoga Web Services.',
+    greeting: copy.greeting,
+    footerNote: copy.footerNote,
+    transactionalNotice: copy.transactionalNotice,
     ...data,
   });
 }
@@ -337,6 +343,8 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  * @param {string|string[]} [params.bcc] - Blind carbon copy recipients.
  * @param {Record<string, string>} [params.headers] - Extra SMTP headers.
  * @param {string} [params.category] - Label recorded in the logs, e.g. `order_confirmation`.
+ * @param {string} [params.locale] - Language the body was rendered in, for the logs and headers.
+ * @param {string} [params.localeReason] - Which signal chose that locale, for the logs.
  * @returns {Promise<SendResult>} Result of the accepted send.
  * @throws {EmailValidationError} When arguments cannot produce a valid message.
  * @throws {EmailSendError} When every attempt failed.
@@ -351,6 +359,8 @@ export async function sendTemplatedMail({
   bcc,
   headers = {},
   category = 'generic',
+  locale,
+  localeReason,
 }) {
   const cfg = getEmailConfig();
   const correlationId = randomUUID();
@@ -381,6 +391,7 @@ export async function sendTemplatedMail({
       'X-SWG-Category': category,
       'X-SWG-Correlation-Id': correlationId,
       'X-Entity-Ref-ID': correlationId,
+      ...(locale ? { 'Content-Language': locale } : {}),
       ...headers,
     },
   };
@@ -408,6 +419,8 @@ export async function sendTemplatedMail({
         correlationId,
         category,
         template,
+        locale,
+        localeReason,
         messageId: result.messageId,
         recipient: result.to,
         recipients: recipients.length,
@@ -468,21 +481,11 @@ export async function sendTemplatedMail({
  *
  * @param {number|string} amount - Amount to format.
  * @param {string} [currency] - ISO 4217 code.
+ * @param {string} [locale] - Target locale, for symbol placement and separators.
  * @returns {string} A display string such as `₪249.00`.
  */
-export function formatAmount(amount, currency = 'ILS') {
-  if (typeof amount === 'string') return amount;
-  const value = Number(amount);
-  if (!Number.isFinite(value)) return String(amount ?? '');
-  try {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: 2,
-    }).format(value);
-  } catch {
-    return value.toFixed(2) + ' ' + currency;
-  }
+export function formatAmount(amount, currency = 'ILS', locale = 'en') {
+  return formatAmountFor(amount, currency, locale);
 }
 
 /**
@@ -508,7 +511,7 @@ export function formatAddress(address) {
  * @param {string} currency - ISO 4217 code used for the money columns.
  * @returns {{name: string, variant: string, quantity: number, lineTotal: string}} Template-ready item.
  */
-function normaliseItem(item, currency) {
+function normaliseItem(item, currency, locale = 'en') {
   const quantity = Number(item.quantity ?? item.qty ?? 1) || 1;
   const unit = Number(item.unit_price ?? item.unitPrice ?? item.price ?? 0);
   const subtotal = item.subtotal ?? item.lineTotal ?? unit * quantity;
@@ -516,7 +519,7 @@ function normaliseItem(item, currency) {
     name: String(item.product_name ?? item.name ?? item.title ?? 'Item'),
     variant: [item.size, item.color, item.variant].filter(Boolean).join(' / '),
     quantity,
-    lineTotal: formatAmount(subtotal, currency),
+    lineTotal: formatAmountFor(subtotal, currency, locale),
   };
 }
 
@@ -535,8 +538,10 @@ function normaliseItem(item, currency) {
  * @param {number|string} params.totalAmount - Order total.
  * @param {string|Record<string, unknown>} [params.shippingAddress] - Delivery address.
  * @param {string} [params.currency] - ISO 4217 code. Defaults to `ILS`.
- * @param {string} [params.orderDate] - Display date. Defaults to today.
+ * @param {string} [params.orderDate] - Display date. Defaults to today, formatted for the locale.
  * @param {string} [params.ctaUrl] - Link behind the primary button.
+ * @param {string} [params.language] - Force a locale (`he`/`en`). Otherwise resolved from the recipient.
+ * @param {string} [params.phone] - Customer phone, used only as a locale signal.
  * @returns {Promise<SendResult>} Result of the accepted send.
  * @throws {EmailValidationError} When required order details are missing.
  * @throws {EmailSendError} When every attempt failed.
@@ -544,7 +549,7 @@ function normaliseItem(item, currency) {
  * @example
  * await sendOrderConfirmation({
  *   to: 'dana@example.com',
- *   customerName: 'דנה כהן',
+ *   customerName: 'דנה כהן',       // Hebrew script -> the email goes out in Hebrew
  *   orderNumber: 'SY-10241',
  *   items: [{ product_name: 'Cinnamor Oregano 30ml', quantity: 2, unit_price: 89 }],
  *   totalAmount: 178,
@@ -561,6 +566,8 @@ export async function sendOrderConfirmation({
   currency = 'ILS',
   orderDate,
   ctaUrl,
+  language,
+  phone,
 }) {
   /** @type {string[]} */
   const issues = [];
@@ -572,33 +579,32 @@ export async function sendOrderConfirmation({
   }
   if (issues.length) throw new EmailValidationError(issues);
 
+  const { locale, reason } = resolveLocale({ language, customerName, shippingAddress, phone });
+  const copy = copyFor(locale);
+  const t = copy.orderConfirmation;
+  const number = String(orderNumber).trim();
+
   return sendTemplatedMail({
     to,
-    subject: 'Order ' + orderNumber + ' confirmed | אישור הזמנה ' + orderNumber,
+    subject: t.subject(number),
     template: 'orderConfirmation',
     category: 'order_confirmation',
+    locale,
+    localeReason: reason,
     data: {
-      preheader: 'We received order ' + orderNumber + '. Here is what is on the way.',
-      headline: 'Thank you for your order',
-      greeting: 'Hello',
-      intro:
-        'We have received your order and it is now being prepared. ' +
-        'You will get a second email with tracking details the moment it ships.',
+      locale,
+      preheader: t.preheader(number),
+      headline: t.headline,
+      intro: t.intro,
       customerName: String(customerName).trim(),
-      orderNumber: String(orderNumber).trim(),
-      orderDate: orderDate || new Date().toLocaleDateString('en-GB'),
-      items: items.map((item) => normaliseItem(item, currency)),
-      totalAmount: formatAmount(totalAmount, currency),
+      orderNumber: number,
+      orderDate: orderDate || formatDateFor(new Date(), locale),
+      items: items.map((item) => normaliseItem(item, currency, locale)),
+      totalAmount: formatAmountFor(totalAmount, currency, locale),
       shippingAddress: formatAddress(shippingAddress),
       ctaUrl: ctaUrl || '',
-      ctaLabel: 'View your order',
-      labels: {
-        orderNumber: 'Order number',
-        orderDate: 'Order date',
-        items: 'What you ordered',
-        total: 'Total',
-        shippingTo: 'Shipping to',
-      },
+      ctaLabel: t.ctaLabel,
+      labels: t.labels,
     },
   });
 }
@@ -614,6 +620,9 @@ export async function sendOrderConfirmation({
  * @param {string} params.carrierName - Carrier handling the shipment.
  * @param {string} [params.trackingUrl] - Direct link to the carrier tracking page.
  * @param {string} [params.estimatedDelivery] - Display date for the expected arrival.
+ * @param {string} [params.language] - Force a locale (`he`/`en`). Otherwise resolved from the recipient.
+ * @param {string|Record<string, unknown>} [params.shippingAddress] - Used only as a locale signal.
+ * @param {string} [params.phone] - Customer phone, used only as a locale signal.
  * @returns {Promise<SendResult>} Result of the accepted send.
  * @throws {EmailValidationError} When required shipment details are missing.
  * @throws {EmailSendError} When every attempt failed.
@@ -636,6 +645,9 @@ export async function sendShippingUpdate({
   carrierName,
   trackingUrl,
   estimatedDelivery,
+  language,
+  shippingAddress,
+  phone,
 }) {
   /** @type {string[]} */
   const issues = [];
@@ -648,30 +660,34 @@ export async function sendShippingUpdate({
   }
   if (issues.length) throw new EmailValidationError(issues);
 
+  const { locale, reason } = resolveLocale({ language, customerName, shippingAddress, phone });
+  const copy = copyFor(locale);
+  const t = copy.shippingUpdate;
+  const number = String(orderNumber).trim();
+  const tracking = String(trackingNumber).trim();
+  const carrier = String(carrierName).trim();
+
   return sendTemplatedMail({
     to,
-    subject: 'Order ' + orderNumber + ' is on its way | ההזמנה שלך נשלחה',
+    subject: t.subject(number),
     template: 'shippingUpdate',
     category: 'shipping_update',
+    locale,
+    localeReason: reason,
     data: {
-      preheader: 'Tracking ' + trackingNumber + ' with ' + carrierName + '.',
-      statusLabel: 'Shipped',
-      headline: 'Your order is on its way',
-      greeting: 'Hello',
-      intro: 'Your parcel has left us and is now with the carrier. Use the tracking details below to follow it.',
+      locale,
+      preheader: t.preheader(tracking, carrier),
+      statusLabel: t.statusLabel,
+      headline: t.headline,
+      intro: t.intro,
       customerName: String(customerName).trim(),
-      orderNumber: String(orderNumber).trim(),
-      trackingNumber: String(trackingNumber).trim(),
-      carrierName: String(carrierName).trim(),
+      orderNumber: number,
+      trackingNumber: tracking,
+      carrierName: carrier,
       trackingUrl: trackingUrl || '',
       estimatedDelivery: estimatedDelivery || '',
-      ctaLabel: 'Track your parcel',
-      labels: {
-        orderNumber: 'Order number',
-        carrier: 'Carrier',
-        tracking: 'Tracking number',
-        eta: 'Estimated delivery:',
-      },
+      ctaLabel: t.ctaLabel,
+      labels: t.labels,
     },
   });
 }
@@ -707,9 +723,10 @@ export async function sendInternalAlert({
   payloadData = {},
   priority = 'normal',
   to,
-  alertKind = 'Automated alert',
+  alertKind,
   ctaUrl,
-  ctaLabel = 'Open in the CRM',
+  ctaLabel,
+  language,
 }) {
   /** @type {string[]} */
   const issues = [];
@@ -718,13 +735,20 @@ export async function sendInternalAlert({
   if (issues.length) throw new EmailValidationError(issues);
 
   const cfg = getEmailConfig();
+  // Internal mail is for the SWG team, so it follows the configured team
+  // language rather than trying to infer anything from a customer record.
+  const { locale, reason } = resolveLocale({ language, fallback: cfg.teamLocale });
+  const copy = copyFor(locale);
+  const t = copy.internalAlert;
+
   const palette = {
-    low: { color: '#7a7462', bg: '#e9e3d3', label: 'Low' },
-    normal: { color: '#5b6b4c', bg: '#e1e6d5', label: 'Normal' },
-    high: { color: '#b98a2e', bg: '#f1e3c4', label: 'High priority' },
-    critical: { color: '#a6472b', bg: '#f0ddd5', label: 'Critical' },
+    low: { color: '#7a7462', bg: '#e9e3d3' },
+    normal: { color: '#5b6b4c', bg: '#e1e6d5' },
+    high: { color: '#b98a2e', bg: '#f1e3c4' },
+    critical: { color: '#a6472b', bg: '#f0ddd5' },
   };
   const tone = palette[priority] || palette.normal;
+  const priorityLabel = t.priority[priority] || t.priority.normal;
 
   const payloadRows = Object.entries(payloadData || {}).map(([key, value]) => ({
     key,
@@ -738,25 +762,28 @@ export async function sendInternalAlert({
 
   return sendTemplatedMail({
     to: to || [...cfg.internalRecipients],
-    subject: '[SWG ' + tone.label + '] ' + String(subject).trim(),
+    subject: '[' + t.subjectPrefix + ' ' + priorityLabel + '] ' + String(subject).trim(),
     template: 'internalAlert',
     category: 'internal_alert',
     replyTo: cfg.replyTo,
+    locale,
+    localeReason: reason,
     headers: { 'X-SWG-Priority': priority },
     data: {
+      locale,
       preheader: String(message).trim().slice(0, 120),
-      alertKind,
+      alertKind: alertKind || t.alertKind,
       alertTitle: String(subject).trim(),
       message: String(message).trim(),
       payloadRows,
-      priorityLabel: tone.label,
+      priorityLabel,
       priorityColor: tone.color,
       priorityBg: tone.bg,
       ctaUrl: ctaUrl || '',
-      ctaLabel,
+      ctaLabel: ctaLabel || t.ctaLabel,
       generatedAt: new Date().toISOString(),
-      internalNotice: 'Internal notification generated by the SWG CRM email service. Not sent to the customer.',
-      labels: { details: 'Details' },
+      internalNotice: t.internalNotice,
+      labels: t.labels,
     },
   });
 }
@@ -769,6 +796,8 @@ export async function sendInternalAlert({
  * @param {string} params.customerName - Name shown in the greeting.
  * @param {string} params.ticketId - Reference the customer can quote back.
  * @param {string} [params.responseTimeNote] - Override for the expected-response sentence.
+ * @param {string} [params.language] - Force a locale (`he`/`en`). Otherwise resolved from the recipient.
+ * @param {string} [params.phone] - Customer phone, used only as a locale signal.
  * @returns {Promise<SendResult>} Result of the accepted send.
  * @throws {EmailValidationError} When required ticket details are missing.
  * @throws {EmailSendError} When every attempt failed.
@@ -776,31 +805,35 @@ export async function sendInternalAlert({
  * @example
  * await sendAutoReply({ to: 'dana@example.com', customerName: 'Dana', ticketId: 'TCK-4471' });
  */
-export async function sendAutoReply({ to, customerName, ticketId, responseTimeNote }) {
+export async function sendAutoReply({ to, customerName, ticketId, responseTimeNote, language, phone }) {
   /** @type {string[]} */
   const issues = [];
   if (!customerName || !String(customerName).trim()) issues.push('customerName is required.');
   if (!ticketId || !String(ticketId).trim()) issues.push('ticketId is required.');
   if (issues.length) throw new EmailValidationError(issues);
 
+  const { locale, reason } = resolveLocale({ language, customerName, phone });
+  const copy = copyFor(locale);
+  const t = copy.autoReply;
+  const ticket = String(ticketId).trim();
+
   return sendTemplatedMail({
     to,
-    subject: 'We received your message | קיבלנו את פנייתך [' + ticketId + ']',
+    subject: t.subject(ticket),
     template: 'autoReply',
     category: 'auto_reply',
+    locale,
+    localeReason: reason,
     headers: { 'Auto-Submitted': 'auto-replied', 'X-Auto-Response-Suppress': 'All' },
     data: {
-      preheader: 'Your enquiry is logged as ' + ticketId + '.',
-      headline: 'We received your message',
-      greeting: 'Hello',
-      intro:
-        'Thank you for getting in touch. Your enquiry is logged and a member of the team will look at it personally.',
+      locale,
+      preheader: t.preheader(ticket),
+      headline: t.headline,
+      intro: t.intro,
       customerName: String(customerName).trim(),
-      ticketId: String(ticketId).trim(),
-      responseTimeNote:
-        responseTimeNote ||
-        'We usually reply within one business day. Keep this reference in any follow-up so we can find your conversation quickly.',
-      labels: { ticket: 'Your reference' },
+      ticketId: ticket,
+      responseTimeNote: responseTimeNote || t.responseTimeNote,
+      labels: t.labels,
     },
   });
 }
