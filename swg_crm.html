@@ -75,6 +75,7 @@
   .navlink[data-view="team"] .dot{background:var(--ink);}
   .navlink[data-view="finance"] .dot{background:var(--sage);}
   .navlink[data-view="emails"] .dot{background:var(--umber);}
+  .navlink[data-view="tickets"] .dot{background:var(--clay);}
   .navlink[data-view="dashboard"].active{background:var(--ink);}
   .navlink[data-view="home"].active{background:var(--amber);}
   .navlink[data-view="contacts"].active{background:var(--amber);}
@@ -90,6 +91,7 @@
   .navlink[data-view="team"].active{background:var(--ink);}
   .navlink[data-view="finance"].active{background:var(--sage);}
   .navlink[data-view="emails"].active{background:var(--umber);}
+  .navlink[data-view="tickets"].active{background:var(--clay);}
   .navlink.hidden-role{display:none;}
   .sidebar-foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--border);}
   .foot-label{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
@@ -187,6 +189,12 @@
   .kcard select{font-size:11px;padding:3px 4px;border-radius:5px;border:1px solid var(--border);font-family:inherit;background:var(--surface);}
   .kcard .kowner{font-size:10.5px;color:var(--ink-soft);}
   .kcard .kdel{cursor:pointer;color:var(--clay);font-size:11px;}
+
+  /* Tickets */
+  .tkt-msg{font-size:13px;line-height:1.7;color:var(--ink-soft);max-width:560px;white-space:pre-line;}
+  .tkt-meta{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+  .tkt-status{font-family:inherit;font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--cream);color:var(--ink);}
+  .tkt-num{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--clay);}
 
   /* Emails -- automated email service */
   .eml-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:14px;}
@@ -608,6 +616,7 @@
     <div class="navlink" data-view="payments"><span class="dot"></span>Payments</div>
     <div class="navlink" data-view="finance"><span class="dot"></span>Finance</div>
     <div class="navlink" data-view="emails"><span class="dot"></span>Emails</div>
+    <div class="navlink" data-view="tickets"><span class="dot"></span>Tickets</div>
     <div class="navlink" data-view="team"><span class="dot"></span>Team</div>
     <div class="sidebar-foot">
       <div class="theme-toggle" id="themeToggle">
@@ -692,7 +701,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he' };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[] };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -789,7 +798,7 @@ const ACCENTS = {
   dashboard:'var(--ink-fixed)', home:'var(--amber)', contacts:'var(--amber)', leads:'var(--ochre)', customers:'var(--sage)',
   distributors:'var(--umber)', suppliers:'var(--clay)', deals:'var(--ochre)', orders:'var(--umber)',
   tasks:'var(--olive)', invoices:'var(--rust)', payments:'var(--rust)', team:'var(--ink)', finance:'var(--sage)',
-  emails:'var(--umber)', search:'var(--ink)', rickroll:'var(--ink)'
+  emails:'var(--umber)', tickets:'var(--clay)', search:'var(--ink)', rickroll:'var(--ink)'
 };
 const CONTINENTS = ['Africa','Asia','Europe','North America','South America','Oceania','Middle East'];
 const SUBREGIONS = {
@@ -921,6 +930,7 @@ const FIELD_MAP = {
   paymentStatus:'payment_status', paymentProvider:'payment_provider', paymentReference:'payment_reference',
   shippingAddress:'shipping_address', externalOrderNumber:'external_order_number',
   trackingNumber:'tracking_number', carrierName:'carrier_name', trackingUrl:'tracking_url',
+  ticketNumber:'ticket_number', externalId:'external_id', assignedTo:'assigned_to',
 };
 const FIELD_MAP_REV = Object.fromEntries(Object.entries(FIELD_MAP).map(([a,b])=>[b,a]));
 function toRow(obj){ const row={}; for(const k in obj){ row[FIELD_MAP[k]||k] = obj[k]; } return row; }
@@ -962,7 +972,7 @@ async function loadAll(){
   const [c,d,o,cu,su,ta,inv,le,di,pa] = await Promise.all([
     loadTable('contacts'), loadTable('deals'), loadTable('orders'),
     loadTable('customers'), loadTable('suppliers'), loadTable('tasks'), loadTable('invoices'),
-    loadTable('leads'), loadTable('distributors'), loadTable('payments'), loadFxRates(), loadEmailLog()
+    loadTable('leads'), loadTable('distributors'), loadTable('payments'), loadFxRates(), loadEmailLog(), loadTickets()
   ]);
   state.contacts = c; state.deals = d; state.orders = o;
   state.customers = cu; state.suppliers = su; state.tasks = ta; state.invoices = inv;
@@ -1176,6 +1186,7 @@ function render(){
     finance:['Finance','Revenue vs. payments, by source and over time'],
     team:['Team','Manage who has access to the ledger'],
     emails:['Emails','Automated messages the CRM sends on your behalf'],
+    tickets:['Tickets','Customer enquiries from the website and elsewhere'],
     setup:['Setup','Roles, validation rules, automation and sharing'],
     search:['Search','Find anything across all tabs'],
     rickroll:['Import / Export','Move data in and out of the ledger']};
@@ -1184,7 +1195,7 @@ function render(){
   document.getElementById('mainArea').style.setProperty('--accent', ACCENTS[state.view] || 'var(--amber)');
   const addLabels = {contacts:'contact', leads:'lead', customers:'customer', distributors:'distributor', suppliers:'supplier', deals:'deal', tasks:'task', invoices:'invoice', payments:'payment', team:'team member'};
   const addBtn = document.getElementById('addBtn');
-  const noAdd = ['dashboard','home','search','rickroll','finance','emails'];
+  const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets'];
   addBtn.style.display = noAdd.includes(state.view) ? 'none' : 'inline-block';
   addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
   const guideBtn = document.getElementById('topbarGuideBtn');
@@ -1212,6 +1223,7 @@ function render(){
   if(state.view==='payments') c.innerHTML = renderPayments();
   if(state.view==='finance') c.innerHTML = renderFinance();
   if(state.view==='emails') c.innerHTML = renderEmails();
+  if(state.view==='tickets') c.innerHTML = renderTickets();
   if(state.view==='team') c.innerHTML = renderTeam();
   if(state.view==='setup') c.innerHTML = renderSetup();
   if(state.view==='search') c.innerHTML = renderSearchShell();
@@ -2467,6 +2479,68 @@ function renderFinance(){
     + `<div class="fin-cols">${renderBrandRevenue(f)}${renderChannelSplit(f)}</div>`
     + renderRevenueByMonth(f)
     + `<div class="fin-cols">${renderDealPie(f)}${renderReceivables(f)}</div>`;
+}
+
+/* ---------- Tickets (Hook 4) ---------- */
+/* Enquiries arrive from the storefront contact form via the
+   storefront-contact Edge Function, which also queues the customer's
+   auto-reply and the team's heads-up. This view is where they get worked. */
+
+const TICKET_STATUS = ['new','open','resolved','closed'];
+
+async function loadTickets(){
+  try{
+    const { data, error } = await sb.from('tickets').select('*').order('created_at', { ascending:false }).limit(300);
+    // Empty on failure so the rest of the ledger still loads, but say so --
+    // a silently empty list looks identical to "no enquiries yet".
+    if(error) console.error('load failed', 'tickets', error);
+    state.tickets = error ? [] : (data||[]).map(fromRow);
+  }catch(e){ console.error('load threw', 'tickets', e); state.tickets = []; }
+}
+
+async function setTicketStatus(id, status){
+  const t = state.tickets.find(x=>x.id===id);
+  if(!t || t.status===status) return;
+  t.status = status;
+  render();
+  const { error } = await sb.from('tickets').update({ status }).eq('id', id);
+  if(error){ console.error('ticket status update failed', error); toast('Could not save the status change.'); return; }
+  toast(`${t.ticketNumber || 'Ticket'} marked ${status}.`);
+}
+
+function renderTickets(){
+  const list = state.tickets || [];
+  if(!list.length){
+    return `<div class="empty"><div class="display">No enquiries yet</div>
+      Messages sent through the website contact form appear here, and the customer is
+      acknowledged automatically. Nothing needs to be logged by hand.</div>`;
+  }
+  const open = list.filter(t=>t.status==='new' || t.status==='open').length;
+  const head = `<div class="fin-head"><div class="fin-asof">
+    ${open} open of ${list.length} · the customer is auto-acknowledged on arrival, and the team is emailed
+  </div></div>`;
+  const badgeFor = (s)=>({new:'pending', open:'unpaid', resolved:'paid', closed:'muted'})[s] || 'muted';
+  const rows = list.map((t,i)=>`
+    <tr>
+      <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
+      <td>
+        <div>${esc(t.name||'—')}</div>
+        <div class="tkt-meta">${esc(t.email||'')}${t.phone?' · '+esc(t.phone):''}</div>
+        <div class="tkt-num">${esc(t.ticketNumber||'—')}</div>
+      </td>
+      <td><div class="tkt-msg">${esc(t.message||'')}</div></td>
+      <td style="font-size:12px;">${esc(t.source||'—')}</td>
+      <td>
+        <select class="tkt-status" data-tkt-status="${t.id}">
+          ${TICKET_STATUS.map(s=>`<option value="${s}" ${t.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+        <div style="margin-top:5px;"><span class="badge ${badgeFor(t.status)}">${esc(t.status||'new')}</span></div>
+      </td>
+      <td style="font-size:12px;color:var(--ink-soft);">${t.createdAt ? new Date(Number(t.createdAt)).toLocaleString() : '—'}</td>
+    </tr>`).join('');
+  return head + `<table><thead><tr>
+      <th>No.</th><th>From</th><th>Message</th><th>Source</th><th>Status</th><th>Received</th>
+    </tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 /* ---------- Emails: the automated email service ---------- */
@@ -3805,6 +3879,9 @@ function attachContentHandlers(){
   });
   document.querySelectorAll('[data-eml-preview]').forEach(el=>{
     el.onclick = ()=>{ openEmailPreview(el.dataset.emlPreview); };
+  });
+  document.querySelectorAll('[data-tkt-status]').forEach(el=>{
+    el.onchange = ()=>{ setTicketStatus(el.dataset.tktStatus, el.value); };
   });
   // Live search
   const si = document.getElementById('searchInput');

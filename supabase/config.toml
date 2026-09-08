@@ -8,3 +8,9 @@ verify_jwt = false
 # verification on means nobody else can poke it from the open internet.
 [functions.email-worker]
 verify_jwt = true
+
+# Public webhook target for the storefront contact form, same as
+# storefront-order: it authenticates with the shared secret in its own
+# header, not a JWT.
+[functions.storefront-contact]
+verify_jwt = false
