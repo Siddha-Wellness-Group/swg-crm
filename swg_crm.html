@@ -481,7 +481,17 @@
     #mainArea>div{overflow:visible !important;padding:0 !important;}
     .panel,.stat-card{break-inside:avoid;}
     body{background:#fff;}
+    body.printing-export #app{display:none !important;}
   }
+  #printExportArea{display:none;}
+  body.printing-export #printExportArea{display:block;padding:30px;}
+  #printExportArea h1{font-family:'Fraunces',serif;margin:0 0 4px;}
+  #printExportArea .pe-date{color:#666;font-size:12px;margin:0 0 20px;}
+  #printExportArea h2{font-family:'Fraunces',serif;font-size:16px;margin:22px 0 8px;}
+  #printExportArea .pe-empty{color:#666;font-size:12px;}
+  #printExportArea table{width:100%;border-collapse:collapse;margin-bottom:10px;}
+  #printExportArea th,#printExportArea td{border:1px solid #ccc;padding:5px 8px;font-size:10.5px;text-align:left;}
+  #printExportArea th{background:#f2f2f2;}
 
   /* Toast */
   .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--ink-fixed);color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,0.3);opacity:0;transition:opacity .25s,transform .25s;z-index:300;max-width:80vw;text-align:center;}
@@ -746,6 +756,8 @@
   <div class="modal" id="modalBody"></div>
 </div>
 
+<div id="printExportArea"></div>
+
 <div class="eml-prev-overlay" id="emlPrevOverlay">
   <div class="eml-prev-shell">
     <div class="eml-prev-head">
@@ -770,7 +782,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[] };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[] };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -1076,6 +1088,9 @@ const KEYS = {
   quickActionPrefs: 'quickActionPrefs',
   bigDealAlert: 'bigDealAlert',
   bigDealAlerts: 'bigDealAlerts',
+  schemaLayout: 'schemaLayout',
+  objectVisibility: 'objectVisibility',
+  fieldVisibility: 'fieldVisibility',
 };
 
 /* Which slice of state each key holds, so a reload can restore them. */
@@ -1084,6 +1099,7 @@ const SETTING_DEFAULTS = {
   guideEntries: [], guideDismissed: {}, dependentFields: [],
   sharingRules: {}, quickActionPrefs: {}, bigDealAlerts: [],
   bigDealAlert: { enabled:false, threshold:10000, currency:'USD' },
+  schemaLayout: {}, objectVisibility: {}, fieldVisibility: {},
 };
 
 /* Saves one settings key. Errors are logged rather than thrown: a failed
@@ -1299,6 +1315,13 @@ function updateNavVisibility(){
   }
   const leadLink = document.querySelector('.navlink[data-view="leads"]');
   if(leadLink) leadLink.classList.toggle('hidden-role', !canSeeLeads());
+  if(!isAdmin()){
+    SETUP_ENTITIES.forEach(entity=>{
+      if(!isObjectHidden(entity)) return;
+      const link = document.querySelector(`.navlink[data-view="${entity}"]`);
+      if(link) link.classList.add('hidden-role');
+    });
+  }
   renderTopnavQuickActions();
 }
 
@@ -1309,6 +1332,7 @@ function render(){
   if(state.view==='team' && !isAdmin()) state.view = 'dashboard';
   if(state.view==='setup' && !canAccessSetup()) state.view = 'dashboard';
   if(state.view==='leads' && !canSeeLeads()) state.view = 'dashboard';
+  if(SETUP_ENTITIES.includes(state.view) && isObjectHidden(state.view) && !isAdmin()) state.view = 'dashboard';
   const isSetupPage = state.view==='setup';
   document.querySelector('.sidebar').style.display = isSetupPage ? 'none' : 'flex';
   document.querySelector('.topnav').style.display = isSetupPage ? 'none' : 'grid';
@@ -1340,7 +1364,7 @@ function render(){
   document.getElementById('mainArea').style.setProperty('--accent', ACCENTS[state.view] || 'var(--amber)');
   const addLabels = {contacts:'contact', leads:'lead', customers:'customer', distributors:'distributor', suppliers:'supplier', deals:'deal', tasks:'task', invoices:'invoice', payments:'payment', team:'team member'};
   const addBtn = document.getElementById('addBtn');
-  const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets'];
+  const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets','setup'];
   addBtn.style.display = noAdd.includes(state.view) ? 'none' : 'inline-block';
   addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
   const guideBtn = document.getElementById('topbarGuideBtn');
@@ -1373,6 +1397,7 @@ function render(){
   if(state.view==='setup') c.innerHTML = renderSetup();
   if(state.view==='search') c.innerHTML = renderSearchShell();
   if(state.view==='rickroll') c.innerHTML = renderImportExport();
+  if(SETUP_ENTITIES.includes(state.view)) applyFieldVisibilityToTable(state.view);
   attachContentHandlers();
 }
 
@@ -1555,10 +1580,15 @@ function renderImportMapping(){
 function renderImportExport(){
   return `<div class="io-grid">
     <div class="io-card">
-      <h3 class="display">Export to Excel</h3>
-      <p>Choose what to include, then download one .xlsx workbook — one sheet per selection. Open it directly, or import it into Google Sheets via File → Import.</p>
+      <h3 class="display">Export</h3>
+      <p>Choose what to include and a format, then download.</p>
       ${renderExportChecklist()}
-      <button class="btn" id="ioExportBtn">Download .xlsx</button>
+      <div class="field"><label>Format</label><select id="ioExportFormat">
+        <option value="xlsx">Excel (.xlsx) — one sheet per selection</option>
+        <option value="csv">Google Sheets (.csv) — one file per selection</option>
+        <option value="pdf">PDF</option>
+      </select></div>
+      <button class="btn" id="ioExportBtn">Export</button>
       <div class="io-status" id="ioExportStatus"></div>
     </div>
     <div class="io-card">
@@ -1591,24 +1621,74 @@ function renderImportExport(){
   ${renderImportMapping()}`;
 }
 
+function exportRowsForSheet(sheet){
+  return (state[sheet.key]||[]).map(item=>{
+    const row = {};
+    sheet.fields.forEach(f=>{
+      let v = item[f];
+      if(Array.isArray(v)) v = v.join(', ');
+      if(f==='createdAt' && v) v = new Date(v).toISOString();
+      row[f] = v==null ? '' : v;
+    });
+    return row;
+  });
+}
+
 function exportWorkbook(selectedKeys){
   const keys = (selectedKeys && selectedKeys.length) ? selectedKeys : EXPORT_SHEETS.map(s=>s.key);
   const wb = XLSX.utils.book_new();
   EXPORT_SHEETS.filter(s=>keys.includes(s.key)).forEach(sheet=>{
-    const rows = (state[sheet.key]||[]).map(item=>{
-      const row = {};
-      sheet.fields.forEach(f=>{
-        let v = item[f];
-        if(Array.isArray(v)) v = v.join(', ');
-        if(f==='createdAt' && v) v = new Date(v).toISOString();
-        row[f] = v==null ? '' : v;
-      });
-      return row;
-    });
+    const rows = exportRowsForSheet(sheet);
     const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [Object.fromEntries(sheet.fields.map(f=>[f,'']))]);
     XLSX.utils.book_append_sheet(wb, ws, sheet.label);
   });
   XLSX.writeFile(wb, `swg-crm-export-${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+function exportCSV(selectedKeys){
+  const keys = (selectedKeys && selectedKeys.length) ? selectedKeys : EXPORT_SHEETS.map(s=>s.key);
+  const dateStr = new Date().toISOString().slice(0,10);
+  EXPORT_SHEETS.filter(s=>keys.includes(s.key)).forEach((sheet,i)=>{
+    const rows = exportRowsForSheet(sheet);
+    const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [Object.fromEntries(sheet.fields.map(f=>[f,'']))]);
+    const csv = XLSX.utils.sheet_to_csv(ws);
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    setTimeout(()=>{
+      const a = document.createElement('a');
+      a.href = url; a.download = `swg-crm-export-${sheet.key}-${dateStr}.csv`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    }, i*200);
+  });
+}
+
+/* PDF export reuses the print-to-PDF pattern already used by Finance: build
+   a print-only table and let the browser's "Save as PDF" print destination
+   do the actual writing, rather than pulling in a PDF-generation library. */
+function exportPDF(selectedKeys){
+  const keys = (selectedKeys && selectedKeys.length) ? selectedKeys : EXPORT_SHEETS.map(s=>s.key);
+  const area = document.getElementById('printExportArea');
+  if(!area) return;
+  area.innerHTML = `<h1>SWG CRM Export</h1><p class="pe-date">${new Date().toLocaleDateString()}</p>` +
+    EXPORT_SHEETS.filter(s=>keys.includes(s.key)).map(sheet=>{
+      const rows = state[sheet.key]||[];
+      if(!rows.length) return `<h2>${esc(sheet.label)}</h2><p class="pe-empty">No records.</p>`;
+      return `<h2>${esc(sheet.label)}</h2><table><thead><tr>${sheet.fields.map(f=>`<th>${esc(prettyField(f))}</th>`).join('')}</tr></thead>
+        <tbody>${rows.map(r=>`<tr>${sheet.fields.map(f=>{
+          let v = r[f];
+          if(Array.isArray(v)) v = v.join(', ');
+          if(f==='createdAt' && v) v = new Date(v).toLocaleDateString();
+          return `<td>${esc(v??'')}</td>`;
+        }).join('')}</tr>`).join('')}</tbody></table>`;
+    }).join('');
+  document.body.classList.add('printing-export');
+  window.addEventListener('afterprint', function cleanup(){
+    document.body.classList.remove('printing-export');
+    area.innerHTML = '';
+    window.removeEventListener('afterprint', cleanup);
+  }, {once:true});
+  window.print();
 }
 
 async function runImport(){
@@ -1638,47 +1718,24 @@ async function runImport(){
   return {added, updated};
 }
 
-async function importWorkbookFile(file){
+/* Populates importTables from any parsed source and re-renders so the
+   mapping wizard (renderImportMapping) shows up for review before anything
+   is actually written — parsing alone must never import data on its own. */
+async function loadTablesForMapping(parseFn, sourceLabel){
   const statusEl = document.getElementById('ioImportStatus');
   const setImportStatus = (msg, isError)=>{ if(statusEl){ statusEl.textContent = msg; statusEl.classList.toggle('error', !!isError); } };
-  setImportStatus('Reading file…', false);
+  setImportStatus(`Reading ${sourceLabel}…`, false);
   try{
-    const rawTables = await parseExcelFile(file);
-    if(!rawTables.length) throw new Error('No readable sheets found in that file.');
-    const tables = buildImportTables(rawTables);
-    const matchedSheets = tables.filter(t=>t.entityKey);
-    if(!matchedSheets.length){
-      setImportStatus('No matching sheets found — export from this ledger first to see the expected format.', true);
-      return;
-    }
-    let totalAdded = 0, totalUpdated = 0;
-    const touched = new Set();
-    matchedSheets.forEach(t=>{
-      const sheetDef = EXPORT_SHEETS.find(s=>s.key===t.entityKey);
-      const list = state[t.entityKey];
-      const idHeader = t.headers.find(h=>normKey(h)==='id');
-      const createdHeader = t.headers.find(h=>['createdat','created','date'].includes(normKey(h)));
-      t.rows.forEach(row=>{
-        const obj = {};
-        sheetDef.fields.filter(f=>f!=='id'&&f!=='createdAt').forEach(f=>{
-          const h = t.fieldMap[f];
-          obj[f] = coerceFieldValue(f, h ? row[h] : '');
-        });
-        obj.id = idHeader && row[idHeader] ? String(row[idHeader]) : uid();
-        obj.createdAt = createdHeader && row[createdHeader] ? (new Date(row[createdHeader]).getTime()||Date.now()) : Date.now();
-        const idx = list.findIndex(x=>x.id===obj.id);
-        if(idx>=0){ list[idx] = {...list[idx], ...obj}; totalUpdated++; }
-        else { list.push(obj); totalAdded++; }
-        touched.add(t.entityKey);
-      });
-    });
-    await Promise.all(Array.from(touched).map(k=>dbUpsertMany(k, state[k])));
-    setImportStatus(`Imported: ${totalAdded} added, ${totalUpdated} updated.`, false);
-    toast(`Import complete — ${totalAdded} added, ${totalUpdated} updated.`);
+    const rawTables = await parseFn();
+    if(!rawTables.length) throw new Error('No readable sheets found.');
+    importTables = buildImportTables(rawTables);
+    setImportStatus(importTables.some(t=>t.entityKey)
+      ? 'Review the mapping below, then click "Import mapped data".'
+      : 'Nothing auto-matched — pick the object for each sheet below.', false);
     render();
   }catch(e){
     console.error(e);
-    setImportStatus('Could not read that file. Make sure it is a .xlsx or .csv file.', true);
+    setImportStatus(e.message || `Could not read that ${sourceLabel}.`, true);
   }
 }
 
@@ -1882,10 +1939,6 @@ function renderOverviewDashboard(priv){
   if(priv) secondary += `<div class="stat-card rust"><div class="num mono">${unpaidValue.toLocaleString()}</div><div class="lbl">Unpaid invoices</div>${deltaHTML(invoiceDelta.text,invoiceDelta.up)}</div>`;
 
   return `
-    <div class="hello">
-      <p class="hi display">Hello, ${esc(state.viewingAs)}</p>
-      <div class="sub2">Here's where the SWG ledger stands today.</div>
-    </div>
     ${renderChart(priv)}
     <div class="stat-grid" style="grid-template-columns:repeat(${priv?4:3},1fr);">${secondary}</div>
     <div class="section-title">Recent activity</div>
@@ -1948,7 +2001,6 @@ document.querySelectorAll('#themeToggle button').forEach(b=>{
     applyThemePref(pref);
   };
 });
-loadThemePref();
 
 function revenueByMonth(){
   const months = [];
@@ -2079,16 +2131,16 @@ function renderContacts(){
   if(!filtered.length){
     rows = `<div class="empty"><div class="display">No contacts yet</div>Add a supplier, distributor, customer or marketing contact.</div>`;
   } else {
-    rows = `<table><thead><tr><th>No.</th><th>Name</th><th>Company Name</th><th>Type</th><th>Kind</th><th>Email / Phone</th><th>Owner</th><th></th></tr></thead><tbody>
+    rows = `<table><thead><tr><th>No.</th><th data-field-col="name">Name</th><th data-field-col="company">Company Name</th><th data-field-col="type">Type</th><th data-field-col="kind">Kind</th><th>Email / Phone</th><th data-field-col="owner">Owner</th><th></th></tr></thead><tbody>
     ${filtered.map((c,i)=>`
       <tr>
         <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
-        <td>${esc(c.name)}</td>
-        <td>${esc(c.company||'—')}</td>
-        <td><span class="badge ${c.type.toLowerCase()}">${c.type}</span></td>
-        <td><span class="badge ${(c.kind||'Individual').toLowerCase()}">${c.kind||'Individual'}</span></td>
+        <td data-field-col="name">${esc(c.name)}</td>
+        <td data-field-col="company">${esc(c.company||'—')}</td>
+        <td data-field-col="type"><span class="badge ${c.type.toLowerCase()}">${c.type}</span></td>
+        <td data-field-col="kind"><span class="badge ${(c.kind||'Individual').toLowerCase()}">${c.kind||'Individual'}</span></td>
         <td style="font-size:12px;">${esc(c.email||'')}${c.email&&c.phone?' · ':''}${esc(c.phone||'')}</td>
-        <td style="font-size:12px;color:var(--ink-soft);">${esc(c.owner||'—')}</td>
+        <td data-field-col="owner" style="font-size:12px;color:var(--ink-soft);">${esc(c.owner||'—')}</td>
         <td class="row-actions"><span data-order="contacts:${c.id}">order</span><span data-edit="contacts:${c.id}">edit</span><span data-del="contacts:${c.id}">delete</span></td>
       </tr>`).join('')}
     </tbody></table>`;
@@ -2143,17 +2195,17 @@ function renderOrders(){
 function renderLeads(){
   const visible = visibleRecords('leads', state.leads);
   if(!visible.length) return `<div class="empty"><div class="display">No leads yet</div>Add a prospect to warm up before they become a customer.</div>`;
-  return `<table><thead><tr><th>No.</th><th>Name</th><th>Kind</th><th>Company Name</th><th>Source</th><th>Email / Phone</th><th>Status</th><th>Owner</th><th></th></tr></thead><tbody>
+  return `<table><thead><tr><th>No.</th><th data-field-col="name">Name</th><th data-field-col="kind">Kind</th><th data-field-col="company">Company Name</th><th data-field-col="source">Source</th><th>Email / Phone</th><th data-field-col="status">Status</th><th data-field-col="owner">Owner</th><th></th></tr></thead><tbody>
   ${visible.map((l,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
-      <td>${esc(l.name)}</td>
-      <td><span class="badge ${(l.kind||'Individual').toLowerCase()}">${l.kind||'Individual'}</span></td>
-      <td>${esc(l.company||'—')}</td>
-      <td style="font-size:12px;color:var(--ink-soft);">${esc(l.source||((l.sources&&l.sources.join(', '))||'—'))}</td>
+      <td data-field-col="name">${esc(l.name)}</td>
+      <td data-field-col="kind"><span class="badge ${(l.kind||'Individual').toLowerCase()}">${l.kind||'Individual'}</span></td>
+      <td data-field-col="company">${esc(l.company||'—')}</td>
+      <td data-field-col="source" style="font-size:12px;color:var(--ink-soft);">${esc(l.source||((l.sources&&l.sources.join(', '))||'—'))}</td>
       <td style="font-size:12px;">${esc(l.email||'')}${l.email&&l.phone?' · ':''}${esc(l.phone||'')}</td>
-      <td><span class="badge ${(l.status||'New').toLowerCase()}">${l.status||'New'}</span></td>
-      <td style="font-size:12px;color:var(--ink-soft);">${esc(l.owner||'—')}</td>
+      <td data-field-col="status"><span class="badge ${(l.status||'New').toLowerCase()}">${l.status||'New'}</span></td>
+      <td data-field-col="owner" style="font-size:12px;color:var(--ink-soft);">${esc(l.owner||'—')}</td>
       <td class="row-actions"><span data-edit="leads:${l.id}">edit</span><span data-del="leads:${l.id}">delete</span></td>
     </tr>`).join('')}
   </tbody></table>`;
@@ -2171,17 +2223,17 @@ function customerTotalSpent(customer){
 }
 function renderCustomers(){
   if(!state.customers.length) return `<div class="empty"><div class="display">No customers yet</div>Add the people and businesses who buy from you.</div>`;
-  return `<table><thead><tr><th>No.</th><th>Name</th><th>Kind</th><th>Company Name</th><th>Email / Phone</th><th>Total Spent (USD)</th><th>Owner</th><th>Notes</th><th></th></tr></thead><tbody>
+  return `<table><thead><tr><th>No.</th><th data-field-col="name">Name</th><th data-field-col="kind">Kind</th><th data-field-col="company">Company Name</th><th>Email / Phone</th><th>Total Spent (USD)</th><th data-field-col="owner">Owner</th><th data-field-col="notes">Notes</th><th></th></tr></thead><tbody>
   ${state.customers.map((c,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
-      <td>${esc(c.name)}</td>
-      <td><span class="badge ${(c.kind||'Individual').toLowerCase()}">${c.kind||'Individual'}</span></td>
-      <td>${esc(c.company||'—')}</td>
+      <td data-field-col="name">${esc(c.name)}</td>
+      <td data-field-col="kind"><span class="badge ${(c.kind||'Individual').toLowerCase()}">${c.kind||'Individual'}</span></td>
+      <td data-field-col="company">${esc(c.company||'—')}</td>
       <td style="font-size:12px;">${esc(c.email||'')}${c.email&&c.phone?' · ':''}${esc(c.phone||'')}</td>
       <td class="mono" style="font-size:12px;">$${customerTotalSpent(c).toLocaleString(undefined,{maximumFractionDigits:0})}</td>
-      <td style="font-size:12px;color:var(--ink-soft);">${esc(c.owner||'—')}</td>
-      <td style="font-size:12px;color:var(--ink-soft);max-width:180px;">${esc(c.notes||'')}</td>
+      <td data-field-col="owner" style="font-size:12px;color:var(--ink-soft);">${esc(c.owner||'—')}</td>
+      <td data-field-col="notes" style="font-size:12px;color:var(--ink-soft);max-width:180px;">${esc(c.notes||'')}</td>
       <td class="row-actions"><span data-order="customers:${c.id}">order</span><span data-edit="customers:${c.id}">edit</span><span data-del="customers:${c.id}">delete</span></td>
     </tr>`).join('')}
   </tbody></table>`;
@@ -2190,14 +2242,14 @@ function renderCustomers(){
 function renderSuppliers(){
   const visible = visibleRecords('suppliers', state.suppliers);
   if(!visible.length) return `<div class="empty"><div class="display">No suppliers yet</div>Add who you source oils and materials from.</div>`;
-  return `<table><thead><tr><th>No.</th><th>Name</th><th>Company Name</th><th>Email / Phone</th><th>Owner</th><th></th></tr></thead><tbody>
+  return `<table><thead><tr><th>No.</th><th data-field-col="name">Name</th><th data-field-col="company">Company Name</th><th>Email / Phone</th><th data-field-col="owner">Owner</th><th></th></tr></thead><tbody>
   ${visible.map((s,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
-      <td>${esc(s.name)}</td>
-      <td>${esc(s.company||'—')}</td>
+      <td data-field-col="name">${esc(s.name)}</td>
+      <td data-field-col="company">${esc(s.company||'—')}</td>
       <td style="font-size:12px;">${esc(s.email||'')}${s.email&&s.phone?' · ':''}${esc(s.phone||'')}</td>
-      <td style="font-size:12px;color:var(--ink-soft);">${esc(s.owner||'—')}</td>
+      <td data-field-col="owner" style="font-size:12px;color:var(--ink-soft);">${esc(s.owner||'—')}</td>
       <td class="row-actions"><span data-order="suppliers:${s.id}">order</span><span data-edit="suppliers:${s.id}">edit</span><span data-del="suppliers:${s.id}">delete</span></td>
     </tr>`).join('')}
   </tbody></table>`;
@@ -2206,16 +2258,16 @@ function renderSuppliers(){
 function renderDistributors(){
   const visible = visibleRecords('distributors', state.distributors);
   if(!visible.length) return `<div class="empty"><div class="display">No distributors yet</div>Add the partners who distribute SWG products.</div>`;
-  return `<table><thead><tr><th>No.</th><th>Name</th><th>Company Name</th><th>Continents</th><th>Sub-regions</th><th>Email / Phone</th><th>Owner</th><th></th></tr></thead><tbody>
+  return `<table><thead><tr><th>No.</th><th data-field-col="name">Name</th><th data-field-col="company">Company Name</th><th data-field-col="continents">Continents</th><th data-field-col="subregions">Sub-regions</th><th>Email / Phone</th><th data-field-col="owner">Owner</th><th></th></tr></thead><tbody>
   ${visible.map((d,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
-      <td>${esc(d.name)}</td>
-      <td>${esc(d.company||'—')}</td>
-      <td style="font-size:12px;">${(d.continents&&d.continents.length)?d.continents.map(c=>`<span class="currency-chip">${esc(c)}</span>`).join(''):esc(d.region||'—')}</td>
-      <td style="font-size:12px;">${(d.subregions&&d.subregions.length)?d.subregions.map(s=>`<span class="currency-chip">${esc(s)}</span>`).join(''):'—'}</td>
+      <td data-field-col="name">${esc(d.name)}</td>
+      <td data-field-col="company">${esc(d.company||'—')}</td>
+      <td data-field-col="continents" style="font-size:12px;">${(d.continents&&d.continents.length)?d.continents.map(c=>`<span class="currency-chip">${esc(c)}</span>`).join(''):esc(d.region||'—')}</td>
+      <td data-field-col="subregions" style="font-size:12px;">${(d.subregions&&d.subregions.length)?d.subregions.map(s=>`<span class="currency-chip">${esc(s)}</span>`).join(''):'—'}</td>
       <td style="font-size:12px;">${esc(d.email||'')}${d.email&&d.phone?' · ':''}${esc(d.phone||'')}</td>
-      <td style="font-size:12px;color:var(--ink-soft);">${esc(d.owner||'—')}</td>
+      <td data-field-col="owner" style="font-size:12px;color:var(--ink-soft);">${esc(d.owner||'—')}</td>
       <td class="row-actions"><span data-order="distributors:${d.id}">order</span><span data-edit="distributors:${d.id}">edit</span><span data-del="distributors:${d.id}">delete</span></td>
     </tr>`).join('')}
   </tbody></table>`;
@@ -2226,15 +2278,15 @@ function renderTasks(){
   const visible = visibleRecords('tasks', state.tasks);
   if(!visible.length) return `<div class="empty"><div class="display">No tasks yet</div>Add a follow-up or a general to-do.</div>`;
   const sorted = [...visible].sort((a,b)=>(a.status==='Done')-(b.status==='Done') || new Date(a.dueDate||0)-new Date(b.dueDate||0));
-  return `<table><thead><tr><th>No.</th><th>Task</th><th>Related to</th><th>Due</th><th>Assignee</th><th>Status</th><th></th></tr></thead><tbody>
+  return `<table><thead><tr><th>No.</th><th data-field-col="title">Task</th><th>Related to</th><th data-field-col="dueDate">Due</th><th data-field-col="owner">Assignee</th><th data-field-col="status">Status</th><th></th></tr></thead><tbody>
   ${sorted.map((t,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
-      <td>${esc(t.title)}${t.notes?`<div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px;">${esc(t.notes)}</div>`:''}</td>
+      <td data-field-col="title">${esc(t.title)}${t.notes?`<div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px;">${esc(t.notes)}</div>`:''}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${esc(linkLabel(t))}</td>
-      <td style="font-size:12px;">${t.dueDate ? new Date(t.dueDate).toLocaleDateString() : '—'}</td>
-      <td style="font-size:12px;color:var(--ink-soft);">${esc(t.owner||'—')}</td>
-      <td><span class="badge ${t.status.toLowerCase()}">${t.status}</span></td>
+      <td data-field-col="dueDate" style="font-size:12px;">${t.dueDate ? new Date(t.dueDate).toLocaleDateString() : '—'}</td>
+      <td data-field-col="owner" style="font-size:12px;color:var(--ink-soft);">${esc(t.owner||'—')}</td>
+      <td data-field-col="status"><span class="badge ${t.status.toLowerCase()}">${t.status}</span></td>
       <td class="row-actions"><span data-edit="tasks:${t.id}">edit</span><span data-del="tasks:${t.id}">delete</span></td>
     </tr>`).join('')}
   </tbody></table>`;
@@ -2242,16 +2294,16 @@ function renderTasks(){
 
 function renderInvoices(){
   if(!state.invoices.length) return `<div class="empty"><div class="display">No invoices yet</div>Generate one from an order or create a standalone invoice.</div>`;
-  return `<table><thead><tr><th>No.</th><th>Related to</th><th>Order</th><th>Amount</th><th>Currencies</th><th>Status</th><th>Due</th><th></th></tr></thead><tbody>
+  return `<table><thead><tr><th>No.</th><th>Related to</th><th>Order</th><th data-field-col="amount">Amount</th><th data-field-col="currencies">Currencies</th><th data-field-col="status">Status</th><th data-field-col="dueDate">Due</th><th></th></tr></thead><tbody>
   ${state.invoices.map((inv,i)=>`
     <tr>
       <td class="mono ledger-no">INV-${String(i+1).padStart(3,'0')}</td>
       <td>${esc(invoiceSubjectLabel(inv))}${inv.relatedType?` <span style="color:var(--ink-soft);font-size:11px;">(${esc(REL_TYPES.find(r=>r.key===inv.relatedType)?.label||inv.relatedType)})</span>`:''}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${inv.orderId ? esc(orderLabel(inv.orderId)) : '— standalone —'}</td>
-      <td class="mono">${Number(inv.amount||0).toLocaleString()}</td>
-      <td>${(inv.currencies&&inv.currencies.length) ? inv.currencies.map(cur=>`<span class="currency-chip">${esc(cur)} (${esc(CURRENCY_SYMBOLS[cur]||'')})</span>`).join('') : '<span style="color:var(--ink-soft);font-size:12px;">—</span>'}</td>
-      <td><span class="badge ${inv.status.toLowerCase()}">${inv.status}</span></td>
-      <td style="font-size:12px;">${inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : '—'}</td>
+      <td data-field-col="amount" class="mono">${Number(inv.amount||0).toLocaleString()}</td>
+      <td data-field-col="currencies">${(inv.currencies&&inv.currencies.length) ? inv.currencies.map(cur=>`<span class="currency-chip">${esc(cur)} (${esc(CURRENCY_SYMBOLS[cur]||'')})</span>`).join('') : '<span style="color:var(--ink-soft);font-size:12px;">—</span>'}</td>
+      <td data-field-col="status"><span class="badge ${inv.status.toLowerCase()}">${inv.status}</span></td>
+      <td data-field-col="dueDate" style="font-size:12px;">${inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : '—'}</td>
       <td class="row-actions"><span data-edit="invoices:${inv.id}">edit</span><span data-del="invoices:${inv.id}">delete</span></td>
     </tr>`).join('')}
   </tbody></table>`;
@@ -2259,19 +2311,19 @@ function renderInvoices(){
 
 function renderPayments(){
   if(!state.payments.length) return `<div class="empty"><div class="display">No payments yet</div>Log a payment to a team member, supplier or distributor.</div>`;
-  return `<table><thead><tr><th>No.</th><th>Payee</th><th>Type</th><th>Purpose</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody>
+  return `<table><thead><tr><th>No.</th><th data-field-col="payee">Payee</th><th data-field-col="payeeType">Type</th><th data-field-col="purpose">Purpose</th><th data-field-col="amount">Amount</th><th data-field-col="currency">Currency</th><th data-field-col="status">Status</th><th data-field-col="dueDate">Date</th><th></th></tr></thead><tbody>
   ${state.payments.map((p,i)=>{
     const cur = p.currency || (p.currencies && p.currencies[0]) || '';
     return `
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
-      <td>${esc(p.payee)}</td>
-      <td style="font-size:12px;color:var(--ink-soft);">${esc(PAYEE_TYPES.find(t=>t.key===p.payeeType)?.label||'—')}</td>
-      <td style="font-size:12px;color:var(--ink-soft);max-width:160px;">${esc(p.purpose||'—')}</td>
-      <td class="mono">${Number(p.amount||0).toLocaleString()}</td>
-      <td>${cur ? `<span class="currency-chip">${esc(cur)} (${esc(CURRENCY_SYMBOLS[cur]||'')})</span>` : '<span style="color:var(--ink-soft);font-size:12px;">—</span>'}</td>
-      <td><span class="badge ${p.status.toLowerCase()}">${p.status}</span></td>
-      <td style="font-size:12px;">${p.dueDate ? new Date(p.dueDate).toLocaleDateString() : '—'}</td>
+      <td data-field-col="payee">${esc(p.payee)}</td>
+      <td data-field-col="payeeType" style="font-size:12px;color:var(--ink-soft);">${esc(PAYEE_TYPES.find(t=>t.key===p.payeeType)?.label||'—')}</td>
+      <td data-field-col="purpose" style="font-size:12px;color:var(--ink-soft);max-width:160px;">${esc(p.purpose||'—')}</td>
+      <td data-field-col="amount" class="mono">${Number(p.amount||0).toLocaleString()}</td>
+      <td data-field-col="currency">${cur ? `<span class="currency-chip">${esc(cur)} (${esc(CURRENCY_SYMBOLS[cur]||'')})</span>` : '<span style="color:var(--ink-soft);font-size:12px;">—</span>'}</td>
+      <td data-field-col="status"><span class="badge ${p.status.toLowerCase()}">${p.status}</span></td>
+      <td data-field-col="dueDate" style="font-size:12px;">${p.dueDate ? new Date(p.dueDate).toLocaleDateString() : '—'}</td>
       <td class="row-actions"><span data-edit="payments:${p.id}">edit</span><span data-del="payments:${p.id}">delete</span></td>
     </tr>`;
   }).join('')}
@@ -3094,6 +3146,7 @@ const SETUP_TABS = [
   {key:'guide', label:'Hands-on Guide'},
   {key:'bigdeal', label:'Big Deal Alerts'},
   {key:'schema', label:'Schema Visualizer'},
+  {key:'visibility', label:'Object &amp; Field Visibility'},
 ];
 const SETUP_ENTITIES = ['contacts','leads','customers','distributors','suppliers','deals','tasks','invoices','payments'];
 const SHARING_ENTITIES = ['contacts','leads','customers','distributors','suppliers','deals','tasks'];
@@ -3404,6 +3457,60 @@ function renderSetupRequired(){
   </div>`;
 }
 
+function isObjectHidden(entity){ return !!state.objectVisibility[entity]; }
+function isFieldHidden(entity, field){ return !!state.fieldVisibility[entity+'.'+field]; }
+const FIELD_FORM_ID_OVERRIDES = {
+  'deals.currencies': 'f_curr_deal',
+  'orders.currencies': 'f_curr_order',
+  'invoices.currencies': 'f_curr_inv',
+  'distributors.continents': 'f_conts',
+  'payments.payee': 'f_payeeSel',
+};
+function formFieldElementId(entity, field){
+  return FIELD_FORM_ID_OVERRIDES[entity+'.'+field] || ('f_'+field);
+}
+/* Hides fields marked invisible-to-non-admins in the Add/Edit form. Looks
+   fields up by their existing f_<field> id convention rather than requiring
+   every renderer's markup to carry a matching data attribute. */
+function applyFieldVisibilityToForm(entity){
+  if(isAdmin()) return;
+  entityFieldsFor(entity).forEach(field=>{
+    if(!isFieldHidden(entity, field)) return;
+    const el = document.getElementById(formFieldElementId(entity, field));
+    const wrap = el && el.closest('.field');
+    if(wrap) wrap.style.display = 'none';
+  });
+}
+/* Hides matching table columns (header + cells), marked via data-field-col
+   in the entity's list renderer. */
+function applyFieldVisibilityToTable(entity){
+  if(isAdmin()) return;
+  entityFieldsFor(entity).forEach(field=>{
+    if(!isFieldHidden(entity, field)) return;
+    document.querySelectorAll(`#content [data-field-col="${field}"]`).forEach(el=>{ el.style.display = 'none'; });
+  });
+}
+function renderSetupVisibility(){
+  const canEdit = canEditGlobalSetup();
+  return `<div class="io-card">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Control which objects and fields other users can see. Hiding an object removes it from the sidebar entirely; hiding a field removes it from that object's list view and its Add/Edit form. Admins (Ariel, David) always see everything, regardless of these settings.</p>
+    ${canEdit ? '' : `<div class="readonly-note">👁 View only — only Ariel or David can change object and field visibility.</div>`}
+    ${SETUP_ENTITIES.map(entity=>`
+      <div style="margin-bottom:18px;">
+        <label class="required-field-row" style="font-size:12.5px;font-weight:700;margin-bottom:8px;">
+          <input type="checkbox" data-hide-object="${entity}" ${isObjectHidden(entity)?'checked':''} ${canEdit?'':'disabled'}>
+          <span>Hide ${esc(EXPORT_SHEETS.find(s=>s.key===entity).label)} entirely</span>
+        </label>
+        <div class="required-field-grid">
+          ${entityFieldsFor(entity).map(f=>`<label class="required-field-row">
+            <input type="checkbox" data-hide-field="${entity}" data-hide-field-name="${f}" ${isFieldHidden(entity,f)?'checked':''} ${canEdit?'':'disabled'}>
+            <span>${esc(prettyField(f))}</span>
+          </label>`).join('')}
+        </div>
+      </div>`).join('')}
+  </div>`;
+}
+
 function renderSetupAutomation(){
   const rules = state.automations;
   const canEdit = canEditGlobalSetup();
@@ -3467,31 +3574,89 @@ function schemaNodePos(i, n, cx, cy, r){
   const angle = (i/n) * 2*Math.PI - Math.PI/2;
   return { x: cx + r*Math.cos(angle), y: cy + r*Math.sin(angle) };
 }
+function defaultSchemaPos(entity){
+  const i = SCHEMA_ENTITIES.indexOf(entity);
+  return schemaNodePos(i, SCHEMA_ENTITIES.length, 380, 290, 225);
+}
+function schemaPosFor(entity){
+  return state.schemaLayout[entity] || defaultSchemaPos(entity);
+}
 function renderSetupSchema(){
-  const n = SCHEMA_ENTITIES.length;
-  const cx=380, cy=290, r=225;
+  const canEdit = canEditGlobalSetup();
   const pos = {};
-  SCHEMA_ENTITIES.forEach((e,i)=>{ pos[e] = schemaNodePos(i,n,cx,cy,r); });
+  SCHEMA_ENTITIES.forEach(e=>{ pos[e] = schemaPosFor(e); });
   const lines = SCHEMA_RELATIONSHIPS.map(rel=>{
     const a = pos[rel.from], b = pos[rel.to];
-    return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${rel.solid?'var(--setup-blue)':'var(--ink-soft)'}" stroke-width="${rel.solid?2:1.3}" stroke-dasharray="${rel.solid?'':'4 4'}" opacity="${rel.solid?0.85:0.55}"/>`;
+    return `<line id="schemaLine-${rel.from}-${rel.to}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${rel.solid?'var(--setup-blue)':'var(--ink-soft)'}" stroke-width="${rel.solid?2:1.3}" stroke-dasharray="${rel.solid?'':'4 4'}" opacity="${rel.solid?0.85:0.55}"/>`;
   }).join('');
   const nodes = SCHEMA_ENTITIES.map(e=>{
     const p = pos[e];
     const label = EXPORT_SHEETS.find(s=>s.key===e)?.label || e;
-    return `<g><rect x="${p.x-58}" y="${p.y-18}" width="116" height="36" rx="9" fill="var(--surface)" stroke="var(--ink-fixed)" stroke-width="1.4"/>
-      <text x="${p.x}" y="${p.y+5}" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink)">${esc(label)}</text></g>`;
+    return `<g data-schema-node="${e}"${canEdit?' style="cursor:grab;"':''}><rect id="schemaRect-${e}" x="${p.x-58}" y="${p.y-18}" width="116" height="36" rx="9" fill="var(--surface)" stroke="var(--ink-fixed)" stroke-width="1.4"/>
+      <text id="schemaText-${e}" x="${p.x}" y="${p.y+5}" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink)">${esc(label)}</text></g>`;
   }).join('');
   return `<div class="io-card">
-    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">How your CRM objects connect to each other. Visible to everyone with Setup access.</p>
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">How your CRM objects connect to each other. Visible to everyone with Setup access.${canEdit ? ' Drag a box to rearrange the layout — it saves for everyone automatically.' : ''}</p>
     <div style="overflow-x:auto;">
-      <svg viewBox="0 0 760 580" style="width:100%;max-width:760px;height:auto;display:block;margin:0 auto;">${lines}${nodes}</svg>
+      <svg id="schemaSvg" viewBox="0 0 760 580" style="width:100%;max-width:760px;height:auto;display:block;margin:0 auto;${canEdit?'touch-action:none;':''}">${lines}${nodes}</svg>
     </div>
     <div class="schema-legend">
       <span><span class="schema-legend-line"></span>Direct link (always points to one record)</span>
       <span><span class="schema-legend-line dashed"></span>Flexible link (depends on the record)</span>
     </div>
+    ${canEdit ? `<button type="button" class="btn secondary" id="schemaResetBtn" style="margin-top:12px;">Reset layout</button>` : ''}
   </div>`;
+}
+function paintSchemaNode(entity){
+  const p = schemaPosFor(entity);
+  const rect = document.getElementById('schemaRect-'+entity);
+  const text = document.getElementById('schemaText-'+entity);
+  if(rect){ rect.setAttribute('x', p.x-58); rect.setAttribute('y', p.y-18); }
+  if(text){ text.setAttribute('x', p.x); text.setAttribute('y', p.y+5); }
+  SCHEMA_RELATIONSHIPS.forEach(rel=>{
+    if(rel.from!==entity && rel.to!==entity) return;
+    const line = document.getElementById('schemaLine-'+rel.from+'-'+rel.to);
+    if(!line) return;
+    const a = schemaPosFor(rel.from), b = schemaPosFor(rel.to);
+    line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
+    line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
+  });
+}
+function wireSchemaVisualizer(){
+  const svg = document.getElementById('schemaSvg');
+  if(!svg || !canEditGlobalSetup()) return;
+  let dragging = null;
+  const toSvgPoint = (clientX, clientY)=>{
+    const rect = svg.getBoundingClientRect();
+    const vb = svg.viewBox.baseVal;
+    return { x: Math.round(vb.x + (clientX-rect.left)*(vb.width/rect.width)), y: Math.round(vb.y + (clientY-rect.top)*(vb.height/rect.height)) };
+  };
+  svg.querySelectorAll('[data-schema-node]').forEach(g=>{
+    g.addEventListener('pointerdown', (e)=>{
+      e.preventDefault();
+      dragging = g.dataset.schemaNode;
+      g.setPointerCapture(e.pointerId);
+      g.style.cursor = 'grabbing';
+    });
+  });
+  svg.addEventListener('pointermove', (e)=>{
+    if(!dragging) return;
+    state.schemaLayout[dragging] = toSvgPoint(e.clientX, e.clientY);
+    paintSchemaNode(dragging);
+  });
+  svg.addEventListener('pointerup', async ()=>{
+    if(!dragging) return;
+    const g = svg.querySelector(`[data-schema-node="${dragging}"]`);
+    if(g) g.style.cursor = 'grab';
+    dragging = null;
+    await saveKey(KEYS.schemaLayout, state.schemaLayout);
+  });
+  const resetBtn = document.getElementById('schemaResetBtn');
+  if(resetBtn) resetBtn.onclick = async ()=>{
+    state.schemaLayout = {};
+    await saveKey(KEYS.schemaLayout, state.schemaLayout);
+    rerenderSetupView();
+  };
 }
 
 function renderSetupSharing(){
@@ -3567,6 +3732,7 @@ function renderSetupTabBody(){
   if(state.setupTab==='guide') return renderSetupGuide();
   if(state.setupTab==='bigdeal') return renderSetupBigDeal();
   if(state.setupTab==='schema') return renderSetupSchema();
+  if(state.setupTab==='visibility') return renderSetupVisibility();
   return '';
 }
 function renderSetup(){
@@ -3910,6 +4076,24 @@ function wireSetupView(){
   document.querySelectorAll('[data-setup-tab]').forEach(btn=>{
     btn.onclick = ()=>{ state.setupTab = btn.dataset.setupTab; rerenderSetupView(); };
   });
+  if(state.setupTab==='schema') wireSchemaVisualizer();
+  document.querySelectorAll('[data-hide-object]').forEach(cb=>{
+    cb.onchange = async ()=>{
+      if(!canEditGlobalSetup()){ cb.checked = !cb.checked; return; }
+      const entity = cb.dataset.hideObject;
+      if(cb.checked) state.objectVisibility[entity] = true; else delete state.objectVisibility[entity];
+      await saveKey(KEYS.objectVisibility, state.objectVisibility);
+      toast(`${EXPORT_SHEETS.find(s=>s.key===entity).label} ${cb.checked?'hidden from':'visible to'} other users.`);
+    };
+  });
+  document.querySelectorAll('[data-hide-field]').forEach(cb=>{
+    cb.onchange = async ()=>{
+      if(!canEditGlobalSetup()){ cb.checked = !cb.checked; return; }
+      const key = cb.dataset.hideField+'.'+cb.dataset.hideFieldName;
+      if(cb.checked) state.fieldVisibility[key] = true; else delete state.fieldVisibility[key];
+      await saveKey(KEYS.fieldVisibility, state.fieldVisibility);
+    };
+  });
   document.querySelectorAll('[data-role-for]').forEach(sel=>{
     sel.onchange = async ()=>{
       if(!canEditRoles()) return;
@@ -4116,12 +4300,30 @@ function attachContentHandlers(){
   const finDemoBtn = document.getElementById('finDemoBtn');
   // Deliberately not persisted: every page load starts on real figures.
   if(finDemoBtn) finDemoBtn.onclick = ()=>{ state.financeDemo = !state.financeDemo; render(); };
+  document.querySelectorAll('[data-export-all]').forEach(el=>{
+    el.onclick = ()=>document.querySelectorAll('[data-export-key]').forEach(cb=>cb.checked=true);
+  });
+  document.querySelectorAll('[data-export-none]').forEach(el=>{
+    el.onclick = ()=>document.querySelectorAll('[data-export-key]').forEach(cb=>cb.checked=false);
+  });
   const ioExportBtn = document.getElementById('ioExportBtn');
   if(ioExportBtn) ioExportBtn.onclick = ()=>{
-    exportWorkbook();
+    const keys = Array.from(document.querySelectorAll('[data-export-key]:checked')).map(cb=>cb.dataset.exportKey);
     const s = document.getElementById('ioExportStatus');
+    if(!keys.length){ if(s){ s.textContent = 'Pick at least one to export.'; s.classList.add('error'); } return; }
+    if(s) s.classList.remove('error');
+    const format = document.getElementById('ioExportFormat').value;
+    if(format==='csv') exportCSV(keys);
+    else if(format==='pdf') exportPDF(keys);
+    else exportWorkbook(keys);
     if(s) s.textContent = 'Downloaded.';
   };
+  document.querySelectorAll('[data-io-source]').forEach(btn=>{
+    btn.onclick = ()=>{
+      document.querySelectorAll('[data-io-source]').forEach(b=>b.classList.toggle('active', b===btn));
+      document.querySelectorAll('.io-source-pane').forEach(p=>p.classList.toggle('active', p.id==='ioPane-'+btn.dataset.ioSource));
+    };
+  });
   const ioImportBtn = document.getElementById('ioImportBtn');
   const ioImportFile = document.getElementById('ioImportFile');
   if(ioImportBtn && ioImportFile){
@@ -4131,9 +4333,64 @@ function attachContentHandlers(){
       const nameEl = document.getElementById('ioFileName');
       if(!file) return;
       if(nameEl) nameEl.textContent = file.name;
-      importWorkbookFile(file);
+      loadTablesForMapping(()=>parseExcelFile(file), 'file');
     };
   }
+  const ioGsheetBtn = document.getElementById('ioGsheetBtn');
+  if(ioGsheetBtn) ioGsheetBtn.onclick = ()=>{
+    const url = document.getElementById('ioGsheetUrl').value.trim();
+    if(!url) return;
+    loadTablesForMapping(()=>parseGoogleSheetUrl(url), 'sheet');
+  };
+  const ioImportPdfBtn = document.getElementById('ioImportPdfBtn');
+  const ioImportPdf = document.getElementById('ioImportPdf');
+  if(ioImportPdfBtn && ioImportPdf){
+    ioImportPdfBtn.onclick = ()=>ioImportPdf.click();
+    ioImportPdf.onchange = ()=>{
+      const file = ioImportPdf.files[0];
+      const nameEl = document.getElementById('ioPdfName');
+      if(!file) return;
+      if(nameEl) nameEl.textContent = file.name;
+      loadTablesForMapping(()=>parsePdfFile(file), 'PDF');
+    };
+  }
+  document.querySelectorAll('[data-map-entity]').forEach(sel=>{
+    sel.onchange = ()=>{
+      const t = importTables[Number(sel.dataset.mapEntity)];
+      if(!t) return;
+      t.entityKey = sel.value;
+      t.fieldMap = {};
+      if(t.entityKey){
+        const sheetDef = EXPORT_SHEETS.find(s=>s.key===t.entityKey);
+        sheetDef.fields.filter(f=>f!=='id'&&f!=='createdAt').forEach(f=>{ t.fieldMap[f] = autoMatchHeader(f, t.headers); });
+      }
+      render();
+    };
+  });
+  document.querySelectorAll('[data-map-ti]').forEach(sel=>{
+    sel.onchange = ()=>{
+      const t = importTables[Number(sel.dataset.mapTi)];
+      if(!t) return;
+      const header = sel.dataset.mapHeader;
+      Object.keys(t.fieldMap).forEach(f=>{ if(t.fieldMap[f]===header) t.fieldMap[f]=''; });
+      if(sel.value) t.fieldMap[sel.value] = header;
+      render();
+    };
+  });
+  const ioRunImportBtn = document.getElementById('ioRunImportBtn');
+  if(ioRunImportBtn) ioRunImportBtn.onclick = async ()=>{
+    const s = document.getElementById('ioImportStatus');
+    if(s) s.textContent = 'Importing…';
+    const {added, updated} = await runImport();
+    importTables = [];
+    render();
+    toast(`Import complete — ${added} added, ${updated} updated.`);
+  };
+  const ioCancelImportBtn = document.getElementById('ioCancelImportBtn');
+  if(ioCancelImportBtn) ioCancelImportBtn.onclick = ()=>{
+    importTables = [];
+    render();
+  };
   if(state.view==='setup') wireSetupView();
 }
 
@@ -4291,6 +4548,7 @@ function openModal(table, id){
   document.getElementById('overlay').classList.add('show');
   document.getElementById('cancelBtn').onclick = closeModal;
   document.getElementById('saveBtn').onclick = ()=>saveModal(table, isEdit?id:null);
+  if(SETUP_ENTITIES.includes(table)) applyFieldVisibilityToForm(table);
 
   // Init multi-select picklists
   if(table==='deals') msInit('f_curr_deal');
@@ -4648,7 +4906,6 @@ async function saveModal(table, id){
   };
   if(table==='contacts'){
     obj.name = document.getElementById('f_name').value.trim();
-    if(!obj.name) return alert('Name is required.');
     obj.kind = document.getElementById('f_kind').value;
     obj.company = readCompany();
     obj.type = document.getElementById('f_type').value;
@@ -4657,7 +4914,6 @@ async function saveModal(table, id){
     obj.notes = document.getElementById('f_notes').value.trim();
   } else if(table==='deals'){
     obj.title = document.getElementById('f_title').value.trim();
-    if(!obj.title) return alert('Title is required.');
     obj.contactId = document.getElementById('f_contact').value;
     obj.currencies = msRead('f_curr_deal');
     obj.value = Number(document.getElementById('f_value').value)||0;
@@ -4666,7 +4922,6 @@ async function saveModal(table, id){
   } else if(table==='orders'){
     obj.contactId = document.getElementById('f_contact').value;
     obj.product = document.getElementById('f_product').value.trim();
-    if(!obj.product) return alert('Product is required.');
     obj.qty = Number(document.getElementById('f_qty').value)||1;
     obj.amount = Number(document.getElementById('f_amount').value)||0;
     obj.currencies = msRead('f_curr_order');
@@ -4678,7 +4933,6 @@ async function saveModal(table, id){
     sendOrderConfirmationRequested = !!(confirmBox && confirmBox.checked);
   } else if(table==='customers'){
     obj.name = document.getElementById('f_name').value.trim();
-    if(!obj.name) return alert('Name is required.');
     obj.kind = document.getElementById('f_kind').value;
     obj.company = readCompany();
     obj.email = document.getElementById('f_email').value.trim();
@@ -4694,14 +4948,12 @@ async function saveModal(table, id){
     obj.notes = document.getElementById('f_notes').value.trim();
   } else if(table==='suppliers'){
     obj.name = document.getElementById('f_name').value.trim();
-    if(!obj.name) return alert('Name is required.');
     obj.company = document.getElementById('f_company').value.trim();
     obj.email = document.getElementById('f_email').value.trim();
     obj.phone = document.getElementById('f_phone').value.trim();
     obj.notes = document.getElementById('f_notes').value.trim();
   } else if(table==='distributors'){
     obj.name = document.getElementById('f_name').value.trim();
-    if(!obj.name) return alert('Name is required.');
     obj.company = document.getElementById('f_company').value.trim();
     obj.continents = msReadSrc('f_conts');
     const subEl = document.getElementById('f_subs_dd');
@@ -4711,7 +4963,6 @@ async function saveModal(table, id){
     obj.notes = document.getElementById('f_notes').value.trim();
   } else if(table==='leads'){
     obj.name = document.getElementById('f_name').value.trim();
-    if(!obj.name) return alert('Name is required.');
     obj.kind = document.getElementById('f_kind').value;
     obj.company = readCompany();
     obj.sources = [];
@@ -4722,7 +4973,6 @@ async function saveModal(table, id){
     obj.notes = document.getElementById('f_notes').value.trim();
   } else if(table==='tasks'){
     obj.title = document.getElementById('f_title').value.trim();
-    if(!obj.title) return alert('Title is required.');
     obj.dueDate = document.getElementById('f_dueDate').value;
     obj.owner = document.getElementById('f_owner').value;
     obj.status = document.getElementById('f_status').value;
@@ -4733,7 +4983,6 @@ async function saveModal(table, id){
   } else if(table==='invoices'){
     obj.relatedType = document.getElementById('f_relType').value;
     obj.relatedId = document.getElementById('f_relId').value;
-    if(!obj.relatedId) return alert('Pick who this invoice relates to.');
     delete obj.customerId;
     obj.orderId = document.getElementById('f_order').value || null;
     obj.amount = Number(document.getElementById('f_amount').value)||0;
@@ -4745,7 +4994,6 @@ async function saveModal(table, id){
     obj.payeeType = document.getElementById('f_payeeType').value;
     const payeeSel = document.getElementById('f_payeeSel');
     obj.payee = payeeSel ? payeeSel.value.trim() : '';
-    if(!obj.payee) return alert('Payee is required.');
     obj.purpose = document.getElementById('f_purpose').value.trim();
     obj.amount = Number(document.getElementById('f_amount').value)||0;
     obj.currency = document.getElementById('f_currency').value;
@@ -5157,6 +5405,7 @@ async function boot(){
     ws.style.display = 'none';
     document.getElementById('app').style.display = 'flex';
     updateIdentityUI();
+    loadThemePref();
     render();
   }, 2000);
 }
