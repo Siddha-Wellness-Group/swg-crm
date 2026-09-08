@@ -29,6 +29,9 @@
     --olive-soft:#E4E8D3;
     --rust:#A6472B;
     --rust-soft:#F0DBD2;
+    --ink-fixed:#23211B;
+    --setup-blue:#2F6FED;
+    --setup-blue-soft:#E3EBFD;
     /* Revenue stream identity: Essential Oils reads blue, Siddha Yoga reads green,
        so the two businesses stay distinguishable in every finance chart. */
     --rev-oils:#31648F;
@@ -36,6 +39,62 @@
     --rev-yoga:#43855A;
     --rev-yoga-soft:#DAEADF;
     --rev-other:#8A7A5C;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --cream:#191712;
+      --parchment:#211E17;
+      --surface:#26231C;
+      --ink:#ECE6D6;
+      --ink-soft:#A69C87;
+      --border:#3B3628;
+      --amber:#CB9A61;
+      --amber-soft:#3A2E1E;
+      --sage:#93A67F;
+      --sage-soft:#28301F;
+      --clay:#C88E76;
+      --clay-soft:#382520;
+      --ochre:#D9A84B;
+      --ochre-soft:#3A2E17;
+      --umber:#B08A63;
+      --umber-soft:#332619;
+      --olive:#A6B27E;
+      --olive-soft:#2C321F;
+      --rust:#D2795A;
+      --rust-soft:#3A2119;
+      --rev-oils:#6FA3D6;
+      --rev-oils-soft:#1E2C3A;
+      --rev-yoga:#7FC79A;
+      --rev-yoga-soft:#1E2E23;
+      --rev-other:#B8A87E;
+    }
+  }
+  :root[data-theme="dark"]{
+    --cream:#191712;
+    --parchment:#211E17;
+    --surface:#26231C;
+    --ink:#ECE6D6;
+    --ink-soft:#A69C87;
+    --border:#3B3628;
+    --amber:#CB9A61;
+    --amber-soft:#3A2E1E;
+    --sage:#93A67F;
+    --sage-soft:#28301F;
+    --clay:#C88E76;
+    --clay-soft:#382520;
+    --ochre:#D9A84B;
+    --ochre-soft:#3A2E17;
+    --umber:#B08A63;
+    --umber-soft:#332619;
+    --olive:#A6B27E;
+    --olive-soft:#2C321F;
+    --rust:#D2795A;
+    --rust-soft:#3A2119;
+    --rev-oils:#6FA3D6;
+    --rev-oils-soft:#1E2C3A;
+    --rev-yoga:#7FC79A;
+    --rev-yoga-soft:#1E2E23;
+    --rev-other:#B8A87E;
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--cream);color:var(--ink);font-family:'Work Sans',sans-serif;font-size:14px;transition:background .15s,color .15s;}
@@ -1708,6 +1767,15 @@ function loadChartPref(){
 }
 function saveChartPref(type){
   try{ localStorage.setItem('crm_chart_pref', type); }catch(e){}
+}
+function loadQuickActionPrefs(){
+  try{
+    const v = JSON.parse(localStorage.getItem('crm_quick_action_prefs')||'null');
+    if(v) state.quickActionPrefs = v;
+  }catch(e){}
+}
+function saveQuickActionPrefs(){
+  try{ localStorage.setItem('crm_quick_action_prefs', JSON.stringify(state.quickActionPrefs)); }catch(e){}
 }
 
 function applyThemePref(pref){
@@ -3945,7 +4013,7 @@ function openQuickActionsCustomizeModal(){
   });
   document.getElementById('qa_saveBtn').onclick = async ()=>{
     state.quickActionPrefs[state.currentUser] = boxes.filter(b=>b.checked).map(b=>b.value);
-    await saveKey(KEYS.quickActionPrefs, state.quickActionPrefs);
+    saveQuickActionPrefs();
     closeModal();
     renderTopnavQuickActions();
     toast('Quick actions updated.');
@@ -4375,6 +4443,7 @@ async function attemptLogin(){
 document.getElementById('loginBtn').onclick = attemptLogin;
 ensureTeamLoaded();
 loadChartPref();
+loadQuickActionPrefs();
 document.getElementById('loginPassword').onkeydown = (e)=>{ if(e.key==='Enter') attemptLogin(); };
 document.getElementById('loginEmail').onkeydown = (e)=>{ if(e.key==='Enter') document.getElementById('loginPassword').focus(); };
 document.getElementById('logoutBtn').onclick = ()=>{
