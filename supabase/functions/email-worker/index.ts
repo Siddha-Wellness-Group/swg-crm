@@ -102,6 +102,18 @@ function render(name: string, data: Record<string, unknown>): string {
   });
 }
 
+/**
+ * Entities that reach the text/plain part. `&quot;` matters: Handlebars
+ * escapes every quote in a value, so a quoted deal title arrived as
+ * `&quot;Wholesale bulk&quot;` until this was handled.
+ */
+const ENTITIES: Record<string, string> = {
+  '&nbsp;': ' ', '&middot;': '-', '&times;': 'x', '&quot;': '"',
+  '&apos;': "'", '&#39;': "'", '&mdash;': '—', '&ndash;': '–',
+  '&lt;': '<', '&gt;': '>', '&amp;': '&',
+};
+const ENTITY_RE = new RegExp(Object.keys(ENTITIES).join('|'), 'gi');
+
 /** Readable plain-text alternative, same rules as the Node service. */
 function htmlToText(html: string): string {
   return String(html)
@@ -110,9 +122,9 @@ function htmlToText(html: string): string {
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/(p|div|tr|h1|h2|h3|li)>/gi, '\n')
     .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/gi, ' ').replace(/&middot;/gi, '-').replace(/&times;/gi, 'x')
-    .replace(/&amp;/gi, '&').replace(/&lt;/gi, '<').replace(/&gt;/gi, '>')
     .replace(/&#847;|&zwnj;/gi, '')
+    .replace(ENTITY_RE, (m) => ENTITIES[m.toLowerCase()] ?? m)
+    .replace(/&#(\d+);/g, (_m, code) => String.fromCharCode(Number(code)))
     .replace(/[ \t]+/g, ' ').replace(/\n\s*\n\s*\n+/g, '\n\n')
     .split('\n').map((l) => l.trim()).join('\n').trim();
 }

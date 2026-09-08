@@ -154,6 +154,27 @@ export async function renderTemplate(name, data = {}) {
 }
 
 /**
+ * HTML entities that appear in the templates or in escaped caller copy.
+ * `&quot;` matters more than it looks: Handlebars escapes every quote in a
+ * value, so a deal title in quotes reached the text/plain part as
+ * `&quot;Wholesale bulk&quot;` until this was handled.
+ */
+const ENTITIES = {
+  '&nbsp;': ' ',
+  '&middot;': '-',
+  '&times;': 'x',
+  '&quot;': '"',
+  '&apos;': "'",
+  '&#39;': "'",
+  '&mdash;': '—',
+  '&ndash;': '–',
+  '&lt;': '<',
+  '&gt;': '>',
+  '&amp;': '&', // last by construction: decoded via the map, not chained
+};
+const ENTITY_RE = new RegExp(Object.keys(ENTITIES).join('|'), 'gi');
+
+/**
  * Produces a readable plain-text alternative from rendered HTML.
  * Good enough for the text/plain part of a multipart message; it is never the
  * primary rendering.
@@ -168,13 +189,10 @@ export function htmlToText(html) {
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/(p|div|tr|h1|h2|h3|li)>/gi, '\n')
     .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&middot;/gi, '-')
-    .replace(/&times;/gi, 'x')
-    .replace(/&amp;/gi, '&')
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>')
     .replace(/&#847;|&zwnj;/gi, '')
+    .replace(ENTITY_RE, (m) => ENTITIES[m.toLowerCase()] ?? m)
+    // Any remaining numeric entity, so nothing leaks through as raw markup.
+    .replace(/&#(\d+);/g, (_m, code) => String.fromCharCode(Number(code)))
     .replace(/[ \t]+/g, ' ')
     .replace(/\n\s*\n\s*\n+/g, '\n\n')
     .split('\n')

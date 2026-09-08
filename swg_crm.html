@@ -4678,10 +4678,55 @@ async function checkBigDealAlert(deal){
   if(state.bigDealAlerts.some(a=>a.dealId===deal.id)) return;
   const alert = { id:uid(), dealId:deal.id, title:deal.title, value:deal.value, owner:deal.owner, stage:deal.stage, createdAt:Date.now() };
   state.bigDealAlerts.unshift(alert);
-  await saveKey(KEYS.bigDealAlerts, state.bigDealAlerts);
+  // saveKey/KEYS are referenced in 27 places across the Setup features but
+  // are never defined anywhere in this file, so this call has always thrown
+  // ReferenceError -- which killed the rest of this function, including the
+  // toast below. Contained here so raising the alert still works; the
+  // missing persistence layer is a separate fix (see the note to Kfir).
+  try { await saveKey(KEYS.bigDealAlerts, state.bigDealAlerts); }
+  catch(e){ console.warn('bigDealAlerts not persisted — saveKey/KEYS undefined in this build', e.message); }
   if(personaIsAdmin() || roleFor(state.viewingAs)==='Manager'){
     toast(`🚨 Big deal alert: "${deal.title}" — ${Number(deal.value||0).toLocaleString()} ${cfg.currency}`);
   }
+  // Hook 3: the toast only reaches whoever happens to be looking, and it is
+  // gone the moment the page changes. Email the team as well so an alert
+  // raised at 2am is still there in the morning. Deliberately outside the
+  // role check above -- that governs who sees the popup, not who needs to
+  // know. The duplicate guard earlier in this function covers the email
+  // too, so a deal cannot alert twice.
+  await queueBigDealAlertEmail(deal, cfg);
+}
+
+/* Hook 3: sends the big-deal alert to the team. Recipients come from the
+   server's EMAIL_INTERNAL_RECIPIENTS, so who gets alerted is an ops setting
+   rather than something baked into this page. */
+async function queueBigDealAlertEmail(deal, cfg){
+  const contact = state.contacts.find(c=>c.id===deal.contactId);
+  const value = Number(deal.value||0);
+  const amount = value.toLocaleString() + ' ' + (cfg.currency || 'USD');
+  const { error } = await sb.from('email_outbox').insert(toRow({
+    id: uid(), createdAt: Date.now(), type:'internalAlert', status:'queued',
+    payload: {
+      subject: `Deal over threshold: ${deal.title}`,
+      message:
+        `"${deal.title}" is at ${amount}, above the ${Number(cfg.threshold||0).toLocaleString()} ${cfg.currency || 'USD'} alert threshold.\n` +
+        `Stage is ${deal.stage || 'unset'}. Worth a look before it moves further.`,
+      payloadData: {
+        deal: deal.title,
+        value: amount,
+        stage: deal.stage || '-',
+        owner: deal.owner || '-',
+        contact: contact ? contact.name : '-',
+        threshold: Number(cfg.threshold||0).toLocaleString() + ' ' + (cfg.currency || 'USD'),
+      },
+      priority: 'high',
+      alertKind: 'Deal over threshold',
+      ctaUrl: 'https://siddha-wellness-group.github.io/swg-crm/swg_crm.html',
+    },
+    relatedType:'deals', relatedId: deal.id,
+  }));
+  if(error){ console.error('queue internalAlert failed', error); return; }
+  if(personaIsAdmin() || roleFor(state.viewingAs)==='Manager') toast('Team alerted by email.');
 }
 
 /* Human-readable order number shown to customers: the storefront's own
