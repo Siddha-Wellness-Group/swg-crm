@@ -29,6 +29,9 @@
     --olive-soft:#E4E8D3;
     --rust:#A6472B;
     --rust-soft:#F0DBD2;
+    --ink-fixed:#23211B;
+    --setup-blue:#2F6FED;
+    --setup-blue-soft:#E3EBFD;
     /* Revenue stream identity: Essential Oils reads blue, Siddha Yoga reads green,
        so the two businesses stay distinguishable in every finance chart. */
     --rev-oils:#31648F;
@@ -36,6 +39,62 @@
     --rev-yoga:#43855A;
     --rev-yoga-soft:#DAEADF;
     --rev-other:#8A7A5C;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --cream:#191712;
+      --parchment:#211E17;
+      --surface:#26231C;
+      --ink:#ECE6D6;
+      --ink-soft:#A69C87;
+      --border:#3B3628;
+      --amber:#CB9A61;
+      --amber-soft:#3A2E1E;
+      --sage:#93A67F;
+      --sage-soft:#28301F;
+      --clay:#C88E76;
+      --clay-soft:#382520;
+      --ochre:#D9A84B;
+      --ochre-soft:#3A2E17;
+      --umber:#B08A63;
+      --umber-soft:#332619;
+      --olive:#A6B27E;
+      --olive-soft:#2C321F;
+      --rust:#D2795A;
+      --rust-soft:#3A2119;
+      --rev-oils:#6FA3D6;
+      --rev-oils-soft:#1E2C3A;
+      --rev-yoga:#7FC79A;
+      --rev-yoga-soft:#1E2E23;
+      --rev-other:#B8A87E;
+    }
+  }
+  :root[data-theme="dark"]{
+    --cream:#191712;
+    --parchment:#211E17;
+    --surface:#26231C;
+    --ink:#ECE6D6;
+    --ink-soft:#A69C87;
+    --border:#3B3628;
+    --amber:#CB9A61;
+    --amber-soft:#3A2E1E;
+    --sage:#93A67F;
+    --sage-soft:#28301F;
+    --clay:#C88E76;
+    --clay-soft:#382520;
+    --ochre:#D9A84B;
+    --ochre-soft:#3A2E17;
+    --umber:#B08A63;
+    --umber-soft:#332619;
+    --olive:#A6B27E;
+    --olive-soft:#2C321F;
+    --rust:#D2795A;
+    --rust-soft:#3A2119;
+    --rev-oils:#6FA3D6;
+    --rev-oils-soft:#1E2C3A;
+    --rev-yoga:#7FC79A;
+    --rev-yoga-soft:#1E2E23;
+    --rev-other:#B8A87E;
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--cream);color:var(--ink);font-family:'Work Sans',sans-serif;font-size:14px;transition:background .15s,color .15s;}
@@ -1765,7 +1824,7 @@ function openNewDashboardModal(){
     if(!name) return alert('Give it a name.');
     const dash = {id:uid(), owner:state.viewingAs, name, widgets:[], createdAt:Date.now()};
     state.dashboards.push(dash);
-    await saveKey(KEYS.dashboards, state.dashboards);
+    saveLocalConfig('dashboards');
     state.activeDashboardId = dash.id;
     closeModal();
     render();
@@ -1786,7 +1845,7 @@ function openDashboardWidgetPicker(dashId){
   document.getElementById('cancelBtn').onclick = closeModal;
   document.getElementById('dashSaveWidgetsBtn').onclick = async ()=>{
     dash.widgets = Array.from(document.querySelectorAll('[data-widget-key]:checked')).map(cb=>cb.dataset.widgetKey);
-    await saveKey(KEYS.dashboards, state.dashboards);
+    saveLocalConfig('dashboards');
     closeModal();
     render();
   };
@@ -1868,6 +1927,29 @@ function loadChartPref(){
 }
 function saveChartPref(type){
   try{ localStorage.setItem('crm_chart_pref', type); }catch(e){}
+}
+function loadQuickActionPrefs(){
+  try{
+    const v = JSON.parse(localStorage.getItem('crm_quick_action_prefs')||'null');
+    if(v) state.quickActionPrefs = v;
+  }catch(e){}
+}
+function saveQuickActionPrefs(){
+  try{ localStorage.setItem('crm_quick_action_prefs', JSON.stringify(state.quickActionPrefs)); }catch(e){}
+}
+/* Setup config features (validation rules, automations, flows, etc.) have no Supabase
+   table yet, so they persist to localStorage until a shared app_config table exists. */
+const LOCAL_CONFIG_KEYS = ['dashboards','validationRules','guideEntries','dependentFields','flows','automations','sharingRules','bigDealAlert','bigDealAlerts','guideDismissed'];
+function loadLocalConfig(){
+  LOCAL_CONFIG_KEYS.forEach(key=>{
+    try{
+      const v = localStorage.getItem('crm_cfg_'+key);
+      if(v!==null) state[key] = JSON.parse(v);
+    }catch(e){}
+  });
+}
+function saveLocalConfig(key){
+  try{ localStorage.setItem('crm_cfg_'+key, JSON.stringify(state[key])); }catch(e){}
 }
 
 function applyThemePref(pref){
@@ -3623,7 +3705,7 @@ function openValidationRuleModal(){
       };
     }
     state.validationRules.push(rule);
-    await saveKey(KEYS.validationRules, state.validationRules);
+    saveLocalConfig('validationRules');
     closeModal();
     rerenderSetupView();
   };
@@ -3655,7 +3737,7 @@ function openGuideEntryModal(presetEntity){
     const linkEntity = document.getElementById('ge_entity').value;
     const linkField = linkEntity ? document.getElementById('ge_field').value : '';
     state.guideEntries.push({id:uid(), title, body, linkEntity, linkField});
-    await saveKey(KEYS.guideEntries, state.guideEntries);
+    saveLocalConfig('guideEntries');
     closeModal();
     rerenderSetupView();
   };
@@ -3685,7 +3767,7 @@ function openDependentFieldModal(){
     if(controllingField===dependentField){ alert('Pick two different fields.'); return; }
     const message = document.getElementById('df_message').value.trim();
     state.dependentFields.push({id:uid(), entity, controllingField, dependentField, message});
-    await saveKey(KEYS.dependentFields, state.dependentFields);
+    saveLocalConfig('dependentFields');
     closeModal();
     rerenderSetupView();
   };
@@ -3775,7 +3857,7 @@ function openFlowModal(){
     if(!flowBuilderSteps.length){ alert('Add at least one condition or action.'); return; }
     const flow = { id:uid(), name, entity: document.getElementById('fl_entity').value, steps: flowBuilderSteps };
     state.flows.push(flow);
-    await saveKey(KEYS.flows, state.flows);
+    saveLocalConfig('flows');
     closeModal();
     rerenderSetupView();
   };
@@ -3842,7 +3924,7 @@ function openAutomationModal(){
       setValue: document.getElementById('au_setValue').value.trim(),
     };
     state.automations.push(automation);
-    await saveKey(KEYS.automations, state.automations);
+    saveLocalConfig('automations');
     closeModal();
     rerenderSetupView();
   };
@@ -3869,7 +3951,7 @@ function wireSetupView(){
       if(!canEditGlobalSetup()) return;
       if(!confirm('Delete this validation rule?')) return;
       state.validationRules = state.validationRules.filter(r=>r.id!==el.dataset.delRule);
-      await saveKey(KEYS.validationRules, state.validationRules);
+      saveLocalConfig('validationRules');
       rerenderSetupView();
     };
   });
@@ -3880,7 +3962,7 @@ function wireSetupView(){
       if(!canEditDependentFields()) return;
       if(!confirm('Delete this dependent field rule?')) return;
       state.dependentFields = state.dependentFields.filter(r=>r.id!==el.dataset.delDependent);
-      await saveKey(KEYS.dependentFields, state.dependentFields);
+      saveLocalConfig('dependentFields');
       rerenderSetupView();
     };
   });
@@ -3893,7 +3975,7 @@ function wireSetupView(){
       } else {
         state.validationRules = state.validationRules.filter(r=>!(r.entity===entity && r.field===field && r.type==='required'));
       }
-      await saveKey(KEYS.validationRules, state.validationRules);
+      saveLocalConfig('validationRules');
       toast(`${prettyField(field)} ${cb.checked?'is now required':'is no longer required'} for ${EXPORT_SHEETS.find(s=>s.key===entity).label}.`);
     };
   });
@@ -3904,7 +3986,7 @@ function wireSetupView(){
       if(!canEditGlobalSetup()) return;
       if(!confirm('Delete this automation?')) return;
       state.automations = state.automations.filter(a=>a.id!==el.dataset.delAutomation);
-      await saveKey(KEYS.automations, state.automations);
+      saveLocalConfig('automations');
       rerenderSetupView();
     };
   });
@@ -3914,7 +3996,7 @@ function wireSetupView(){
     el.onclick = async ()=>{
       if(!confirm('Delete this flow?')) return;
       state.flows = state.flows.filter(f=>f.id!==el.dataset.delFlow);
-      await saveKey(KEYS.flows, state.flows);
+      saveLocalConfig('flows');
       rerenderSetupView();
     };
   });
@@ -3922,7 +4004,7 @@ function wireSetupView(){
     sel.onchange = async ()=>{
       if(!canEditGlobalSetup()) return;
       state.sharingRules[sel.dataset.sharingFor] = sel.value;
-      await saveKey(KEYS.sharingRules, state.sharingRules);
+      saveLocalConfig('sharingRules');
       toast('Sharing rule updated.');
     };
   });
@@ -3932,7 +4014,7 @@ function wireSetupView(){
     el.onclick = async ()=>{
       if(!confirm('Delete this guide entry?')) return;
       state.guideEntries = state.guideEntries.filter(g=>g.id!==el.dataset.delGuide);
-      await saveKey(KEYS.guideEntries, state.guideEntries);
+      saveLocalConfig('guideEntries');
       rerenderSetupView();
     };
   });
@@ -3945,7 +4027,7 @@ function wireSetupView(){
         threshold: Number(document.getElementById('bda_threshold').value)||0,
         currency: document.getElementById('bda_currency').value,
       };
-      await saveKey(KEYS.bigDealAlert, state.bigDealAlert);
+      saveLocalConfig('bigDealAlert');
       toast('Big deal alert settings saved.');
     };
   }
@@ -3953,7 +4035,7 @@ function wireSetupView(){
     el.onclick = async ()=>{
       if(!canEditBigDealAlert()) return;
       state.bigDealAlerts = state.bigDealAlerts.filter(a=>a.id!==el.dataset.delBigdeal);
-      await saveKey(KEYS.bigDealAlerts, state.bigDealAlerts);
+      saveLocalConfig('bigDealAlerts');
       rerenderSetupView();
     };
   });
@@ -4002,7 +4084,7 @@ function attachContentHandlers(){
   if(dashDeleteBtn) dashDeleteBtn.onclick = async ()=>{
     if(!confirm('Delete this dashboard?')) return;
     state.dashboards = state.dashboards.filter(d=>d.id!==dashDeleteBtn.dataset.dashId);
-    await saveKey(KEYS.dashboards, state.dashboards);
+    saveLocalConfig('dashboards');
     state.activeDashboardId = '';
     render();
   };
@@ -4499,7 +4581,7 @@ function openObjectGuideIntroModal(entityKey, onContinue){
       if(!list.includes(entityKey)){
         list.push(entityKey);
         state.guideDismissed[state.currentUser] = list;
-        await saveKey(KEYS.guideDismissed, state.guideDismissed);
+        saveLocalConfig('guideDismissed');
       }
     }
     closeModal();
@@ -4570,7 +4652,7 @@ function openQuickActionsCustomizeModal(){
   });
   document.getElementById('qa_saveBtn').onclick = async ()=>{
     state.quickActionPrefs[state.currentUser] = boxes.filter(b=>b.checked).map(b=>b.value);
-    await saveKey(KEYS.quickActionPrefs, state.quickActionPrefs);
+    saveQuickActionPrefs();
     closeModal();
     renderTopnavQuickActions();
     toast('Quick actions updated.');
@@ -4844,7 +4926,7 @@ async function checkBigDealAlert(deal){
   if(state.bigDealAlerts.some(a=>a.dealId===deal.id)) return;
   const alert = { id:uid(), dealId:deal.id, title:deal.title, value:deal.value, owner:deal.owner, stage:deal.stage, createdAt:Date.now() };
   state.bigDealAlerts.unshift(alert);
-  await saveKey(KEYS.bigDealAlerts, state.bigDealAlerts);
+  saveLocalConfig('bigDealAlerts');
   if(personaIsAdmin() || roleFor(state.viewingAs)==='Manager'){
     toast(`🚨 Big deal alert: "${deal.title}" — ${Number(deal.value||0).toLocaleString()} ${cfg.currency}`);
   }
@@ -4966,6 +5048,7 @@ async function setDealStage(dealId, newStage){
   if(deal.stage==='Won' && !wasWon && !deal._autoInvoiced){
     deal._autoInvoiced = true;
     await dbUpdate('deals', deal);
+    await checkBigDealAlert(deal);
     await createPaidOrderAndInvoice({
       relatedType:'contact', relatedId: deal.contactId,
       product: deal.title, qty:1, amount: deal.value||0, currencies: deal.currencies||[],
@@ -5125,6 +5208,8 @@ async function attemptLogin(){
 document.getElementById('loginBtn').onclick = attemptLogin;
 ensureTeamLoaded();
 loadChartPref();
+loadQuickActionPrefs();
+loadLocalConfig();
 document.getElementById('loginPassword').onkeydown = (e)=>{ if(e.key==='Enter') attemptLogin(); };
 document.getElementById('loginEmail').onkeydown = (e)=>{ if(e.key==='Enter') document.getElementById('loginPassword').focus(); };
 document.getElementById('logoutBtn').onclick = ()=>{
