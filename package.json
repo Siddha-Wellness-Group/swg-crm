@@ -1,0 +1,24 @@
+{
+  "name": "swg-crm",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Siddha Wellness Group CRM - ledger UI plus the automated transactional email service.",
+  "main": "src/services/email/emailService.js",
+  "scripts": {
+    "test:email": "node test-email.js",
+    "test:email:dry": "node test-email.js --dry-run",
+    "email:oauth-setup": "node scripts/get-oauth-refresh-token.js",
+    "email:worker": "node src/server/runEmailWorker.js",
+    "sync:edge": "node scripts/sync-edge-email.js"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "dotenv": "^16.4.5",
+    "handlebars": "^4.7.8",
+    "nodemailer": "^6.9.14"
+  }
+}

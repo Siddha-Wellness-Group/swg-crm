@@ -88,6 +88,13 @@ Deno.serve(async (req) => {
     shipping_address: order.shipping_address || null,
     items: order.items || [],
     currency: order.currency || null,
+    // The money breakdown, so the customer's confirmation can explain what
+    // the total is made of instead of showing an unexplained gap.
+    subtotal: order.subtotal ?? null,
+    shipping_cost: order.shipping_cost ?? null,
+    discount_amount: order.discount_amount ?? null,
+    discount_code: order.discount_code || null,
+    tax_amount: order.tax_amount ?? null,
   };
 
   let existingOrder = null;
@@ -104,6 +111,62 @@ Deno.serve(async (req) => {
     const newOrder = { id: uid(), created_at: Date.now(), owner: 'Website', ...orderFields };
     const { error } = await sb.from('orders').insert(newOrder);
     if (error) return json({ error: 'order insert failed: ' + error.message }, 500);
-    return json({ success: true, orderId: newOrder.id, action: 'created' });
+    const queued = await queueOrderConfirmation(sb, order, newOrder, email);
+    return json({ success: true, orderId: newOrder.id, action: 'created', confirmationQueued: queued });
   }
 });
+
+/**
+ * Queues the customer's order confirmation.
+ *
+ * Only on a newly created order -- a retried webhook delivery updates the
+ * existing row instead, and must not email the customer twice.
+ *
+ * Note this is the customer's first and only confirmation: the storefront's
+ * own orderNotification function emails the business, and
+ * getOrderConfirmation is just an API for the thank-you page. Before this,
+ * a customer who ordered received nothing at all.
+ *
+ * Queuing is best-effort by design. A failure here is logged and swallowed
+ * so it can never reject an order that was already saved -- the same reason
+ * the storefront wraps its own CRM sync in a try/catch.
+ */
+async function queueOrderConfirmation(sb, order, newOrder, email) {
+  // Someone whose payment outright failed has not placed an order worth
+  // confirming. Everything else -- unpaid, pending, paid -- gets the
+  // "we have your order" message a checkout is expected to produce.
+  if (order.payment_status === 'failed') return false;
+
+  try {
+    const { error } = await sb.from('email_outbox').insert({
+      id: uid(),
+      created_at: Date.now(),
+      type: 'orderConfirmation',
+      status: 'queued',
+      related_type: 'orders',
+      related_id: newOrder.id,
+      payload: {
+        to: email,
+        customerName: order.customer_name || email,
+        orderNumber: order.order_number || newOrder.id,
+        items: order.items || [],
+        totalAmount: Number(order.total) || 0,
+        currency: order.currency || 'ILS',
+        subtotal: order.subtotal ?? null,
+        shippingCost: order.shipping_cost ?? null,
+        discountAmount: order.discount_amount ?? null,
+        taxAmount: order.tax_amount ?? null,
+        shippingAddress: order.shipping_address || null,
+        phone: order.customer_phone || '',
+      },
+    });
+    if (error) {
+      console.error('order confirmation queue failed', error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('order confirmation queue threw', e);
+    return false;
+  }
+}
