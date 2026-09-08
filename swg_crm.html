@@ -3950,6 +3950,15 @@ function openModal(table, id){
       <div class="field"><label>Cost</label><input id="f_amount" type="number" value="${item?item.amount:''}"></div>
       <div class="field"><label>Currencies accepted</label>${msHTML('f_curr_order', CURRENCIES, selCurr)}</div>
       <div class="field"><label>Status</label><select id="f_status">${statusOpts.map(s=>`<option ${item&&item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      ${isEdit ? '' : `<div class="field" style="display:flex;align-items:flex-start;gap:9px;">
+        <input type="checkbox" id="f_sendConfirm" style="width:auto;margin-top:2px;">
+        <label for="f_sendConfirm" style="text-transform:none;letter-spacing:0;font-size:12.5px;color:var(--ink);cursor:pointer;">
+          Email an order confirmation to the customer
+          <span style="display:block;color:var(--ink-soft);font-size:11.5px;margin-top:2px;">
+            Off by default. Storefront orders confirm themselves automatically &mdash; tick this only for an order you are logging on the customer's behalf and they are expecting it.
+          </span>
+        </label>
+      </div>`}
       <div id="f_shipWrap" style="${shipWrapStyle}">
         <div class="field"><label>Tracking number</label><input id="f_tracking" value="${item?esc(item.trackingNumber||''):''}"></div>
         <div class="field"><label>Carrier</label><input id="f_carrier" value="${item?esc(item.carrierName||''):''}" placeholder="e.g. Israel Post"></div>
@@ -4406,6 +4415,7 @@ async function saveModal(table, id){
   const isEdit = !!id;
   let obj = isEdit ? state[table].find(x=>x.id===id) : { id: uid(), createdAt: Date.now(), owner: state.viewingAs };
   const prevOrderStatus = (table==='orders' && isEdit) ? obj.status : null;
+  let sendOrderConfirmationRequested = false;
   const readCompany = ()=>{
     const kind = document.getElementById('f_kind') ? document.getElementById('f_kind').value : 'Company';
     if(kind==='Individual') return '';
@@ -4440,6 +4450,8 @@ async function saveModal(table, id){
     obj.trackingNumber = document.getElementById('f_tracking').value.trim();
     obj.carrierName = document.getElementById('f_carrier').value.trim();
     obj.trackingUrl = document.getElementById('f_trackingUrl').value.trim();
+    const confirmBox = document.getElementById('f_sendConfirm');
+    sendOrderConfirmationRequested = !!(confirmBox && confirmBox.checked);
   } else if(table==='customers'){
     obj.name = document.getElementById('f_name').value.trim();
     if(!obj.name) return alert('Name is required.');
@@ -4538,6 +4550,7 @@ async function saveModal(table, id){
   render();
   if(wasNew) await dbInsert(table, obj); else await dbUpdate(table, obj);
   if(table==='orders') await checkOrderStatusChange(savedObj, prevOrderStatus);
+  if(table==='orders' && wasNew && sendOrderConfirmationRequested) await queueOrderConfirmation(savedObj);
   if(wasNew){
     if(table==='deals' || table==='leads'){
       celebrate();
@@ -4677,6 +4690,35 @@ async function checkBigDealAlert(deal){
    get something presentable in a shipping email. */
 function orderDisplayNumber(order){
   return order.externalOrderNumber || ('SWG-' + order.id.slice(-6).toUpperCase());
+}
+
+/* Hook 2, manual path: queues the customer's order confirmation for an
+   order logged by hand in the CRM. Deliberately opt-in per order rather
+   than automatic -- storefront orders confirm themselves, and a wholesale
+   order someone closed over the phone should not surprise the customer
+   with a "thank you for your order" they never asked for. */
+async function queueOrderConfirmation(order){
+  const contact = state.contacts.find(c=>c.id===order.contactId);
+  if(!contact || !contact.email){
+    toast('Order saved, but the linked contact has no email on file — no confirmation was queued.');
+    return;
+  }
+  const { error } = await sb.from('email_outbox').insert(toRow({
+    id: uid(), createdAt: Date.now(), type:'orderConfirmation', status:'queued',
+    payload: {
+      to: contact.email,
+      customerName: contact.name,
+      orderNumber: orderDisplayNumber(order),
+      items: [{ product_name: order.product, quantity: order.qty, unit_price: (Number(order.amount)||0) / (Number(order.qty)||1) }],
+      totalAmount: Number(order.amount)||0,
+      currency: (order.currencies && order.currencies[0]) || 'ILS',
+      shippingAddress: contact.address || null,
+      phone: contact.phone || '',
+    },
+    relatedType:'orders', relatedId: order.id,
+  }));
+  if(error){ console.error('queue orderConfirmation failed', error); toast('Order saved, but queuing the confirmation email failed — check the console.'); return; }
+  toast(`Order confirmation queued for ${contact.email}`);
 }
 
 /* Item 3/4 hook: fires from saveModal when an order's status is edited in
