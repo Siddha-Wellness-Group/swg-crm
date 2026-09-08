@@ -863,7 +863,22 @@ const FIELD_MAP = {
   shippingAddress:'shipping_address', externalOrderNumber:'external_order_number',
 };
 const FIELD_MAP_REV = Object.fromEntries(Object.entries(FIELD_MAP).map(([a,b])=>[b,a]));
-function toRow(obj){ const row={}; for(const k in obj){ row[FIELD_MAP[k]||k] = obj[k]; } return row; }
+/* Columns Postgres types as `date`. An empty date input yields '', which
+   Postgres rejects with 22007 "invalid input syntax for type date" -- and
+   because dbInsert only logs, the record silently never saved. That hit
+   every task, invoice and payment left without a due date, plus the
+   auto-invoice on a won deal, which hardcodes dueDate:''. Normalised here
+   so it is fixed once rather than at each call site. */
+const DATE_COLUMNS = new Set(['due_date']);
+function toRow(obj){
+  const row={};
+  for(const k in obj){
+    const col = FIELD_MAP[k]||k;
+    const val = obj[k];
+    row[col] = (DATE_COLUMNS.has(col) && (val === '' || val === undefined)) ? null : val;
+  }
+  return row;
+}
 function fromRow(row){ if(!row) return row; const obj={}; for(const k in row){ obj[FIELD_MAP_REV[k]||k] = row[k]; } return obj; }
 
 async function loadTable(table){
@@ -898,11 +913,72 @@ async function dbDeleteAll(table){
   if(error) console.error('delete-all failed', table, error);
 }
 
+/* ---------- Settings persistence ----------
+   The Setup features call saveKey(KEYS.x, value) in 27 places, but neither
+   KEYS nor saveKey was ever defined, so every call threw ReferenceError --
+   and since a throw abandons the rest of its function, the fallout went
+   well past settings: deal stage changes were never saved, marking a deal
+   Won never reached the auto-invoice, automation tasks were lost, and
+   checkBigDealAlert died before its own toast.
+
+   Eleven of the keys are settings-shaped and live in the `settings` table.
+   The other three (deals, tasks, team) already have real tables, so those
+   call sites use the existing db helpers instead of this. */
+
+const KEYS = {
+  validationRules: 'validationRules',
+  dashboards: 'dashboards',
+  automations: 'automations',
+  flows: 'flows',
+  guideEntries: 'guideEntries',
+  guideDismissed: 'guideDismissed',
+  dependentFields: 'dependentFields',
+  sharingRules: 'sharingRules',
+  quickActionPrefs: 'quickActionPrefs',
+  bigDealAlert: 'bigDealAlert',
+  bigDealAlerts: 'bigDealAlerts',
+};
+
+/* Which slice of state each key holds, so a reload can restore them. */
+const SETTING_DEFAULTS = {
+  validationRules: [], dashboards: [], automations: [], flows: [],
+  guideEntries: [], guideDismissed: {}, dependentFields: [],
+  sharingRules: {}, quickActionPrefs: {}, bigDealAlerts: [],
+  bigDealAlert: { enabled:false, threshold:10000, currency:'USD' },
+};
+
+/* Saves one settings key. Errors are logged rather than thrown: a failed
+   save must not abandon the caller mid-way, which is exactly how the
+   undefined version did its damage. */
+async function saveKey(key, value){
+  if(!key){ console.error('saveKey called without a key'); return false; }
+  const { error } = await sb.from('settings')
+    .upsert({ key, value, updated_at: Date.now() }, { onConflict:'key' });
+  if(error){ console.error('saveKey failed', key, error); toast('Could not save that setting.'); return false; }
+  return true;
+}
+
+/* Restores every settings key into state. Anything missing keeps its
+   default, so a fresh project behaves like an empty one rather than
+   breaking. */
+async function loadSettings(){
+  try{
+    const { data, error } = await sb.from('settings').select('key,value');
+    if(error){ console.error('load failed', 'settings', error); return; }
+    const byKey = Object.fromEntries((data||[]).map(r=>[r.key, r.value]));
+    for(const [key, fallback] of Object.entries(SETTING_DEFAULTS)){
+      const stored = byKey[key];
+      state[key] = (stored === undefined || stored === null) ? fallback : stored;
+    }
+  }catch(e){ console.error('load threw', 'settings', e); }
+}
+
 async function loadAll(){
   const [c,d,o,cu,su,ta,inv,le,di,pa] = await Promise.all([
     loadTable('contacts'), loadTable('deals'), loadTable('orders'),
     loadTable('customers'), loadTable('suppliers'), loadTable('tasks'), loadTable('invoices'),
-    loadTable('leads'), loadTable('distributors'), loadTable('payments'), loadFxRates()
+    loadTable('leads'), loadTable('distributors'), loadTable('payments'), loadFxRates(),
+    loadSettings()
   ]);
   state.contacts = c; state.deals = d; state.orders = o;
   state.customers = cu; state.suppliers = su; state.tasks = ta; state.invoices = inv;
@@ -2634,11 +2710,11 @@ async function runAutomations(entityKey, obj){
         dueDate:due, owner:a.taskOwner||obj.owner||state.viewingAs, status:'Open', linkType:'none', linkId:null,
         notes:`Auto-created by automation "${a.name}".` };
       state.tasks.push(task);
-      await saveKey(KEYS.tasks, state.tasks);
+      await dbInsert('tasks', task);
     } else if(a.action==='set_field' && a.setField){
       const list = state[entityKey];
       const rec = list.find(x=>x.id===obj.id);
-      if(rec){ rec[a.setField] = a.setValue; await saveKey(KEYS[entityKey], list); }
+      if(rec){ rec[a.setField] = a.setValue; await dbUpdate(entityKey, rec); }
     }
   }
 }
@@ -2651,11 +2727,11 @@ async function runFlowAction(step, entityKey, obj, flowName){
       dueDate:due, owner:obj.owner||state.viewingAs, status:'Open', linkType:'none', linkId:null,
       notes:`Auto-created by flow "${flowName}".` };
     state.tasks.push(task);
-    await saveKey(KEYS.tasks, state.tasks);
+    await dbInsert('tasks', task);
   } else if(step.action==='set_field' && step.field){
     const list = state[entityKey];
     const rec = list.find(x=>x.id===obj.id);
-    if(rec){ rec[step.field] = step.value; await saveKey(KEYS[entityKey], list); }
+    if(rec){ rec[step.field] = step.value; await dbUpdate(entityKey, rec); }
   } else if(step.action==='toast'){
     toast(step.message || `Flow "${flowName}" ran.`);
   }
@@ -3266,7 +3342,10 @@ function wireSetupView(){
     sel.onchange = async ()=>{
       if(!canEditRoles()) return;
       const rec = state.team.find(t=>t.id===sel.dataset.roleFor);
-      if(rec){ rec.role = sel.value; await saveKey(KEYS.team, state.team); toast(`${rec.name} is now ${rec.role}.`); }
+      // Persists the choice now that team has a role column. It does not
+      // yet grant anything: permissions still come from the hardcoded
+      // FULL_ADMIN / CO_ADMINS / PRIVILEGED lists, which ignore this field.
+      if(rec){ rec.role = sel.value; await dbUpdate('team', rec); toast(`${rec.name} is now ${rec.role}.`); }
     };
   });
   const addValBtn = document.getElementById('addValidationBtn');
@@ -4215,7 +4294,7 @@ async function setDealStage(dealId, newStage){
   deal.stage = newStage;
   if(deal.stage==='Won' && !wasWon && !deal._autoInvoiced){
     deal._autoInvoiced = true;
-    await saveKey(KEYS.deals, state.deals);
+    await dbUpdate('deals', deal);
     await createPaidOrderAndInvoice({
       relatedType:'contact', relatedId: deal.contactId,
       product: deal.title, qty:1, amount: deal.value||0, currencies: deal.currencies||[],
@@ -4226,7 +4305,7 @@ async function setDealStage(dealId, newStage){
     celebrate();
     return;
   }
-  await saveKey(KEYS.deals, state.deals);
+  await dbUpdate('deals', deal);
   await checkBigDealAlert(deal);
   render();
 }
