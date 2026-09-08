@@ -1664,7 +1664,7 @@ function openNewDashboardModal(){
     if(!name) return alert('Give it a name.');
     const dash = {id:uid(), owner:state.viewingAs, name, widgets:[], createdAt:Date.now()};
     state.dashboards.push(dash);
-    await saveKey(KEYS.dashboards, state.dashboards);
+    saveLocalConfig('dashboards');
     state.activeDashboardId = dash.id;
     closeModal();
     render();
@@ -1685,7 +1685,7 @@ function openDashboardWidgetPicker(dashId){
   document.getElementById('cancelBtn').onclick = closeModal;
   document.getElementById('dashSaveWidgetsBtn').onclick = async ()=>{
     dash.widgets = Array.from(document.querySelectorAll('[data-widget-key]:checked')).map(cb=>cb.dataset.widgetKey);
-    await saveKey(KEYS.dashboards, state.dashboards);
+    saveLocalConfig('dashboards');
     closeModal();
     render();
   };
@@ -1776,6 +1776,20 @@ function loadQuickActionPrefs(){
 }
 function saveQuickActionPrefs(){
   try{ localStorage.setItem('crm_quick_action_prefs', JSON.stringify(state.quickActionPrefs)); }catch(e){}
+}
+/* Setup config features (validation rules, automations, flows, etc.) have no Supabase
+   table yet, so they persist to localStorage until a shared app_config table exists. */
+const LOCAL_CONFIG_KEYS = ['dashboards','validationRules','guideEntries','dependentFields','flows','automations','sharingRules','bigDealAlert','bigDealAlerts','guideDismissed'];
+function loadLocalConfig(){
+  LOCAL_CONFIG_KEYS.forEach(key=>{
+    try{
+      const v = localStorage.getItem('crm_cfg_'+key);
+      if(v!==null) state[key] = JSON.parse(v);
+    }catch(e){}
+  });
+}
+function saveLocalConfig(key){
+  try{ localStorage.setItem('crm_cfg_'+key, JSON.stringify(state[key])); }catch(e){}
 }
 
 function applyThemePref(pref){
@@ -2702,11 +2716,11 @@ async function runAutomations(entityKey, obj){
         dueDate:due, owner:a.taskOwner||obj.owner||state.viewingAs, status:'Open', linkType:'none', linkId:null,
         notes:`Auto-created by automation "${a.name}".` };
       state.tasks.push(task);
-      await saveKey(KEYS.tasks, state.tasks);
+      await dbInsert('tasks', task);
     } else if(a.action==='set_field' && a.setField){
       const list = state[entityKey];
       const rec = list.find(x=>x.id===obj.id);
-      if(rec){ rec[a.setField] = a.setValue; await saveKey(KEYS[entityKey], list); }
+      if(rec){ rec[a.setField] = a.setValue; await dbUpdate(entityKey, rec); }
     }
   }
 }
@@ -2719,11 +2733,11 @@ async function runFlowAction(step, entityKey, obj, flowName){
       dueDate:due, owner:obj.owner||state.viewingAs, status:'Open', linkType:'none', linkId:null,
       notes:`Auto-created by flow "${flowName}".` };
     state.tasks.push(task);
-    await saveKey(KEYS.tasks, state.tasks);
+    await dbInsert('tasks', task);
   } else if(step.action==='set_field' && step.field){
     const list = state[entityKey];
     const rec = list.find(x=>x.id===obj.id);
-    if(rec){ rec[step.field] = step.value; await saveKey(KEYS[entityKey], list); }
+    if(rec){ rec[step.field] = step.value; await dbUpdate(entityKey, rec); }
   } else if(step.action==='toast'){
     toast(step.message || `Flow "${flowName}" ran.`);
   }
@@ -3101,7 +3115,7 @@ function openValidationRuleModal(){
       };
     }
     state.validationRules.push(rule);
-    await saveKey(KEYS.validationRules, state.validationRules);
+    saveLocalConfig('validationRules');
     closeModal();
     rerenderSetupView();
   };
@@ -3133,7 +3147,7 @@ function openGuideEntryModal(presetEntity){
     const linkEntity = document.getElementById('ge_entity').value;
     const linkField = linkEntity ? document.getElementById('ge_field').value : '';
     state.guideEntries.push({id:uid(), title, body, linkEntity, linkField});
-    await saveKey(KEYS.guideEntries, state.guideEntries);
+    saveLocalConfig('guideEntries');
     closeModal();
     rerenderSetupView();
   };
@@ -3163,7 +3177,7 @@ function openDependentFieldModal(){
     if(controllingField===dependentField){ alert('Pick two different fields.'); return; }
     const message = document.getElementById('df_message').value.trim();
     state.dependentFields.push({id:uid(), entity, controllingField, dependentField, message});
-    await saveKey(KEYS.dependentFields, state.dependentFields);
+    saveLocalConfig('dependentFields');
     closeModal();
     rerenderSetupView();
   };
@@ -3253,7 +3267,7 @@ function openFlowModal(){
     if(!flowBuilderSteps.length){ alert('Add at least one condition or action.'); return; }
     const flow = { id:uid(), name, entity: document.getElementById('fl_entity').value, steps: flowBuilderSteps };
     state.flows.push(flow);
-    await saveKey(KEYS.flows, state.flows);
+    saveLocalConfig('flows');
     closeModal();
     rerenderSetupView();
   };
@@ -3320,7 +3334,7 @@ function openAutomationModal(){
       setValue: document.getElementById('au_setValue').value.trim(),
     };
     state.automations.push(automation);
-    await saveKey(KEYS.automations, state.automations);
+    saveLocalConfig('automations');
     closeModal();
     rerenderSetupView();
   };
@@ -3334,7 +3348,7 @@ function wireSetupView(){
     sel.onchange = async ()=>{
       if(!canEditRoles()) return;
       const rec = state.team.find(t=>t.id===sel.dataset.roleFor);
-      if(rec){ rec.role = sel.value; await saveKey(KEYS.team, state.team); toast(`${rec.name} is now ${rec.role}.`); }
+      if(rec){ rec.role = sel.value; await dbUpdate('team', rec); toast(`${rec.name} is now ${rec.role}.`); }
     };
   });
   const addValBtn = document.getElementById('addValidationBtn');
@@ -3344,7 +3358,7 @@ function wireSetupView(){
       if(!canEditGlobalSetup()) return;
       if(!confirm('Delete this validation rule?')) return;
       state.validationRules = state.validationRules.filter(r=>r.id!==el.dataset.delRule);
-      await saveKey(KEYS.validationRules, state.validationRules);
+      saveLocalConfig('validationRules');
       rerenderSetupView();
     };
   });
@@ -3355,7 +3369,7 @@ function wireSetupView(){
       if(!canEditDependentFields()) return;
       if(!confirm('Delete this dependent field rule?')) return;
       state.dependentFields = state.dependentFields.filter(r=>r.id!==el.dataset.delDependent);
-      await saveKey(KEYS.dependentFields, state.dependentFields);
+      saveLocalConfig('dependentFields');
       rerenderSetupView();
     };
   });
@@ -3368,7 +3382,7 @@ function wireSetupView(){
       } else {
         state.validationRules = state.validationRules.filter(r=>!(r.entity===entity && r.field===field && r.type==='required'));
       }
-      await saveKey(KEYS.validationRules, state.validationRules);
+      saveLocalConfig('validationRules');
       toast(`${prettyField(field)} ${cb.checked?'is now required':'is no longer required'} for ${EXPORT_SHEETS.find(s=>s.key===entity).label}.`);
     };
   });
@@ -3379,7 +3393,7 @@ function wireSetupView(){
       if(!canEditGlobalSetup()) return;
       if(!confirm('Delete this automation?')) return;
       state.automations = state.automations.filter(a=>a.id!==el.dataset.delAutomation);
-      await saveKey(KEYS.automations, state.automations);
+      saveLocalConfig('automations');
       rerenderSetupView();
     };
   });
@@ -3389,7 +3403,7 @@ function wireSetupView(){
     el.onclick = async ()=>{
       if(!confirm('Delete this flow?')) return;
       state.flows = state.flows.filter(f=>f.id!==el.dataset.delFlow);
-      await saveKey(KEYS.flows, state.flows);
+      saveLocalConfig('flows');
       rerenderSetupView();
     };
   });
@@ -3397,7 +3411,7 @@ function wireSetupView(){
     sel.onchange = async ()=>{
       if(!canEditGlobalSetup()) return;
       state.sharingRules[sel.dataset.sharingFor] = sel.value;
-      await saveKey(KEYS.sharingRules, state.sharingRules);
+      saveLocalConfig('sharingRules');
       toast('Sharing rule updated.');
     };
   });
@@ -3407,7 +3421,7 @@ function wireSetupView(){
     el.onclick = async ()=>{
       if(!confirm('Delete this guide entry?')) return;
       state.guideEntries = state.guideEntries.filter(g=>g.id!==el.dataset.delGuide);
-      await saveKey(KEYS.guideEntries, state.guideEntries);
+      saveLocalConfig('guideEntries');
       rerenderSetupView();
     };
   });
@@ -3420,7 +3434,7 @@ function wireSetupView(){
         threshold: Number(document.getElementById('bda_threshold').value)||0,
         currency: document.getElementById('bda_currency').value,
       };
-      await saveKey(KEYS.bigDealAlert, state.bigDealAlert);
+      saveLocalConfig('bigDealAlert');
       toast('Big deal alert settings saved.');
     };
   }
@@ -3428,7 +3442,7 @@ function wireSetupView(){
     el.onclick = async ()=>{
       if(!canEditBigDealAlert()) return;
       state.bigDealAlerts = state.bigDealAlerts.filter(a=>a.id!==el.dataset.delBigdeal);
-      await saveKey(KEYS.bigDealAlerts, state.bigDealAlerts);
+      saveLocalConfig('bigDealAlerts');
       rerenderSetupView();
     };
   });
@@ -3471,7 +3485,7 @@ function attachContentHandlers(){
   if(dashDeleteBtn) dashDeleteBtn.onclick = async ()=>{
     if(!confirm('Delete this dashboard?')) return;
     state.dashboards = state.dashboards.filter(d=>d.id!==dashDeleteBtn.dataset.dashId);
-    await saveKey(KEYS.dashboards, state.dashboards);
+    saveLocalConfig('dashboards');
     state.activeDashboardId = '';
     render();
   };
@@ -3942,7 +3956,7 @@ function openObjectGuideIntroModal(entityKey, onContinue){
       if(!list.includes(entityKey)){
         list.push(entityKey);
         state.guideDismissed[state.currentUser] = list;
-        await saveKey(KEYS.guideDismissed, state.guideDismissed);
+        saveLocalConfig('guideDismissed');
       }
     }
     closeModal();
@@ -4270,7 +4284,7 @@ async function checkBigDealAlert(deal){
   if(state.bigDealAlerts.some(a=>a.dealId===deal.id)) return;
   const alert = { id:uid(), dealId:deal.id, title:deal.title, value:deal.value, owner:deal.owner, stage:deal.stage, createdAt:Date.now() };
   state.bigDealAlerts.unshift(alert);
-  await saveKey(KEYS.bigDealAlerts, state.bigDealAlerts);
+  saveLocalConfig('bigDealAlerts');
   if(personaIsAdmin() || roleFor(state.viewingAs)==='Manager'){
     toast(`🚨 Big deal alert: "${deal.title}" — ${Number(deal.value||0).toLocaleString()} ${cfg.currency}`);
   }
@@ -4283,7 +4297,8 @@ async function setDealStage(dealId, newStage){
   deal.stage = newStage;
   if(deal.stage==='Won' && !wasWon && !deal._autoInvoiced){
     deal._autoInvoiced = true;
-    await saveKey(KEYS.deals, state.deals);
+    await dbUpdate('deals', deal);
+    await checkBigDealAlert(deal);
     await createPaidOrderAndInvoice({
       relatedType:'contact', relatedId: deal.contactId,
       product: deal.title, qty:1, amount: deal.value||0, currencies: deal.currencies||[],
@@ -4294,7 +4309,7 @@ async function setDealStage(dealId, newStage){
     celebrate();
     return;
   }
-  await saveKey(KEYS.deals, state.deals);
+  await dbUpdate('deals', deal);
   await checkBigDealAlert(deal);
   render();
 }
@@ -4444,6 +4459,7 @@ document.getElementById('loginBtn').onclick = attemptLogin;
 ensureTeamLoaded();
 loadChartPref();
 loadQuickActionPrefs();
+loadLocalConfig();
 document.getElementById('loginPassword').onkeydown = (e)=>{ if(e.key==='Enter') attemptLogin(); };
 document.getElementById('loginEmail').onkeydown = (e)=>{ if(e.key==='Enter') document.getElementById('loginPassword').focus(); };
 document.getElementById('logoutBtn').onclick = ()=>{
