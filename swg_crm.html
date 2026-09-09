@@ -329,15 +329,22 @@
   /* Interactive walkthrough */
   .tour-overlay{position:fixed;inset:0;z-index:9990;}
   .tour-blocker{position:fixed;inset:0;background:transparent;}
-  .tour-spot{position:fixed;border-radius:9px;box-shadow:0 0 0 9999px rgba(20,18,12,0.6);pointer-events:none;transition:top .25s ease,left .25s ease,width .25s ease,height .25s ease;outline:2px solid var(--setup-blue);outline-offset:2px;}
-  .tour-card{position:fixed;width:340px;max-width:calc(100vw - 32px);background:var(--surface);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,0.28);padding:18px 20px 16px;transition:top .25s ease,left .25s ease;}
-  .tour-card-eyebrow{font-size:10.5px;font-weight:700;color:var(--setup-blue);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;}
-  .tour-card-title{font-family:'Fraunces',serif;font-weight:700;font-size:15.5px;color:var(--ink);margin-bottom:6px;}
-  .tour-card-body{font-size:12.8px;color:var(--ink-soft);line-height:1.55;margin-bottom:12px;}
-  .tour-progress{display:flex;gap:4px;margin-bottom:14px;}
-  .tour-progress span{width:16px;height:3px;border-radius:2px;background:var(--border);}
-  .tour-progress span.on{background:var(--setup-blue);}
+  .tour-spot{position:fixed;border-radius:9px;box-shadow:0 0 0 9999px rgba(20,18,12,0.62);pointer-events:none;transition:top .25s ease,left .25s ease,width .25s ease,height .25s ease;outline:2px solid var(--setup-blue);outline-offset:2px;}
+  .tour-card{position:fixed;width:380px;max-width:calc(100vw - 32px);background:var(--surface);border-radius:14px;box-shadow:0 16px 40px rgba(0,0,0,0.32);padding:22px 24px 18px;transition:top .25s ease,left .25s ease;animation:tour-card-in .2s ease;}
+  @keyframes tour-card-in{ from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
+  .tour-card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;}
+  .tour-card-icon{width:34px;height:34px;border-radius:9px;background:var(--setup-blue-soft);color:var(--setup-blue);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .tour-card-icon svg{width:18px;height:18px;}
+  .tour-card-eyebrow{font-size:10.5px;font-weight:700;color:var(--setup-blue);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;}
+  .tour-card-title{font-family:'Fraunces',serif;font-weight:700;font-size:16.5px;color:var(--ink);}
+  .tour-card-body{font-size:13px;color:var(--ink-soft);line-height:1.6;margin-bottom:16px;}
+  .tour-progress-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+  .tour-progress-track{flex:1;height:5px;border-radius:3px;background:var(--border);overflow:hidden;}
+  .tour-progress-fill{height:100%;background:var(--setup-blue);border-radius:3px;transition:width .25s ease;}
+  .tour-progress-label{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);white-space:nowrap;}
   .tour-card-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .tour-end-link{background:none;border:none;color:var(--ink-soft);font-family:inherit;font-size:12px;cursor:pointer;text-decoration:underline;padding:0;}
+  .tour-end-link:hover{color:var(--ink);}
   .modal h2{margin:0 0 16px;font-size:17px;font-weight:500;}
   .field{margin-bottom:12px;}
   .field label{display:block;font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;}
@@ -375,6 +382,17 @@
   .dash-tab.active{background:var(--ink-fixed);color:#fff;border-color:var(--ink-fixed);}
   .setup-tabs .dash-tab.active{background:var(--setup-blue);border-color:var(--setup-blue);}
   .setup-banner{background:var(--setup-blue-soft);color:var(--setup-blue);border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .setup-layout{display:flex;align-items:flex-start;gap:24px;}
+  .setup-sidenav{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:2px;position:sticky;top:0;}
+  .setup-nav-item{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:7px;border:none;background:none;color:var(--ink-soft);cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;transition:background .15s,color .15s;}
+  .setup-nav-item:hover{background:var(--setup-blue-soft);color:var(--setup-blue);}
+  .setup-nav-item.active{background:var(--setup-blue);color:#fff;}
+  .setup-body{flex:1;min-width:0;}
+  .setup-savebar{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--setup-blue-soft);border:1px solid var(--setup-blue);color:var(--setup-blue);border-radius:8px;padding:10px 14px;font-size:12.5px;font-weight:600;margin-bottom:14px;}
+  .setup-savebar-top{position:sticky;top:0;z-index:5;}
+  .setup-savebar-bottom{margin-top:14px;margin-bottom:0;}
+  .setup-savebar-actions{display:flex;gap:8px;flex-shrink:0;}
+  .setup-savebar-actions .btn{padding:6px 16px;font-size:12.5px;}
   .help-tip{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--border);color:var(--ink-soft);font-size:10px;font-weight:700;cursor:help;margin-left:5px;vertical-align:middle;}
   .formula-wizard{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:8px;}
   .formula-wizard .fw-label{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 6px;}
@@ -498,15 +516,24 @@
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
   /* Login screen */
-  .login-screen{position:fixed;inset:0;background:var(--cream);display:flex;align-items:center;justify-content:center;overflow:hidden;z-index:100;}
-  .login-card{position:relative;z-index:2;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px 30px;width:320px;box-shadow:0 12px 32px rgba(42,40,32,0.14);text-align:center;}
-  .login-card .brand-sub{text-align:center;}
-  .login-card .login-message{font-size:18px;color:var(--ink);margin:14px 0 22px;line-height:1.35;}
+  .login-screen{position:fixed;inset:0;background:radial-gradient(circle at 50% 32%, #16233d 0%, #05070d 68%);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;z-index:100;}
+  .login-wordmark{font-family:'Fraunces',serif;font-size:52px;font-weight:600;letter-spacing:5px;color:#eaf1ff;margin:0 0 28px;animation:login-glow-pulse 3.2s ease-in-out infinite;}
+  @keyframes login-glow-pulse{
+    0%,100%{text-shadow:0 0 18px rgba(79,140,255,0.75),0 0 40px rgba(47,111,237,0.45);}
+    50%{text-shadow:0 0 30px rgba(120,170,255,1),0 0 66px rgba(47,111,237,0.75);}
+  }
+  .login-card{position:relative;z-index:2;background:#0d1526;border:1px solid rgba(79,140,255,0.5);border-radius:16px;padding:32px 30px;width:320px;text-align:center;animation:login-box-glow 3.2s ease-in-out infinite;}
+  @keyframes login-box-glow{
+    0%,100%{box-shadow:0 0 0 1px rgba(79,140,255,0.18),0 0 26px rgba(47,111,237,0.3),0 20px 44px rgba(0,0,0,0.55);}
+    50%{box-shadow:0 0 0 1px rgba(79,140,255,0.35),0 0 48px rgba(47,111,237,0.65),0 20px 44px rgba(0,0,0,0.55);}
+  }
   .login-card .field{text-align:left;margin-bottom:14px;}
-  .login-error{color:var(--rust);font-size:12px;margin:-4px 0 10px;text-align:left;}
-  .confetti-container{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;}
-  .confetti-piece{position:absolute;top:-20px;width:8px;height:14px;opacity:.85;border-radius:1px;animation:confetti-fall linear infinite;}
-  @keyframes confetti-fall{0%{transform:translateY(-10vh) rotate(0deg);}100%{transform:translateY(110vh) rotate(360deg);}}
+  .login-card .field label{color:#8fa8d6;}
+  .login-card .field input{background:#101b30;border:1px solid rgba(79,140,255,0.3);color:#eaf1ff;}
+  .login-card .field input::placeholder{color:#4d5f80;}
+  .login-card .field input:focus{outline:none;border-color:rgba(79,140,255,0.85);box-shadow:0 0 0 3px rgba(47,111,237,0.25);}
+  .login-card .btn{background:#2F6FED;}
+  .login-error{color:#ff8a80;font-size:12px;margin:-4px 0 10px;text-align:left;}
 
   /* Identity / logout */
   .identity-name{font-size:13px;font-weight:500;color:var(--ink);padding:6px 0 2px;}
@@ -569,16 +596,6 @@
   .search-hit-sub{font-size:11.5px;color:var(--ink-soft);}
   .search-empty{color:var(--ink-soft);font-size:13px;text-align:center;padding:30px;}
 
-  /* Rocket flight on login screen */
-  .rocket{position:absolute;left:-80px;bottom:22vh;font-size:44px;z-index:3;pointer-events:none;transform:rotate(-8deg);opacity:0;filter:drop-shadow(0 4px 8px rgba(42,40,32,0.2));}
-  .rocket.launched{animation:rocket-fly 2.6s cubic-bezier(0.4,0,0.7,1) forwards;}
-  @keyframes rocket-fly{
-    0%{left:-80px;bottom:22vh;opacity:0;transform:rotate(-8deg);}
-    10%{opacity:1;}
-    50%{bottom:60vh;transform:rotate(-4deg);}
-    90%{opacity:1;}
-    100%{left:105vw;bottom:75vh;opacity:0;transform:rotate(2deg);}
-  }
 
   /* In-app celebration confetti (1s burst) */
   .celebrate{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden;}
@@ -650,21 +667,17 @@
 </head>
 <body>
 <div id="loginScreen" class="login-screen">
-  <div class="confetti-container" id="confettiContainer"></div>
-  <div class="rocket" id="rocket">🚀</div>
+  <div class="login-wordmark">SWG</div>
   <div class="login-card">
-    <div class="brand display" style="font-size:20px;">SWG</div>
-    <div class="brand-sub" style="margin-bottom:18px;">CRM Ledger</div>
-    <div class="login-message display">Perfect day to break records.</div>
     <div class="field">
-      <label>Email</label>
-      <input id="loginEmail" type="email" placeholder="you@siddhayogaweb.com" autocomplete="username">
+      <label>Username</label>
+      <input id="loginEmail" type="email" placeholder="your username" autocomplete="username">
     </div>
     <div class="field">
       <label>Password</label>
       <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password">
     </div>
-    <div class="login-error" id="loginError" style="display:none;">Incorrect email or password.</div>
+    <div class="login-error" id="loginError" style="display:none;">Incorrect username or password.</div>
     <button class="btn" id="loginBtn" style="width:100%;margin-top:6px;">Log in</button>
   </div>
 </div>
@@ -1299,29 +1312,28 @@ function setActiveNav(){
     el.classList.toggle('active', el.dataset.view===state.view);
   });
 }
+/* Combines every rule that can hide a sidebar entry so each render fully
+   recomputes hidden-role (add AND remove) instead of only ever adding it --
+   switching "viewing as" back to an admin, or unhiding an object, has to
+   actually reveal the link again, not just leave a stale class behind. */
+function navLinkHidden(entity){
+  if((entity==='invoices' || entity==='payments' || entity==='finance') && !isPrivileged()) return true;
+  if(entity==='team' && !isAdmin()) return true;
+  if(entity==='leads' && !canSeeLeads()) return true;
+  if(SETUP_ENTITIES.includes(entity) && isObjectHidden(entity) && !personaIsAdmin()) return true;
+  return false;
+}
 function updateNavVisibility(){
-  const invLink = document.querySelector('.navlink[data-view="invoices"]');
-  if(invLink) invLink.classList.toggle('hidden-role', !isPrivileged());
-  const payLink = document.querySelector('.navlink[data-view="payments"]');
-  if(payLink) payLink.classList.toggle('hidden-role', !isPrivileged());
-  const financeLink = document.querySelector('.navlink[data-view="finance"]');
-  if(financeLink) financeLink.classList.toggle('hidden-role', !isPrivileged());
-  const teamLink = document.querySelector('.navlink[data-view="team"]');
-  if(teamLink) teamLink.classList.toggle('hidden-role', !isAdmin());
   const setupGear = document.getElementById('setupGearBtn');
   if(setupGear){
     setupGear.style.display = canAccessSetup() ? 'flex' : 'none';
     setupGear.classList.toggle('active', state.view==='setup');
   }
-  const leadLink = document.querySelector('.navlink[data-view="leads"]');
-  if(leadLink) leadLink.classList.toggle('hidden-role', !canSeeLeads());
-  if(!isAdmin()){
-    SETUP_ENTITIES.forEach(entity=>{
-      if(!isObjectHidden(entity)) return;
-      const link = document.querySelector(`.navlink[data-view="${entity}"]`);
-      if(link) link.classList.add('hidden-role');
-    });
-  }
+  const gatedEntities = Array.from(new Set(['invoices','payments','finance','team', ...SETUP_ENTITIES]));
+  gatedEntities.forEach(entity=>{
+    const link = document.querySelector(`.navlink[data-view="${entity}"]`);
+    if(link) link.classList.toggle('hidden-role', navLinkHidden(entity));
+  });
   renderTopnavQuickActions();
 }
 
@@ -1332,7 +1344,7 @@ function render(){
   if(state.view==='team' && !isAdmin()) state.view = 'dashboard';
   if(state.view==='setup' && !canAccessSetup()) state.view = 'dashboard';
   if(state.view==='leads' && !canSeeLeads()) state.view = 'dashboard';
-  if(SETUP_ENTITIES.includes(state.view) && isObjectHidden(state.view) && !isAdmin()) state.view = 'dashboard';
+  if(SETUP_ENTITIES.includes(state.view) && isObjectHidden(state.view) && !personaIsAdmin()) state.view = 'dashboard';
   const isSetupPage = state.view==='setup';
   document.querySelector('.sidebar').style.display = isSetupPage ? 'none' : 'flex';
   document.querySelector('.topnav').style.display = isSetupPage ? 'none' : 'grid';
@@ -3382,18 +3394,77 @@ function visibleRecords(entityKey, list){
   return list.filter(x=>x.owner===state.viewingAs);
 }
 
+/* Roles, Required Fields, Sharing Rules and Object & Field Visibility stage
+   their edits here instead of saving on every toggle -- a Save/Cancel bar
+   (rendered top+bottom of the tab) commits or discards the whole batch, so
+   an accidental click never silently changes a team-wide setting. Every
+   other Setup tab either has its own explicit Save button already (Big
+   Deal Alerts) or only ever adds/deletes whole rows via a modal, which
+   already requires an explicit confirm -- so this is scoped to these four. */
+let setupDraft = null;
+function setupDraftActive(tab){ return !!(setupDraft && setupDraft.tab===tab); }
+function setupDraftSeed(tab){
+  if(tab==='roles'){ const m={}; state.team.forEach(t=>{ m[t.id]=roleFor(t.name); }); return m; }
+  if(tab==='required') return state.validationRules.map(r=>({...r}));
+  if(tab==='sharing') return {...state.sharingRules};
+  if(tab==='visibility') return { objectVisibility:{...state.objectVisibility}, fieldVisibility:{...state.fieldVisibility} };
+  return null;
+}
+function stageSetupChange(tab, mutate){
+  if(!setupDraftActive(tab)) setupDraft = { tab, data: setupDraftSeed(tab) };
+  mutate(setupDraft.data);
+  rerenderSetupView();
+}
+async function saveSetupDraft(){
+  if(!setupDraft) return;
+  const { tab, data } = setupDraft;
+  if(tab==='roles'){
+    await Promise.all(state.team.filter(t=>data[t.id]!==undefined && data[t.id]!==roleFor(t.name)).map(t=>{ t.role = data[t.id]; return dbUpdate('team', t); }));
+  } else if(tab==='required'){
+    state.validationRules = data;
+    await saveKey(KEYS.validationRules, state.validationRules);
+  } else if(tab==='sharing'){
+    state.sharingRules = data;
+    await saveKey(KEYS.sharingRules, state.sharingRules);
+  } else if(tab==='visibility'){
+    state.objectVisibility = data.objectVisibility;
+    state.fieldVisibility = data.fieldVisibility;
+    await saveKey(KEYS.objectVisibility, state.objectVisibility);
+    await saveKey(KEYS.fieldVisibility, state.fieldVisibility);
+  }
+  setupDraft = null;
+  toast('Changes saved.');
+  rerenderSetupView();
+}
+function cancelSetupDraft(){
+  setupDraft = null;
+  rerenderSetupView();
+}
+function renderSetupSaveBar(pos){
+  if(!setupDraft) return '';
+  return `<div class="setup-savebar setup-savebar-${pos}">
+    <span>You have unsaved changes.</span>
+    <div class="setup-savebar-actions">
+      <button type="button" class="btn secondary setup-cancel-btn">Cancel</button>
+      <button type="button" class="btn setup-save-btn">Save</button>
+    </div>
+  </div>`;
+}
 function renderSetupRoles(){
   const canEdit = canEditRoles();
+  const roles = setupDraftActive('roles') ? setupDraft.data : null;
   return `<div class="io-card">
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Assign each team member a role. Admins and Managers can open Setup; only Ariel can delete a team member.</p>
     ${canEdit ? '' : `<div class="readonly-note">👁 View only — only Ariel or Daniel can change roles.</div>`}
+    ${renderSetupSaveBar('top')}
     <table><thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody>
     ${state.team.map(t=>`<tr>
       <td>${esc(t.name)}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${esc(t.email||'—')}</td>
-      <td><select data-role-for="${t.id}" ${(t.name===FULL_ADMIN || !canEdit)?'disabled':''}>${ROLE_LIST.map(r=>`<option ${roleFor(t.name)===r?'selected':''}>${r}</option>`).join('')}</select></td>
+      <td><select data-role-for="${t.id}" ${(t.name===FULL_ADMIN || !canEdit)?'disabled':''}>${ROLE_LIST.map(r=>`<option ${(roles?roles[t.id]:roleFor(t.name))===r?'selected':''}>${r}</option>`).join('')}</select></td>
     </tr>`).join('')}
     </tbody></table>
+    ${renderSetupSaveBar('bottom')}
   </div>`;
 }
 
@@ -3441,29 +3512,33 @@ function isFieldRequired(entity, field){
 }
 function renderSetupRequired(){
   const canEdit = canEditRequiredFields();
+  const rules = setupDraftActive('required') ? setupDraft.data : state.validationRules;
+  const draftRequired = (entity, field) => rules.some(r=>r.entity===entity && r.field===field && r.type==='required');
   return `<div class="io-card">
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Mark fields that must be filled in before a record can be saved. Toggling one on or off adds or removes a "Required" validation rule behind the scenes.</p>
     ${canEdit ? '' : `<div class="readonly-note">👁 View only — only Ariel, David or Daniel can change which fields are required.</div>`}
+    ${renderSetupSaveBar('top')}
     ${SETUP_ENTITIES.map(entity=>`
       <div style="margin-bottom:18px;">
         <p style="font-size:12.5px;font-weight:700;margin:0 0 8px;">${esc(EXPORT_SHEETS.find(s=>s.key===entity).label)}</p>
         <div class="required-field-grid">
           ${entityFieldsFor(entity).map(f=>`<label class="required-field-row">
-            <input type="checkbox" data-req-entity="${entity}" data-req-field="${f}" ${isFieldRequired(entity,f)?'checked':''} ${canEdit?'':'disabled'}>
+            <input type="checkbox" data-req-entity="${entity}" data-req-field="${f}" ${draftRequired(entity,f)?'checked':''} ${canEdit?'':'disabled'}>
             <span>${esc(prettyField(f))}</span>
           </label>`).join('')}
         </div>
       </div>`).join('')}
+    ${renderSetupSaveBar('bottom')}
   </div>`;
 }
 
 function isObjectHidden(entity){ return !!state.objectVisibility[entity]; }
 function isFieldHidden(entity, field){ return !!state.fieldVisibility[entity+'.'+field]; }
 const FIELD_FORM_ID_OVERRIDES = {
-  'deals.currencies': 'f_curr_deal',
-  'orders.currencies': 'f_curr_order',
-  'invoices.currencies': 'f_curr_inv',
-  'distributors.continents': 'f_conts',
+  'deals.currencies': 'f_curr_deal_wrap',
+  'orders.currencies': 'f_curr_order_wrap',
+  'invoices.currencies': 'f_curr_inv_wrap',
+  'distributors.continents': 'f_conts_wrap',
   'payments.payee': 'f_payeeSel',
 };
 function formFieldElementId(entity, field){
@@ -3473,7 +3548,7 @@ function formFieldElementId(entity, field){
    fields up by their existing f_<field> id convention rather than requiring
    every renderer's markup to carry a matching data attribute. */
 function applyFieldVisibilityToForm(entity){
-  if(isAdmin()) return;
+  if(personaIsAdmin()) return;
   entityFieldsFor(entity).forEach(field=>{
     if(!isFieldHidden(entity, field)) return;
     const el = document.getElementById(formFieldElementId(entity, field));
@@ -3484,7 +3559,7 @@ function applyFieldVisibilityToForm(entity){
 /* Hides matching table columns (header + cells), marked via data-field-col
    in the entity's list renderer. */
 function applyFieldVisibilityToTable(entity){
-  if(isAdmin()) return;
+  if(personaIsAdmin()) return;
   entityFieldsFor(entity).forEach(field=>{
     if(!isFieldHidden(entity, field)) return;
     document.querySelectorAll(`#content [data-field-col="${field}"]`).forEach(el=>{ el.style.display = 'none'; });
@@ -3492,22 +3567,27 @@ function applyFieldVisibilityToTable(entity){
 }
 function renderSetupVisibility(){
   const canEdit = canEditGlobalSetup();
+  const draft = setupDraftActive('visibility') ? setupDraft.data : null;
+  const objHidden = entity => draft ? !!draft.objectVisibility[entity] : isObjectHidden(entity);
+  const fieldHidden = (entity,f) => draft ? !!draft.fieldVisibility[entity+'.'+f] : isFieldHidden(entity,f);
   return `<div class="io-card">
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Control which objects and fields other users can see. Hiding an object removes it from the sidebar entirely; hiding a field removes it from that object's list view and its Add/Edit form. Admins (Ariel, David) always see everything, regardless of these settings.</p>
     ${canEdit ? '' : `<div class="readonly-note">👁 View only — only Ariel or David can change object and field visibility.</div>`}
+    ${renderSetupSaveBar('top')}
     ${SETUP_ENTITIES.map(entity=>`
       <div style="margin-bottom:18px;">
         <label class="required-field-row" style="font-size:12.5px;font-weight:700;margin-bottom:8px;">
-          <input type="checkbox" data-hide-object="${entity}" ${isObjectHidden(entity)?'checked':''} ${canEdit?'':'disabled'}>
+          <input type="checkbox" data-hide-object="${entity}" ${objHidden(entity)?'checked':''} ${canEdit?'':'disabled'}>
           <span>Hide ${esc(EXPORT_SHEETS.find(s=>s.key===entity).label)} entirely</span>
         </label>
         <div class="required-field-grid">
           ${entityFieldsFor(entity).map(f=>`<label class="required-field-row">
-            <input type="checkbox" data-hide-field="${entity}" data-hide-field-name="${f}" ${isFieldHidden(entity,f)?'checked':''} ${canEdit?'':'disabled'}>
+            <input type="checkbox" data-hide-field="${entity}" data-hide-field-name="${f}" ${fieldHidden(entity,f)?'checked':''} ${canEdit?'':'disabled'}>
             <span>${esc(prettyField(f))}</span>
           </label>`).join('')}
         </div>
       </div>`).join('')}
+    ${renderSetupSaveBar('bottom')}
   </div>`;
 }
 
@@ -3598,7 +3678,7 @@ function renderSetupSchema(){
   return `<div class="io-card">
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">How your CRM objects connect to each other. Visible to everyone with Setup access.${canEdit ? ' Drag a box to rearrange the layout — it saves for everyone automatically.' : ''}</p>
     <div style="overflow-x:auto;">
-      <svg id="schemaSvg" viewBox="0 0 760 580" style="width:100%;max-width:760px;height:auto;display:block;margin:0 auto;${canEdit?'touch-action:none;':''}">${lines}${nodes}</svg>
+      <svg id="schemaSvg" viewBox="0 0 760 580" style="width:100%;height:auto;display:block;${canEdit?'touch-action:none;':''}">${lines}${nodes}</svg>
     </div>
     <div class="schema-legend">
       <span><span class="schema-legend-line"></span>Direct link (always points to one record)</span>
@@ -3661,15 +3741,18 @@ function wireSchemaVisualizer(){
 
 function renderSetupSharing(){
   const canEdit = canEditGlobalSetup();
+  const rules = setupDraftActive('sharing') ? setupDraft.data : state.sharingRules;
   return `<div class="io-card">
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Controls which team members can see each object's records in lists. Only an admin can change these — they affect the whole team. Everyone always sees their own records; admins always see everything.</p>
     ${canEdit ? '' : `<div class="readonly-note">👁 View only — only an admin can change sharing rules.</div>`}
+    ${renderSetupSaveBar('top')}
     <table><thead><tr><th>Object</th><th>Visible to</th></tr></thead><tbody>
     ${SHARING_ENTITIES.map(key=>`<tr>
       <td style="font-size:13px;">${esc(EXPORT_SHEETS.find(s=>s.key===key).label)}</td>
-      <td><select data-sharing-for="${key}" ${canEdit?'':'disabled'}>${SHARING_MODES.map(m=>`<option value="${m.key}" ${(state.sharingRules[key]||'everyone')===m.key?'selected':''}>${m.label}</option>`).join('')}</select></td>
+      <td><select data-sharing-for="${key}" ${canEdit?'':'disabled'}>${SHARING_MODES.map(m=>`<option value="${m.key}" ${(rules[key]||'everyone')===m.key?'selected':''}>${m.label}</option>`).join('')}</select></td>
     </tr>`).join('')}
     </tbody></table>
+    ${renderSetupSaveBar('bottom')}
   </div>`;
 }
 
@@ -3737,10 +3820,12 @@ function renderSetupTabBody(){
 }
 function renderSetup(){
   return `<div class="setup-banner">🔧 You're in the backend — changes here affect the whole team.</div>
-  <div class="dash-tabs setup-tabs">
-    ${SETUP_TABS.map(t=>`<button type="button" class="dash-tab ${state.setupTab===t.key?'active':''}" data-setup-tab="${t.key}">${t.label}</button>`).join('')}
-  </div>
-  <div id="setupTabBody">${renderSetupTabBody()}</div>`;
+  <div class="setup-layout">
+    <nav class="setup-sidenav">
+      ${SETUP_TABS.map(t=>`<button type="button" class="setup-nav-item ${state.setupTab===t.key?'active':''}" data-setup-tab="${t.key}">${t.label}</button>`).join('')}
+    </nav>
+    <div class="setup-body" id="setupTabBody">${renderSetupTabBody()}</div>
+  </div>`;
 }
 
 function rerenderSetupView(){
@@ -4074,34 +4159,44 @@ function openAutomationModal(){
 
 function wireSetupView(){
   document.querySelectorAll('[data-setup-tab]').forEach(btn=>{
-    btn.onclick = ()=>{ state.setupTab = btn.dataset.setupTab; rerenderSetupView(); };
+    btn.onclick = ()=>{
+      if(setupDraft && !confirm('You have unsaved changes on this tab. Discard them and switch tabs?')) return;
+      setupDraft = null;
+      state.setupTab = btn.dataset.setupTab;
+      rerenderSetupView();
+    };
   });
   if(state.setupTab==='schema') wireSchemaVisualizer();
+  document.querySelectorAll('.setup-save-btn').forEach(btn=>{ btn.onclick = saveSetupDraft; });
+  document.querySelectorAll('.setup-cancel-btn').forEach(btn=>{ btn.onclick = cancelSetupDraft; });
   document.querySelectorAll('[data-hide-object]').forEach(cb=>{
-    cb.onchange = async ()=>{
+    cb.onchange = ()=>{
       if(!canEditGlobalSetup()){ cb.checked = !cb.checked; return; }
       const entity = cb.dataset.hideObject;
-      if(cb.checked) state.objectVisibility[entity] = true; else delete state.objectVisibility[entity];
-      await saveKey(KEYS.objectVisibility, state.objectVisibility);
-      toast(`${EXPORT_SHEETS.find(s=>s.key===entity).label} ${cb.checked?'hidden from':'visible to'} other users.`);
+      const checked = cb.checked;
+      stageSetupChange('visibility', data=>{
+        if(checked) data.objectVisibility[entity] = true; else delete data.objectVisibility[entity];
+      });
     };
   });
   document.querySelectorAll('[data-hide-field]').forEach(cb=>{
-    cb.onchange = async ()=>{
+    cb.onchange = ()=>{
       if(!canEditGlobalSetup()){ cb.checked = !cb.checked; return; }
       const key = cb.dataset.hideField+'.'+cb.dataset.hideFieldName;
-      if(cb.checked) state.fieldVisibility[key] = true; else delete state.fieldVisibility[key];
-      await saveKey(KEYS.fieldVisibility, state.fieldVisibility);
+      const checked = cb.checked;
+      stageSetupChange('visibility', data=>{
+        if(checked) data.fieldVisibility[key] = true; else delete data.fieldVisibility[key];
+      });
     };
   });
   document.querySelectorAll('[data-role-for]').forEach(sel=>{
-    sel.onchange = async ()=>{
+    sel.onchange = ()=>{
       if(!canEditRoles()) return;
-      const rec = state.team.find(t=>t.id===sel.dataset.roleFor);
+      const teamId = sel.dataset.roleFor, role = sel.value;
       // Persists the choice now that team has a role column. It does not
       // yet grant anything: permissions still come from the hardcoded
       // FULL_ADMIN / CO_ADMINS / PRIVILEGED lists, which ignore this field.
-      if(rec){ rec.role = sel.value; await dbUpdate('team', rec); toast(`${rec.name} is now ${rec.role}.`); }
+      stageSetupChange('roles', data=>{ data[teamId] = role; });
     };
   });
   const addValBtn = document.getElementById('addValidationBtn');
@@ -4127,16 +4222,17 @@ function wireSetupView(){
     };
   });
   document.querySelectorAll('[data-req-entity]').forEach(cb=>{
-    cb.onchange = async ()=>{
+    cb.onchange = ()=>{
       if(!canEditRequiredFields()){ cb.checked = !cb.checked; return; }
-      const entity = cb.dataset.reqEntity, field = cb.dataset.reqField;
-      if(cb.checked){
-        if(!isFieldRequired(entity,field)) state.validationRules.push({id:uid(), entity, field, type:'required', value:'', message:''});
-      } else {
-        state.validationRules = state.validationRules.filter(r=>!(r.entity===entity && r.field===field && r.type==='required'));
-      }
-      await saveKey(KEYS.validationRules, state.validationRules);
-      toast(`${prettyField(field)} ${cb.checked?'is now required':'is no longer required'} for ${EXPORT_SHEETS.find(s=>s.key===entity).label}.`);
+      const entity = cb.dataset.reqEntity, field = cb.dataset.reqField, checked = cb.checked;
+      stageSetupChange('required', data=>{
+        if(checked){
+          if(!data.some(r=>r.entity===entity && r.field===field && r.type==='required')) data.push({id:uid(), entity, field, type:'required', value:'', message:''});
+        } else {
+          const idx = data.findIndex(r=>r.entity===entity && r.field===field && r.type==='required');
+          if(idx>=0) data.splice(idx,1);
+        }
+      });
     };
   });
   const addAutoBtn = document.getElementById('addAutomationBtn');
@@ -4161,11 +4257,10 @@ function wireSetupView(){
     };
   });
   document.querySelectorAll('[data-sharing-for]').forEach(sel=>{
-    sel.onchange = async ()=>{
+    sel.onchange = ()=>{
       if(!canEditGlobalSetup()) return;
-      state.sharingRules[sel.dataset.sharingFor] = sel.value;
-      await saveKey(KEYS.sharingRules, state.sharingRules);
-      toast('Sharing rule updated.');
+      const key = sel.dataset.sharingFor, mode = sel.value;
+      stageSetupChange('sharing', data=>{ data[key] = mode; });
     };
   });
   const addGuideBtn = document.getElementById('addGuideBtn');
@@ -4689,7 +4784,11 @@ function renderGuideNoteCards(entries, tagFn){
   </div>`).join('');
 }
 
-/* ---------- Interactive object walkthrough ---------- */
+/* ---------- Interactive object walkthrough ----------
+   Field-linked steps spotlight the real Add-form field (opening the Add
+   modal itself if needed) rather than a list column -- a list column only
+   exists once a record has been created, which is exactly backwards for a
+   tour meant to help someone with zero records yet. */
 let tourState = null;
 
 function tourStepsFor(entityKey){
@@ -4699,19 +4798,17 @@ function tourStepsFor(entityKey){
 
 function resolveTourTarget(step){
   if(step.linkField){
-    const wanted = prettyField(step.linkField).toLowerCase();
-    const ths = Array.from(document.querySelectorAll('#content th'));
-    const match = ths.find(th=>{
-      const t = th.textContent.trim().toLowerCase();
-      return t && (t.includes(wanted) || wanted.includes(t));
-    });
-    if(match) return match;
+    const el = document.getElementById(formFieldElementId(tourState.entityKey, step.linkField));
+    const wrap = el && el.closest('.field');
+    if(wrap && wrap.offsetParent !== null) return wrap;
+    const modal = document.getElementById('modalBody');
+    if(modal && document.getElementById('overlay').classList.contains('show')) return modal;
   }
   return document.querySelector('.topbar') || document.getElementById('content');
 }
 
 function tourCardStyle(rect){
-  const cardW = 340, cardH = 210, margin = 16;
+  const cardW = 380, cardH = 240, margin = 18;
   let top = rect.bottom + margin;
   if(top + cardH > window.innerHeight) top = Math.max(margin, rect.top - cardH - margin);
   let left = rect.left;
@@ -4721,6 +4818,7 @@ function tourCardStyle(rect){
 }
 
 function endTour(){
+  if(tourState && tourState.modalOpenedByTour) closeModal();
   tourState = null;
   const el = document.getElementById('tourOverlay');
   if(el) el.remove();
@@ -4741,18 +4839,27 @@ function paintTourStep(){
   const rect = target.getBoundingClientRect();
   const label = EXPORT_SHEETS.find(s=>s.key===tourState.entityKey)?.label || tourState.entityKey;
   const isLast = tourState.idx === tourState.steps.length-1;
+  const isFirst = tourState.idx === 0;
   overlay.innerHTML = `
     <div class="tour-blocker"></div>
     <div class="tour-spot" style="top:${rect.top-6}px;left:${rect.left-6}px;width:${rect.width+12}px;height:${rect.height+12}px;"></div>
     <div class="tour-card" style="${tourCardStyle(rect)}">
-      <div class="tour-card-eyebrow">${esc(label)} walkthrough · Step ${tourState.idx+1} of ${tourState.steps.length}</div>
-      <div class="tour-card-title">${esc(step.title)}</div>
+      <div class="tour-card-head">
+        <div class="tour-card-icon">${GUIDE_BOOK_ICON}</div>
+        <div>
+          <div class="tour-card-eyebrow">${esc(label)} walkthrough</div>
+          <div class="tour-card-title">${esc(step.title)}</div>
+        </div>
+      </div>
       <div class="tour-card-body">${esc(step.body)}</div>
-      <div class="tour-progress">${tourState.steps.map((s,i)=>`<span class="${i===tourState.idx?'on':''}"></span>`).join('')}</div>
+      <div class="tour-progress-row">
+        <div class="tour-progress-track"><div class="tour-progress-fill" style="width:${((tourState.idx+1)/tourState.steps.length)*100}%;"></div></div>
+        <span class="tour-progress-label">${tourState.idx+1} / ${tourState.steps.length}</span>
+      </div>
       <div class="tour-card-actions">
-        <button type="button" class="btn secondary" id="tourEndBtn">End tour</button>
+        <button type="button" class="tour-end-link" id="tourEndBtn">${isFirst ? 'Skip tour' : 'End tour'}</button>
         <div style="display:flex;gap:8px;">
-          ${tourState.idx>0 ? `<button type="button" class="btn secondary" id="tourBackBtn">Back</button>` : ''}
+          ${!isFirst ? `<button type="button" class="btn secondary" id="tourBackBtn">Back</button>` : ''}
           <button type="button" class="btn" id="tourNextBtn">${isLast ? 'Finish' : 'Next'}</button>
         </div>
       </div>
@@ -4770,15 +4877,25 @@ function paintTourStep(){
 function advanceTourStep(){
   if(!tourState) return;
   const step = tourState.steps[tourState.idx];
-  const target = resolveTourTarget(step);
-  if(target && target.scrollIntoView) target.scrollIntoView({block:'center', behavior:'auto'});
-  requestAnimationFrame(paintTourStep);
+  const overlayShown = document.getElementById('overlay').classList.contains('show');
+  if(step.linkField && !overlayShown){
+    openModal(tourState.entityKey, null);
+    tourState.modalOpenedByTour = true;
+  } else if(!step.linkField && tourState.modalOpenedByTour){
+    closeModal();
+    tourState.modalOpenedByTour = false;
+  }
+  requestAnimationFrame(()=>{
+    const target = resolveTourTarget(step);
+    if(target && target.scrollIntoView) target.scrollIntoView({block:'center', behavior:'auto'});
+    requestAnimationFrame(paintTourStep);
+  });
 }
 
 function startObjectWalkthrough(entityKey){
   const steps = tourStepsFor(entityKey);
   if(!steps.length) return;
-  tourState = { entityKey, steps, idx: 0 };
+  tourState = { entityKey, steps, idx: 0, modalOpenedByTour: false };
   window.addEventListener('resize', paintTourStep);
   advanceTourStep();
 }
@@ -4860,9 +4977,11 @@ function updateQaScrollArrows(){
   const leftBtn = document.getElementById('qaScrollLeft');
   const rightBtn = document.getElementById('qaScrollRight');
   if(!scroller || !leftBtn || !rightBtn) return;
+  const keys = state.quickActionPrefs[state.currentUser] || [];
   const overflowing = scroller.scrollWidth > scroller.clientWidth + 2;
-  leftBtn.style.display = overflowing ? 'block' : 'none';
-  rightBtn.style.display = overflowing ? 'block' : 'none';
+  const show = overflowing || keys.length >= 2;
+  leftBtn.style.display = show ? 'block' : 'none';
+  rightBtn.style.display = show ? 'block' : 'none';
 }
 function openQuickActionsCustomizeModal(){
   const current = state.quickActionPrefs[state.currentUser] || [];
@@ -5063,7 +5182,11 @@ document.getElementById('setupGearBtn').onclick = ()=>{
     onConfirm: ()=>{ state.returnView = state.view; state.view='setup'; render(); },
   });
 };
-document.getElementById('setupBackBtn').onclick = ()=>{ state.view = state.returnView || 'dashboard'; render(); };
+document.getElementById('setupBackBtn').onclick = ()=>{
+  if(setupDraft && !confirm('You have unsaved changes in Setup. Discard them and leave?')) return;
+  setupDraft = null;
+  state.view = state.returnView || 'dashboard'; render();
+};
 document.addEventListener('keydown', (e)=>{
   if(e.key!=='/' || !document.getElementById('app') || document.getElementById('app').style.display==='none') return;
   const tag = (document.activeElement && document.activeElement.tagName) || '';
@@ -5357,21 +5480,6 @@ function showContactFollowup(contact){
 }
 
 /* ---------- Auth ---------- */
-function spawnConfetti(){
-  const colors = ['var(--amber)','var(--sage)','var(--clay)','var(--ochre)','var(--umber)','var(--olive)','var(--rust)'];
-  const container = document.getElementById('confettiContainer');
-  let html = '';
-  for(let i=0;i<36;i++){
-    const left = (Math.random()*100).toFixed(1);
-    const dur = (4 + Math.random()*3).toFixed(2);
-    const delay = (Math.random()*5).toFixed(2);
-    const color = colors[i % colors.length];
-    const skew = Math.random()>0.5 ? 'rotate(15deg)' : 'rotate(-15deg)';
-    html += `<div class="confetti-piece" style="left:${left}%;background:${color};animation-duration:${dur}s;animation-delay:-${delay}s;transform:${skew};"></div>`;
-  }
-  container.innerHTML = html;
-}
-
 function populateViewingAsOptions(){
   const sel = document.getElementById('viewingAs');
   if(!sel) return;
@@ -5419,7 +5527,7 @@ async function attemptLogin(){
   await ensureTeamLoaded();
   const name = teamEmailMap()[email];
   if(!name || pass !== APP_PASSWORD){
-    errEl.textContent = 'Incorrect email or password.';
+    errEl.textContent = 'Incorrect username or password.';
     errEl.style.display = 'block';
     return;
   }
@@ -5444,12 +5552,6 @@ document.getElementById('logoutBtn').onclick = ()=>{
   document.getElementById('loginPassword').value = '';
   document.getElementById('loginError').style.display = 'none';
 };
-
-spawnConfetti();
-setTimeout(()=>{
-  const rocket = document.getElementById('rocket');
-  if(rocket) rocket.classList.add('launched');
-}, 2000);
 
 </script>
 </body>
