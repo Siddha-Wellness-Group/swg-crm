@@ -509,6 +509,67 @@
   .fw-test-result.err{display:block;background:#FCE7E7;color:#B4232C;}
   .dash-tab-add{background:none;border-style:dashed;color:var(--amber);}
   .dash-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;}
+
+  /* ================================================================
+     Customer & Fulfillment Command Center -- namespaced under .fc-*.
+     Deliberately reuses the existing dark :root tokens (--surface,
+     --ink, --ink-soft, --border, --amber, etc.) and existing component
+     idioms (.stat-card, .badge, .dash-tab) rather than introducing a
+     separate design system the way the Customer 360 page's .cp-* did --
+     this dashboard is meant to feel like a denser version of the same
+     ledger, not a different product.
+     ================================================================ */
+  .fc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+  .fc-filter-select{font-family:inherit;font-size:12.5px;padding:7px 10px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--ink);}
+  .fc-filter-search{font-family:inherit;font-size:12.5px;padding:7px 10px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--ink);min-width:200px;}
+  .fc-filterbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0;}
+  .fc-filter-clear{font-size:12px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;}
+  .fc-table-wrap{overflow-x:auto;}
+  .fc-sortable-th{cursor:pointer;user-select:none;}
+  .fc-sortable-th:hover{color:var(--ink);}
+  .fc-row-clickable{cursor:pointer;}
+  .fc-row-clickable:hover td{background:var(--cream);}
+  .fc-view-link{color:var(--amber);cursor:pointer;font-size:12.5px;}
+  .fc-pager{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:10px;font-size:12px;color:var(--ink-soft);}
+  .fc-pager button{font-family:inherit;font-size:12px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--ink);cursor:pointer;}
+  .fc-pager button:disabled{opacity:.4;cursor:default;}
+
+  /* Slide-in drawer -- the one genuinely new interaction pattern here.
+     Lives inside this dashboard's own #content subtree (rebuilt by
+     render() like everything else) rather than as a page-level
+     singleton like #overlay/#emlPrevOverlay, since it belongs to this
+     view only and should simply vanish if the user navigates away --
+     its open/close handlers are safely rewired every render() the same
+     way the Customer 360 kebab menus already are. */
+  .fc-drawer-backdrop{display:none;position:fixed;inset:0;background:rgba(35,33,27,0.35);z-index:55;}
+  .fc-drawer-backdrop.show{display:block;}
+  .fc-drawer{position:fixed;top:0;right:0;height:100vh;width:400px;max-width:92vw;background:var(--surface);border-left:1px solid var(--border);box-shadow:-8px 0 24px rgba(35,33,27,0.12);z-index:56;transform:translateX(100%);transition:transform .22s ease;display:flex;flex-direction:column;}
+  .fc-drawer.show{transform:translateX(0);}
+  .fc-drawer-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid var(--border);}
+  .fc-drawer-close{background:none;border:none;font-size:22px;line-height:1;color:var(--ink-soft);cursor:pointer;padding:2px 6px;}
+  .fc-drawer-close:hover{color:var(--ink);}
+  .fc-drawer-body{padding:18px 20px;overflow-y:auto;flex:1;}
+  .fc-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+  .fc-tab{padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-family:inherit;font-size:12px;color:var(--ink-soft);cursor:pointer;}
+  .fc-tab.active{background:var(--ink-fixed);color:#fff;border-color:var(--ink-fixed);}
+  .fc-tab:disabled{opacity:.45;cursor:default;}
+
+  /* Requires-attention panel (phase 3) and order timeline (phase 2) */
+  .fc-attn-panel{display:flex;flex-direction:column;gap:8px;}
+  .fc-attn-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;font-size:13px;}
+  .fc-attn-item:hover{background:var(--cream);}
+  .fc-attn-badge{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .fc-attn-badge.warn{background:var(--amber);}
+  .fc-attn-badge.bad{background:var(--rust);}
+  .fc-attn-badge.neutral{background:var(--ink-soft);}
+  .fc-timeline{display:flex;flex-direction:column;gap:0;}
+  .fc-timeline-item{position:relative;padding:0 0 20px 22px;border-left:2px solid var(--border);}
+  .fc-timeline-item:last-child{border-left-color:transparent;padding-bottom:0;}
+  .fc-timeline-dot{position:absolute;left:-6px;top:1px;width:10px;height:10px;border-radius:50%;background:var(--amber);border:2px solid var(--surface);}
+
+  @media (max-width:640px){
+    .fc-drawer{width:100%;max-width:100%;}
+  }
   .donut-wrap{display:flex;align-items:center;gap:34px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-bottom:24px;flex-wrap:wrap;}
   .donut{width:220px;height:220px;border-radius:50%;flex-shrink:0;position:relative;}
   .donut-hole{position:absolute;top:50%;left:50%;width:128px;height:128px;background:var(--surface);border-radius:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;}
@@ -898,7 +959,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all' };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', sourceFilter:'all', statusFilter:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0 };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -1954,6 +2015,7 @@ function renderDashboard(){
     <button type="button" class="dash-tab dash-tab-add" id="dashAddBtn">+ New dashboard</button>
   </div>`;
   const active = myDashboards.find(d=>d.id===state.activeDashboardId);
+  if(active && active.kind==='fulfillment_command_center') return tabs + renderFulfillmentCommandCenter(active);
   return tabs + (active ? renderCustomDashboard(active, priv) : renderOverviewDashboard(priv));
 }
 
@@ -1994,22 +2056,34 @@ function renderCustomDashboard(dash, priv){
     ${!widgets.length ? `<div class="empty" style="margin-top:16px;"><div class="display">No widgets yet</div>Click "edit widgets" to add some.</div>` : ''}
   `;
 }
+const DASH_TEMPLATES = [
+  {key:'', label:'Blank dashboard — pick your own widgets'},
+  {key:'fulfillment_command_center', label:'Customer & Fulfillment Command Center'},
+];
 function openNewDashboardModal(){
   document.getElementById('modalBody').innerHTML = `<h2 class="display">New dashboard</h2>
     <div class="field"><label>Name</label><input id="f_dashName" placeholder="e.g. My Sales Snapshot"></div>
+    <div class="field"><label>Type</label><select id="f_dashTemplate">${DASH_TEMPLATES.map(t=>`<option value="${t.key}">${esc(t.label)}</option>`).join('')}</select></div>
     <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="dashCreateBtn">Create</button></div>`;
   document.getElementById('overlay').classList.add('show');
   document.getElementById('cancelBtn').onclick = closeModal;
+  const nameInput = document.getElementById('f_dashName');
+  const templateSelect = document.getElementById('f_dashTemplate');
+  templateSelect.onchange = ()=>{
+    if(templateSelect.value==='fulfillment_command_center' && !nameInput.value.trim()) nameInput.value = 'Customer & Fulfillment';
+  };
   document.getElementById('dashCreateBtn').onclick = async ()=>{
-    const name = document.getElementById('f_dashName').value.trim();
+    const name = nameInput.value.trim();
     if(!name) return alert('Give it a name.');
+    const kind = templateSelect.value || undefined;
     const dash = {id:uid(), owner:state.viewingAs, name, widgets:[], createdAt:Date.now()};
+    if(kind) dash.kind = kind;
     state.dashboards.push(dash);
     await saveKey(KEYS.dashboards, state.dashboards);
     state.activeDashboardId = dash.id;
     closeModal();
     render();
-    openDashboardWidgetPicker(dash.id);
+    if(!kind) openDashboardWidgetPicker(dash.id);
   };
 }
 function openDashboardWidgetPicker(dashId){
@@ -2030,6 +2104,146 @@ function openDashboardWidgetPicker(dashId){
     closeModal();
     render();
   };
+}
+
+/* ================================================================
+   Customer & Fulfillment Command Center -- a second, purpose-built
+   dashboard type (dash.kind==='fulfillment_command_center') created
+   through the "+ New dashboard" flow above, bypassing the generic
+   WIDGET_DEFS checkbox system entirely (this page's shape -- a table
+   plus a drawer -- doesn't fit that model). Stays inside the app's
+   existing dark :root tokens and .stat-card/.badge/.dash-tab idiom
+   rather than introducing another one-off design system.
+   Phase 1: KPI row + sortable customer table + read-only drawer.
+   ================================================================ */
+function fcDateRangeMs(range){
+  const day = 86400000;
+  if(range==='today') return day;
+  if(range==='30d') return 30*day;
+  return 7*day;
+}
+function fcSortCustomers(list){
+  const sort = state.fcSort || {field:'createdAt', dir:'desc'};
+  const mul = sort.dir==='asc' ? 1 : -1;
+  return list.slice().sort((a,b)=>{
+    let av,bv;
+    if(sort.field==='name'){ av=(a.name||'').toLowerCase(); bv=(b.name||'').toLowerCase(); }
+    else { av=a.createdAt||0; bv=b.createdAt||0; }
+    if(av<bv) return -1*mul;
+    if(av>bv) return 1*mul;
+    return 0;
+  });
+}
+function fcSortCaret(field){
+  const sort = state.fcSort || {field:'createdAt', dir:'desc'};
+  if(sort.field!==field) return '';
+  return sort.dir==='asc' ? ' ↑' : ' ↓';
+}
+function renderFcCustomerDrawer(){
+  const cust = state.fcDrawerCustomerId ? state.customers.find(c=>c.id===state.fcDrawerCustomerId) : null;
+  if(!cust) return `<div class="fc-drawer-backdrop" data-fc-drawer-close></div><div class="fc-drawer" id="fcDrawer"></div>`;
+  const stats = customerStats(cust);
+  return `<div class="fc-drawer-backdrop show" data-fc-drawer-close></div>
+    <div class="fc-drawer show" id="fcDrawer">
+      <div class="fc-drawer-head">
+        <div>
+          <div style="font-size:16px;font-weight:600;">${esc(cust.name)}</div>
+          <div style="font-size:12px;color:var(--ink-soft);">Customer profile</div>
+        </div>
+        <button type="button" class="fc-drawer-close" data-fc-drawer-close aria-label="Close">&times;</button>
+      </div>
+      <div class="fc-drawer-body">
+        <div style="display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;margin-bottom:8px;">
+          <span>${esc(cust.email||'—')}</span>
+          <span>${esc(cust.phone||'—')}</span>
+          <span>${esc(cust.country||'—')}</span>
+        </div>
+        <div style="font-size:12px;color:var(--ink-soft);margin-bottom:18px;">Customer since ${cpDate(cust.createdAt)} &middot; Source: ${esc(cust.source||'Manual')}</div>
+        <div class="stat-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:22px;">
+          ${widgetKPI('Total orders', stats.totalOrders, 'sage')}
+          ${widgetKPI('Total spent', cpMoney(stats.totalSpent), 'ochre')}
+          ${widgetKPI('Avg order value', cpMoney(stats.aov), 'umber')}
+          ${widgetKPI('Last order', stats.lastOrder ? cpRelative(stats.lastOrder.createdAt) : '—', 'clay')}
+        </div>
+        <div class="section-title" style="margin-top:0;">Notes</div>
+        <div style="font-size:13px;color:var(--ink-soft);">${esc(cust.notes || 'No notes yet.')}</div>
+        <div style="font-size:11.5px;color:var(--ink-soft);margin-top:18px;">Order history, activity and notes editing arrive in the next phase of this dashboard.</div>
+      </div>
+    </div>`;
+}
+function renderFulfillmentCommandCenter(dash){
+  const range = state.fcFilters.dateRange || '7d';
+  const since = Date.now() - fcDateRangeMs(range);
+  const newCustomers = state.customers.filter(c=>(c.createdAt||0) >= since);
+  const newOrders = state.orders.filter(o=>(o.createdAt||0) >= since);
+  const pending = state.orders.filter(o=>o.status==='Pending');
+  const shipped = state.orders.filter(o=>o.status==='Shipped');
+  const delivered = state.orders.filter(o=>o.status==='Delivered');
+  const revenue = newOrders.filter(o=>o.status!=='Cancelled').reduce((s,o)=>s+toUSD(o.amount, orderCurrency(o)), 0);
+
+  const kpis = [
+    ['New customers', newCustomers.length, 'sage'],
+    ['New orders', newOrders.length, 'ochre'],
+    ['Orders to fulfill', pending.length, 'amber'],
+    ['Shipped', shipped.length, 'umber'],
+    ['Delivered', delivered.length, 'olive'],
+    ['Revenue', cpMoney(revenue), 'rust'],
+  ];
+
+  const PAGE_SIZE = 10;
+  const sorted = fcSortCustomers(state.customers);
+  const page = state.fcTablePage || 0;
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const pageItems = sorted.slice(page*PAGE_SIZE, page*PAGE_SIZE + PAGE_SIZE);
+
+  const rows = pageItems.map(c=>{
+    const stats = customerStats(c);
+    const status = stats.orders.some(o=>o.status!=='Cancelled') ? 'Active' : 'New';
+    return `<tr class="fc-row-clickable" data-fc-open-customer="${c.id}">
+      <td>${esc(c.name)}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(c.email||'—')}</td>
+      <td><span class="badge muted">${esc(c.source || 'Manual')}</span></td>
+      <td style="font-size:12px;">${cpDate(c.createdAt)}</td>
+      <td>${stats.totalOrders}</td>
+      <td style="font-size:12px;">${stats.lastOrder ? cpRelative(stats.lastOrder.createdAt) : '—'}</td>
+      <td class="mono">${cpMoney(stats.totalSpent)}</td>
+      <td><span class="badge ${status==='Active'?'delivered':'muted'}">${status}</span></td>
+      <td><span class="fc-view-link" data-fc-open-customer="${c.id}">View</span></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="9"><div class="empty"><div class="display">No customers yet</div>New customers from the website will show up here.</div></td></tr>`;
+
+  return `
+    <div class="fc-head">
+      <div>
+        <p class="hi display" style="margin:0;">Customer &amp; Fulfillment</p>
+        <div style="font-size:12.5px;color:var(--ink-soft);margin-top:3px;">Monitor new customers, orders and fulfillment activity.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <select id="fcDateRange" class="fc-filter-select">
+          <option value="today" ${range==='today'?'selected':''}>Today</option>
+          <option value="7d" ${range==='7d'?'selected':''}>Last 7 days</option>
+          <option value="30d" ${range==='30d'?'selected':''}>Last 30 days</option>
+        </select>
+        <button type="button" class="btn secondary" id="fcRefreshBtn">Refresh</button>
+        <span class="row-actions" id="dashDeleteBtn" data-dash-id="${dash.id}" style="cursor:pointer;">delete</span>
+      </div>
+    </div>
+    <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">${kpis.map(([l,v,c])=>widgetKPI(l,v,c)).join('')}</div>
+    <div class="section-title">New customers</div>
+    <div class="fc-table-wrap">
+      <table>
+        <thead><tr>
+          <th class="fc-sortable-th" data-fc-sort="name">Customer${fcSortCaret('name')}</th>
+          <th>Email</th><th>Source</th>
+          <th class="fc-sortable-th" data-fc-sort="createdAt">Created${fcSortCaret('createdAt')}</th>
+          <th>Orders</th><th>Last order</th><th>Total spent</th><th>Status</th><th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    ${totalPages>1 ? `<div class="fc-pager"><button type="button" data-fc-page="prev" ${page<=0?'disabled':''}>Prev</button><span>${page+1} / ${totalPages}</span><button type="button" data-fc-page="next" ${page>=totalPages-1?'disabled':''}>Next</button></div>` : ''}
+    ${renderFcCustomerDrawer()}
+  `;
 }
 
 function renderOverviewDashboard(priv){
@@ -4741,6 +4955,36 @@ function attachContentHandlers(){
     state.activeDashboardId = '';
     render();
   };
+
+  // Customer & Fulfillment Command Center. The drawer lives inside this
+  // dashboard's own #content subtree (not a page-level singleton), so
+  // rewiring its close handlers here on every render() is correct and
+  // safe -- same reasoning as the Customer 360 kebab menus below.
+  document.querySelectorAll('[data-fc-open-customer]').forEach(el=>{
+    el.onclick = (e)=>{ e.preventDefault(); state.fcDrawerCustomerId = el.dataset.fcOpenCustomer; render(); };
+  });
+  document.querySelectorAll('[data-fc-drawer-close]').forEach(el=>{
+    el.onclick = ()=>{ state.fcDrawerCustomerId = null; render(); };
+  });
+  document.querySelectorAll('[data-fc-sort]').forEach(el=>{
+    el.onclick = ()=>{
+      const field = el.dataset.fcSort;
+      const cur = state.fcSort || {field:'createdAt', dir:'desc'};
+      state.fcSort = {field, dir: (cur.field===field && cur.dir==='asc') ? 'desc' : 'asc'};
+      render();
+    };
+  });
+  document.querySelectorAll('[data-fc-page]').forEach(el=>{
+    el.onclick = ()=>{
+      state.fcTablePage = Math.max(0, (state.fcTablePage||0) + (el.dataset.fcPage==='next' ? 1 : -1));
+      render();
+    };
+  });
+  const fcDateRangeSel = document.getElementById('fcDateRange');
+  if(fcDateRangeSel) fcDateRangeSel.onchange = ()=>{ state.fcFilters.dateRange = fcDateRangeSel.value; render(); };
+  const fcRefreshBtn = document.getElementById('fcRefreshBtn');
+  if(fcRefreshBtn) fcRefreshBtn.onclick = async ()=>{ await loadAll(); render(); };
+
   document.querySelectorAll('[data-edit]').forEach(el=>{
     el.onclick = (e)=>{
       // A <tr data-edit> (order history rows) shouldn't fire when the
