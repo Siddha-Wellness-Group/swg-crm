@@ -6242,7 +6242,13 @@ async function queueOrderConfirmation(order){
    the same transition. A failed insert never blocks anything below it --
    dbInsert already logs-and-continues rather than throwing. */
 async function logOrderEvent(order, note){
-  await dbInsert('order_events', { id: uid(), orderId: order.id, status: order.status, note: note||null, createdAt: Date.now() });
+  // Pushed into local state immediately (same optimistic-update convention
+  // used everywhere else in this file) so the Activity tab and Order
+  // Detail Drawer reflect it in this session without needing a manual
+  // Refresh -- dbInsert then persists it in the background.
+  const event = { id: uid(), orderId: order.id, status: order.status, note: note||null, createdAt: Date.now() };
+  state.orderEvents.push(event);
+  await dbInsert('order_events', event);
 }
 
 /* Item 3/4 hook: fires from saveModal when an order's status is edited in
