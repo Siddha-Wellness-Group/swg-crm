@@ -276,7 +276,7 @@
      ================================================================ */
   .cp-page{
     --cp-bg:#fafafa; --cp-surface:#ffffff; --cp-border:#e5e7eb; --cp-border-soft:#f0f1f3;
-    --cp-text:#111827; --cp-text-soft:#6b7280; --cp-text-faint:#9ca3af;
+    --cp-text:#111827; --cp-text-soft:#6b7280; --cp-text-faint:#6f7681;
     --cp-accent:#a8703c; --cp-accent-soft:#f3e8dd;
     --cp-danger:#a6472b; --cp-danger-soft:#f0ddd5;
     --cp-good:#5b6b4c; --cp-good-soft:#e1e6d5;
@@ -326,6 +326,15 @@
   .cp-select{font-family:inherit;font-size:12.5px;padding:6px 9px;border-radius:6px;border:1px solid var(--cp-border);background:var(--cp-surface);color:var(--cp-text);}
   .cp-table-wrap{overflow-x:auto;}
   .cp-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  /* The ledger's global table/th rules paint var(--surface)/var(--parchment),
+     which are near-black in dark mode. This card is a light surface with dark
+     text, so without resetting them the rows render black-on-black (only the
+     :hover rule below repainted the cells, which is why the text appeared
+     only while hovering). Scoped to .cp-page so the ledger's own tables keep
+     their normal dark styling. */
+  .cp-page table.cp-table{background:var(--cp-surface);border:none;border-radius:0;}
+  .cp-page .cp-table th{background:var(--cp-surface);}
+  .cp-page .cp-table td{background:transparent;}
   .cp-table th{text-align:left;font-size:10.5px;font-weight:600;color:var(--cp-text-faint);text-transform:uppercase;letter-spacing:.5px;padding:0 10px 8px;border-bottom:1px solid var(--cp-border);white-space:nowrap;}
   .cp-table td{padding:10px 10px;border-bottom:1px solid var(--cp-border-soft);color:var(--cp-text);vertical-align:top;white-space:nowrap;}
   .cp-table tbody tr{cursor:pointer;}
@@ -343,6 +352,7 @@
 
   /* Kebab menu — reused on the Customers row AND the profile header */
   .cp-kebab-wrap{position:relative;display:inline-block;}
+  .cp-page .cp-kebab-btn{color:var(--cp-text-soft);}
   .cp-kebab-btn{width:26px;height:26px;border-radius:6px;border:1px solid transparent;background:none;color:var(--ink-soft, #7a7462);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:16px;line-height:1;}
   .cp-kebab-btn:hover{background:rgba(0,0,0,.06);border-color:transparent;}
   .cp-kebab-menu{position:absolute;top:calc(100% + 4px);right:0;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 16px rgba(17,24,39,.12);z-index:40;overflow:hidden;}
