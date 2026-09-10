@@ -2238,6 +2238,8 @@ function renderRecent(){
 }
 
 function renderContacts(){
+  const custByEmail = new Map(state.customers.map(cu=>[(cu.email||'').trim().toLowerCase(), cu.id]).filter(([k])=>k));
+  const contactCustomerId = (c)=>{ const e=(c.email||'').trim().toLowerCase(); return e ? (custByEmail.get(e)||null) : null; };
   const visible = visibleRecords('contacts', state.contacts);
   const filtered = state.contactFilter==='all' ? visible : visible.filter(c=>c.type===state.contactFilter);
   const chips = ['all',...CTYPES].map(t=>`<div class="filter-chip ${state.contactFilter===t?'active':''}" data-filter="${t}">${t==='all'?'All':t}</div>`).join('');
@@ -2249,13 +2251,23 @@ function renderContacts(){
     ${filtered.map((c,i)=>`
       <tr>
         <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
-        <td data-field-col="name">${esc(c.name)}</td>
+        <td data-field-col="name">${contactCustomerId(c)?`<a href="#" data-cust-profile="${contactCustomerId(c)}" style="color:inherit;text-decoration:none;font-weight:500;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${esc(c.name)}</a>`:esc(c.name)}</td>
         <td data-field-col="company">${esc(c.company||'—')}</td>
         <td data-field-col="type"><span class="badge ${c.type.toLowerCase()}">${c.type}</span></td>
         <td data-field-col="kind"><span class="badge ${(c.kind||'Individual').toLowerCase()}">${c.kind||'Individual'}</span></td>
         <td style="font-size:12px;">${esc(c.email||'')}${c.email&&c.phone?' · ':''}${esc(c.phone||'')}</td>
         <td data-field-col="owner" style="font-size:12px;color:var(--ink-soft);">${esc(c.owner||'—')}</td>
-        <td class="row-actions"><span data-order="contacts:${c.id}">order</span><span data-edit="contacts:${c.id}">edit</span><span data-del="contacts:${c.id}">delete</span></td>
+        <td class="row-actions">
+          <div class="cp-kebab-wrap" data-kebab>
+            <button type="button" class="cp-kebab-btn" data-kebab-toggle aria-haspopup="true" aria-expanded="false" aria-label="More actions for ${esc(c.name)}">&#8942;</button>
+            <div class="cp-kebab-menu" data-kebab-menu hidden>
+              ${contactCustomerId(c)?`<button type="button" data-cust-profile="${contactCustomerId(c)}">View profile</button>`:''}
+              <button type="button" data-order="contacts:${c.id}">Place order</button>
+              <button type="button" data-edit="contacts:${c.id}">Edit</button>
+              <button type="button" class="danger" data-del="contacts:${c.id}">Delete</button>
+            </div>
+          </div>
+        </td>
       </tr>`).join('')}
     </tbody></table>`;
   }
