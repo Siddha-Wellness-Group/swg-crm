@@ -554,6 +554,14 @@
   .fc-tab.active{background:var(--ink-fixed);color:#fff;border-color:var(--ink-fixed);}
   .fc-tab:disabled{opacity:.45;cursor:default;}
 
+  /* Order Detail Drawer -- a second, independent drawer that can sit on
+     top of the customer drawer (opened by clicking a row in its Orders
+     tab), so it needs a higher stacking order than the customer drawer's
+     55/56. Same visual shell otherwise -- .fc-drawer/.fc-drawer-backdrop
+     styling is reused as-is via the shared classes. */
+  .fc-order-drawer-backdrop{z-index:57;}
+  .fc-order-drawer{z-index:58;}
+
   /* Requires-attention panel (phase 3) and order timeline (phase 2) */
   .fc-attn-panel{display:flex;flex-direction:column;gap:8px;}
   .fc-attn-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;font-size:13px;}
@@ -1306,15 +1314,16 @@ async function loadSettings(){
 }
 
 async function loadAll(){
-  const [c,d,o,cu,su,ta,inv,le,di,pa] = await Promise.all([
+  const [c,d,o,cu,su,ta,inv,le,di,pa,,,,,oe] = await Promise.all([
     loadTable('contacts'), loadTable('deals'), loadTable('orders'),
     loadTable('customers'), loadTable('suppliers'), loadTable('tasks'), loadTable('invoices'),
     loadTable('leads'), loadTable('distributors'), loadTable('payments'), loadFxRates(),
-    loadEmailLog(), loadTickets(), loadSettings()
+    loadEmailLog(), loadTickets(), loadSettings(), loadTable('order_events')
   ]);
   state.contacts = c; state.deals = d; state.orders = o;
   state.customers = cu; state.suppliers = su; state.tasks = ta; state.invoices = inv;
   state.leads = le; state.distributors = di; state.payments = pa;
+  state.orderEvents = oe;
   state.loaded = true;
 }
 
@@ -2150,15 +2159,72 @@ const FC_DRAWER_TABS = [
   {key:'activity', label:'Activity'},
   {key:'notes', label:'Notes'},
 ];
+function renderFcDrawerOverview(cust, stats){
+  return `
+    <div class="section-title" style="margin-top:0;">Customer summary</div>
+    <div class="stat-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:18px;">
+      ${widgetKPI('Total orders', stats.totalOrders, 'sage')}
+      ${widgetKPI('Total spent', stats.totalOrders ? cpMoney(stats.totalSpent) : '—', 'ochre')}
+      ${widgetKPI('Avg order value', stats.totalOrders ? cpMoney(stats.aov) : '—', 'umber')}
+      ${widgetKPI('Last order', stats.lastOrder ? cpRelative(stats.lastOrder.createdAt) : '—', 'clay')}
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button type="button" class="btn secondary" data-fc-view-customer="${cust.id}">View customer</button>
+      <button type="button" class="btn secondary" data-fc-drawer-tab="orders">View orders</button>
+    </div>`;
+}
+function renderFcDrawerOrders(stats){
+  if(!stats.orders.length){
+    return `<div class="empty"><div class="display">No orders yet</div>No orders have been placed by this customer yet.</div>`;
+  }
+  const rows = stats.orders.map(o=>{
+    const summary = cpOrderSummary(o);
+    return `<tr class="fc-row-clickable" data-fc-open-order="${o.id}">
+      <td class="mono">${esc(o.externalOrderNumber || orderDisplayNumber(o))}</td>
+      <td style="font-size:12px;">${cpDate(o.createdAt)}</td>
+      <td title="${esc(summary.title||'')}">${summary.label}</td>
+      <td class="mono">${cpMoney(toUSD(o.amount, orderCurrency(o)))}</td>
+      <td>${o.paymentStatus ? `<span class="badge ${o.paymentStatus.toLowerCase()==='paid'?'paid':'unpaid'}">${esc(o.paymentStatus)}</span>` : '—'}</td>
+      <td><span class="badge ${o.status.toLowerCase()}">${esc(o.status)}</span></td>
+    </tr>`;
+  }).join('');
+  return `<div class="fc-table-wrap"><table>
+    <thead><tr><th>Order #</th><th>Date</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+}
+function renderFcDrawerActivity(stats){
+  const items = [];
+  stats.orders.forEach(o=>{
+    items.push({label:`Order ${orderDisplayNumber(o)} created`, createdAt:o.createdAt});
+    orderEventsFor(o.id).forEach(e=>items.push({label:`Order ${orderDisplayNumber(o)} marked ${e.status}`, createdAt:e.createdAt}));
+  });
+  if(!items.length) return `<div class="empty"><div class="display">No activity yet</div>Order and status changes for this customer will appear here.</div>`;
+  items.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  return `<div class="fc-timeline">${items.map(it=>`
+    <div class="fc-timeline-item">
+      <div class="fc-timeline-dot"></div>
+      <div style="font-size:13px;">${esc(it.label)}</div>
+      <div style="font-size:11.5px;color:var(--ink-soft);">${cpDate(it.createdAt)}</div>
+    </div>`).join('')}</div>`;
+}
+function renderFcDrawerNotes(cust){
+  return `
+    <div style="font-size:13px;color:var(--ink-soft);white-space:pre-wrap;margin-bottom:16px;">${esc(cust.notes || 'No notes yet.')}</div>
+    <button type="button" class="btn secondary" data-fc-edit-customer="${cust.id}">Edit customer</button>`;
+}
 function renderFcCustomerDrawer(){
   const cust = state.fcDrawerCustomerId ? state.customers.find(c=>c.id===state.fcDrawerCustomerId) : null;
   if(!cust) return `<div class="fc-drawer-backdrop" data-fc-drawer-close></div><div class="fc-drawer" id="fcDrawer"></div>`;
   const stats = customerStats(cust);
   const status = fcCustomerStatus(cust);
-  const tabs = FC_DRAWER_TABS.map(t=>{
-    if(t.key==='overview') return `<button type="button" class="fc-tab active" data-fc-drawer-tab="overview">Overview</button>`;
-    return `<button type="button" class="fc-tab" disabled title="Arrives in a later phase of this dashboard">${esc(t.label)}</button>`;
-  }).join('');
+  const activeTab = state.fcDrawerTab || 'overview';
+  const tabs = FC_DRAWER_TABS.map(t=>`<button type="button" class="fc-tab ${activeTab===t.key?'active':''}" data-fc-drawer-tab="${t.key}">${esc(t.label)}</button>`).join('');
+  let body;
+  if(activeTab==='orders') body = renderFcDrawerOrders(stats);
+  else if(activeTab==='activity') body = renderFcDrawerActivity(stats);
+  else if(activeTab==='notes') body = renderFcDrawerNotes(cust);
+  else body = renderFcDrawerOverview(cust, stats);
   return `<div class="fc-drawer-backdrop show" data-fc-drawer-close></div>
     <div class="fc-drawer show" id="fcDrawer">
       <div class="fc-drawer-head">
@@ -2181,20 +2247,59 @@ function renderFcCustomerDrawer(){
           <span>Source: ${esc(cust.source||'Manual')}</span>
           <span class="badge ${status==='Active'?'delivered':'muted'}">${status}</span>
         </div>
-        <div class="section-title" style="margin-top:0;">Customer summary</div>
-        <div class="stat-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:18px;">
-          ${widgetKPI('Total orders', stats.totalOrders, 'sage')}
-          ${widgetKPI('Total spent', stats.totalOrders ? cpMoney(stats.totalSpent) : '—', 'ochre')}
-          ${widgetKPI('Avg order value', stats.totalOrders ? cpMoney(stats.aov) : '—', 'umber')}
-          ${widgetKPI('Last order', stats.lastOrder ? cpRelative(stats.lastOrder.createdAt) : '—', 'clay')}
+        ${body}
+      </div>
+    </div>`;
+}
+/* Order Detail Drawer -- a second slide-in panel that can sit on top of
+   the customer drawer (higher z-index, see .fc-order-drawer CSS), reached
+   by clicking a row in the customer drawer's Orders tab. Its own backdrop
+   and close button use data-fc-order-drawer-close so they never collide
+   with the customer drawer's data-fc-drawer-close handlers. */
+function renderFcTimeline(order){
+  const events = orderEventsFor(order.id);
+  const items = [
+    {label:'Order created', createdAt:order.createdAt},
+    ...events.map(e=>({label:`Marked ${e.status}`, createdAt:e.createdAt})),
+  ];
+  return `<div class="fc-timeline">${items.map(it=>`
+    <div class="fc-timeline-item">
+      <div class="fc-timeline-dot"></div>
+      <div style="font-size:13px;font-weight:500;">${esc(it.label)}</div>
+      <div style="font-size:11.5px;color:var(--ink-soft);">${cpDate(it.createdAt)} &middot; ${new Date(it.createdAt).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}</div>
+    </div>`).join('')}</div>`;
+}
+function renderFcOrderDrawer(){
+  const order = state.fcOrderDrawerId ? state.orders.find(o=>o.id===state.fcOrderDrawerId) : null;
+  if(!order) return `<div class="fc-drawer-backdrop fc-order-drawer-backdrop" data-fc-order-drawer-close></div><div class="fc-drawer fc-order-drawer" id="fcOrderDrawer"></div>`;
+  const contact = state.contacts.find(c=>c.id===order.contactId);
+  const cust = customerForContactId(order.contactId);
+  const unitPrice = toUSD(order.amount, orderCurrency(order)) / (Number(order.qty)||1);
+  return `<div class="fc-drawer-backdrop fc-order-drawer-backdrop show" data-fc-order-drawer-close></div>
+    <div class="fc-drawer fc-order-drawer show" id="fcOrderDrawer">
+      <div class="fc-drawer-head">
+        <div>
+          <div style="font-size:16px;font-weight:600;">${esc(orderDisplayNumber(order))}</div>
+          <div style="font-size:12px;color:var(--ink-soft);">Order detail</div>
         </div>
-        <div style="display:flex;gap:8px;margin-bottom:22px;">
-          <button type="button" class="btn secondary" data-fc-view-customer="${cust.id}">View customer</button>
-          <button type="button" class="btn secondary" disabled title="Filtering Orders by customer isn't available yet">View orders</button>
+        <button type="button" class="fc-drawer-close" data-fc-order-drawer-close aria-label="Close">&times;</button>
+      </div>
+      <div class="fc-drawer-body">
+        <div class="section-title" style="margin-top:0;">Customer</div>
+        <div style="font-size:13px;margin-bottom:8px;">${esc(contact ? contact.name : '—')}</div>
+        ${cust ? `<button type="button" class="btn secondary" data-fc-view-customer="${cust.id}" style="margin-bottom:18px;">View customer</button>` : ''}
+        <div class="section-title">Order date</div>
+        <div style="font-size:13px;margin-bottom:18px;">${cpDate(order.createdAt)}</div>
+        <div class="section-title">Items</div>
+        <table style="margin-bottom:18px;"><thead><tr><th>Product</th><th>Qty</th><th>Price</th></tr></thead>
+          <tbody><tr><td>${esc(order.product)}</td><td>${esc(order.qty)}</td><td class="mono">${cpMoney(unitPrice)}</td></tr></tbody>
+        </table>
+        <div style="display:flex;gap:24px;margin-bottom:18px;flex-wrap:wrap;">
+          <div><div class="section-title" style="margin:0 0 4px;">Payment</div>${order.paymentStatus ? `<span class="badge ${order.paymentStatus.toLowerCase()==='paid'?'paid':'unpaid'}">${esc(order.paymentStatus)}</span>` : '<span style="font-size:13px;color:var(--ink-soft);">—</span>'}</div>
+          <div><div class="section-title" style="margin:0 0 4px;">Status</div><span class="badge ${order.status.toLowerCase()}">${esc(order.status)}</span></div>
         </div>
-        <div class="section-title" style="margin-top:0;">Notes</div>
-        <div style="font-size:13px;color:var(--ink-soft);">${esc(cust.notes || 'No notes yet.')}</div>
-        <div style="font-size:11.5px;color:var(--ink-soft);margin-top:18px;">Order history, activity and notes editing arrive in a later phase of this dashboard.</div>
+        <div class="section-title">Timeline</div>
+        ${renderFcTimeline(order)}
       </div>
     </div>`;
 }
@@ -2273,6 +2378,7 @@ function renderFulfillmentCommandCenter(dash){
     </div>
     ${totalPages>1 ? `<div class="fc-pager"><button type="button" data-fc-page="prev" ${page<=0?'disabled':''}>Prev</button><span>${page+1} / ${totalPages}</span><button type="button" data-fc-page="next" ${page>=totalPages-1?'disabled':''}>Next</button></div>` : ''}
     ${renderFcCustomerDrawer()}
+    ${renderFcOrderDrawer()}
   `;
 }
 
@@ -2629,6 +2735,23 @@ function customerStats(customer){
     lastOrder: orders[0] || null,
     firstOrder: orders.length ? orders[orders.length-1] : null,
   };
+}
+/* Reverse of customerContactIds -- given an order's contact_id, find the
+   customers-table record for the same person (matched by email, same
+   convention as everywhere else this join is made). Used by the order
+   detail drawer to link back to the customer. */
+function customerForContactId(contactId){
+  const contact = state.contacts.find(c=>c.id===contactId);
+  if(!contact || !contact.email) return null;
+  const email = contact.email.trim().toLowerCase();
+  return state.customers.find(cu=>(cu.email||'').trim().toLowerCase()===email) || null;
+}
+/* order_events rows for one order, oldest first. Empty for any order that
+   predates the order_events table or hasn't had a status change since --
+   renderFcTimeline() supplies the one fact we always know (created_at)
+   as a fallback rather than inventing history. */
+function orderEventsFor(orderId){
+  return state.orderEvents.filter(e=>e.orderId===orderId).slice().sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
 }
 function renderCustomers(){
   if(!state.customers.length) return `<div class="empty"><div class="display">No customers yet</div>Add the people and businesses who buy from you.</div>`;
@@ -4991,10 +5114,22 @@ function attachContentHandlers(){
   // rewiring its close handlers here on every render() is correct and
   // safe -- same reasoning as the Customer 360 kebab menus below.
   document.querySelectorAll('[data-fc-open-customer]').forEach(el=>{
-    el.onclick = (e)=>{ e.preventDefault(); state.fcDrawerCustomerId = el.dataset.fcOpenCustomer; render(); };
+    el.onclick = (e)=>{ e.preventDefault(); state.fcDrawerCustomerId = el.dataset.fcOpenCustomer; state.fcDrawerTab = 'overview'; render(); };
   });
   document.querySelectorAll('[data-fc-drawer-close]').forEach(el=>{
     el.onclick = ()=>{ state.fcDrawerCustomerId = null; render(); };
+  });
+  document.querySelectorAll('[data-fc-drawer-tab]').forEach(el=>{
+    el.onclick = ()=>{ state.fcDrawerTab = el.dataset.fcDrawerTab; render(); };
+  });
+  document.querySelectorAll('[data-fc-open-order]').forEach(el=>{
+    el.onclick = ()=>{ state.fcOrderDrawerId = el.dataset.fcOpenOrder; render(); };
+  });
+  document.querySelectorAll('[data-fc-order-drawer-close]').forEach(el=>{
+    el.onclick = ()=>{ state.fcOrderDrawerId = null; render(); };
+  });
+  document.querySelectorAll('[data-fc-edit-customer]').forEach(el=>{
+    el.onclick = ()=>openModal('customers', el.dataset.fcEditCustomer);
   });
   document.querySelectorAll('[data-fc-view-customer]').forEach(el=>{
     el.onclick = ()=>{
@@ -5002,6 +5137,11 @@ function attachContentHandlers(){
       state.profileCustomerId = el.dataset.fcViewCustomer;
       state.cpOrderPage = 0;
       state.cpOrderStatusFilter = 'all';
+      // Leaving both drawers behind rather than carrying them across the
+      // navigation, so Back always returns to a clean dashboard instead
+      // of silently reopening whatever was open before.
+      state.fcDrawerCustomerId = null;
+      state.fcOrderDrawerId = null;
       state.view = 'customerProfile';
       render();
     };
@@ -5933,10 +6073,13 @@ document.addEventListener('keydown', (e)=>{
   if(e.key!=='Escape') return;
   document.querySelectorAll('.cp-kebab-menu').forEach(m=>{ m.hidden = true; });
   document.querySelectorAll('[data-kebab-toggle]').forEach(b=>b.setAttribute('aria-expanded','false'));
-  // Customer & Fulfillment drawer -- a no-op state check when it's not
-  // open, so this is safe to attach once here regardless of which view
-  // is currently showing (mirrors the kebab-menu Escape handler above).
-  if(state.fcDrawerCustomerId){ state.fcDrawerCustomerId = null; render(); }
+  // Customer & Fulfillment drawers -- a no-op state check when neither is
+  // open, so this is safe to attach once here regardless of which view is
+  // currently showing (mirrors the kebab-menu Escape handler above). The
+  // order drawer sits on top of the customer drawer, so Escape closes it
+  // first if both happen to be open.
+  if(state.fcOrderDrawerId){ state.fcOrderDrawerId = null; render(); }
+  else if(state.fcDrawerCustomerId){ state.fcDrawerCustomerId = null; render(); }
 });
 document.getElementById('emlPrevClose').onclick = closeEmailPreview;
 document.querySelectorAll('#emlPrevLang [data-eml-lang]').forEach(el=>{
@@ -6092,12 +6235,23 @@ async function queueOrderConfirmation(order){
   toast(`Order confirmation queued for ${contact.email}`);
 }
 
+/* Logs one order_events row for a real status change -- this is the only
+   place order.status ever changes today (the order edit modal, via
+   saveModal, which is the sole caller of this function), so hooking the
+   log in here rather than also in saveModal avoids a duplicate insert for
+   the same transition. A failed insert never blocks anything below it --
+   dbInsert already logs-and-continues rather than throwing. */
+async function logOrderEvent(order, note){
+  await dbInsert('order_events', { id: uid(), orderId: order.id, status: order.status, note: note||null, createdAt: Date.now() });
+}
+
 /* Item 3/4 hook: fires from saveModal when an order's status is edited in
    the CRM. Only entering 'Shipped' queues anything -- editing other fields,
    or moving between any other two statuses, is a no-op. Queues a row in
    email_outbox rather than sending directly, so the real Gmail credentials
    never need to reach the browser (see src/server/emailWorker.js). */
 async function checkOrderStatusChange(order, prevStatus){
+  if(prevStatus !== null && prevStatus !== order.status) await logOrderEvent(order);
   if(prevStatus === order.status || order.status !== 'Shipped') return;
   const contact = state.contacts.find(c=>c.id===order.contactId);
   if(!contact || !contact.email){
