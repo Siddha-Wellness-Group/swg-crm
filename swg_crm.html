@@ -511,28 +511,103 @@
   .dash-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;}
 
   /* ================================================================
-     Customer & Fulfillment Command Center -- namespaced under .fc-*.
-     Deliberately reuses the existing dark :root tokens (--surface,
-     --ink, --ink-soft, --border, --amber, etc.) and existing component
-     idioms (.stat-card, .badge, .dash-tab) rather than introducing a
-     separate design system the way the Customer 360 page's .cp-* did --
-     this dashboard is meant to feel like a denser version of the same
-     ledger, not a different product.
+     Customer & Fulfillment Command Center -- v2 visual redesign.
+
+     DESIGN SYSTEM (all scoped under .fc-page so nothing here can ever
+     leak onto Deals/Orders/Contacts/other dashboards, even though a lot
+     of these rules override shared element types like table/td/.badge/
+     .kcard -- scoping via the .fc-page ancestor, not by changing the
+     shared rule itself, is what makes that safe):
+
+       Spacing   -- 4px unit. Section rhythm 20-24px, card padding 10-14px,
+                    table rows 9-10px vertical -- denser than the app's
+                    default ledger tables on purpose, this is an ops
+                    screen meant to be scanned, not a form.
+       Type      -- Fraunces (serif) reserved for the one page title only;
+                    Work Sans for every label/body string; IBM Plex Mono
+                    for every number (counts, money, dates-as-data) with
+                    tabular-nums, matching how .kval/.cp-stat already use
+                    mono for figures elsewhere in this app.
+       Radius    -- 8px cards/panels, pill (999px) for chips/badges/tabs.
+       Border    -- 1px var(--border) is the only border weight used;
+                    color is what carries status, not stroke weight.
+       Status    -- amber=Pending/attention, umber=Shipped, sage=Delivered/
+                    good, clay=Cancelled/bad -- the same tokens .badge
+                    already assigns to these words elsewhere, just applied
+                    more consistently (kanban column accent, attention
+                    severity, filter "active" state all reuse them).
      ================================================================ */
-  .fc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
-  .fc-filter-select{font-family:inherit;font-size:12.5px;padding:7px 10px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--ink);}
-  .fc-filter-search{font-family:inherit;font-size:12.5px;padding:7px 10px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--ink);min-width:200px;}
-  .fc-filterbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0;}
-  .fc-filter-clear{font-size:12px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;}
+  .fc-page{ }
+  .fc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:16px;}
+  .fc-head .fc-title{font-family:'Fraunces',serif;font-size:19px;font-weight:600;color:var(--ink);margin:0;letter-spacing:-.1px;}
+  .fc-head .fc-subtitle{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .fc-head-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .fc-icon-btn{font-family:inherit;font-size:12px;padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--ink-soft);cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+  .fc-icon-btn:hover{color:var(--ink);border-color:var(--ink-soft);}
+  .fc-text-link{font-size:11.5px;color:var(--ink-soft);cursor:pointer;text-decoration:none;}
+  .fc-text-link:hover{color:var(--rust);text-decoration:underline;}
+
+  /* Metrics strip -- replaces six large stat-cards with one thin,
+     dot-divided bar. Counts stay real (no new figures, same six values
+     as before), just presented at a scale that stops competing with the
+     actual customer/order data below it. */
+  .fc-metrics{display:flex;flex-wrap:wrap;border:1px solid var(--border);border-radius:8px;background:var(--surface);margin-bottom:18px;}
+  .fc-metric{display:flex;align-items:baseline;gap:6px;padding:10px 18px;border-right:1px solid var(--border);min-width:118px;}
+  .fc-metric:last-child{border-right:none;}
+  .fc-metric-num{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;}
+  .fc-metric-label{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.5px;}
+  .fc-metric.acc-amber .fc-metric-num{color:var(--amber);}
+  .fc-metric.acc-rust .fc-metric-num{color:var(--rust);}
+  .fc-metric.acc-sage .fc-metric-num{color:var(--sage);}
+
+  /* Filter bar -- pill-shaped compact controls instead of boxy native
+     selects. The <select>/<input> elements underneath are untouched
+     (same ids, same onchange/oninput wiring) -- only wrapped and
+     re-skinned so the browser's own chrome (default border, arrow) never
+     shows. "Active" state is computed server-side from the already-
+     current filter value when the row is built, so a live filter reads
+     as a colored pill at a glance instead of just "some select somewhere
+     that isn't on its default option". */
+  .fc-filterbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
+  .fc-search-wrap{position:relative;display:inline-flex;}
+  .fc-search-wrap::before{content:'';position:absolute;left:10px;top:50%;width:7px;height:7px;border:1.4px solid var(--ink-soft);border-radius:50%;transform:translateY(-75%);pointer-events:none;}
+  .fc-search-wrap::after{content:'';position:absolute;left:15.5px;top:50%;width:4px;height:1.4px;background:var(--ink-soft);transform:translateY(45%) rotate(45deg);pointer-events:none;}
+  .fc-filter-search{font-family:inherit;font-size:12px;padding:6px 12px 6px 24px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--ink);min-width:190px;transition:border-color .12s;}
+  .fc-filter-search:focus{outline:none;border-color:var(--ink-soft);}
+  .fc-select-wrap{position:relative;display:inline-flex;}
+  .fc-select-wrap::after{content:'';position:absolute;right:10px;top:50%;width:5px;height:5px;border-right:1.4px solid var(--ink-soft);border-bottom:1.4px solid var(--ink-soft);transform:translateY(-65%) rotate(45deg);pointer-events:none;}
+  .fc-filter-select{font-family:inherit;font-size:11.5px;padding:6px 22px 6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--ink-soft);appearance:none;-webkit-appearance:none;cursor:pointer;}
+  .fc-filter-select.fc-active{border-color:var(--amber);color:var(--amber);background:var(--amber-soft);}
+  .fc-select-wrap:has(.fc-active)::after{border-color:var(--amber);}
+  .fc-filter-clear{font-size:11px;color:var(--ink-soft);cursor:pointer;padding:6px 6px;opacity:.5;}
+  .fc-filter-clear.fc-active{opacity:1;color:var(--rust);text-decoration:underline;}
+
   .fc-table-wrap{overflow-x:auto;}
   .fc-sortable-th{cursor:pointer;user-select:none;}
   .fc-sortable-th:hover{color:var(--ink);}
   .fc-row-clickable{cursor:pointer;}
   .fc-row-clickable:hover td{background:var(--cream);}
-  .fc-view-link{color:var(--amber);cursor:pointer;font-size:12.5px;}
-  .fc-pager{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:10px;font-size:12px;color:var(--ink-soft);}
-  .fc-pager button{font-family:inherit;font-size:12px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--ink);cursor:pointer;}
+  .fc-row-chevron{opacity:0;color:var(--ink-soft);transition:opacity .12s;font-size:13px;}
+  .fc-row-clickable:hover .fc-row-chevron{opacity:1;}
+  .fc-pager{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:8px;font-size:11.5px;color:var(--ink-soft);}
+  .fc-pager button{font-family:inherit;font-size:11.5px;padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--ink);cursor:pointer;}
   .fc-pager button:disabled{opacity:.4;cursor:default;}
+
+  /* Dense customer/order rows -- scoped, so the ledger's other tables
+     (Contacts, Orders, Customers) keep their current row height/type. */
+  .fc-page table{border-radius:8px;}
+  .fc-page th{font-size:10.5px;padding:7px 12px;letter-spacing:.5px;}
+  .fc-page td{padding:8px 12px;font-size:13px;}
+  .fc-cust-cell{display:flex;align-items:center;gap:9px;}
+  .fc-avatar-sm{width:25px;height:25px;border-radius:50%;background:var(--amber-soft);color:var(--amber);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;flex:none;}
+  .fc-cust-name{font-weight:500;color:var(--ink);font-size:13px;line-height:1.35;}
+  .fc-cust-email{font-size:11px;color:var(--ink-soft);line-height:1.35;}
+  .fc-num{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
+  .fc-page .badge{font-size:10px;padding:2.5px 8px;}
+  /* Shipped reads identically to a disabled/muted badge in the shared
+     .badge rule (background:var(--border)); on this screen it's an
+     active, meaningful state, so it gets its own scoped color. */
+  .fc-page .badge.shipped{background:var(--umber-soft);color:var(--umber);}
 
   /* Slide-in drawer -- the one genuinely new interaction pattern here.
      Lives inside this dashboard's own #content subtree (rebuilt by
@@ -545,14 +620,20 @@
   .fc-drawer-backdrop.show{display:block;}
   .fc-drawer{position:fixed;top:0;right:0;height:100vh;width:400px;max-width:92vw;background:var(--surface);border-left:1px solid var(--border);box-shadow:-8px 0 24px rgba(35,33,27,0.12);z-index:56;transform:translateX(100%);transition:transform .22s ease;display:flex;flex-direction:column;}
   .fc-drawer.show{transform:translateX(0);}
-  .fc-drawer-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid var(--border);}
-  .fc-drawer-close{background:none;border:none;font-size:22px;line-height:1;color:var(--ink-soft);cursor:pointer;padding:2px 6px;}
+  .fc-drawer-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);}
+  .fc-drawer-close{background:none;border:none;font-size:20px;line-height:1;color:var(--ink-soft);cursor:pointer;padding:2px 6px;}
   .fc-drawer-close:hover{color:var(--ink);}
-  .fc-drawer-body{padding:18px 20px;overflow-y:auto;flex:1;}
-  .fc-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
-  .fc-tab{padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-family:inherit;font-size:12px;color:var(--ink-soft);cursor:pointer;}
+  .fc-drawer-body{padding:16px 20px;overflow-y:auto;flex:1;}
+  .fc-tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap;}
+  .fc-tab{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-family:inherit;font-size:11.5px;color:var(--ink-soft);cursor:pointer;}
   .fc-tab.active{background:var(--ink-fixed);color:#fff;border-color:var(--ink-fixed);}
   .fc-tab:disabled{opacity:.45;cursor:default;}
+  /* Denser drawer stat cards -- same .stat-card/.widgetKPI markup used
+     by the generic dashboard widgets and Overview, only the size is
+     reined in, and only inside this drawer. */
+  .fc-page .fc-drawer .stat-card{padding:10px 12px;}
+  .fc-page .fc-drawer .stat-card .num{font-family:'IBM Plex Mono',monospace;font-size:17px;}
+  .fc-page .fc-drawer .stat-card .lbl{font-size:10px;}
 
   /* Order Detail Drawer -- a second, independent drawer that can sit on
      top of the customer drawer (opened by clicking a row in its Orders
@@ -562,28 +643,57 @@
   .fc-order-drawer-backdrop{z-index:57;}
   .fc-order-drawer{z-index:58;}
 
-  /* Fulfillment kanban -- reuses .kanban/.kcol/.kcard verbatim (the exact
-     same classes Deals already uses), but Deals hardcodes a 5-column grid
-     for its 5 stages; this board has 4 real order statuses (or fewer when
-     the Fulfillment status filter narrows to one), so the column count is
-     set inline per render rather than baked into a fixed CSS rule. */
-  .fc-kanban{margin-top:4px;}
+  /* Fulfillment board -- reuses .kanban/.kcol/.kcard verbatim (the exact
+     same classes Deals already uses) as the structural base, with dense
+     overrides scoped to .fc-kanban so Deals' own board is untouched.
+     Column accent color keys off the real data-fc-stage-col value
+     already on each column, no new state. */
+  .fc-kanban{margin-top:2px;}
+  .fc-kanban.kanban{gap:10px;}
+  .fc-kanban .kcol{padding:8px;min-height:0;border-top:none;border-left:3px solid var(--border);border-radius:6px;}
+  .fc-kanban .kcol[data-fc-stage-col="Pending"]{border-left-color:var(--amber);}
+  .fc-kanban .kcol[data-fc-stage-col="Shipped"]{border-left-color:var(--umber);}
+  .fc-kanban .kcol[data-fc-stage-col="Delivered"]{border-left-color:var(--sage);}
+  .fc-kanban .kcol[data-fc-stage-col="Cancelled"]{border-left-color:var(--clay);}
+  .fc-kanban .kcol-head{padding:2px 4px 8px;font-size:10.5px;}
+  .fc-kanban .kcol-head span:last-child{font-family:'IBM Plex Mono',monospace;}
+  .fc-kanban .kcard{padding:9px 10px;margin-bottom:7px;cursor:default;}
+  .fc-kanban .ledger-no{position:static;font-size:10.5px;}
+  .fc-kanban .kcard-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+  .fc-kanban .kcard-age{font-size:10.5px;color:var(--ink-soft);white-space:nowrap;}
+  .fc-kanban .ktitle{font-size:12.5px;font-weight:500;margin:3px 0 2px;padding-right:0;}
+  .fc-kanban .kcontact{font-size:11px;margin-bottom:0;}
+  .fc-kanban .kval{font-size:12.5px;margin:2px 0 8px;}
+  .fc-kanban .kfoot{margin-top:0 !important;align-items:center;}
+  .fc-kanban .kfoot select{font-family:inherit;font-size:10.5px;padding:3px 20px 3px 8px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--ink-soft);appearance:none;-webkit-appearance:none;cursor:pointer;position:relative;}
+  .fc-kanban-select-wrap{position:relative;display:inline-flex;}
+  .fc-kanban-select-wrap::after{content:'';position:absolute;right:8px;top:50%;width:4px;height:4px;border-right:1.2px solid var(--ink-soft);border-bottom:1.2px solid var(--ink-soft);transform:translateY(-60%) rotate(45deg);pointer-events:none;}
+  .fc-kanban .fc-card-open{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--ink-soft);cursor:pointer;font-size:12px;flex:none;}
+  .fc-kanban .fc-card-open:hover{background:var(--cream);color:var(--ink);}
 
   /* Requires-attention panel (phase 3) and order timeline (phase 2) */
-  .fc-attn-panel{display:flex;flex-direction:column;gap:8px;}
-  .fc-attn-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;font-size:13px;}
+  .fc-attn-panel{display:flex;flex-direction:column;gap:1px;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  .fc-attn-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;border-left:3px solid transparent;background:var(--surface);cursor:pointer;font-size:12.5px;}
+  .fc-attn-item + .fc-attn-item{border-top:1px solid var(--border);}
   .fc-attn-item:hover{background:var(--cream);}
-  .fc-attn-badge{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .fc-attn-item.warn{border-left-color:var(--amber);}
+  .fc-attn-item.bad{border-left-color:var(--rust);}
+  .fc-attn-item.neutral{border-left-color:var(--ink-soft);}
+  .fc-attn-badge{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
   .fc-attn-badge.warn{background:var(--amber);}
   .fc-attn-badge.bad{background:var(--rust);}
   .fc-attn-badge.neutral{background:var(--ink-soft);}
   .fc-timeline{display:flex;flex-direction:column;gap:0;}
-  .fc-timeline-item{position:relative;padding:0 0 20px 22px;border-left:2px solid var(--border);}
+  .fc-timeline-item{position:relative;padding:0 0 18px 20px;border-left:2px solid var(--border);}
   .fc-timeline-item:last-child{border-left-color:transparent;padding-bottom:0;}
-  .fc-timeline-dot{position:absolute;left:-6px;top:1px;width:10px;height:10px;border-radius:50%;background:var(--amber);border:2px solid var(--surface);}
+  .fc-timeline-dot{position:absolute;left:-5px;top:1px;width:8px;height:8px;border-radius:50%;background:var(--amber);border:2px solid var(--surface);}
 
+  @media (max-width:900px){
+    .fc-metric{min-width:33%;}
+  }
   @media (max-width:640px){
     .fc-drawer{width:100%;max-width:100%;}
+    .fc-metric{min-width:50%;}
   }
   .donut-wrap{display:flex;align-items:center;gap:34px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-bottom:24px;flex-wrap:wrap;}
   .donut{width:220px;height:220px;border-radius:50%;flex-shrink:0;position:relative;}
@@ -2313,26 +2423,23 @@ function renderFcOrderDrawer(){
 function renderFcFilterBar(){
   const f = state.fcFilters;
   const opt = (val, label, cur) => `<option value="${esc(val)}" ${cur===val?'selected':''}>${esc(label)}</option>`;
+  const anyActive = f.customerStatus!=='all' || f.orderStatus!=='all' || f.fulfillmentStatus!=='all' || f.source!=='all' || !!f.search;
+  const sel = (id, current, defaultLabel, options) => `
+    <span class="fc-select-wrap">
+      <select class="fc-filter-select ${current!=='all'?'fc-active':''}" id="${id}">
+        ${opt('all',defaultLabel,current)}
+        ${options.map(o=>opt(o,o,current)).join('')}
+      </select>
+    </span>`;
   return `<div class="fc-filterbar">
-    <input type="text" class="fc-filter-search" id="fcSearchInput" placeholder="Search customer, email, or order #" value="${esc(f.search)}">
-    <select class="fc-filter-select" id="fcCustomerStatusFilter">
-      ${opt('all','All customer statuses',f.customerStatus)}
-      ${opt('Active','Active',f.customerStatus)}
-      ${opt('New','New',f.customerStatus)}
-    </select>
-    <select class="fc-filter-select" id="fcOrderStatusFilter">
-      ${opt('all','All order statuses',f.orderStatus)}
-      ${OSTATUS.map(s=>opt(s,s,f.orderStatus)).join('')}
-    </select>
-    <select class="fc-filter-select" id="fcFulfillmentStatusFilter">
-      ${opt('all','All fulfillment stages',f.fulfillmentStatus)}
-      ${OSTATUS.map(s=>opt(s,s,f.fulfillmentStatus)).join('')}
-    </select>
-    <select class="fc-filter-select" id="fcSourceFilter">
-      ${opt('all','All sources',f.source)}
-      ${fcSourceOptions().map(s=>opt(s,s,f.source)).join('')}
-    </select>
-    <span class="fc-filter-clear" id="fcClearFilters">Clear filters</span>
+    <span class="fc-search-wrap">
+      <input type="text" class="fc-filter-search" id="fcSearchInput" placeholder="Search customer, email, order #" value="${esc(f.search)}">
+    </span>
+    ${sel('fcCustomerStatusFilter', f.customerStatus, 'Customer status', ['Active','New'])}
+    ${sel('fcOrderStatusFilter', f.orderStatus, 'Order status', OSTATUS)}
+    ${sel('fcFulfillmentStatusFilter', f.fulfillmentStatus, 'Fulfillment stage', OSTATUS)}
+    ${sel('fcSourceFilter', f.source, 'Source', fcSourceOptions())}
+    <span class="fc-filter-clear ${anyActive?'fc-active':''}" id="fcClearFilters">Clear filters</span>
   </div>`;
 }
 function renderFcCustomerTableSection(){
@@ -2348,17 +2455,26 @@ function renderFcCustomerTableSection(){
     const stats = customerStats(c);
     const status = fcCustomerStatus(c);
     return `<tr class="fc-row-clickable" data-fc-open-customer="${c.id}">
-      <td>${esc(c.name)}</td>
-      <td style="font-size:12px;color:var(--ink-soft);">${esc(c.email||'—')}</td>
+      <td>
+        <div class="fc-cust-cell">
+          <div class="fc-avatar-sm">${esc(cpInitials(c.name))}</div>
+          <div>
+            <div class="fc-cust-name">${esc(c.name)}</div>
+            <div class="fc-cust-email">${esc(c.email||'—')}</div>
+          </div>
+        </div>
+      </td>
       <td><span class="badge muted">${esc(c.source || 'Manual')}</span></td>
-      <td style="font-size:12px;">${cpDate(c.createdAt)}</td>
-      <td>${stats.totalOrders}</td>
-      <td style="font-size:12px;">${stats.lastOrder ? cpRelative(stats.lastOrder.createdAt) : '—'}</td>
-      <td class="mono">${stats.totalOrders ? cpMoney(stats.totalSpent) : '—'}</td>
+      <td style="font-size:11.5px;color:var(--ink-soft);">${cpDate(c.createdAt)}</td>
+      <td>
+        <div class="fc-num" style="font-size:12.5px;">${stats.totalOrders} order${stats.totalOrders===1?'':'s'}</div>
+        <div style="font-size:11px;color:var(--ink-soft);">${stats.lastOrder ? cpRelative(stats.lastOrder.createdAt) : 'no orders yet'}</div>
+      </td>
+      <td class="fc-num" style="text-align:right;">${stats.totalOrders ? cpMoney(stats.totalSpent) : '—'}</td>
       <td><span class="badge ${status==='Active'?'delivered':'muted'}">${status}</span></td>
-      <td><span class="fc-view-link" data-fc-open-customer="${c.id}">View</span></td>
+      <td style="width:16px;"><span class="fc-row-chevron">&rarr;</span></td>
     </tr>`;
-  }).join('') || `<tr><td colspan="9"><div class="empty"><div class="display">No customers found</div>No customers match the current criteria.</div></td></tr>`;
+  }).join('') || `<tr><td colspan="7"><div class="empty"><div class="display">No customers found</div>No customers match the current criteria.</div></td></tr>`;
 
   return `
     <div class="section-title" style="margin-top:0;">New customers</div>
@@ -2366,11 +2482,10 @@ function renderFcCustomerTableSection(){
       <table>
         <thead><tr>
           <th class="fc-sortable-th" data-fc-sort="name">Customer${fcSortCaret('name')}</th>
-          <th>Email</th><th>Source</th>
+          <th>Source</th>
           <th class="fc-sortable-th" data-fc-sort="createdAt">Created${fcSortCaret('createdAt')}</th>
           <th class="fc-sortable-th" data-fc-sort="orders">Orders${fcSortCaret('orders')}</th>
-          <th>Last order</th>
-          <th class="fc-sortable-th" data-fc-sort="orderValue">Order value${fcSortCaret('orderValue')}</th>
+          <th class="fc-sortable-th" data-fc-sort="orderValue" style="text-align:right;">Order value${fcSortCaret('orderValue')}</th>
           <th>Status</th><th></th>
         </tr></thead>
         <tbody>${rows}</tbody>
@@ -2391,16 +2506,18 @@ function renderFcKanbanSection(){
         ${items.map(o=>{
           const summary = cpOrderSummary(o);
           return `<div class="kcard">
-            <div class="ledger-no mono">${esc(orderDisplayNumber(o))}</div>
+            <div class="kcard-top">
+              <span class="ledger-no mono">${esc(orderDisplayNumber(o))}</span>
+              <span class="kcard-age">${cpRelative(o.createdAt)}</span>
+            </div>
             <div class="ktitle">${esc(contactName(o.contactId))}</div>
             <div class="kcontact">${summary.label}</div>
             <div class="kval mono">${cpMoney(toUSD(o.amount, orderCurrency(o)))}</div>
-            <div class="kfoot" style="margin-top:8px;">
-              <select data-fc-order-stage="${o.id}">${OSTATUS.map(s=>`<option ${s===o.status?'selected':''}>${s}</option>`).join('')}</select>
-              <span class="kowner">${cpRelative(o.createdAt)}</span>
-            </div>
-            <div style="margin-top:7px;text-align:right;">
-              <span class="fc-view-link" data-fc-open-order="${o.id}">View</span>
+            <div class="kfoot">
+              <span class="fc-kanban-select-wrap">
+                <select data-fc-order-stage="${o.id}">${OSTATUS.map(s=>`<option ${s===o.status?'selected':''}>${s}</option>`).join('')}</select>
+              </span>
+              <span class="fc-card-open" data-fc-open-order="${o.id}" title="Open order">&rarr;</span>
             </div>
           </div>`;
         }).join('') || ''}
@@ -2431,7 +2548,7 @@ function renderFcAttentionPanel(){
     return `<div class="empty"><div class="display">All clear</div>Nothing needs attention right now.</div>`;
   }
   return `<div class="fc-attn-panel">${items.map(it=>`
-    <div class="fc-attn-item" data-fc-attn-${it.kind}="${it.id}">
+    <div class="fc-attn-item ${it.sev}" data-fc-attn-${it.kind}="${it.id}">
       <div style="display:flex;align-items:center;gap:10px;"><span class="fc-attn-badge ${it.sev}"></span><span>${it.label}</span></div>
       <span style="color:var(--ink-soft);font-size:11px;white-space:nowrap;">${it.kind==='order'?'View order':'View customer'} &rarr;</span>
     </div>`).join('')}</div>`;
@@ -2443,44 +2560,55 @@ function renderFulfillmentCommandCenter(dash){
   const newOrders = state.orders.filter(o=>(o.createdAt||0) >= since);
   const pending = state.orders.filter(o=>o.status==='Pending');
   const shipped = state.orders.filter(o=>o.status==='Shipped');
-  const delivered = state.orders.filter(o=>o.status==='Delivered');
   const revenue = newOrders.filter(o=>o.status!=='Cancelled').reduce((s,o)=>s+toUSD(o.amount, orderCurrency(o)), 0);
+  const attn = requiresAttention();
+  const attnCount = attn.waitingFulfillment.length + attn.missingAddress.length + attn.shippedStale.length + attn.openTicketCustomers.length;
 
-  const kpis = [
-    ['New customers', newCustomers.length, 'sage'],
-    ['New orders', newOrders.length, 'ochre'],
-    ['Orders to fulfill', pending.length, 'amber'],
-    ['Shipped', shipped.length, 'umber'],
-    ['Delivered', delivered.length, 'olive'],
-    ['Revenue', cpMoney(revenue), 'rust'],
+  // Compact metrics strip -- same six real numbers the six large cards
+  // showed before, just not one per giant card. "Delivered" isn't lost,
+  // it's still the Delivered column's own count in Fulfillment overview
+  // below; Attention surfaces the same requiresAttention() total the
+  // panel at the bottom lists in full, so the two stay in sync by
+  // construction rather than two separately-maintained counts.
+  const metrics = [
+    ['New customers', newCustomers.length, ''],
+    ['New orders', newOrders.length, ''],
+    ['To fulfill', pending.length, pending.length ? 'acc-amber' : ''],
+    ['Shipped', shipped.length, ''],
+    ['Attention', attnCount, attnCount ? 'acc-rust' : 'acc-sage'],
+    ['Revenue', cpMoney(revenue), ''],
   ];
 
   return `
+    <div class="fc-page">
     <div class="fc-head">
       <div>
-        <p class="hi display" style="margin:0;">Customer &amp; Fulfillment</p>
-        <div style="font-size:12.5px;color:var(--ink-soft);margin-top:3px;">Monitor new customers, orders and fulfillment activity.</div>
+        <p class="fc-title">Customer &amp; Fulfillment</p>
+        <div class="fc-subtitle">Monitor new customers, orders and fulfillment activity.</div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-        <select id="fcDateRange" class="fc-filter-select">
-          <option value="today" ${range==='today'?'selected':''}>Today</option>
-          <option value="7d" ${range==='7d'?'selected':''}>Last 7 days</option>
-          <option value="30d" ${range==='30d'?'selected':''}>Last 30 days</option>
-        </select>
-        <button type="button" class="btn secondary" id="fcRefreshBtn">Refresh</button>
-        <span class="row-actions" id="dashDeleteBtn" data-dash-id="${dash.id}" style="cursor:pointer;">delete</span>
+      <div class="fc-head-controls">
+        <span class="fc-select-wrap">
+          <select id="fcDateRange" class="fc-filter-select">
+            <option value="today" ${range==='today'?'selected':''}>Today</option>
+            <option value="7d" ${range==='7d'?'selected':''}>Last 7 days</option>
+            <option value="30d" ${range==='30d'?'selected':''}>Last 30 days</option>
+          </select>
+        </span>
+        <button type="button" class="fc-icon-btn" id="fcRefreshBtn">&#8635; Refresh</button>
+        <span class="fc-text-link" id="dashDeleteBtn" data-dash-id="${dash.id}">Delete</span>
       </div>
     </div>
-    <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">${kpis.map(([l,v,c])=>widgetKPI(l,v,c)).join('')}</div>
+    <div class="fc-metrics">${metrics.map(([l,v,acc])=>`<div class="fc-metric ${acc}"><span class="fc-metric-num">${v}</span><span class="fc-metric-label">${esc(l)}</span></div>`).join('')}</div>
     ${renderFcFilterBar()}
     <div id="fcCustomerTableSection">${renderFcCustomerTableSection()}</div>
-    <div id="fcKanbanSection" style="margin-top:26px;">${renderFcKanbanSection()}</div>
-    <div style="margin-top:26px;">
+    <div id="fcKanbanSection" style="margin-top:22px;">${renderFcKanbanSection()}</div>
+    <div style="margin-top:22px;">
       <div class="section-title" style="margin-top:0;">Requires attention</div>
       ${renderFcAttentionPanel()}
     </div>
     ${renderFcCustomerDrawer()}
     ${renderFcOrderDrawer()}
+    </div>
   `;
 }
 
