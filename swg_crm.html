@@ -2122,12 +2122,17 @@ function fcDateRangeMs(range){
   if(range==='30d') return 30*day;
   return 7*day;
 }
+function fcCustomerStatus(customer){
+  return customerOrders(customer).some(o=>o.status!=='Cancelled') ? 'Active' : 'New';
+}
 function fcSortCustomers(list){
   const sort = state.fcSort || {field:'createdAt', dir:'desc'};
   const mul = sort.dir==='asc' ? 1 : -1;
   return list.slice().sort((a,b)=>{
     let av,bv;
     if(sort.field==='name'){ av=(a.name||'').toLowerCase(); bv=(b.name||'').toLowerCase(); }
+    else if(sort.field==='orders'){ av=customerStats(a).totalOrders; bv=customerStats(b).totalOrders; }
+    else if(sort.field==='orderValue'){ av=customerStats(a).totalSpent; bv=customerStats(b).totalSpent; }
     else { av=a.createdAt||0; bv=b.createdAt||0; }
     if(av<bv) return -1*mul;
     if(av>bv) return 1*mul;
@@ -2139,10 +2144,21 @@ function fcSortCaret(field){
   if(sort.field!==field) return '';
   return sort.dir==='asc' ? ' ↑' : ' ↓';
 }
+const FC_DRAWER_TABS = [
+  {key:'overview', label:'Overview'},
+  {key:'orders', label:'Orders'},
+  {key:'activity', label:'Activity'},
+  {key:'notes', label:'Notes'},
+];
 function renderFcCustomerDrawer(){
   const cust = state.fcDrawerCustomerId ? state.customers.find(c=>c.id===state.fcDrawerCustomerId) : null;
   if(!cust) return `<div class="fc-drawer-backdrop" data-fc-drawer-close></div><div class="fc-drawer" id="fcDrawer"></div>`;
   const stats = customerStats(cust);
+  const status = fcCustomerStatus(cust);
+  const tabs = FC_DRAWER_TABS.map(t=>{
+    if(t.key==='overview') return `<button type="button" class="fc-tab active" data-fc-drawer-tab="overview">Overview</button>`;
+    return `<button type="button" class="fc-tab" disabled title="Arrives in a later phase of this dashboard">${esc(t.label)}</button>`;
+  }).join('');
   return `<div class="fc-drawer-backdrop show" data-fc-drawer-close></div>
     <div class="fc-drawer show" id="fcDrawer">
       <div class="fc-drawer-head">
@@ -2153,21 +2169,32 @@ function renderFcCustomerDrawer(){
         <button type="button" class="fc-drawer-close" data-fc-drawer-close aria-label="Close">&times;</button>
       </div>
       <div class="fc-drawer-body">
+        <div class="fc-tabs">${tabs}</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;margin-bottom:8px;">
           <span>${esc(cust.email||'—')}</span>
           <span>${esc(cust.phone||'—')}</span>
           <span>${esc(cust.country||'—')}</span>
         </div>
-        <div style="font-size:12px;color:var(--ink-soft);margin-bottom:18px;">Customer since ${cpDate(cust.createdAt)} &middot; Source: ${esc(cust.source||'Manual')}</div>
-        <div class="stat-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:22px;">
+        <div style="display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink-soft);margin-bottom:18px;">
+          <span>Customer since ${cpDate(cust.createdAt)}</span>
+          <span>&middot;</span>
+          <span>Source: ${esc(cust.source||'Manual')}</span>
+          <span class="badge ${status==='Active'?'delivered':'muted'}">${status}</span>
+        </div>
+        <div class="section-title" style="margin-top:0;">Customer summary</div>
+        <div class="stat-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:18px;">
           ${widgetKPI('Total orders', stats.totalOrders, 'sage')}
-          ${widgetKPI('Total spent', cpMoney(stats.totalSpent), 'ochre')}
-          ${widgetKPI('Avg order value', cpMoney(stats.aov), 'umber')}
+          ${widgetKPI('Total spent', stats.totalOrders ? cpMoney(stats.totalSpent) : '—', 'ochre')}
+          ${widgetKPI('Avg order value', stats.totalOrders ? cpMoney(stats.aov) : '—', 'umber')}
           ${widgetKPI('Last order', stats.lastOrder ? cpRelative(stats.lastOrder.createdAt) : '—', 'clay')}
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:22px;">
+          <button type="button" class="btn secondary" data-fc-view-customer="${cust.id}">View customer</button>
+          <button type="button" class="btn secondary" disabled title="Filtering Orders by customer isn't available yet">View orders</button>
         </div>
         <div class="section-title" style="margin-top:0;">Notes</div>
         <div style="font-size:13px;color:var(--ink-soft);">${esc(cust.notes || 'No notes yet.')}</div>
-        <div style="font-size:11.5px;color:var(--ink-soft);margin-top:18px;">Order history, activity and notes editing arrive in the next phase of this dashboard.</div>
+        <div style="font-size:11.5px;color:var(--ink-soft);margin-top:18px;">Order history, activity and notes editing arrive in a later phase of this dashboard.</div>
       </div>
     </div>`;
 }
@@ -2198,7 +2225,7 @@ function renderFulfillmentCommandCenter(dash){
 
   const rows = pageItems.map(c=>{
     const stats = customerStats(c);
-    const status = stats.orders.some(o=>o.status!=='Cancelled') ? 'Active' : 'New';
+    const status = fcCustomerStatus(c);
     return `<tr class="fc-row-clickable" data-fc-open-customer="${c.id}">
       <td>${esc(c.name)}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${esc(c.email||'—')}</td>
@@ -2206,11 +2233,11 @@ function renderFulfillmentCommandCenter(dash){
       <td style="font-size:12px;">${cpDate(c.createdAt)}</td>
       <td>${stats.totalOrders}</td>
       <td style="font-size:12px;">${stats.lastOrder ? cpRelative(stats.lastOrder.createdAt) : '—'}</td>
-      <td class="mono">${cpMoney(stats.totalSpent)}</td>
+      <td class="mono">${stats.totalOrders ? cpMoney(stats.totalSpent) : '—'}</td>
       <td><span class="badge ${status==='Active'?'delivered':'muted'}">${status}</span></td>
       <td><span class="fc-view-link" data-fc-open-customer="${c.id}">View</span></td>
     </tr>`;
-  }).join('') || `<tr><td colspan="9"><div class="empty"><div class="display">No customers yet</div>New customers from the website will show up here.</div></td></tr>`;
+  }).join('') || `<tr><td colspan="9"><div class="empty"><div class="display">No customers found</div>No customers match the current criteria.</div></td></tr>`;
 
   return `
     <div class="fc-head">
@@ -2236,7 +2263,10 @@ function renderFulfillmentCommandCenter(dash){
           <th class="fc-sortable-th" data-fc-sort="name">Customer${fcSortCaret('name')}</th>
           <th>Email</th><th>Source</th>
           <th class="fc-sortable-th" data-fc-sort="createdAt">Created${fcSortCaret('createdAt')}</th>
-          <th>Orders</th><th>Last order</th><th>Total spent</th><th>Status</th><th></th>
+          <th class="fc-sortable-th" data-fc-sort="orders">Orders${fcSortCaret('orders')}</th>
+          <th>Last order</th>
+          <th class="fc-sortable-th" data-fc-sort="orderValue">Order value${fcSortCaret('orderValue')}</th>
+          <th>Status</th><th></th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
@@ -4966,6 +4996,16 @@ function attachContentHandlers(){
   document.querySelectorAll('[data-fc-drawer-close]').forEach(el=>{
     el.onclick = ()=>{ state.fcDrawerCustomerId = null; render(); };
   });
+  document.querySelectorAll('[data-fc-view-customer]').forEach(el=>{
+    el.onclick = ()=>{
+      state.returnView = 'dashboard';
+      state.profileCustomerId = el.dataset.fcViewCustomer;
+      state.cpOrderPage = 0;
+      state.cpOrderStatusFilter = 'all';
+      state.view = 'customerProfile';
+      render();
+    };
+  });
   document.querySelectorAll('[data-fc-sort]').forEach(el=>{
     el.onclick = ()=>{
       const field = el.dataset.fcSort;
@@ -5893,6 +5933,10 @@ document.addEventListener('keydown', (e)=>{
   if(e.key!=='Escape') return;
   document.querySelectorAll('.cp-kebab-menu').forEach(m=>{ m.hidden = true; });
   document.querySelectorAll('[data-kebab-toggle]').forEach(b=>b.setAttribute('aria-expanded','false'));
+  // Customer & Fulfillment drawer -- a no-op state check when it's not
+  // open, so this is safe to attach once here regardless of which view
+  // is currently showing (mirrors the kebab-menu Escape handler above).
+  if(state.fcDrawerCustomerId){ state.fcDrawerCustomerId = null; render(); }
 });
 document.getElementById('emlPrevClose').onclick = closeEmailPreview;
 document.querySelectorAll('#emlPrevLang [data-eml-lang]').forEach(el=>{
