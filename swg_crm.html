@@ -265,6 +265,99 @@
   .tkt-status{font-family:inherit;font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--cream);color:var(--ink);}
   .tkt-num{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--clay);}
 
+
+  /* ================================================================
+     Customer 360 profile page — a deliberately different visual system
+     from the rest of the ledger (neutral gray/white, one accent, dense
+     tables, restrained shadows), namespaced entirely under .cp-page so
+     it cannot leak into or be affected by the ledger's cream/parchment
+     styling. Reuses Work Sans (already the body font) and IBM Plex Mono
+     (already used for figures elsewhere) rather than loading anything new.
+     ================================================================ */
+  .cp-page{
+    --cp-bg:#fafafa; --cp-surface:#ffffff; --cp-border:#e5e7eb; --cp-border-soft:#f0f1f3;
+    --cp-text:#111827; --cp-text-soft:#6b7280; --cp-text-faint:#9ca3af;
+    --cp-accent:#a8703c; --cp-accent-soft:#f3e8dd;
+    --cp-danger:#a6472b; --cp-danger-soft:#f0ddd5;
+    --cp-good:#5b6b4c; --cp-good-soft:#e1e6d5;
+    --cp-radius:10px; --cp-shadow:0 1px 2px rgba(17,24,39,.04);
+    font-family:'Work Sans',sans-serif; color:var(--cp-text);
+  }
+  .cp-card{background:var(--cp-surface);border:1px solid var(--cp-border);border-radius:var(--cp-radius);box-shadow:var(--cp-shadow);padding:20px 22px;margin-bottom:16px;}
+  .cp-section-title{font-size:13px;font-weight:600;color:var(--cp-text);letter-spacing:.1px;margin:0 0 14px;}
+  .cp-empty{padding:28px 10px;text-align:center;color:var(--cp-text-soft);font-size:13px;line-height:1.7;}
+
+  /* Header */
+  .cp-header-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;}
+  .cp-identity{display:flex;gap:14px;align-items:flex-start;min-width:0;}
+  .cp-avatar{width:52px;height:52px;border-radius:50%;background:var(--cp-accent-soft);color:var(--cp-accent);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;flex-shrink:0;}
+  .cp-name{font-size:20px;font-weight:700;color:var(--cp-text);line-height:1.25;}
+  .cp-name-meta{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:5px;font-size:12.5px;color:var(--cp-text-soft);}
+  .cp-name-meta a{color:var(--cp-text-soft);text-decoration:none;}
+  .cp-name-meta a:hover{color:var(--cp-accent);}
+  .cp-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+  .cp-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;background:var(--cp-border-soft);color:var(--cp-text-soft);}
+  .cp-pill.accent{background:var(--cp-accent-soft);color:var(--cp-accent);}
+  .cp-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .cp-btn{font-family:inherit;font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:7px;border:1px solid var(--cp-border);background:var(--cp-surface);color:var(--cp-text);cursor:pointer;transition:background .15s,border-color .15s;}
+  .cp-btn:hover{background:var(--cp-border-soft);}
+  .cp-btn.primary{background:var(--cp-accent);border-color:var(--cp-accent);color:#fff;}
+  .cp-btn.primary:hover{opacity:.9;background:var(--cp-accent);}
+
+  /* Stat pills row — dense, not a wall of stat cards */
+  .cp-stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid var(--cp-border-soft);}
+  .cp-stat{padding:8px 14px;border:1px solid var(--cp-border);border-radius:8px;background:var(--cp-bg);min-width:108px;}
+  .cp-stat .v{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--cp-text);}
+  .cp-stat .l{font-size:10.5px;color:var(--cp-text-soft);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+
+  /* Two-column responsive layout */
+  .cp-grid{display:grid;grid-template-columns:1fr;gap:16px;align-items:start;margin-top:16px;}
+  @media (min-width:960px){ .cp-grid{grid-template-columns:minmax(0,2fr) minmax(280px,1fr);} }
+
+  /* Info card groups (Contact / Address / Account) */
+  .cp-info-group + .cp-info-group{margin-top:16px;padding-top:16px;border-top:1px solid var(--cp-border-soft);}
+  .cp-info-label{font-size:10.5px;font-weight:600;color:var(--cp-text-faint);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+  .cp-info-row{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:12.5px;}
+  .cp-info-row .k{color:var(--cp-text-soft);}
+  .cp-info-row .v{color:var(--cp-text);text-align:right;word-break:break-word;}
+
+  /* Order history table */
+  .cp-table-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .cp-select{font-family:inherit;font-size:12.5px;padding:6px 9px;border-radius:6px;border:1px solid var(--cp-border);background:var(--cp-surface);color:var(--cp-text);}
+  .cp-table-wrap{overflow-x:auto;}
+  .cp-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .cp-table th{text-align:left;font-size:10.5px;font-weight:600;color:var(--cp-text-faint);text-transform:uppercase;letter-spacing:.5px;padding:0 10px 8px;border-bottom:1px solid var(--cp-border);white-space:nowrap;}
+  .cp-table td{padding:10px 10px;border-bottom:1px solid var(--cp-border-soft);color:var(--cp-text);vertical-align:top;white-space:nowrap;}
+  .cp-table tbody tr{cursor:pointer;}
+  .cp-table tbody tr:hover td{background:var(--cp-bg);}
+  .cp-table td.wrap{white-space:normal;}
+  .cp-order-num{font-family:'IBM Plex Mono',monospace;color:var(--cp-accent);}
+  .cp-badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:600;white-space:nowrap;}
+  .cp-badge.neutral{background:var(--cp-border-soft);color:var(--cp-text-soft);}
+  .cp-badge.good{background:var(--cp-good-soft);color:var(--cp-good);}
+  .cp-badge.warn{background:var(--cp-accent-soft);color:var(--cp-accent);}
+  .cp-badge.bad{background:var(--cp-danger-soft);color:var(--cp-danger);}
+  .cp-pager{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:12px;font-size:12px;color:var(--cp-text-soft);}
+  .cp-pager button{font-family:inherit;font-size:12px;padding:5px 10px;border-radius:6px;border:1px solid var(--cp-border);background:var(--cp-surface);color:var(--cp-text);cursor:pointer;}
+  .cp-pager button:disabled{opacity:.4;cursor:default;}
+
+  /* Kebab menu — reused on the Customers row AND the profile header */
+  .cp-kebab-wrap{position:relative;display:inline-block;}
+  .cp-kebab-btn{width:26px;height:26px;border-radius:6px;border:1px solid transparent;background:none;color:var(--ink-soft, #7a7462);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:16px;line-height:1;}
+  .cp-kebab-btn:hover{background:rgba(0,0,0,.06);border-color:transparent;}
+  .cp-kebab-menu{position:absolute;top:calc(100% + 4px);right:0;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 16px rgba(17,24,39,.12);z-index:40;overflow:hidden;}
+  .cp-kebab-menu button{display:block;width:100%;text-align:left;padding:9px 13px;border:none;background:none;font-family:inherit;font-size:12.5px;color:#111827;cursor:pointer;}
+  .cp-kebab-menu button:hover{background:#f3f4f6;}
+  .cp-kebab-menu button.danger{color:#a6472b;}
+  .cp-kebab-menu button.danger:hover{background:#f0ddd5;}
+
+  @media (max-width:640px){
+    .cp-header-top{flex-direction:column;}
+    .cp-actions{width:100%;justify-content:flex-start;}
+    .cp-stats{gap:8px;}
+    .cp-stat{min-width:calc(50% - 4px);}
+  }
+
   /* Emails -- automated email service */
   .eml-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:14px;}
   .eml-card{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:16px 18px 15px;overflow:hidden;}
@@ -795,7 +888,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[] };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all' };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -1346,9 +1439,10 @@ function render(){
   if(state.view==='leads' && !canSeeLeads()) state.view = 'dashboard';
   if(SETUP_ENTITIES.includes(state.view) && isObjectHidden(state.view) && !personaIsAdmin()) state.view = 'dashboard';
   const isSetupPage = state.view==='setup';
-  document.querySelector('.sidebar').style.display = isSetupPage ? 'none' : 'flex';
-  document.querySelector('.topnav').style.display = isSetupPage ? 'none' : 'grid';
-  document.getElementById('setupBackBtn').style.display = isSetupPage ? 'flex' : 'none';
+  const isSubPage = isSetupPage || state.view==='customerProfile';
+  document.querySelector('.sidebar').style.display = isSubPage ? 'none' : 'flex';
+  document.querySelector('.topnav').style.display = isSubPage ? 'none' : 'grid';
+  document.getElementById('setupBackBtn').style.display = isSubPage ? 'flex' : 'none';
   updateNavVisibility();
   populateViewingAsOptions();
   setActiveNav();
@@ -1369,14 +1463,21 @@ function render(){
     emails:['Emails','Automated messages the CRM sends on your behalf'],
     tickets:['Tickets','Customer enquiries from the website and elsewhere'],
     setup:['Setup','Roles, validation rules, automation and sharing'],
+    customerProfile:['Customer',''],
     search:['Search','Find anything across all tabs'],
     rickroll:['Import / Export','Move data in and out of the ledger']};
-  document.getElementById('pageTitle').innerHTML = `<span class="accent-dot"></span>${titleMap[state.view]?titleMap[state.view][0]:state.view}`;
-  document.getElementById('pageSub').textContent = titleMap[state.view]?titleMap[state.view][1]:'';
+  if(state.view==='customerProfile'){
+    const cpc = state.customers.find(x=>x.id===state.profileCustomerId);
+    document.getElementById('pageTitle').innerHTML = `<span class="accent-dot"></span>${esc(cpc?cpc.name:'Customer')}`;
+    document.getElementById('pageSub').textContent = 'Customer profile';
+  } else {
+    document.getElementById('pageTitle').innerHTML = `<span class="accent-dot"></span>${titleMap[state.view]?titleMap[state.view][0]:state.view}`;
+    document.getElementById('pageSub').textContent = titleMap[state.view]?titleMap[state.view][1]:'';
+  }
   document.getElementById('mainArea').style.setProperty('--accent', ACCENTS[state.view] || 'var(--amber)');
   const addLabels = {contacts:'contact', leads:'lead', customers:'customer', distributors:'distributor', suppliers:'supplier', deals:'deal', tasks:'task', invoices:'invoice', payments:'payment', team:'team member'};
   const addBtn = document.getElementById('addBtn');
-  const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets','setup'];
+  const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets','setup','customerProfile'];
   addBtn.style.display = noAdd.includes(state.view) ? 'none' : 'inline-block';
   addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
   const guideBtn = document.getElementById('topbarGuideBtn');
@@ -1395,6 +1496,7 @@ function render(){
   if(state.view==='contacts') c.innerHTML = renderContacts();
   if(state.view==='leads') c.innerHTML = renderLeads();
   if(state.view==='customers') c.innerHTML = renderCustomers();
+  if(state.view==='customerProfile') c.innerHTML = renderCustomerProfile();
   if(state.view==='distributors') c.innerHTML = renderDistributors();
   if(state.view==='suppliers') c.innerHTML = renderSuppliers();
   if(state.view==='deals') c.innerHTML = renderDeals();
@@ -2224,14 +2326,43 @@ function renderLeads(){
 }
 
 function orderCurrency(o){ return o.currency || (o.currencies && o.currencies[0]) || 'USD'; }
-function customerTotalSpent(customer){
+
+/* Customers and contacts are independent tables with independent ids --
+   a customer row and the contact row for the same person are only linked
+   by matching email (see storefront-order, which creates both from a
+   webhook). Orders reference contact_id, never a customer id directly, so
+   finding "this customer's orders" always goes through this join. Shared
+   by the Customers list total and the Customer 360 profile page so the
+   join logic exists in exactly one place. */
+function customerContactIds(customer){
   const email = (customer.email||'').trim().toLowerCase();
-  if(!email) return 0;
-  const contactIds = new Set(state.contacts.filter(ct=>(ct.email||'').trim().toLowerCase()===email).map(ct=>ct.id));
-  if(!contactIds.size) return 0;
-  return state.orders
-    .filter(o=>contactIds.has(o.contactId) && o.status!=='Cancelled')
+  if(!email) return new Set();
+  return new Set(state.contacts.filter(ct=>(ct.email||'').trim().toLowerCase()===email).map(ct=>ct.id));
+}
+function customerOrders(customer){
+  const ids = customerContactIds(customer);
+  if(!ids.size) return [];
+  return state.orders.filter(o=>ids.has(o.contactId)).slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+}
+function customerTotalSpent(customer){
+  return customerOrders(customer)
+    .filter(o=>o.status!=='Cancelled')
     .reduce((sum,o)=>sum + toUSD(o.amount, orderCurrency(o)), 0);
+}
+/* Everything the profile page and the stats pills need, computed once so
+   the header pills, the Insights card and the order table all agree. */
+function customerStats(customer){
+  const orders = customerOrders(customer); // newest first
+  const billable = orders.filter(o=>o.status!=='Cancelled');
+  const totalSpent = billable.reduce((s,o)=>s+toUSD(o.amount, orderCurrency(o)),0);
+  return {
+    orders,
+    totalOrders: orders.length,
+    totalSpent,
+    aov: billable.length ? totalSpent/billable.length : 0,
+    lastOrder: orders[0] || null,
+    firstOrder: orders.length ? orders[orders.length-1] : null,
+  };
 }
 function renderCustomers(){
   if(!state.customers.length) return `<div class="empty"><div class="display">No customers yet</div>Add the people and businesses who buy from you.</div>`;
@@ -2239,16 +2370,261 @@ function renderCustomers(){
   ${state.customers.map((c,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
-      <td data-field-col="name">${esc(c.name)}</td>
+      <td data-field-col="name"><a href="#" data-cust-profile="${c.id}" style="color:inherit;text-decoration:none;font-weight:500;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${esc(c.name)}</a></td>
       <td data-field-col="kind"><span class="badge ${(c.kind||'Individual').toLowerCase()}">${c.kind||'Individual'}</span></td>
       <td data-field-col="company">${esc(c.company||'—')}</td>
       <td style="font-size:12px;">${esc(c.email||'')}${c.email&&c.phone?' · ':''}${esc(c.phone||'')}</td>
       <td class="mono" style="font-size:12px;">$${customerTotalSpent(c).toLocaleString(undefined,{maximumFractionDigits:0})}</td>
       <td data-field-col="owner" style="font-size:12px;color:var(--ink-soft);">${esc(c.owner||'—')}</td>
       <td data-field-col="notes" style="font-size:12px;color:var(--ink-soft);max-width:180px;">${esc(c.notes||'')}</td>
-      <td class="row-actions"><span data-order="customers:${c.id}">order</span><span data-edit="customers:${c.id}">edit</span><span data-del="customers:${c.id}">delete</span></td>
+      <td class="row-actions">
+        <div class="cp-kebab-wrap" data-kebab>
+          <button type="button" class="cp-kebab-btn" data-kebab-toggle aria-haspopup="true" aria-expanded="false" aria-label="More actions for ${esc(c.name)}">&#8942;</button>
+          <div class="cp-kebab-menu" data-kebab-menu hidden>
+            <button type="button" data-cust-profile="${c.id}">View profile</button>
+            <button type="button" data-order="customers:${c.id}">Place order</button>
+            <button type="button" data-edit="customers:${c.id}">Edit</button>
+            <button type="button" class="danger" data-del="customers:${c.id}">Delete</button>
+          </div>
+        </div>
+      </td>
     </tr>`).join('')}
   </tbody></table>`;
+}
+
+/* ================================================================
+   Customer 360 profile page.
+   Scoped entirely to the Customers view: a dedicated route would need a
+   router this app doesn't have (no hash/pushState anywhere), so this
+   reuses the same state.view + returnView mechanism already built for
+   Setup's own sub-page (see setupBackBtn in render()). Every function
+   below returns a plain HTML string, same convention as every other
+   renderX() in this file -- no new architecture, just more of the same
+   one.
+   ================================================================ */
+
+function cpInitials(name){
+  const parts = String(name||'').trim().split(/\s+/).filter(Boolean);
+  if(!parts.length) return '?';
+  return (parts[0][0] + (parts.length>1?parts[parts.length-1][0]:'')).toUpperCase();
+}
+function cpMoney(n){ return '$' + Math.round(Number(n)||0).toLocaleString(); }
+function cpDate(ts, opts){
+  if(!ts) return '—';
+  try{ return new Date(Number(ts)).toLocaleDateString('en-US', opts||{month:'short', day:'numeric', year:'numeric'}); }
+  catch(e){ return '—'; }
+}
+function cpRelative(ts){
+  if(!ts) return '—';
+  const diff = Math.floor((Date.now()-Number(ts))/86400000);
+  if(diff<=0) return 'today';
+  if(diff===1) return '1 day ago';
+  if(diff<30) return diff+' days ago';
+  const months = Math.floor(diff/30);
+  if(months<12) return months+(months===1?' month ago':' months ago');
+  const years = Math.floor(months/12);
+  return years+(years===1?' year ago':' years ago');
+}
+/* "3 items" for a storefront order with a real items[] array; falls back
+   to the single product/qty pair a manually-logged CRM order has. Never
+   invents data the order doesn't carry. */
+function cpOrderSummary(o){
+  if(Array.isArray(o.items) && o.items.length){
+    const names = o.items.map(i=>i.product_name||i.name).filter(Boolean).join(', ');
+    return { label: o.items.length===1 ? '1 item' : o.items.length+' items', title: names };
+  }
+  return { label: `${esc(o.product||'—')} × ${o.qty||1}`, title:'' };
+}
+function cpStatusBadgeClass(status){
+  const s = String(status||'').toLowerCase();
+  if(s==='delivered' || s==='paid') return 'good';
+  if(s==='cancelled' || s==='failed') return 'bad';
+  if(s==='shipped' || s==='pending') return 'warn';
+  return 'neutral';
+}
+
+function renderCustomerHeader(customer, stats){
+  const location = [customer.city, customer.country].filter(Boolean).join(', ');
+  return `<div class="cp-card">
+    <div class="cp-header-top">
+      <div class="cp-identity">
+        <div class="cp-avatar">${esc(cpInitials(customer.name))}</div>
+        <div style="min-width:0;">
+          <div class="cp-name">${esc(customer.name)}</div>
+          <div class="cp-name-meta">
+            ${customer.email ? `<a href="mailto:${esc(customer.email)}">${esc(customer.email)}</a>` : ''}
+            ${customer.phone ? `<span>${esc(customer.phone)}</span>` : ''}
+            ${location ? `<span>${esc(location)}</span>` : ''}
+          </div>
+          <div class="cp-badges">
+            <span class="cp-pill accent">${esc(customer.kind||'Individual')}</span>
+            ${customer.source ? `<span class="cp-pill">${esc(customer.source)}</span>` : ''}
+            ${customer.createdAt ? `<span class="cp-pill">Customer since ${cpDate(customer.createdAt, {month:'long', year:'numeric'})}</span>` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="cp-actions">
+        <button type="button" class="cp-btn primary" data-edit="customers:${customer.id}">Edit customer</button>
+        <div class="cp-kebab-wrap" data-kebab>
+          <button type="button" class="cp-kebab-btn" data-kebab-toggle aria-haspopup="true" aria-expanded="false" aria-label="More actions" style="border:1px solid var(--cp-border);width:34px;height:34px;">&#8942;</button>
+          <div class="cp-kebab-menu" data-kebab-menu hidden>
+            <button type="button" data-order="customers:${customer.id}">Place order</button>
+            <button type="button" class="danger" data-del="customers:${customer.id}">Delete customer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cp-stats">
+      <div class="cp-stat"><div class="v">${stats.totalOrders}</div><div class="l">Total orders</div></div>
+      <div class="cp-stat"><div class="v">${cpMoney(stats.totalSpent)}</div><div class="l">Total spent</div></div>
+      <div class="cp-stat"><div class="v">${stats.totalOrders?cpMoney(stats.aov):'—'}</div><div class="l">Avg order value</div></div>
+      <div class="cp-stat"><div class="v">${stats.lastOrder?cpRelative(stats.lastOrder.createdAt):'—'}</div><div class="l">Last order</div></div>
+    </div>
+  </div>`;
+}
+
+const CP_PAGE_SIZE = 8;
+
+function renderCustomerOrderHistory(customer, stats){
+  const allOrders = stats.orders;
+  if(!allOrders.length){
+    return `<div class="cp-card">
+      <div class="cp-section-title">Order history</div>
+      <div class="cp-empty">No orders yet from this customer.</div>
+    </div>`;
+  }
+  const statuses = Array.from(new Set(allOrders.map(o=>o.status).filter(Boolean)));
+  const filter = state.cpOrderStatusFilter || 'all';
+  const filtered = filter==='all' ? allOrders : allOrders.filter(o=>o.status===filter);
+  const page = state.cpOrderPage || 0;
+  const pageCount = Math.max(1, Math.ceil(filtered.length / CP_PAGE_SIZE));
+  const pageClamped = Math.min(page, pageCount-1);
+  const pageRows = filtered.slice(pageClamped*CP_PAGE_SIZE, pageClamped*CP_PAGE_SIZE+CP_PAGE_SIZE);
+
+  const rows = pageRows.map(o=>{
+    const summary = cpOrderSummary(o);
+    return `<tr data-edit="orders:${o.id}">
+      <td class="cp-order-num">${esc(o.externalOrderNumber || orderDisplayNumber(o))}</td>
+      <td>${cpDate(o.createdAt)}</td>
+      <td class="wrap" title="${esc(summary.title)}">${summary.label}</td>
+      <td><span class="cp-badge ${cpStatusBadgeClass(o.status)}">${esc(o.status||'—')}</span></td>
+      <td>${o.paymentStatus ? `<span class="cp-badge ${cpStatusBadgeClass(o.paymentStatus)}">${esc(o.paymentStatus)}</span>` : '—'}</td>
+      <td class="mono">${cpMoney(toUSD(o.amount, orderCurrency(o)))}</td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="cp-card">
+    <div class="cp-table-toolbar">
+      <div class="cp-section-title" style="margin:0;">Order history <span style="color:var(--cp-text-faint);font-weight:400;">(${filtered.length})</span></div>
+      ${statuses.length>1 ? `<select class="cp-select" data-cp-status-filter>
+        <option value="all" ${filter==='all'?'selected':''}>All statuses</option>
+        ${statuses.map(st=>`<option value="${esc(st)}" ${filter===st?'selected':''}>${esc(st)}</option>`).join('')}
+      </select>` : ''}
+    </div>
+    <div class="cp-table-wrap">
+      <table class="cp-table">
+        <thead><tr><th>Order #</th><th>Date</th><th>Items</th><th>Status</th><th>Payment</th><th>Total</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    ${pageCount>1 ? `<div class="cp-pager">
+      <span>Page ${pageClamped+1} of ${pageCount}</span>
+      <button type="button" data-cp-page="prev" ${pageClamped===0?'disabled':''}>Previous</button>
+      <button type="button" data-cp-page="next" ${pageClamped>=pageCount-1?'disabled':''}>Next</button>
+    </div>` : ''}
+  </div>`;
+}
+
+/* No activity log exists in this schema. Rather than invent one, this is
+   an empty-state shell shaped so a future `state.activity` (or similar)
+   can be dropped in without restructuring the page. */
+function renderCustomerActivity(){
+  return `<div class="cp-card">
+    <div class="cp-section-title">Recent activity</div>
+    <div class="cp-empty">Activity tracking isn't recorded yet for this ledger.<br>Order and status changes will appear here once it is.</div>
+  </div>`;
+}
+
+function renderCustomerInfoCard(customer){
+  const contactRows = [
+    ['Full name', customer.name],
+    ['Email', customer.email],
+    ['Phone', customer.phone],
+  ].filter(([,v])=>v);
+  const addressParts = [customer.address, customer.city, customer.country].filter(Boolean);
+  const accountRows = [
+    ['Customer ID', customer.id],
+    ['Created', cpDate(customer.createdAt)],
+    ['Kind', customer.kind],
+    ['Company', customer.company],
+    ['Source', customer.source],
+    ['Owner', customer.owner],
+  ].filter(([,v])=>v);
+
+  const group = (label, rows) => rows.length ? `<div class="cp-info-group">
+    <div class="cp-info-label">${label}</div>
+    ${rows.map(([k,v])=>`<div class="cp-info-row"><span class="k">${k}</span><span class="v">${esc(v)}</span></div>`).join('')}
+  </div>` : '';
+
+  return `<div class="cp-card">
+    <div class="cp-section-title">Customer information</div>
+    ${group('Contact', contactRows)}
+    ${addressParts.length ? group('Address', [['Address', addressParts.join(', ')]]) : ''}
+    ${group('Account', accountRows)}
+  </div>`;
+}
+
+function renderCustomerInsights(stats){
+  const rows = [];
+  if(stats.firstOrder) rows.push(['First order', cpDate(stats.firstOrder.createdAt)]);
+  if(stats.lastOrder) rows.push(['Last order', cpDate(stats.lastOrder.createdAt)]);
+  if(stats.totalOrders) rows.push(['Total orders', stats.totalOrders]);
+  if(stats.totalSpent) rows.push(['Total revenue', cpMoney(stats.totalSpent)]);
+  if(stats.totalOrders) rows.push(['Avg order value', cpMoney(stats.aov)]);
+  if(!rows.length){
+    return `<div class="cp-card"><div class="cp-section-title">Insights</div><div class="cp-empty">Not enough order history yet to summarise.</div></div>`;
+  }
+  return `<div class="cp-card">
+    <div class="cp-section-title">Insights</div>
+    ${rows.map(([k,v])=>`<div class="cp-info-row"><span class="k">${k}</span><span class="v">${esc(String(v))}</span></div>`).join('')}
+  </div>`;
+}
+
+/* customers.notes is a single free-text field, not a dated notes system.
+   Shown as-is; editing reuses the existing customer edit modal rather
+   than building new persistence for something the schema already has. */
+function renderCustomerNotes(customer){
+  return `<div class="cp-card">
+    <div class="cp-section-title">Notes</div>
+    ${customer.notes
+      ? `<div style="font-size:12.5px;line-height:1.7;color:var(--cp-text-soft);white-space:pre-line;">${esc(customer.notes)}</div>`
+      : `<div class="cp-empty" style="padding:8px 0;">No notes yet.</div>`}
+    <div style="margin-top:12px;"><button type="button" class="cp-btn" data-edit="customers:${customer.id}">Edit notes</button></div>
+  </div>`;
+}
+
+function renderCustomerProfile(){
+  const customer = state.customers.find(c=>c.id===state.profileCustomerId);
+  if(!customer){
+    return `<div class="cp-page"><div class="cp-empty">This customer no longer exists.
+      <div style="margin-top:12px;"><button type="button" class="cp-btn" onclick="state.view='customers';render();">Back to Customers</button></div>
+    </div></div>`;
+  }
+  const stats = customerStats(customer);
+  return `<div class="cp-page">
+    ${renderCustomerHeader(customer, stats)}
+    <div class="cp-grid">
+      <div class="cp-main">
+        ${renderCustomerOrderHistory(customer, stats)}
+        ${renderCustomerActivity()}
+      </div>
+      <div class="cp-side">
+        ${renderCustomerInfoCard(customer)}
+        ${renderCustomerInsights(stats)}
+        ${renderCustomerNotes(customer)}
+      </div>
+    </div>
+  </div>`;
 }
 
 function renderSuppliers(){
@@ -4344,7 +4720,45 @@ function attachContentHandlers(){
     render();
   };
   document.querySelectorAll('[data-edit]').forEach(el=>{
-    el.onclick = ()=>{ const [table,id] = el.dataset.edit.split(':'); openModal(table, id); };
+    el.onclick = (e)=>{
+      // A <tr data-edit> (order history rows) shouldn't fire when the
+      // click landed on something with its own action inside the row.
+      if(e.target.closest('[data-kebab]')) return;
+      const [table,id] = el.dataset.edit.split(':'); openModal(table, id);
+    };
+  });
+
+  // Customer 360: kebab menus (Customers list rows + the profile header).
+  // Toggled via .onclick reassignment like everything else here, so
+  // re-running this on every render() never stacks duplicate listeners.
+  document.querySelectorAll('[data-kebab-toggle]').forEach(btn=>{
+    btn.onclick = (e)=>{
+      e.stopPropagation();
+      const menu = btn.nextElementSibling;
+      const willOpen = menu.hidden;
+      document.querySelectorAll('.cp-kebab-menu').forEach(m=>{ m.hidden = true; });
+      document.querySelectorAll('[data-kebab-toggle]').forEach(b=>b.setAttribute('aria-expanded','false'));
+      if(willOpen){ menu.hidden = false; btn.setAttribute('aria-expanded','true'); }
+    };
+  });
+  document.querySelectorAll('[data-cust-profile]').forEach(el=>{
+    el.onclick = (e)=>{
+      e.preventDefault();
+      state.returnView = state.view;
+      state.profileCustomerId = el.dataset.custProfile;
+      state.cpOrderPage = 0;
+      state.cpOrderStatusFilter = 'all';
+      state.view = 'customerProfile';
+      render();
+    };
+  });
+  const cpStatusSel = document.querySelector('[data-cp-status-filter]');
+  if(cpStatusSel) cpStatusSel.onchange = ()=>{ state.cpOrderStatusFilter = cpStatusSel.value; state.cpOrderPage = 0; render(); };
+  document.querySelectorAll('[data-cp-page]').forEach(el=>{
+    el.onclick = ()=>{
+      state.cpOrderPage = Math.max(0, (state.cpOrderPage||0) + (el.dataset.cpPage==='next'?1:-1));
+      render();
+    };
   });
   document.querySelectorAll('[data-del]').forEach(el=>{
     el.onclick = async ()=>{
@@ -5183,7 +5597,7 @@ document.getElementById('setupGearBtn').onclick = ()=>{
   });
 };
 document.getElementById('setupBackBtn').onclick = ()=>{
-  if(setupDraft && !confirm('You have unsaved changes in Setup. Discard them and leave?')) return;
+  if(state.view==='setup' && setupDraft && !confirm('You have unsaved changes in Setup. Discard them and leave?')) return;
   setupDraft = null;
   state.view = state.returnView || 'dashboard'; render();
 };
@@ -5201,6 +5615,19 @@ document.getElementById('addBtn').onclick = ()=>{
 };
 document.getElementById('overlay').onclick = (e)=>{ if(e.target.id==='overlay') closeModal(); };
 document.getElementById('emlPrevOverlay').onclick = (e)=>{ if(e.target.id==='emlPrevOverlay') closeEmailPreview(); };
+// Customer 360 kebab menus: click-away and Escape both close whatever is open.
+// Attached once here rather than in attachContentHandlers, which reruns on
+// every render() -- a document-level listener added there would stack.
+document.addEventListener('click', (e)=>{
+  if(e.target.closest('[data-kebab]')) return;
+  document.querySelectorAll('.cp-kebab-menu').forEach(m=>{ m.hidden = true; });
+  document.querySelectorAll('[data-kebab-toggle]').forEach(b=>b.setAttribute('aria-expanded','false'));
+});
+document.addEventListener('keydown', (e)=>{
+  if(e.key!=='Escape') return;
+  document.querySelectorAll('.cp-kebab-menu').forEach(m=>{ m.hidden = true; });
+  document.querySelectorAll('[data-kebab-toggle]').forEach(b=>b.setAttribute('aria-expanded','false'));
+});
 document.getElementById('emlPrevClose').onclick = closeEmailPreview;
 document.querySelectorAll('#emlPrevLang [data-eml-lang]').forEach(el=>{
   el.onclick = ()=>{ if(state.emailPreview) openEmailPreview(state.emailPreview, el.dataset.emlLang); };
