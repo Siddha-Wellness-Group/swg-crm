@@ -562,6 +562,13 @@
   .fc-order-drawer-backdrop{z-index:57;}
   .fc-order-drawer{z-index:58;}
 
+  /* Fulfillment kanban -- reuses .kanban/.kcol/.kcard verbatim (the exact
+     same classes Deals already uses), but Deals hardcodes a 5-column grid
+     for its 5 stages; this board has 4 real order statuses (or fewer when
+     the Fulfillment status filter narrows to one), so the column count is
+     set inline per render rather than baked into a fixed CSS rule. */
+  .fc-kanban{margin-top:4px;}
+
   /* Requires-attention panel (phase 3) and order timeline (phase 2) */
   .fc-attn-panel{display:flex;flex-direction:column;gap:8px;}
   .fc-attn-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;font-size:13px;}
@@ -967,7 +974,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', sourceFilter:'all', statusFilter:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0 };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0 };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -2303,6 +2310,132 @@ function renderFcOrderDrawer(){
       </div>
     </div>`;
 }
+function renderFcFilterBar(){
+  const f = state.fcFilters;
+  const opt = (val, label, cur) => `<option value="${esc(val)}" ${cur===val?'selected':''}>${esc(label)}</option>`;
+  return `<div class="fc-filterbar">
+    <input type="text" class="fc-filter-search" id="fcSearchInput" placeholder="Search customer, email, or order #" value="${esc(f.search)}">
+    <select class="fc-filter-select" id="fcCustomerStatusFilter">
+      ${opt('all','All customer statuses',f.customerStatus)}
+      ${opt('Active','Active',f.customerStatus)}
+      ${opt('New','New',f.customerStatus)}
+    </select>
+    <select class="fc-filter-select" id="fcOrderStatusFilter">
+      ${opt('all','All order statuses',f.orderStatus)}
+      ${OSTATUS.map(s=>opt(s,s,f.orderStatus)).join('')}
+    </select>
+    <select class="fc-filter-select" id="fcFulfillmentStatusFilter">
+      ${opt('all','All fulfillment stages',f.fulfillmentStatus)}
+      ${OSTATUS.map(s=>opt(s,s,f.fulfillmentStatus)).join('')}
+    </select>
+    <select class="fc-filter-select" id="fcSourceFilter">
+      ${opt('all','All sources',f.source)}
+      ${fcSourceOptions().map(s=>opt(s,s,f.source)).join('')}
+    </select>
+    <span class="fc-filter-clear" id="fcClearFilters">Clear filters</span>
+  </div>`;
+}
+function renderFcCustomerTableSection(){
+  const PAGE_SIZE = 10;
+  const filtered = fcFilteredCustomers();
+  const sorted = fcSortCustomers(filtered);
+  const page = state.fcTablePage || 0;
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const clampedPage = Math.min(page, totalPages-1);
+  const pageItems = sorted.slice(clampedPage*PAGE_SIZE, clampedPage*PAGE_SIZE + PAGE_SIZE);
+
+  const rows = pageItems.map(c=>{
+    const stats = customerStats(c);
+    const status = fcCustomerStatus(c);
+    return `<tr class="fc-row-clickable" data-fc-open-customer="${c.id}">
+      <td>${esc(c.name)}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(c.email||'—')}</td>
+      <td><span class="badge muted">${esc(c.source || 'Manual')}</span></td>
+      <td style="font-size:12px;">${cpDate(c.createdAt)}</td>
+      <td>${stats.totalOrders}</td>
+      <td style="font-size:12px;">${stats.lastOrder ? cpRelative(stats.lastOrder.createdAt) : '—'}</td>
+      <td class="mono">${stats.totalOrders ? cpMoney(stats.totalSpent) : '—'}</td>
+      <td><span class="badge ${status==='Active'?'delivered':'muted'}">${status}</span></td>
+      <td><span class="fc-view-link" data-fc-open-customer="${c.id}">View</span></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="9"><div class="empty"><div class="display">No customers found</div>No customers match the current criteria.</div></td></tr>`;
+
+  return `
+    <div class="section-title" style="margin-top:0;">New customers</div>
+    <div class="fc-table-wrap">
+      <table>
+        <thead><tr>
+          <th class="fc-sortable-th" data-fc-sort="name">Customer${fcSortCaret('name')}</th>
+          <th>Email</th><th>Source</th>
+          <th class="fc-sortable-th" data-fc-sort="createdAt">Created${fcSortCaret('createdAt')}</th>
+          <th class="fc-sortable-th" data-fc-sort="orders">Orders${fcSortCaret('orders')}</th>
+          <th>Last order</th>
+          <th class="fc-sortable-th" data-fc-sort="orderValue">Order value${fcSortCaret('orderValue')}</th>
+          <th>Status</th><th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    ${totalPages>1 ? `<div class="fc-pager"><button type="button" data-fc-page="prev" ${clampedPage<=0?'disabled':''}>Prev</button><span>${clampedPage+1} / ${totalPages}</span><button type="button" data-fc-page="next" ${clampedPage>=totalPages-1?'disabled':''}>Next</button></div>` : ''}
+  `;
+}
+function renderFcKanbanSection(){
+  const orders = fcFilteredOrders();
+  const cols = state.fcFilters.fulfillmentStatus==='all' ? OSTATUS : [state.fcFilters.fulfillmentStatus];
+  return `
+    <div class="section-title" style="margin-top:0;">Fulfillment overview</div>
+    <div class="kanban fc-kanban" style="grid-template-columns:repeat(${cols.length},minmax(0,1fr));">${cols.map(stage=>{
+      const items = orders.filter(o=>o.status===stage);
+      return `<div class="kcol" data-fc-stage-col="${stage}">
+        <div class="kcol-head"><span>${stage}</span><span>${items.length}</span></div>
+        ${items.map(o=>{
+          const summary = cpOrderSummary(o);
+          return `<div class="kcard">
+            <div class="ledger-no mono">${esc(orderDisplayNumber(o))}</div>
+            <div class="ktitle">${esc(contactName(o.contactId))}</div>
+            <div class="kcontact">${summary.label}</div>
+            <div class="kval mono">${cpMoney(toUSD(o.amount, orderCurrency(o)))}</div>
+            <div class="kfoot" style="margin-top:8px;">
+              <select data-fc-order-stage="${o.id}">${OSTATUS.map(s=>`<option ${s===o.status?'selected':''}>${s}</option>`).join('')}</select>
+              <span class="kowner">${cpRelative(o.createdAt)}</span>
+            </div>
+            <div style="margin-top:7px;text-align:right;">
+              <span class="fc-view-link" data-fc-open-order="${o.id}">View</span>
+            </div>
+          </div>`;
+        }).join('') || ''}
+      </div>`;
+    }).join('')}</div>
+  `;
+}
+function renderFcAttentionPanel(){
+  const attn = requiresAttention();
+  const items = [];
+  attn.waitingFulfillment.forEach(o=>items.push({
+    sev:'warn', kind:'order', id:o.id,
+    label:`Order ${esc(orderDisplayNumber(o))} has been waiting for fulfillment for ${Math.floor((Date.now()-(o.createdAt||0))/3600000)}h`,
+  }));
+  attn.missingAddress.forEach(o=>items.push({
+    sev:'bad', kind:'order', id:o.id,
+    label:`Order ${esc(orderDisplayNumber(o))} is missing a shipping address`,
+  }));
+  attn.shippedStale.forEach(o=>items.push({
+    sev:'warn', kind:'order', id:o.id,
+    label:`Order ${esc(orderDisplayNumber(o))} has been Shipped for over 5 days without being marked Delivered`,
+  }));
+  attn.openTicketCustomers.forEach(({ticket,customer})=>items.push({
+    sev:'neutral', kind:'customer', id:customer.id,
+    label:`${esc(customer.name)} has an open enquiry (${esc(ticket.ticketNumber||'no ticket #')})`,
+  }));
+  if(!items.length){
+    return `<div class="empty"><div class="display">All clear</div>Nothing needs attention right now.</div>`;
+  }
+  return `<div class="fc-attn-panel">${items.map(it=>`
+    <div class="fc-attn-item" data-fc-attn-${it.kind}="${it.id}">
+      <div style="display:flex;align-items:center;gap:10px;"><span class="fc-attn-badge ${it.sev}"></span><span>${it.label}</span></div>
+      <span style="color:var(--ink-soft);font-size:11px;white-space:nowrap;">${it.kind==='order'?'View order':'View customer'} &rarr;</span>
+    </div>`).join('')}</div>`;
+}
 function renderFulfillmentCommandCenter(dash){
   const range = state.fcFilters.dateRange || '7d';
   const since = Date.now() - fcDateRangeMs(range);
@@ -2322,28 +2455,6 @@ function renderFulfillmentCommandCenter(dash){
     ['Revenue', cpMoney(revenue), 'rust'],
   ];
 
-  const PAGE_SIZE = 10;
-  const sorted = fcSortCustomers(state.customers);
-  const page = state.fcTablePage || 0;
-  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
-  const pageItems = sorted.slice(page*PAGE_SIZE, page*PAGE_SIZE + PAGE_SIZE);
-
-  const rows = pageItems.map(c=>{
-    const stats = customerStats(c);
-    const status = fcCustomerStatus(c);
-    return `<tr class="fc-row-clickable" data-fc-open-customer="${c.id}">
-      <td>${esc(c.name)}</td>
-      <td style="font-size:12px;color:var(--ink-soft);">${esc(c.email||'—')}</td>
-      <td><span class="badge muted">${esc(c.source || 'Manual')}</span></td>
-      <td style="font-size:12px;">${cpDate(c.createdAt)}</td>
-      <td>${stats.totalOrders}</td>
-      <td style="font-size:12px;">${stats.lastOrder ? cpRelative(stats.lastOrder.createdAt) : '—'}</td>
-      <td class="mono">${stats.totalOrders ? cpMoney(stats.totalSpent) : '—'}</td>
-      <td><span class="badge ${status==='Active'?'delivered':'muted'}">${status}</span></td>
-      <td><span class="fc-view-link" data-fc-open-customer="${c.id}">View</span></td>
-    </tr>`;
-  }).join('') || `<tr><td colspan="9"><div class="empty"><div class="display">No customers found</div>No customers match the current criteria.</div></td></tr>`;
-
   return `
     <div class="fc-head">
       <div>
@@ -2361,22 +2472,13 @@ function renderFulfillmentCommandCenter(dash){
       </div>
     </div>
     <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">${kpis.map(([l,v,c])=>widgetKPI(l,v,c)).join('')}</div>
-    <div class="section-title">New customers</div>
-    <div class="fc-table-wrap">
-      <table>
-        <thead><tr>
-          <th class="fc-sortable-th" data-fc-sort="name">Customer${fcSortCaret('name')}</th>
-          <th>Email</th><th>Source</th>
-          <th class="fc-sortable-th" data-fc-sort="createdAt">Created${fcSortCaret('createdAt')}</th>
-          <th class="fc-sortable-th" data-fc-sort="orders">Orders${fcSortCaret('orders')}</th>
-          <th>Last order</th>
-          <th class="fc-sortable-th" data-fc-sort="orderValue">Order value${fcSortCaret('orderValue')}</th>
-          <th>Status</th><th></th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
+    ${renderFcFilterBar()}
+    <div id="fcCustomerTableSection">${renderFcCustomerTableSection()}</div>
+    <div id="fcKanbanSection" style="margin-top:26px;">${renderFcKanbanSection()}</div>
+    <div style="margin-top:26px;">
+      <div class="section-title" style="margin-top:0;">Requires attention</div>
+      ${renderFcAttentionPanel()}
     </div>
-    ${totalPages>1 ? `<div class="fc-pager"><button type="button" data-fc-page="prev" ${page<=0?'disabled':''}>Prev</button><span>${page+1} / ${totalPages}</span><button type="button" data-fc-page="next" ${page>=totalPages-1?'disabled':''}>Next</button></div>` : ''}
     ${renderFcCustomerDrawer()}
     ${renderFcOrderDrawer()}
   `;
@@ -2752,6 +2854,105 @@ function customerForContactId(contactId){
    as a fallback rather than inventing history. */
 function orderEventsFor(orderId){
   return state.orderEvents.filter(e=>e.orderId===orderId).slice().sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+}
+
+/* ================================================================
+   Phase 3 data helpers -- Requires Attention + the filter bar. All
+   computed client-side from state already loaded by loadAll(); no new
+   database reads. Requires Attention deliberately reads the FULL
+   unfiltered data set (never scoped by state.fcFilters or the date
+   range) so an active search/filter can never hide a real problem.
+   ================================================================ */
+function fcOrderMissingAddress(order){
+  const a = order.shippingAddress;
+  if(!a) return true;
+  if(typeof a === 'string') return !a.trim();
+  if(typeof a === 'object') return !Object.values(a).some(v=>v && String(v).trim());
+  return false;
+}
+/* When an order was actually marked Shipped -- from the real order_events
+   log where one exists, falling back to created_at for orders shipped
+   before that table existed (never fabricated, just the one honest fact
+   we still have). */
+function fcShippedSince(order){
+  const events = orderEventsFor(order.id);
+  const shipped = events.slice().reverse().find(e=>e.status==='Shipped');
+  return shipped ? shipped.createdAt : order.createdAt;
+}
+const FC_PENDING_STALE_MS = 48*3600*1000;      // 48 hours
+const FC_SHIPPED_STALE_MS = 5*24*3600*1000;    // 5 days
+function requiresAttention(){
+  const now = Date.now();
+  const waitingFulfillment = state.orders.filter(o=>o.status==='Pending' && (now-(o.createdAt||0)) > FC_PENDING_STALE_MS);
+  const missingAddress = state.orders.filter(o=>o.status!=='Cancelled' && fcOrderMissingAddress(o));
+  const shippedStale = state.orders.filter(o=>o.status==='Shipped' && (now-fcShippedSince(o)) > FC_SHIPPED_STALE_MS);
+  const openTicketCustomers = [];
+  const seen = new Set();
+  state.tickets.filter(t=>t.status==='new' || t.status==='open').forEach(t=>{
+    const email = (t.email||'').trim().toLowerCase();
+    if(!email) return;
+    const cust = state.customers.find(c=>(c.email||'').trim().toLowerCase()===email);
+    if(cust && !seen.has(cust.id)){ seen.add(cust.id); openTicketCustomers.push({ticket:t, customer:cust}); }
+  });
+  return {waitingFulfillment, missingAddress, shippedStale, openTicketCustomers};
+}
+/* Real, already-populated source values -- 'Manual' stands in for orders/
+   customers created directly in the CRM (source is null there), nothing
+   else is invented. */
+function fcSourceOptions(){
+  return Array.from(new Set(state.customers.map(c=>c.source || 'Manual'))).sort();
+}
+function fcCustomerMatchesFilters(cust, f, since){
+  if((cust.createdAt||0) < since) return false;
+  if(f.customerStatus!=='all' && fcCustomerStatus(cust)!==f.customerStatus) return false;
+  const stats = customerStats(cust);
+  if(f.orderStatus!=='all' && !stats.orders.some(o=>o.status===f.orderStatus)) return false;
+  if(f.source!=='all' && (cust.source||'Manual')!==f.source) return false;
+  if(f.search){
+    const q = f.search.trim().toLowerCase();
+    if(q){
+      const hit = (cust.name||'').toLowerCase().includes(q)
+        || (cust.email||'').toLowerCase().includes(q)
+        || stats.orders.some(o=>orderDisplayNumber(o).toLowerCase().includes(q));
+      if(!hit) return false;
+    }
+  }
+  return true;
+}
+/* Feeds the New Customers table -- recency-scoped by the header's date
+   range, same as the KPI row above it. */
+function fcFilteredCustomers(){
+  const f = state.fcFilters;
+  const since = Date.now() - fcDateRangeMs(f.dateRange||'7d');
+  return state.customers.filter(c=>fcCustomerMatchesFilters(c, f, since));
+}
+/* Feeds the Fulfillment kanban. Deliberately NOT date-range scoped -- a
+   stuck Pending order from three weeks ago is exactly what an ops board
+   needs to keep showing, not hide because "Last 7 days" is selected.
+   fulfillmentStatus narrows which column(s) are shown; the rest of the
+   filter bar (search/customer status/source) narrows within them by the
+   order's own customer, so the whole filter bar stays one coherent set
+   of controls rather than the kanban living by its own separate rules. */
+function fcFilteredOrders(){
+  const f = state.fcFilters;
+  return state.orders.filter(o=>{
+    if(f.fulfillmentStatus!=='all' && o.status!==f.fulfillmentStatus) return false;
+    const contact = state.contacts.find(c=>c.id===o.contactId);
+    const cust = customerForContactId(o.contactId);
+    if(f.source!=='all' && ((cust&&cust.source)||'Manual')!==f.source) return false;
+    if(f.customerStatus!=='all' && cust && fcCustomerStatus(cust)!==f.customerStatus) return false;
+    if(f.search){
+      const q = f.search.trim().toLowerCase();
+      if(q){
+        const name = cust ? cust.name : (contact ? contact.name : '');
+        const hit = (name||'').toLowerCase().includes(q)
+          || orderDisplayNumber(o).toLowerCase().includes(q)
+          || (cust && (cust.email||'').toLowerCase().includes(q));
+        if(!hit) return false;
+      }
+    }
+    return true;
+  });
 }
 function renderCustomers(){
   if(!state.customers.length) return `<div class="empty"><div class="display">No customers yet</div>Add the people and businesses who buy from you.</div>`;
@@ -5063,56 +5264,29 @@ function wireSetupView(){
 
 function esc(s){ return String(s??'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
-/* ---------- Content event handlers ---------- */
-function attachContentHandlers(){
-  document.querySelectorAll('[data-navigate]').forEach(el=>{
-    el.onclick = ()=>{ state.view = el.dataset.navigate; render(); };
-  });
-  document.querySelectorAll('[data-eml-preview]').forEach(el=>{
-    el.onclick = ()=>{ openEmailPreview(el.dataset.emlPreview); };
-  });
-  document.querySelectorAll('[data-tkt-status]').forEach(el=>{
-    el.onchange = ()=>{ setTicketStatus(el.dataset.tktStatus, el.value); };
-  });
-  // Live search
-  const si = document.getElementById('searchInput');
-  if(si){
-    si.focus();
-    si.selectionStart = si.selectionEnd = si.value.length;
-    si.oninput = ()=>{
-      const wrap = document.getElementById('searchResultsWrap');
-      wrap.innerHTML = renderSearch(si.value);
-      wrap.querySelectorAll('[data-navigate]').forEach(el=>{
-        el.onclick = ()=>{ state.view = el.dataset.navigate; render(); };
-      });
-    };
-  }
-  document.querySelectorAll('[data-filter]').forEach(el=>{
-    el.onclick = ()=>{ state.contactFilter = el.dataset.filter; render(); };
-  });
-  document.querySelectorAll('[data-chart]').forEach(el=>{
-    el.onclick = ()=>{ state.chartType = el.dataset.chart; saveChartPref(state.chartType); render(); };
-  });
-  document.querySelectorAll('[data-dash-tab]').forEach(btn=>{
-    btn.onclick = ()=>{ state.activeDashboardId = btn.dataset.dashTab; render(); };
-  });
-  const dashAddBtn = document.getElementById('dashAddBtn');
-  if(dashAddBtn) dashAddBtn.onclick = openNewDashboardModal;
-  const dashEditBtn = document.getElementById('dashEditBtn');
-  if(dashEditBtn) dashEditBtn.onclick = ()=>openDashboardWidgetPicker(dashEditBtn.dataset.dashId);
-  const dashDeleteBtn = document.getElementById('dashDeleteBtn');
-  if(dashDeleteBtn) dashDeleteBtn.onclick = async ()=>{
-    if(!confirm('Delete this dashboard?')) return;
-    state.dashboards = state.dashboards.filter(d=>d.id!==dashDeleteBtn.dataset.dashId);
-    await saveKey(KEYS.dashboards, state.dashboards);
-    state.activeDashboardId = '';
-    render();
-  };
-
-  // Customer & Fulfillment Command Center. The drawer lives inside this
-  // dashboard's own #content subtree (not a page-level singleton), so
-  // rewiring its close handlers here on every render() is correct and
-  // safe -- same reasoning as the Customer 360 kebab menus below.
+/* Applies an order's status change through the exact same path the order
+   edit modal uses -- update, render immediately, persist, then let
+   checkOrderStatusChange log the order_events row (and fire the shipping
+   email if applicable) -- so the kanban's dropdown is just another caller
+   of that one real flow, never a second parallel one. */
+async function setOrderFulfillmentStatus(orderId, newStatus){
+  const order = state.orders.find(o=>o.id===orderId);
+  if(!order || order.status===newStatus) return;
+  const prevStatus = order.status;
+  order.status = newStatus;
+  render();
+  await dbUpdate('orders', order);
+  await checkOrderStatusChange(order, prevStatus);
+}
+/* All Customer & Fulfillment Command Center wiring, consolidated here so
+   the search box's targeted update (below) can re-run just this after
+   swapping the table/kanban sub-trees' innerHTML, instead of either
+   calling the full render() (which would blow away focus/cursor in the
+   search input on every keystroke) or hand-rolling a narrower rewire.
+   Re-running this is always safe: every handler here is `.onclick=`/
+   `.onchange=` assignment, which overwrites rather than stacks, exactly
+   like the rest of this file's per-render wiring. */
+function wireFulfillmentCommandCenter(){
   document.querySelectorAll('[data-fc-open-customer]').forEach(el=>{
     el.onclick = (e)=>{ e.preventDefault(); state.fcDrawerCustomerId = el.dataset.fcOpenCustomer; state.fcDrawerTab = 'overview'; render(); };
   });
@@ -5161,9 +5335,117 @@ function attachContentHandlers(){
     };
   });
   const fcDateRangeSel = document.getElementById('fcDateRange');
-  if(fcDateRangeSel) fcDateRangeSel.onchange = ()=>{ state.fcFilters.dateRange = fcDateRangeSel.value; render(); };
+  if(fcDateRangeSel) fcDateRangeSel.onchange = ()=>{ state.fcFilters.dateRange = fcDateRangeSel.value; state.fcTablePage = 0; render(); };
   const fcRefreshBtn = document.getElementById('fcRefreshBtn');
   if(fcRefreshBtn) fcRefreshBtn.onclick = async ()=>{ await loadAll(); render(); };
+
+  // Fulfillment kanban -- status dropdown per card, no drag-and-drop.
+  document.querySelectorAll('[data-fc-order-stage]').forEach(el=>{
+    el.onchange = ()=>{ setOrderFulfillmentStatus(el.dataset.fcOrderStage, el.value); };
+  });
+
+  // Requires Attention -- each item opens the relevant drawer directly.
+  document.querySelectorAll('[data-fc-attn-order]').forEach(el=>{
+    el.onclick = ()=>{ state.fcOrderDrawerId = el.dataset.fcAttnOrder; render(); };
+  });
+  document.querySelectorAll('[data-fc-attn-customer]').forEach(el=>{
+    el.onclick = ()=>{ state.fcDrawerCustomerId = el.dataset.fcAttnCustomer; state.fcDrawerTab = 'overview'; render(); };
+  });
+
+  // Filter bar dropdowns -- a plain full render() is fine for these
+  // (unlike the search box below, a <select> has no cursor/focus state
+  // worth preserving across a re-render).
+  const fcCustStatusSel = document.getElementById('fcCustomerStatusFilter');
+  if(fcCustStatusSel) fcCustStatusSel.onchange = ()=>{ state.fcFilters.customerStatus = fcCustStatusSel.value; state.fcTablePage = 0; render(); };
+  const fcOrderStatusSel = document.getElementById('fcOrderStatusFilter');
+  if(fcOrderStatusSel) fcOrderStatusSel.onchange = ()=>{ state.fcFilters.orderStatus = fcOrderStatusSel.value; state.fcTablePage = 0; render(); };
+  const fcFulfillmentStatusSel = document.getElementById('fcFulfillmentStatusFilter');
+  if(fcFulfillmentStatusSel) fcFulfillmentStatusSel.onchange = ()=>{ state.fcFilters.fulfillmentStatus = fcFulfillmentStatusSel.value; render(); };
+  const fcSourceSel = document.getElementById('fcSourceFilter');
+  if(fcSourceSel) fcSourceSel.onchange = ()=>{ state.fcFilters.source = fcSourceSel.value; state.fcTablePage = 0; render(); };
+  const fcClearBtn = document.getElementById('fcClearFilters');
+  if(fcClearBtn) fcClearBtn.onclick = ()=>{
+    state.fcFilters.search = '';
+    state.fcFilters.customerStatus = 'all';
+    state.fcFilters.orderStatus = 'all';
+    state.fcFilters.fulfillmentStatus = 'all';
+    state.fcFilters.source = 'all';
+    state.fcTablePage = 0;
+    render();
+  };
+
+  // Search box: targeted update only (swap the table + kanban sub-trees'
+  // innerHTML and re-run this same wiring function), never the full
+  // render() -- a full render() would destroy and recreate this very
+  // <input>, losing focus and cursor position on every keystroke. Same
+  // precedent as the cross-entity Search page's own oninput handler.
+  const fcSearchInput = document.getElementById('fcSearchInput');
+  if(fcSearchInput){
+    fcSearchInput.oninput = ()=>{
+      state.fcFilters.search = fcSearchInput.value;
+      state.fcTablePage = 0;
+      const tableWrap = document.getElementById('fcCustomerTableSection');
+      if(tableWrap) tableWrap.innerHTML = renderFcCustomerTableSection();
+      const kanbanWrap = document.getElementById('fcKanbanSection');
+      if(kanbanWrap) kanbanWrap.innerHTML = renderFcKanbanSection();
+      wireFulfillmentCommandCenter();
+      fcSearchInput.focus();
+      fcSearchInput.selectionStart = fcSearchInput.selectionEnd = fcSearchInput.value.length;
+    };
+  }
+}
+
+/* ---------- Content event handlers ---------- */
+function attachContentHandlers(){
+  document.querySelectorAll('[data-navigate]').forEach(el=>{
+    el.onclick = ()=>{ state.view = el.dataset.navigate; render(); };
+  });
+  document.querySelectorAll('[data-eml-preview]').forEach(el=>{
+    el.onclick = ()=>{ openEmailPreview(el.dataset.emlPreview); };
+  });
+  document.querySelectorAll('[data-tkt-status]').forEach(el=>{
+    el.onchange = ()=>{ setTicketStatus(el.dataset.tktStatus, el.value); };
+  });
+  // Live search
+  const si = document.getElementById('searchInput');
+  if(si){
+    si.focus();
+    si.selectionStart = si.selectionEnd = si.value.length;
+    si.oninput = ()=>{
+      const wrap = document.getElementById('searchResultsWrap');
+      wrap.innerHTML = renderSearch(si.value);
+      wrap.querySelectorAll('[data-navigate]').forEach(el=>{
+        el.onclick = ()=>{ state.view = el.dataset.navigate; render(); };
+      });
+    };
+  }
+  document.querySelectorAll('[data-filter]').forEach(el=>{
+    el.onclick = ()=>{ state.contactFilter = el.dataset.filter; render(); };
+  });
+  document.querySelectorAll('[data-chart]').forEach(el=>{
+    el.onclick = ()=>{ state.chartType = el.dataset.chart; saveChartPref(state.chartType); render(); };
+  });
+  document.querySelectorAll('[data-dash-tab]').forEach(btn=>{
+    btn.onclick = ()=>{ state.activeDashboardId = btn.dataset.dashTab; render(); };
+  });
+  const dashAddBtn = document.getElementById('dashAddBtn');
+  if(dashAddBtn) dashAddBtn.onclick = openNewDashboardModal;
+  const dashEditBtn = document.getElementById('dashEditBtn');
+  if(dashEditBtn) dashEditBtn.onclick = ()=>openDashboardWidgetPicker(dashEditBtn.dataset.dashId);
+  const dashDeleteBtn = document.getElementById('dashDeleteBtn');
+  if(dashDeleteBtn) dashDeleteBtn.onclick = async ()=>{
+    if(!confirm('Delete this dashboard?')) return;
+    state.dashboards = state.dashboards.filter(d=>d.id!==dashDeleteBtn.dataset.dashId);
+    await saveKey(KEYS.dashboards, state.dashboards);
+    state.activeDashboardId = '';
+    render();
+  };
+
+  // Customer & Fulfillment Command Center: all of it lives in one
+  // function below so the search box's targeted update (see
+  // wireFulfillmentCommandCenter) can re-run just this wiring without
+  // touching the rest of attachContentHandlers.
+  wireFulfillmentCommandCenter();
 
   document.querySelectorAll('[data-edit]').forEach(el=>{
     el.onclick = (e)=>{
