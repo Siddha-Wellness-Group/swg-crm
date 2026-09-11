@@ -103,55 +103,43 @@
   #app{display:flex;min-height:100vh;}
 
   /* Sidebar */
-  .sidebar{width:200px;background:var(--parchment);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:22px 16px;flex-shrink:0;}
+  .sidebar{width:208px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:22px 14px;flex-shrink:0;overflow-y:auto;}
   .brand{font-size:19px;font-weight:600;letter-spacing:0.3px;margin-bottom:2px;}
   .brand-sub{font-size:10.5px;color:var(--ink-soft);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:28px;}
   .brand-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;}
   .brand-row .brand{margin-bottom:0;}
-  .setup-gear{width:27px;height:27px;border-radius:8px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);flex-shrink:0;padding:0;}
-  .setup-gear:hover{color:var(--setup-blue);border-color:var(--setup-blue);}
-  .setup-gear.active{background:var(--setup-blue);border-color:var(--setup-blue);color:#fff;}
-  .setup-gear svg{width:15px;height:15px;}
+  /* Salesforce's Setup control is a plain solid gear glyph, not a boxed button */
+  .setup-gear{width:30px;height:30px;border-radius:6px;border:none;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--setup-blue);flex-shrink:0;padding:0;transition:background .14s;}
+  .setup-gear:hover{background:var(--setup-blue-soft);}
+  .setup-gear.active{background:var(--setup-blue);color:#fff;}
+  .setup-gear svg{width:21px;height:21px;display:block;}
   .setup-back-btn{display:flex;align-items:center;gap:6px;padding:8px 14px 8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;flex-shrink:0;}
   .setup-back-btn:hover{border-color:var(--setup-blue);color:var(--setup-blue);}
   .setup-back-btn svg{width:15px;height:15px;}
-  .navlink{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:6px;color:var(--ink-soft);cursor:pointer;margin-bottom:2px;font-size:13.5px;font-weight:500;transition:background .15s,color .15s;}
-  .navlink:hover{background:rgba(42,40,32,0.06);}
-  .navlink.active{color:#fff;}
-  .navlink .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-  .navlink[data-view="dashboard"] .dot{background:var(--ink-fixed);}
-  .navlink[data-view="home"] .dot{background:var(--amber);}
-  .navlink[data-view="contacts"] .dot{background:var(--amber);}
-  .navlink[data-view="leads"] .dot{background:var(--ochre);}
-  .navlink[data-view="customers"] .dot{background:var(--sage);}
-  .navlink[data-view="distributors"] .dot{background:var(--umber);}
-  .navlink[data-view="suppliers"] .dot{background:var(--clay);}
-  .navlink[data-view="deals"] .dot{background:var(--ochre);}
-  .navlink[data-view="orders"] .dot{background:var(--umber);}
-  .navlink[data-view="tasks"] .dot{background:var(--olive);}
-  .navlink[data-view="invoices"] .dot{background:var(--rust);}
-  .navlink[data-view="payments"] .dot{background:var(--rust);}
-  .navlink[data-view="team"] .dot{background:var(--ink);}
-  .navlink[data-view="finance"] .dot{background:var(--sage);}
-  .navlink[data-view="emails"] .dot{background:var(--umber);}
-  .navlink[data-view="tickets"] .dot{background:var(--clay);}
-  .navlink[data-view="dashboard"].active{background:var(--ink);}
-  .navlink[data-view="home"].active{background:var(--amber);}
-  .navlink[data-view="contacts"].active{background:var(--amber);}
-  .navlink[data-view="leads"].active{background:var(--ochre);}
-  .navlink[data-view="customers"].active{background:var(--sage);}
-  .navlink[data-view="distributors"].active{background:var(--umber);}
-  .navlink[data-view="suppliers"].active{background:var(--clay);}
-  .navlink[data-view="deals"].active{background:var(--ochre);}
-  .navlink[data-view="orders"].active{background:var(--umber);}
-  .navlink[data-view="tasks"].active{background:var(--olive);}
-  .navlink[data-view="invoices"].active{background:var(--rust);}
-  .navlink[data-view="payments"].active{background:var(--rust);}
-  .navlink[data-view="team"].active{background:var(--ink);}
-  .navlink[data-view="finance"].active{background:var(--sage);}
-  .navlink[data-view="emails"].active{background:var(--umber);}
-  .navlink[data-view="tickets"].active{background:var(--clay);}
+  /* Each object carries its own accent, declared once as a pair of custom
+     properties, so one .active / :hover rule covers every nav item instead of
+     a per-view rule for the dot and another for the active background. */
+  .navlink{--nav-accent:var(--ink-fixed);--nav-accent-soft:var(--cream);
+    position:relative;display:flex;align-items:center;gap:10px;padding:8px 10px 8px 11px;border-radius:8px;color:var(--ink-soft);cursor:pointer;margin-bottom:1px;font-size:13.5px;font-weight:500;transition:background .14s,color .14s;}
+  .navlink[data-view="home"],.navlink[data-view="contacts"]{--nav-accent:var(--amber);--nav-accent-soft:var(--amber-soft);}
+  .navlink[data-view="leads"],.navlink[data-view="deals"]{--nav-accent:var(--ochre);--nav-accent-soft:var(--ochre-soft);}
+  .navlink[data-view="customers"],.navlink[data-view="finance"]{--nav-accent:var(--sage);--nav-accent-soft:var(--sage-soft);}
+  .navlink[data-view="distributors"],.navlink[data-view="orders"],.navlink[data-view="emails"]{--nav-accent:var(--umber);--nav-accent-soft:var(--umber-soft);}
+  .navlink[data-view="suppliers"],.navlink[data-view="tickets"]{--nav-accent:var(--clay);--nav-accent-soft:var(--clay-soft);}
+  .navlink[data-view="tasks"]{--nav-accent:var(--olive);--nav-accent-soft:var(--olive-soft);}
+  .navlink[data-view="invoices"],.navlink[data-view="payments"]{--nav-accent:var(--rust);--nav-accent-soft:var(--rust-soft);}
+  .navlink .nav-ico{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);transition:color .14s;}
+  .navlink .nav-ico svg{width:100%;height:100%;display:block;}
+  .navlink:hover{background:var(--nav-accent-soft);color:var(--ink);}
+  .navlink:hover .nav-ico{color:var(--nav-accent);}
+  .navlink.active{background:var(--nav-accent-soft);color:var(--nav-accent);font-weight:600;}
+  .navlink.active .nav-ico{color:var(--nav-accent);}
+  /* Left rail marks the active row without a second background colour. */
+  .navlink.active::before{content:'';position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:var(--nav-accent);}
   .navlink.hidden-role{display:none;}
+  .nav-group-label{font-size:9.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1.1px;padding:0 11px;margin:16px 0 5px;opacity:.75;}
+  .nav-group-label:first-of-type{margin-top:0;}
+  .nav-group-label.hidden-role{display:none;}
   .sidebar-foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--border);}
   .foot-label{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
   select#viewingAs{width:100%;padding:7px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--ink);font-family:inherit;font-size:12.5px;}
@@ -429,25 +417,43 @@
   .guide-dontshow input{width:auto;}
   .guide-modal-actions{display:flex;justify-content:flex-end;gap:10px;}
 
-  /* Interactive walkthrough */
-  .tour-overlay{position:fixed;inset:0;z-index:9990;}
+  /* Interactive walkthrough — a dark coach-mark popover that points at the
+     element it is describing, with its own fixed palette so it reads the same
+     against a light page, a dark page, or the dimmed overlay. */
+  .tour-overlay{position:fixed;inset:0;z-index:9990;--tour-navy:#04295c;--tour-navy-foot:#052f69;}
   .tour-blocker{position:fixed;inset:0;background:transparent;}
-  .tour-spot{position:fixed;border-radius:9px;box-shadow:0 0 0 9999px rgba(20,18,12,0.62);pointer-events:none;transition:top .25s ease,left .25s ease,width .25s ease,height .25s ease;outline:2px solid var(--setup-blue);outline-offset:2px;}
-  .tour-card{position:fixed;width:380px;max-width:calc(100vw - 32px);background:var(--surface);border-radius:14px;box-shadow:0 16px 40px rgba(0,0,0,0.32);padding:22px 24px 18px;transition:top .25s ease,left .25s ease;animation:tour-card-in .2s ease;}
-  @keyframes tour-card-in{ from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
-  .tour-card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;}
-  .tour-card-icon{width:34px;height:34px;border-radius:9px;background:var(--setup-blue-soft);color:var(--setup-blue);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .tour-card-icon svg{width:18px;height:18px;}
-  .tour-card-eyebrow{font-size:10.5px;font-weight:700;color:var(--setup-blue);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;}
-  .tour-card-title{font-family:'Fraunces',serif;font-weight:700;font-size:16.5px;color:var(--ink);}
-  .tour-card-body{font-size:13px;color:var(--ink-soft);line-height:1.6;margin-bottom:16px;}
-  .tour-progress-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
-  .tour-progress-track{flex:1;height:5px;border-radius:3px;background:var(--border);overflow:hidden;}
-  .tour-progress-fill{height:100%;background:var(--setup-blue);border-radius:3px;transition:width .25s ease;}
-  .tour-progress-label{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);white-space:nowrap;}
-  .tour-card-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;}
-  .tour-end-link{background:none;border:none;color:var(--ink-soft);font-family:inherit;font-size:12px;cursor:pointer;text-decoration:underline;padding:0;}
-  .tour-end-link:hover{color:var(--ink);}
+  .tour-spot{position:fixed;border-radius:6px;box-shadow:0 0 0 9999px rgba(8,16,32,0.66);pointer-events:none;transition:top .22s ease,left .22s ease,width .22s ease,height .22s ease;outline:2px solid #fff;outline-offset:2px;}
+  .tour-card{position:fixed;width:380px;max-width:calc(100vw - 28px);background:var(--tour-navy);color:#fff;border-radius:10px;box-shadow:0 18px 46px rgba(0,0,0,0.5);transition:top .22s ease,left .22s ease;animation:tour-card-in .18s ease;}
+  @keyframes tour-card-in{ from{opacity:0;transform:scale(.97);} to{opacity:1;transform:scale(1);} }
+  /* Bubble tail: a border triangle parked just outside the matching edge. Its
+     offset along that edge is set inline so it lines up with the target. */
+  .tour-tail{position:absolute;width:0;height:0;border:11px solid transparent;}
+  .tour-card[data-place="right"] .tour-tail{left:-22px;border-right-color:var(--tour-navy);}
+  .tour-card[data-place="left"] .tour-tail{right:-22px;border-left-color:var(--tour-navy);}
+  .tour-card[data-place="below"] .tour-tail{top:-22px;border-bottom-color:var(--tour-navy);}
+  .tour-card[data-place="above"] .tour-tail{bottom:-22px;border-top-color:var(--tour-navy);}
+  .tour-card[data-dragged="1"] .tour-tail{display:none;}
+  .tour-card-main{padding:18px 20px 16px;position:relative;}
+  .tour-card-top{display:flex;align-items:flex-start;gap:13px;}
+  .tour-card-icon{width:30px;height:30px;flex-shrink:0;color:#fff;}
+  .tour-card-icon svg{width:100%;height:100%;display:block;}
+  .tour-card-title{font-size:19px;font-weight:600;line-height:1.25;letter-spacing:.1px;flex:1;padding-top:2px;}
+  .tour-close{background:none;border:none;color:rgba(255,255,255,.72);cursor:pointer;padding:2px;margin:-2px -4px 0 0;line-height:0;flex-shrink:0;}
+  .tour-close svg{width:15px;height:15px;display:block;}
+  .tour-close:hover{color:#fff;}
+  .tour-card-body{font-size:13.5px;color:rgba(255,255,255,.86);line-height:1.55;margin:11px 0 0;padding-right:26px;}
+  .tour-step-count{font-size:12.5px;color:rgba(255,255,255,.72);margin-top:13px;}
+  /* Drag handle, so the card can be moved off whatever it is covering. */
+  .tour-grip{position:absolute;right:13px;top:50%;transform:translateY(-50%);display:grid;grid-template-columns:repeat(2,3px);gap:3px;cursor:grab;padding:5px;}
+  .tour-grip span{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.55);}
+  .tour-grip:active{cursor:grabbing;}
+  .tour-card-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--tour-navy-foot);border-top:1px solid rgba(255,255,255,.14);border-radius:0 0 10px 10px;padding:13px 20px;}
+  .tour-foot-right{display:flex;align-items:center;gap:8px;}
+  .tour-btn{font-family:inherit;font-size:13px;font-weight:600;border-radius:20px;padding:7px 19px;cursor:pointer;transition:background .14s,color .14s;}
+  .tour-btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.62);color:#fff;}
+  .tour-btn-ghost:hover{background:rgba(255,255,255,.12);border-color:#fff;}
+  .tour-btn-solid{background:#fff;border:1px solid #fff;color:var(--tour-navy);}
+  .tour-btn-solid:hover{background:rgba(255,255,255,.86);}
   .modal h2{margin:0 0 16px;font-size:17px;font-weight:500;}
   .field{margin-bottom:12px;}
   .field label{display:block;font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;}
@@ -491,6 +497,78 @@
   .setup-nav-item:hover{background:var(--setup-blue-soft);color:var(--setup-blue);}
   .setup-nav-item.active{background:var(--setup-blue);color:#fff;}
   .setup-body{flex:1;min-width:0;}
+  /* Setup section tabs (Home / Object Manager) */
+  .setup-sections{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:20px;}
+  .setup-section-tab{background:none;border:none;border-bottom:3px solid transparent;padding:9px 16px;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;margin-bottom:-1px;}
+  .setup-section-tab:hover{color:var(--setup-blue);}
+  .setup-section-tab.active{color:var(--setup-blue);border-bottom-color:var(--setup-blue);}
+
+  /* Object Manager */
+  .om-head-card{display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px;flex-wrap:wrap;}
+  .om-head-icon{width:44px;height:44px;border-radius:10px;background:var(--setup-blue);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .om-head-icon svg{width:24px;height:24px;}
+  .om-eyebrow{font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1px;}
+  .om-head-title{font-family:'Fraunces',serif;font-size:21px;font-weight:600;color:var(--ink);line-height:1.2;}
+  .om-head-sub{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .om-head-tools{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .om-quickfind{padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:var(--cream);color:var(--ink);font-family:inherit;font-size:12.5px;width:170px;}
+  .om-table th{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-soft);}
+  .om-link{color:var(--setup-blue);font-size:12.5px;font-weight:600;cursor:pointer;}
+  .om-link:hover{text-decoration:underline;}
+  .om-pill{display:inline-block;font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:11px;background:var(--sage-soft);color:var(--sage);}
+  .om-pill.hidden{background:var(--clay-soft);color:var(--clay);}
+  .om-pill.req{background:var(--olive-soft);color:var(--olive);}
+  .om-crumb{display:flex;align-items:center;gap:8px;font-size:10.5px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+  .om-crumb-link{color:var(--setup-blue);cursor:pointer;}
+  .om-crumb-link:hover{text-decoration:underline;}
+  .om-crumb-sep{color:var(--ink-soft);}
+  .om-detail-title{font-family:'Fraunces',serif;font-size:25px;font-weight:600;color:var(--ink);margin-bottom:18px;}
+  .om-pane-title{font-family:'Fraunces',serif;font-size:17px;font-weight:600;color:var(--ink);margin:0 0 12px;}
+  .om-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2px 32px;}
+  .om-fact{padding:10px 0;border-bottom:1px solid var(--border);}
+  .om-fact-k{font-size:11.5px;color:var(--ink-soft);margin-bottom:3px;}
+  .om-fact-v{font-size:13.5px;color:var(--ink);}
+
+  /* Quick Settings — a right-edge flyout of the settings people reach for most,
+     so common admin jobs don't need a trip through the whole backend. */
+  .qs-backdrop{position:fixed;inset:0;background:rgba(20,18,12,0.28);z-index:180;opacity:0;pointer-events:none;transition:opacity .18s;}
+  .qs-backdrop.show{opacity:1;pointer-events:auto;}
+  .qs-panel{position:fixed;top:0;right:0;bottom:0;width:352px;max-width:92vw;background:var(--surface);border-left:1px solid var(--border);box-shadow:-8px 0 28px rgba(0,0,0,0.14);z-index:181;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease;}
+  .qs-panel.show{transform:translateX(0);}
+  .qs-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 22px 14px;flex-shrink:0;}
+  .qs-title{font-size:19px;font-weight:600;color:var(--ink);}
+  .qs-close{background:none;border:none;color:var(--ink-soft);cursor:pointer;padding:4px;line-height:0;border-radius:5px;}
+  .qs-close svg{width:15px;height:15px;display:block;}
+  .qs-close:hover{color:var(--ink);background:var(--cream);}
+  .qs-body{flex:1;overflow-y:auto;padding:0 22px 24px;}
+  .qs-advanced{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px 14px;border-radius:6px;border:1px solid var(--setup-blue);background:var(--surface);color:var(--setup-blue);font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;margin-bottom:22px;}
+  .qs-advanced:hover{background:var(--setup-blue-soft);}
+  .qs-advanced svg{width:14px;height:14px;}
+  .qs-group-label{font-size:13px;font-weight:700;color:var(--ink);margin:0 0 10px;}
+  .qs-group + .qs-group{margin-top:22px;}
+  .qs-row{display:flex;align-items:flex-start;gap:13px;padding:9px 8px;margin:0 -8px;border-radius:7px;cursor:pointer;text-align:left;background:none;border:none;font-family:inherit;width:calc(100% + 16px);}
+  .qs-row:hover{background:var(--cream);}
+  .qs-ico{width:34px;height:34px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--qs-tint,var(--setup-blue-soft));color:var(--qs-ink,var(--setup-blue));}
+  .qs-ico svg{width:18px;height:18px;}
+  .qs-row-title{font-size:13.5px;color:var(--setup-blue);font-weight:500;}
+  .qs-row:hover .qs-row-title{text-decoration:underline;}
+  .qs-row-desc{font-size:12px;color:var(--ink-soft);line-height:1.45;margin-top:2px;}
+
+  /* Hands-on Guide authoring: one block per object, steps in tour order */
+  .guide-object-block{border:1px solid var(--border);border-radius:10px;padding:14px 16px 8px;margin-bottom:14px;background:var(--cream);}
+  .guide-object-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+  .guide-object-name{font-size:13.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:9px;}
+  .guide-step-count{font-size:11px;font-weight:500;color:var(--ink-soft);background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:2px 9px;}
+  .guide-step-row{display:flex;align-items:flex-start;gap:11px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;}
+  .guide-step-num{width:22px;height:22px;border-radius:50%;background:var(--setup-blue-soft);color:var(--setup-blue);font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .guide-step-title{font-size:12.5px;font-weight:600;color:var(--ink);}
+  .guide-step-body{font-size:12px;color:var(--ink-soft);line-height:1.5;margin-top:2px;}
+  .guide-step-target{font-size:11px;color:var(--setup-blue);margin-top:4px;}
+  .guide-step-tools{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+  .guide-tool{background:none;border:1px solid var(--border);border-radius:6px;color:var(--ink-soft);font-family:inherit;font-size:11px;padding:4px 8px;cursor:pointer;}
+  .guide-tool:hover:not(:disabled){border-color:var(--setup-blue);color:var(--setup-blue);}
+  .guide-tool:disabled{opacity:.35;cursor:default;}
+  .guide-tool.danger:hover{border-color:var(--rust);color:var(--rust);}
   .setup-savebar{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--setup-blue-soft);border:1px solid var(--setup-blue);color:var(--setup-blue);border-radius:8px;padding:10px 14px;font-size:12.5px;font-weight:600;margin-bottom:14px;}
   .setup-savebar-top{position:sticky;top:0;z-index:5;}
   .setup-savebar-bottom{margin-top:14px;margin-bottom:0;}
@@ -981,24 +1059,29 @@
     <div class="brand-row">
       <div class="brand display">SWG</div>
       <button type="button" id="setupGearBtn" class="setup-gear" title="Setup" style="display:none;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 13.5a1.7 1.7 0 0 0 .34 1.87l.06.06a2.06 2.06 0 1 1-2.92 2.92l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V20a2.06 2.06 0 1 1-4.12 0v-.09a1.7 1.7 0 0 0-1.11-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2.06 2.06 0 1 1-2.92-2.92l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H4a2.06 2.06 0 1 1 0-4.12h.09a1.7 1.7 0 0 0 1.55-1.11 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2.06 2.06 0 1 1 2.92-2.92l.06.06a1.7 1.7 0 0 0 1.87.34H10a1.7 1.7 0 0 0 1-1.55V4a2.06 2.06 0 1 1 4.12 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2.06 2.06 0 1 1 2.92 2.92l-.06.06a1.7 1.7 0 0 0-.34 1.87V10a1.7 1.7 0 0 0 1.55 1H20a2.06 2.06 0 1 1 0 4.12h-.09a1.7 1.7 0 0 0-1.55 1Z"/></svg>
+        <svg viewBox="0 0 52 52" fill="currentColor"><path d="M48.5 20.7h-3.3a1.9 1.9 0 0 1-1.7-1.2 1.8 1.8 0 0 1 .3-2.1l2.4-2.3a1.6 1.6 0 0 0 0-2.3l-3.2-3.2a1.6 1.6 0 0 0-2.3 0l-2.3 2.4a1.8 1.8 0 0 1-2.1.3 1.9 1.9 0 0 1-1.2-1.7V7.3a1.6 1.6 0 0 0-1.6-1.6h-4.6a1.6 1.6 0 0 0-1.6 1.6v3.3a1.9 1.9 0 0 1-1.2 1.7 1.8 1.8 0 0 1-2.1-.3l-2.3-2.4a1.6 1.6 0 0 0-2.3 0l-3.2 3.2a1.6 1.6 0 0 0 0 2.3l2.4 2.3a1.8 1.8 0 0 1 .3 2.1 1.9 1.9 0 0 1-1.7 1.2H3.5a1.6 1.6 0 0 0-1.6 1.6v4.6a1.6 1.6 0 0 0 1.6 1.6h3.3a1.9 1.9 0 0 1 1.7 1.2 1.8 1.8 0 0 1-.3 2.1l-2.4 2.3a1.6 1.6 0 0 0 0 2.3l3.2 3.2a1.6 1.6 0 0 0 2.3 0l2.3-2.4a1.8 1.8 0 0 1 2.1-.3 1.9 1.9 0 0 1 1.2 1.7v3.3a1.6 1.6 0 0 0 1.6 1.6h4.6a1.6 1.6 0 0 0 1.6-1.6v-3.3a1.9 1.9 0 0 1 1.2-1.7 1.8 1.8 0 0 1 2.1.3l2.3 2.4a1.6 1.6 0 0 0 2.3 0l3.2-3.2a1.6 1.6 0 0 0 0-2.3l-2.4-2.3a1.8 1.8 0 0 1-.3-2.1 1.9 1.9 0 0 1 1.7-1.2h3.3a1.6 1.6 0 0 0 1.6-1.6v-4.6a1.6 1.6 0 0 0-1.6-1.6ZM26 34.4A8.4 8.4 0 1 1 34.4 26 8.4 8.4 0 0 1 26 34.4Z"/></svg>
       </button>
     </div>
-    <div class="navlink" data-view="home"><span class="dot"></span>Home</div>
-    <div class="navlink active" data-view="dashboard"><span class="dot"></span>Dashboard</div>
-    <div class="navlink" data-view="contacts"><span class="dot"></span>Contacts</div>
-    <div class="navlink" data-view="leads"><span class="dot"></span>Leads</div>
-    <div class="navlink" data-view="customers"><span class="dot"></span>Customers</div>
-    <div class="navlink" data-view="distributors"><span class="dot"></span>Distributors</div>
-    <div class="navlink" data-view="suppliers"><span class="dot"></span>Suppliers</div>
-    <div class="navlink" data-view="deals"><span class="dot"></span>Deals</div>
-    <div class="navlink" data-view="tasks"><span class="dot"></span>Tasks</div>
-    <div class="navlink" data-view="invoices"><span class="dot"></span>Invoices</div>
-    <div class="navlink" data-view="payments"><span class="dot"></span>Payments</div>
-    <div class="navlink" data-view="finance"><span class="dot"></span>Finance</div>
-    <div class="navlink" data-view="emails"><span class="dot"></span>Emails</div>
-    <div class="navlink" data-view="tickets"><span class="dot"></span>Tickets</div>
-    <div class="navlink" data-view="team"><span class="dot"></span>Team</div>
+    <div class="nav-group-label" data-nav-group="workspace">Workspace</div>
+    <div class="navlink" data-view="home" data-nav-group="workspace"><span class="nav-ico"></span>Home</div>
+    <div class="navlink active" data-view="dashboard" data-nav-group="workspace"><span class="nav-ico"></span>Dashboard</div>
+    <div class="nav-group-label" data-nav-group="records">Records</div>
+    <div class="navlink" data-view="contacts" data-nav-group="records"><span class="nav-ico"></span>Contacts</div>
+    <div class="navlink" data-view="leads" data-nav-group="records"><span class="nav-ico"></span>Leads</div>
+    <div class="navlink" data-view="customers" data-nav-group="records"><span class="nav-ico"></span>Customers</div>
+    <div class="navlink" data-view="distributors" data-nav-group="records"><span class="nav-ico"></span>Distributors</div>
+    <div class="navlink" data-view="suppliers" data-nav-group="records"><span class="nav-ico"></span>Suppliers</div>
+    <div class="navlink" data-view="deals" data-nav-group="records"><span class="nav-ico"></span>Deals</div>
+    <div class="nav-group-label" data-nav-group="operations">Operations</div>
+    <div class="navlink" data-view="tasks" data-nav-group="operations"><span class="nav-ico"></span>Tasks</div>
+    <div class="navlink" data-view="invoices" data-nav-group="operations"><span class="nav-ico"></span>Invoices</div>
+    <div class="navlink" data-view="payments" data-nav-group="operations"><span class="nav-ico"></span>Payments</div>
+    <div class="navlink" data-view="finance" data-nav-group="operations"><span class="nav-ico"></span>Finance</div>
+    <div class="nav-group-label" data-nav-group="support">Support</div>
+    <div class="navlink" data-view="emails" data-nav-group="support"><span class="nav-ico"></span>Emails</div>
+    <div class="navlink" data-view="tickets" data-nav-group="support"><span class="nav-ico"></span>Tickets</div>
+    <div class="nav-group-label" data-nav-group="admin">Admin</div>
+    <div class="navlink" data-view="team" data-nav-group="admin"><span class="nav-ico"></span>Team</div>
     <div class="sidebar-foot">
       <div class="theme-toggle" id="themeToggle">
         <button type="button" data-theme-choice="system" title="Match system">Auto</button>
@@ -1054,6 +1137,17 @@
   </main>
 </div>
 
+<div class="qs-backdrop" id="qsBackdrop"></div>
+<aside class="qs-panel" id="qsPanel" aria-hidden="true">
+  <div class="qs-head">
+    <div class="qs-title">Quick Settings</div>
+    <button type="button" class="qs-close" id="qsCloseBtn" title="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5.8 5.8l12.4 12.4M18.2 5.8 5.8 18.2"/></svg>
+    </button>
+  </div>
+  <div class="qs-body" id="qsBody"></div>
+</aside>
+
 <div class="overlay" id="overlay">
   <div class="modal" id="modalBody"></div>
 </div>
@@ -1084,7 +1178,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0 };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, setupTab:'roles', setupSection:'home', omObject:null, omTab:'details', omFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0 };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -1177,6 +1271,38 @@ const LINKTYPES_PRIV = [
   {key:'user', label:'Team member'},
 ];
 const COUNTRIES = ['Afghanistan','Albania','Algeria','Andorra','Angola','Antigua and Barbuda','Argentina','Armenia','Australia','Austria','Azerbaijan','Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize','Benin','Bhutan','Bolivia','Bosnia and Herzegovina','Botswana','Brazil','Brunei','Bulgaria','Burkina Faso','Burundi','Cabo Verde','Cambodia','Cameroon','Canada','Central African Republic','Chad','Chile','China','Colombia','Comoros','Congo','Costa Rica','Croatia','Cuba','Cyprus','Czech Republic','Denmark','Djibouti','Dominica','Dominican Republic','Ecuador','Egypt','El Salvador','Equatorial Guinea','Eritrea','Estonia','Eswatini','Ethiopia','Fiji','Finland','France','Gabon','Gambia','Georgia','Germany','Ghana','Greece','Grenada','Guatemala','Guinea','Guinea-Bissau','Guyana','Haiti','Honduras','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Jamaica','Japan','Jordan','Kazakhstan','Kenya','Kiribati','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Lesotho','Liberia','Libya','Liechtenstein','Lithuania','Luxembourg','Madagascar','Malawi','Malaysia','Maldives','Mali','Malta','Marshall Islands','Mauritania','Mauritius','Mexico','Micronesia','Moldova','Monaco','Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nauru','Nepal','Netherlands','New Zealand','Nicaragua','Niger','Nigeria','North Korea','North Macedonia','Norway','Oman','Pakistan','Palau','Palestine','Panama','Papua New Guinea','Paraguay','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Rwanda','Saint Kitts and Nevis','Saint Lucia','Saint Vincent and the Grenadines','Samoa','San Marino','Sao Tome and Principe','Saudi Arabia','Senegal','Serbia','Seychelles','Sierra Leone','Singapore','Slovakia','Slovenia','Solomon Islands','Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka','Sudan','Suriname','Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Timor-Leste','Togo','Tonga','Trinidad and Tobago','Tunisia','Turkey','Turkmenistan','Tuvalu','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States','Uruguay','Uzbekistan','Vanuatu','Vatican City','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe'];
+/* Sidebar glyphs live here rather than inline in the markup so each object has
+   exactly one icon definition, shared by the nav and anything else that wants
+   it. Stroke-based so they inherit the nav row's colour in both themes. */
+const NAV_ICONS = {
+  home:`<path d="M3 10.5 12 3.5l9 7"/><path d="M5.5 9.3V20.5h13V9.3"/><path d="M9.8 20.5v-5.6h4.4v5.6"/>`,
+  dashboard:`<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>`,
+  contacts:`<rect x="5" y="3" width="15" height="18" rx="2"/><path d="M5 8H2.8M5 12H2.8M5 16H2.8"/><circle cx="12.5" cy="10" r="2.4"/><path d="M8.8 17.2c.5-1.9 1.9-3 3.7-3s3.2 1.1 3.7 3"/>`,
+  leads:`<path d="M3.5 5h17l-6.6 7.8V20l-3.8-2.2v-5L3.5 5Z"/>`,
+  customers:`<circle cx="10" cy="8" r="3.6"/><path d="M3.6 20c.6-3.4 3.1-5.4 6.4-5.4 1.1 0 2.2.22 3.1.68"/><path d="M15.4 17.6l2 2 3.6-4"/>`,
+  distributors:`<path d="M3 6.2h10.6v10H3z"/><path d="M13.6 10.4h3.6l3 3.1v2.7h-6.6z"/><circle cx="7.1" cy="18.5" r="1.8"/><circle cx="16.7" cy="18.5" r="1.8"/>`,
+  suppliers:`<path d="M12 3.2 20.5 7.6v8.8L12 20.8 3.5 16.4V7.6z"/><path d="M3.5 7.6 12 12l8.5-4.4"/><path d="M12 12v8.8"/>`,
+  deals:`<path d="M3.5 16.8 9.2 11l3.6 3.6 7.7-7.7"/><path d="M15.6 6.9h4.9v4.9"/>`,
+  orders:`<path d="M3 5.2h2.4l2.3 10.6h9.6"/><path d="M7.2 12.6h10.2l1.8-5.6H5.9"/><circle cx="9.2" cy="19" r="1.5"/><circle cx="16.6" cy="19" r="1.5"/>`,
+  tasks:`<path d="M9 4.2H7.2A1.7 1.7 0 0 0 5.5 5.9v13.4a1.7 1.7 0 0 0 1.7 1.7h9.6a1.7 1.7 0 0 0 1.7-1.7V5.9a1.7 1.7 0 0 0-1.7-1.7H15"/><rect x="9" y="2.6" width="6" height="3.4" rx="1.2"/><path d="M8.9 13.4l2.1 2.1 4.1-4.3"/>`,
+  invoices:`<path d="M14 3.2H7.4A1.9 1.9 0 0 0 5.5 5.1v13.8a1.9 1.9 0 0 0 1.9 1.9h9.2a1.9 1.9 0 0 0 1.9-1.9V8.2z"/><path d="M13.8 3.3v4.9h4.7"/><path d="M8.8 13h6.4M8.8 16.6h4.3"/>`,
+  payments:`<rect x="2.6" y="5.4" width="18.8" height="13.2" rx="2.2"/><path d="M2.6 10.2h18.8"/><path d="M6.4 14.8h3.4"/>`,
+  finance:`<path d="M3.4 20.6h17.2"/><rect x="5.4" y="12" width="3.4" height="6.4" rx="1"/><rect x="10.6" y="7.6" width="3.4" height="10.8" rx="1"/><rect x="15.8" y="10" width="3.4" height="8.4" rx="1"/>`,
+  emails:`<rect x="2.8" y="5" width="18.4" height="14" rx="2.2"/><path d="M3.4 6.6 12 13l8.6-6.4"/>`,
+  tickets:`<circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="3.4"/><path d="M6 6l3.6 3.6M14.4 14.4 18 18M18 6l-3.6 3.6M9.6 14.4 6 18"/>`,
+  team:`<circle cx="9.4" cy="8.4" r="3.5"/><path d="M2.8 20c.6-3.5 3.2-5.6 6.6-5.6S15.4 16.5 16 20"/><path d="M16.2 5.5a3.4 3.4 0 0 1 0 6.6"/><path d="M17.8 14.7c2 .7 3.3 2.4 3.7 5.3"/>`,
+};
+function navIconSVG(view){
+  const paths = NAV_ICONS[view];
+  if(!paths) return '';
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+}
+function paintNavIcons(){
+  document.querySelectorAll('.navlink[data-view]').forEach(el=>{
+    const slot = el.querySelector('.nav-ico');
+    if(slot && !slot.innerHTML) slot.innerHTML = navIconSVG(el.dataset.view);
+  });
+}
 const ACCENTS = {
   dashboard:'var(--ink-fixed)', home:'var(--amber)', contacts:'var(--amber)', leads:'var(--ochre)', customers:'var(--sage)',
   distributors:'var(--umber)', suppliers:'var(--clay)', deals:'var(--ochre)', orders:'var(--umber)',
@@ -1623,6 +1749,13 @@ function updateNavVisibility(){
   gatedEntities.forEach(entity=>{
     const link = document.querySelector(`.navlink[data-view="${entity}"]`);
     if(link) link.classList.toggle('hidden-role', navLinkHidden(entity));
+  });
+  // A group heading with every item hidden would otherwise dangle above nothing.
+  document.querySelectorAll('.nav-group-label[data-nav-group]').forEach(label=>{
+    const group = label.dataset.navGroup;
+    const anyVisible = Array.from(document.querySelectorAll(`.navlink[data-nav-group="${group}"]`))
+      .some(link=>!link.classList.contains('hidden-role'));
+    label.classList.toggle('hidden-role', !anyVisible);
   });
   renderTopnavQuickActions();
 }
@@ -4562,8 +4695,10 @@ function renderSetupRoles(){
   </div>`;
 }
 
-function renderSetupValidation(){
-  const rules = state.validationRules;
+/* onlyEntity scopes the tab to a single object so Object Manager can reuse the
+   same renderer, staged-draft handling and Save bar as the global Setup tab. */
+function renderSetupValidation(onlyEntity){
+  const rules = onlyEntity ? state.validationRules.filter(r=>r.entity===onlyEntity) : state.validationRules;
   const canEdit = canEditGlobalSetup();
   return `<div class="io-card">
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Rules run whenever a record is added in that object. Saving is blocked with the message below until the rule passes.</p>
@@ -4582,9 +4717,9 @@ function renderSetupValidation(){
   </div>`;
 }
 
-function renderSetupDependent(){
+function renderSetupDependent(onlyEntity){
   const canEdit = canEditDependentFields();
-  const rules = state.dependentFields;
+  const rules = onlyEntity ? state.dependentFields.filter(r=>r.entity===onlyEntity) : state.dependentFields;
   return `<div class="io-card">
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Make one field required only once another is filled in — e.g. require a City as soon as a Country is picked. Runs alongside validation rules when a record is saved.</p>
     ${canEdit ? '' : `<div class="readonly-note">👁 View only — only an admin can add or remove dependent field rules.</div>`}
@@ -4604,7 +4739,7 @@ function renderSetupDependent(){
 function isFieldRequired(entity, field){
   return state.validationRules.some(r=>r.entity===entity && r.field===field && r.type==='required');
 }
-function renderSetupRequired(){
+function renderSetupRequired(onlyEntity){
   const canEdit = canEditRequiredFields();
   const rules = setupDraftActive('required') ? setupDraft.data : state.validationRules;
   const draftRequired = (entity, field) => rules.some(r=>r.entity===entity && r.field===field && r.type==='required');
@@ -4612,7 +4747,7 @@ function renderSetupRequired(){
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Mark fields that must be filled in before a record can be saved. Toggling one on or off adds or removes a "Required" validation rule behind the scenes.</p>
     ${canEdit ? '' : `<div class="readonly-note">👁 View only — only Ariel, David or Daniel can change which fields are required.</div>`}
     ${renderSetupSaveBar('top')}
-    ${SETUP_ENTITIES.map(entity=>`
+    ${(onlyEntity ? [onlyEntity] : SETUP_ENTITIES).map(entity=>`
       <div style="margin-bottom:18px;">
         <p style="font-size:12.5px;font-weight:700;margin:0 0 8px;">${esc(EXPORT_SHEETS.find(s=>s.key===entity).label)}</p>
         <div class="required-field-grid">
@@ -4659,7 +4794,7 @@ function applyFieldVisibilityToTable(entity){
     document.querySelectorAll(`#content [data-field-col="${field}"]`).forEach(el=>{ el.style.display = 'none'; });
   });
 }
-function renderSetupVisibility(){
+function renderSetupVisibility(onlyEntity){
   const canEdit = canEditGlobalSetup();
   const draft = setupDraftActive('visibility') ? setupDraft.data : null;
   const objHidden = entity => draft ? !!draft.objectVisibility[entity] : isObjectHidden(entity);
@@ -4668,7 +4803,7 @@ function renderSetupVisibility(){
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Control which objects and fields other users can see. Hiding an object removes it from the sidebar entirely; hiding a field removes it from that object's list view and its Add/Edit form. Admins (Ariel, David) always see everything, regardless of these settings.</p>
     ${canEdit ? '' : `<div class="readonly-note">👁 View only — only Ariel or David can change object and field visibility.</div>`}
     ${renderSetupSaveBar('top')}
-    ${SETUP_ENTITIES.map(entity=>`
+    ${(onlyEntity ? [onlyEntity] : SETUP_ENTITIES).map(entity=>`
       <div style="margin-bottom:18px;">
         <label class="required-field-row" style="font-size:12.5px;font-weight:700;margin-bottom:8px;">
           <input type="checkbox" data-hide-object="${entity}" ${objHidden(entity)?'checked':''} ${canEdit?'':'disabled'}>
@@ -4685,8 +4820,8 @@ function renderSetupVisibility(){
   </div>`;
 }
 
-function renderSetupAutomation(){
-  const rules = state.automations;
+function renderSetupAutomation(onlyEntity){
+  const rules = onlyEntity ? state.automations.filter(a=>a.entity===onlyEntity) : state.automations;
   const canEdit = canEditGlobalSetup();
   return `<div class="io-card">
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Runs automatically right after a new record is created in that object.</p>
@@ -4833,15 +4968,16 @@ function wireSchemaVisualizer(){
   };
 }
 
-function renderSetupSharing(){
+function renderSetupSharing(onlyEntity){
   const canEdit = canEditGlobalSetup();
   const rules = setupDraftActive('sharing') ? setupDraft.data : state.sharingRules;
+  const entities = onlyEntity ? SHARING_ENTITIES.filter(k=>k===onlyEntity) : SHARING_ENTITIES;
   return `<div class="io-card">
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Controls which team members can see each object's records in lists. Only an admin can change these — they affect the whole team. Everyone always sees their own records; admins always see everything.</p>
     ${canEdit ? '' : `<div class="readonly-note">👁 View only — only an admin can change sharing rules.</div>`}
     ${renderSetupSaveBar('top')}
     <table><thead><tr><th>Object</th><th>Visible to</th></tr></thead><tbody>
-    ${SHARING_ENTITIES.map(key=>`<tr>
+    ${entities.map(key=>`<tr>
       <td style="font-size:13px;">${esc(EXPORT_SHEETS.find(s=>s.key===key).label)}</td>
       <td><select data-sharing-for="${key}" ${canEdit?'':'disabled'}>${SHARING_MODES.map(m=>`<option value="${m.key}" ${(rules[key]||'everyone')===m.key?'selected':''}>${m.label}</option>`).join('')}</select></td>
     </tr>`).join('')}
@@ -4850,24 +4986,37 @@ function renderSetupSharing(){
   </div>`;
 }
 
-function guideLinkLabel(g){
-  if(!g.linkEntity) return 'General';
-  const entLabel = EXPORT_SHEETS.find(s=>s.key===g.linkEntity)?.label || g.linkEntity;
-  return g.linkField ? `${entLabel} → ${prettyField(g.linkField)}` : entLabel;
-}
 function renderSetupGuide(){
-  const entries = state.guideEntries;
+  const objectsWithSteps = SETUP_ENTITIES.filter(e=>guideEntriesFor(e).length);
   return `<div class="io-card">
-    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Write short how-to notes for your team. Each note is tied to an object (and optionally one of its fields) and becomes one step of that object's guided walkthrough — click <strong>Guide</strong> at the top of that object's page to take the tour.</p>
-    <table><thead><tr><th>Title</th><th>Note</th><th>Linked to</th><th></th></tr></thead><tbody>
-    ${entries.map(g=>`<tr>
-      <td style="font-size:12px;font-weight:600;max-width:150px;">${esc(g.title)}</td>
-      <td style="font-size:12px;color:var(--ink-soft);max-width:300px;">${esc(g.body)}</td>
-      <td style="font-size:12px;color:var(--ink-soft);white-space:nowrap;">${esc(guideLinkLabel(g))}</td>
-      <td class="row-actions"><span data-del-guide="${g.id}">delete</span></td>
-    </tr>`).join('') || `<tr><td colspan="4" style="text-align:center;color:var(--ink-soft);padding:20px;">No guide entries yet.</td></tr>`}
-    </tbody></table>
-    <button class="btn" id="addGuideBtn" style="margin-top:14px;">+ Add guide entry</button>
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 16px;">Build a guided walkthrough for each object, the way Salesforce does. Each step is a card that points at a real place on the page — the menu item, the <strong>+ Add</strong> button, the list, or one field on the Add form. Your team takes the tour by clicking <strong>Guide</strong> at the top of that object's page.</p>
+    ${objectsWithSteps.map(entity=>{
+      const steps = guideEntriesFor(entity);
+      return `<div class="guide-object-block">
+        <div class="guide-object-head">
+          <div class="guide-object-name">${esc(EXPORT_SHEETS.find(s=>s.key===entity).label)}<span class="guide-step-count">${steps.length} step${steps.length===1?'':'s'}</span></div>
+          <div style="display:flex;gap:7px;">
+            <button type="button" class="btn secondary" data-preview-guide="${entity}">▷ Preview</button>
+            <button type="button" class="btn secondary" data-add-guide-for="${entity}">+ Add step</button>
+          </div>
+        </div>
+        ${steps.map((g,i)=>`<div class="guide-step-row">
+          <div class="guide-step-num">${i+1}</div>
+          <div style="flex:1;min-width:0;">
+            <div class="guide-step-title">${esc(g.title)}</div>
+            <div class="guide-step-body">${esc(g.body)}</div>
+            <div class="guide-step-target">Points at: ${esc(guideTargetLabel(g))}</div>
+          </div>
+          <div class="guide-step-tools">
+            <button type="button" class="guide-tool" data-guide-up="${g.id}" ${i===0?'disabled':''} title="Move up">↑</button>
+            <button type="button" class="guide-tool" data-guide-down="${g.id}" ${i===steps.length-1?'disabled':''} title="Move down">↓</button>
+            <button type="button" class="guide-tool" data-edit-guide="${g.id}" title="Edit">Edit</button>
+            <button type="button" class="guide-tool danger" data-del-guide="${g.id}" title="Delete">Delete</button>
+          </div>
+        </div>`).join('')}
+      </div>`;
+    }).join('') || `<div class="readonly-note" style="text-align:center;">No walkthrough steps yet — add the first one below.</div>`}
+    <button class="btn" id="addGuideBtn" style="margin-top:16px;">+ Add walkthrough step</button>
   </div>`;
 }
 
@@ -4898,6 +5047,199 @@ function renderSetupBigDeal(){
   </div>`;
 }
 
+/* ---------- Object Manager ----------
+   One place to see every object and open its own settings, instead of hunting
+   through nine global tabs to find the three rules that touch Deals. Each
+   sub-tab reuses the global renderer scoped to this object, so there is one
+   implementation of each feature and the staged Save/Cancel bar still works. */
+const OM_TABS = [
+  {key:'details', label:'Details'},
+  {key:'fields', label:'Fields & Relationships'},
+  {key:'required', label:'Required Fields'},
+  {key:'validation', label:'Validation Rules'},
+  {key:'dependent', label:'Dependent Fields'},
+  {key:'visibility', label:'Field Visibility'},
+  {key:'access', label:'Object Access'},
+  {key:'automation', label:'Automation'},
+  {key:'guide', label:'Hands-on Guide'},
+];
+const OM_STACK_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 20.8 7.7 12 12.2 3.2 7.7z"/><path d="M3.2 12 12 16.5l8.8-4.5"/><path d="M3.2 16.3 12 20.8l8.8-4.5"/></svg>`;
+
+function objectLabel(entity){ return EXPORT_SHEETS.find(s=>s.key===entity)?.label || entity; }
+function objectFieldCount(entity){ return entityFieldsFor(entity).length; }
+function objectRecordCount(entity){ return Array.isArray(state[entity]) ? state[entity].length : 0; }
+
+function renderObjectManagerList(){
+  const q = (state.omFilter||'').trim().toLowerCase();
+  const rows = SETUP_ENTITIES.filter(e=>!q || objectLabel(e).toLowerCase().includes(q) || e.includes(q));
+  return `<div class="om-head-card">
+    <div class="om-head-icon">${OM_STACK_ICON}</div>
+    <div style="flex:1;min-width:0;">
+      <div class="om-eyebrow">Setup</div>
+      <div class="om-head-title">Object Manager</div>
+      <div class="om-head-sub">${SETUP_ENTITIES.length} items, sorted by label</div>
+    </div>
+    <div class="om-head-tools">
+      <input id="omQuickFind" class="om-quickfind" placeholder="Quick Find" value="${esc(state.omFilter||'')}">
+      <button type="button" class="btn secondary" id="omSchemaBtn">Schema Builder</button>
+    </div>
+  </div>
+  <div class="io-card" style="padding-top:6px;">
+    <table class="om-table"><thead><tr>
+      <th>Label</th><th>API Name</th><th>Type</th><th style="text-align:right;">Fields</th><th style="text-align:right;">Records</th><th>Visibility</th>
+    </tr></thead><tbody>
+    ${rows.map(e=>`<tr>
+      <td><span class="om-link" data-om-open="${e}">${esc(objectLabel(e))}</span></td>
+      <td class="mono" style="font-size:12px;color:var(--ink-soft);">${esc(e)}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">Standard Object</td>
+      <td style="text-align:right;font-size:12px;">${objectFieldCount(e)}</td>
+      <td style="text-align:right;font-size:12px;">${objectRecordCount(e)}</td>
+      <td style="font-size:12px;">${isObjectHidden(e)
+        ? `<span class="om-pill hidden">Hidden</span>`
+        : `<span class="om-pill">Visible</span>`}</td>
+    </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:20px;">No objects match "${esc(state.omFilter||'')}".</td></tr>`}
+    </tbody></table>
+  </div>`;
+}
+
+function renderObjectDetailBody(entity){
+  const tab = state.omTab;
+  if(tab==='fields') return renderObjectFields(entity);
+  if(tab==='required') return renderSetupRequired(entity);
+  if(tab==='validation') return renderSetupValidation(entity);
+  if(tab==='dependent') return renderSetupDependent(entity);
+  if(tab==='visibility') return renderSetupVisibility(entity);
+  if(tab==='access') return renderObjectAccess(entity);
+  if(tab==='automation') return renderObjectAutomation(entity);
+  if(tab==='guide') return renderObjectGuide(entity);
+  return renderObjectDetails(entity);
+}
+
+function renderObjectDetails(entity){
+  const sharing = SHARING_MODES.find(m=>m.key===(state.sharingRules[entity]||'everyone'));
+  const reqCount = state.validationRules.filter(r=>r.entity===entity && r.type==='required').length;
+  const hiddenFields = entityFieldsFor(entity).filter(f=>isFieldHidden(entity,f)).length;
+  const facts = [
+    ['API Name', entity, true],
+    ['Label', objectLabel(entity)],
+    ['Type', 'Standard Object'],
+    ['Fields', String(objectFieldCount(entity))],
+    ['Records', String(objectRecordCount(entity))],
+    ['Hidden from team', isObjectHidden(entity) ? 'Yes' : 'No'],
+    ['Visible to', sharing ? sharing.label : 'Everyone'],
+    ['Required fields', String(reqCount)],
+    ['Hidden fields', String(hiddenFields)],
+    ['Validation rules', String(state.validationRules.filter(r=>r.entity===entity && r.type!=='required').length)],
+    ['Dependent field rules', String(state.dependentFields.filter(r=>r.entity===entity).length)],
+    ['Automations', String(state.automations.filter(a=>a.entity===entity).length)],
+    ['Walkthrough steps', String(guideEntriesFor(entity).length)],
+  ];
+  return `<div class="io-card">
+    <h3 class="om-pane-title">Details</h3>
+    <div class="om-facts">
+      ${facts.map(([k,v,mono])=>`<div class="om-fact">
+        <div class="om-fact-k">${esc(k)}</div>
+        <div class="om-fact-v${mono?' mono':''}">${esc(v)}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderObjectFields(entity){
+  const fields = entityFieldsFor(entity);
+  const guideFields = new Set(guideEntriesFor(entity).filter(g=>g.linkField).map(g=>g.linkField));
+  return `<div class="io-card">
+    <h3 class="om-pane-title">Fields & Relationships</h3>
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Every field on ${esc(objectLabel(entity))}, and the rules currently attached to it.</p>
+    <table class="om-table"><thead><tr>
+      <th>Field Label</th><th>API Name</th><th>Required</th><th>Hidden</th><th>Rules</th><th>Guide step</th>
+    </tr></thead><tbody>
+    ${fields.map(f=>{
+      const rules = state.validationRules.filter(r=>r.entity===entity && r.field===f && r.type!=='required');
+      const dep = state.dependentFields.filter(r=>r.entity===entity && (r.controllingField===f || r.dependentField===f));
+      return `<tr>
+        <td style="font-size:12.5px;font-weight:600;">${esc(prettyField(f))}</td>
+        <td class="mono" style="font-size:12px;color:var(--ink-soft);">${esc(f)}</td>
+        <td>${isFieldRequired(entity,f) ? `<span class="om-pill req">Required</span>` : `<span style="color:var(--ink-soft);font-size:12px;">—</span>`}</td>
+        <td>${isFieldHidden(entity,f) ? `<span class="om-pill hidden">Hidden</span>` : `<span style="color:var(--ink-soft);font-size:12px;">—</span>`}</td>
+        <td style="font-size:12px;color:var(--ink-soft);">${rules.length+dep.length ? `${rules.length+dep.length} rule${rules.length+dep.length===1?'':'s'}` : '—'}</td>
+        <td style="font-size:12px;color:var(--ink-soft);">${guideFields.has(f) ? 'Yes' : '—'}</td>
+      </tr>`;
+    }).join('')}
+    </tbody></table>
+  </div>`;
+}
+
+function renderObjectAccess(entity){
+  if(!SHARING_ENTITIES.includes(entity)){
+    return `<div class="io-card">
+      <h3 class="om-pane-title">Object Access</h3>
+      <div class="readonly-note">${esc(objectLabel(entity))} has no sharing rule — access to it is governed by role instead. Invoices, Payments and Finance are limited to admins and managers.</div>
+    </div>`;
+  }
+  return renderSetupSharing(entity);
+}
+
+function renderObjectAutomation(entity){
+  const flows = state.flows.filter(f=>f.entity===entity);
+  return renderSetupAutomation(entity) + `<div class="io-card" style="margin-top:16px;">
+    <h3 class="om-pane-title">Flows</h3>
+    <table><thead><tr><th>Name</th><th>Steps</th><th></th></tr></thead><tbody>
+    ${flows.map(f=>{
+      const nCond = f.steps.filter(s=>s.type==='condition').length;
+      const nAct = f.steps.filter(s=>s.type==='action').length;
+      return `<tr>
+        <td style="font-size:12px;font-weight:600;">${esc(f.name)}</td>
+        <td style="font-size:12px;color:var(--ink-soft);">${nCond} condition${nCond===1?'':'s'}, ${nAct} action${nAct===1?'':'s'}</td>
+        <td class="row-actions"><span data-del-flow="${f.id}">delete</span></td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="3" style="text-align:center;color:var(--ink-soft);padding:20px;">No flows on ${esc(objectLabel(entity))} yet.</td></tr>`}
+    </tbody></table>
+    <button class="btn" id="addFlowBtn" style="margin-top:14px;">+ Create flow</button>
+  </div>`;
+}
+
+function renderObjectGuide(entity){
+  const steps = guideEntriesFor(entity);
+  return `<div class="io-card">
+    <h3 class="om-pane-title">Hands-on Guide</h3>
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">The walkthrough your team sees when they click <strong>Guide</strong> on the ${esc(objectLabel(entity))} page.</p>
+    <div style="display:flex;gap:7px;margin-bottom:12px;">
+      ${steps.length ? `<button type="button" class="btn secondary" data-preview-guide="${entity}">▷ Preview</button>` : ''}
+      <button type="button" class="btn secondary" data-add-guide-for="${entity}">+ Add step</button>
+    </div>
+    ${steps.map((g,i)=>`<div class="guide-step-row">
+      <div class="guide-step-num">${i+1}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="guide-step-title">${esc(g.title)}</div>
+        <div class="guide-step-body">${esc(g.body)}</div>
+        <div class="guide-step-target">Points at: ${esc(guideTargetLabel(g))}</div>
+      </div>
+      <div class="guide-step-tools">
+        <button type="button" class="guide-tool" data-guide-up="${g.id}" ${i===0?'disabled':''} title="Move up">↑</button>
+        <button type="button" class="guide-tool" data-guide-down="${g.id}" ${i===steps.length-1?'disabled':''} title="Move down">↓</button>
+        <button type="button" class="guide-tool" data-edit-guide="${g.id}" title="Edit">Edit</button>
+        <button type="button" class="guide-tool danger" data-del-guide="${g.id}" title="Delete">Delete</button>
+      </div>
+    </div>`).join('') || `<div class="readonly-note" style="text-align:center;">No walkthrough steps for ${esc(objectLabel(entity))} yet.</div>`}
+  </div>`;
+}
+
+function renderObjectDetail(entity){
+  return `<div class="om-crumb">
+    <span class="om-crumb-link" data-om-crumb="setup">Setup</span>
+    <span class="om-crumb-sep">&gt;</span>
+    <span class="om-crumb-link" data-om-crumb="objects">Object Manager</span>
+  </div>
+  <div class="om-detail-title">${esc(objectLabel(entity))}</div>
+  <div class="setup-layout">
+    <nav class="setup-sidenav">
+      ${OM_TABS.map(t=>`<button type="button" class="setup-nav-item ${state.omTab===t.key?'active':''}" data-om-tab="${t.key}">${t.label}</button>`).join('')}
+    </nav>
+    <div class="setup-body">${renderObjectDetailBody(entity)}</div>
+  </div>`;
+}
+
 function renderSetupTabBody(){
   if(state.setupTab==='roles') return renderSetupRoles();
   if(state.setupTab==='validation') return renderSetupValidation();
@@ -4912,13 +5254,24 @@ function renderSetupTabBody(){
   if(state.setupTab==='visibility') return renderSetupVisibility();
   return '';
 }
-function renderSetup(){
-  return `<div class="setup-banner">🔧 You're in the backend — changes here affect the whole team.</div>
-  <div class="setup-layout">
+function renderSetupSection(){
+  if(state.setupSection === 'objects'){
+    return state.omObject ? renderObjectDetail(state.omObject) : renderObjectManagerList();
+  }
+  return `<div class="setup-layout">
     <nav class="setup-sidenav">
       ${SETUP_TABS.map(t=>`<button type="button" class="setup-nav-item ${state.setupTab===t.key?'active':''}" data-setup-tab="${t.key}">${t.label}</button>`).join('')}
     </nav>
     <div class="setup-body" id="setupTabBody">${renderSetupTabBody()}</div>
+  </div>`;
+}
+function renderSetup(){
+  return `<div class="setup-banner">🔧 You're in the backend — changes here affect the whole team.</div>
+  <div class="setup-sections">
+    <button type="button" class="setup-section-tab ${state.setupSection==='home'?'active':''}" data-setup-section="home">Home</button>
+    <button type="button" class="setup-section-tab ${state.setupSection==='objects'?'active':''}" data-setup-section="objects">Object Manager</button>
+  </div>
+  <div>${renderSetupSection()}
   </div>`;
 }
 
@@ -4941,10 +5294,10 @@ function insertAtCursor(textareaId, text){
 
 const FORMULA_OPS = ['AND','OR','NOT','==','!=','>=','<=','>','<','+','-','(',')'];
 
-function openValidationRuleModal(){
+function openValidationRuleModal(presetEntity){
   if(!canEditGlobalSetup()) return;
   document.getElementById('modalBody').innerHTML = `<h2 class="display">New validation rule</h2>
-    <div class="field"><label>Object</label><select id="vr_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}">${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
+    <div class="field"><label>Object</label><select id="vr_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}" ${presetEntity===e?'selected':''}>${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
     <div class="field"><label>Rule</label><select id="vr_type">${RULE_TYPES.map(t=>`<option value="${t.key}">${t.label}</option>`).join('')}</select></div>
     <div id="vr_simpleWrap">
       <div class="field"><label>Field</label><select id="vr_field"></select></div>
@@ -5032,42 +5385,84 @@ function openValidationRuleModal(){
   };
 }
 
-function openGuideEntryModal(presetEntity){
-  document.getElementById('modalBody').innerHTML = `<h2 class="display">New guide entry</h2>
-    <p style="color:var(--ink-soft);font-size:12px;margin:0 0 4px;">Each entry becomes one step in that object's guided walkthrough.</p>
-    <div class="field"><label>Title</label><input id="ge_title" placeholder="e.g. How to log a new deal"></div>
+/* What a walkthrough step can point at. Field targets are appended per object
+   as "f:<field>" so the admin picks a real place on screen, not just a field. */
+const GUIDE_TARGETS = [
+  {key:'', label:'Page header (intro step)'},
+  {key:'nav', label:'Its menu item in the sidebar'},
+  {key:'add', label:'The "+ Add" button'},
+  {key:'guide', label:'The Guide button'},
+  {key:'search', label:'Search'},
+  {key:'list', label:'The list / table area'},
+];
+function guideTargetSelectValue(g){ return g.linkField ? 'f:'+g.linkField : (g.target||''); }
+function guideTargetFromSelect(v){
+  return v.startsWith('f:') ? {target:'', linkField:v.slice(2)} : {target:v, linkField:''};
+}
+function guideTargetLabel(g){
+  if(g.linkField) return `${prettyField(g.linkField)} field`;
+  return (GUIDE_TARGETS.find(t=>t.key===(g.target||'')) || GUIDE_TARGETS[0]).label;
+}
+
+function openGuideEntryModal(presetEntity, editId){
+  const editing = editId ? state.guideEntries.find(g=>g.id===editId) : null;
+  const entityFor = editing ? editing.linkEntity : (presetEntity || SETUP_ENTITIES[0]);
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">${editing?'Edit':'New'} walkthrough step</h2>
+    <p style="color:var(--ink-soft);font-size:12px;margin:0 0 4px;">Each step is one card in that object's guided walkthrough. Pick what the card should point at.</p>
+    <div class="field"><label>Title</label><input id="ge_title" value="${editing?esc(editing.title):''}" placeholder="e.g. Pick the right stage"></div>
     <div class="field"><label>Object</label><select id="ge_entity">
-      ${SETUP_ENTITIES.map(e=>`<option value="${e}" ${(presetEntity?presetEntity===e:e===SETUP_ENTITIES[0])?'selected':''}>${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}
+      ${SETUP_ENTITIES.map(e=>`<option value="${e}" ${entityFor===e?'selected':''}>${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}
     </select></div>
-    <div class="field" id="ge_fieldWrap"><label>Section (optional)</label><select id="ge_field"><option value="">— Whole object (intro step) —</option></select></div>
-    <div class="field"><label>Note</label><textarea id="ge_body" style="min-height:100px;" placeholder="Explain the feature in plain language, for anyone on the team."></textarea></div>
-    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="ge_saveBtn">Add entry</button></div>`;
+    <div class="field"><label>Points at</label><select id="ge_target"></select></div>
+    <div class="field"><label>Note</label><textarea id="ge_body" style="min-height:100px;" placeholder="Explain it in plain language, for anyone on the team.">${editing?esc(editing.body):''}</textarea></div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="ge_saveBtn">${editing?'Save step':'Add step'}</button></div>`;
   document.getElementById('overlay').classList.add('show');
   document.getElementById('cancelBtn').onclick = closeModal;
-  function refreshFieldOptions(){
+  function refreshTargetOptions(keepValue){
     const entity = document.getElementById('ge_entity').value;
-    document.getElementById('ge_field').innerHTML = `<option value="">— Whole object (intro step) —</option>` +
-      entityFieldsFor(entity).map(f=>`<option value="${f}">${esc(prettyField(f))}</option>`).join('');
+    const sel = document.getElementById('ge_target');
+    sel.innerHTML = GUIDE_TARGETS.map(t=>`<option value="${t.key}">${esc(t.label)}</option>`).join('')
+      + `<optgroup label="A field on the Add form">`
+      + entityFieldsFor(entity).map(f=>`<option value="f:${esc(f)}">${esc(prettyField(f))}</option>`).join('')
+      + `</optgroup>`;
+    if(keepValue) sel.value = keepValue;
   }
-  document.getElementById('ge_entity').onchange = refreshFieldOptions;
-  refreshFieldOptions();
+  document.getElementById('ge_entity').onchange = ()=>refreshTargetOptions();
+  refreshTargetOptions(editing ? guideTargetSelectValue(editing) : '');
   document.getElementById('ge_saveBtn').onclick = async ()=>{
     const title = document.getElementById('ge_title').value.trim();
     const body = document.getElementById('ge_body').value.trim();
     if(!title || !body){ alert('Fill in a title and a note.'); return; }
     const linkEntity = document.getElementById('ge_entity').value;
-    const linkField = linkEntity ? document.getElementById('ge_field').value : '';
-    state.guideEntries.push({id:uid(), title, body, linkEntity, linkField});
+    const { target, linkField } = guideTargetFromSelect(document.getElementById('ge_target').value);
+    if(editing) Object.assign(editing, { title, body, linkEntity, target, linkField });
+    else state.guideEntries.push({id:uid(), title, body, linkEntity, target, linkField});
     await saveKey(KEYS.guideEntries, state.guideEntries);
     closeModal();
     rerenderSetupView();
   };
 }
 
-function openDependentFieldModal(){
+/* Reordering swaps an entry with its neighbour *within the same object*, so the
+   flat guideEntries array doubles as each object's step order. */
+async function moveGuideEntry(id, dir){
+  const entry = state.guideEntries.find(g=>g.id===id);
+  if(!entry) return;
+  const siblings = state.guideEntries.filter(g=>g.linkEntity===entry.linkEntity);
+  const at = siblings.indexOf(entry);
+  const swapWith = siblings[at + dir];
+  if(!swapWith) return;
+  const i = state.guideEntries.indexOf(entry), j = state.guideEntries.indexOf(swapWith);
+  state.guideEntries[i] = swapWith;
+  state.guideEntries[j] = entry;
+  await saveKey(KEYS.guideEntries, state.guideEntries);
+  rerenderSetupView();
+}
+
+function openDependentFieldModal(presetEntity){
   if(!canEditDependentFields()) return;
   document.getElementById('modalBody').innerHTML = `<h2 class="display">New dependent field rule</h2>
-    <div class="field"><label>Object</label><select id="df_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}">${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
+    <div class="field"><label>Object</label><select id="df_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}" ${presetEntity===e?'selected':''}>${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
     <div class="field"><label>When this field is filled in</label><select id="df_controlling"></select></div>
     <div class="field"><label>…this field becomes required</label><select id="df_dependent"></select></div>
     <div class="field"><label>Message (optional)</label><input id="df_message" placeholder="Shown when the dependent field is missing"></div>
@@ -5184,11 +5579,11 @@ function openFlowModal(){
   };
 }
 
-function openAutomationModal(){
+function openAutomationModal(presetEntity){
   if(!canEditGlobalSetup()) return;
   document.getElementById('modalBody').innerHTML = `<h2 class="display">New automation</h2>
     <div class="field"><label>Name</label><input id="au_name" placeholder="e.g. Welcome task for new leads"></div>
-    <div class="field"><label>When this object is created</label><select id="au_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}">${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
+    <div class="field"><label>When this object is created</label><select id="au_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}" ${presetEntity===e?'selected':''}>${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
     <div class="field"><label>Condition</label><select id="au_op">${COND_OPS.map(o=>`<option value="${o.key}">${o.label}</option>`).join('')}</select></div>
     <div class="field" id="au_condFieldWrap"><label>Field</label><select id="au_condField"></select></div>
     <div class="field" id="au_condValueWrap"><label>Value</label><input id="au_condValue"></div>
@@ -5251,14 +5646,53 @@ function openAutomationModal(){
   };
 }
 
+/* Which object the Setup screen is currently scoped to, if any. */
+function omScopedEntity(){
+  return (state.setupSection === 'objects' && state.omObject) ? state.omObject : undefined;
+}
 function wireSetupView(){
+  // Any navigation inside Setup drops a staged draft, after asking.
+  const navAway = (apply)=>{
+    if(setupDraft && !confirm('You have unsaved changes here. Discard them and move on?')) return;
+    setupDraft = null;
+    apply();
+    rerenderSetupView();
+  };
   document.querySelectorAll('[data-setup-tab]').forEach(btn=>{
-    btn.onclick = ()=>{
-      if(setupDraft && !confirm('You have unsaved changes on this tab. Discard them and switch tabs?')) return;
-      setupDraft = null;
-      state.setupTab = btn.dataset.setupTab;
+    btn.onclick = ()=> navAway(()=>{ state.setupTab = btn.dataset.setupTab; });
+  });
+  document.querySelectorAll('[data-setup-section]').forEach(btn=>{
+    btn.onclick = ()=> navAway(()=>{
+      state.setupSection = btn.dataset.setupSection;
+      if(state.setupSection === 'objects') state.omObject = null;
+    });
+  });
+  document.querySelectorAll('[data-om-open]').forEach(el=>{
+    el.onclick = ()=> navAway(()=>{ state.omObject = el.dataset.omOpen; state.omTab = 'details'; });
+  });
+  document.querySelectorAll('[data-om-tab]').forEach(btn=>{
+    btn.onclick = ()=> navAway(()=>{ state.omTab = btn.dataset.omTab; });
+  });
+  document.querySelectorAll('[data-om-crumb]').forEach(el=>{
+    el.onclick = ()=> navAway(()=>{
+      if(el.dataset.omCrumb === 'setup'){ state.setupSection = 'home'; state.omObject = null; }
+      else state.omObject = null;
+    });
+  });
+  const omFind = document.getElementById('omQuickFind');
+  if(omFind){
+    omFind.oninput = ()=>{
+      state.omFilter = omFind.value;
       rerenderSetupView();
+      const again = document.getElementById('omQuickFind');
+      if(again){ again.focus(); again.selectionStart = again.selectionEnd = again.value.length; }
     };
+  }
+  const omSchemaBtn = document.getElementById('omSchemaBtn');
+  if(omSchemaBtn) omSchemaBtn.onclick = ()=> navAway(()=>{
+    state.setupSection = 'home';
+    state.setupTab = 'schema';
+    state.omObject = null;
   });
   if(state.setupTab==='schema') wireSchemaVisualizer();
   document.querySelectorAll('.setup-save-btn').forEach(btn=>{ btn.onclick = saveSetupDraft; });
@@ -5294,7 +5728,7 @@ function wireSetupView(){
     };
   });
   const addValBtn = document.getElementById('addValidationBtn');
-  if(addValBtn) addValBtn.onclick = openValidationRuleModal;
+  if(addValBtn) addValBtn.onclick = ()=> openValidationRuleModal(omScopedEntity());
   document.querySelectorAll('[data-del-rule]').forEach(el=>{
     el.onclick = async ()=>{
       if(!canEditGlobalSetup()) return;
@@ -5305,7 +5739,7 @@ function wireSetupView(){
     };
   });
   const addDependentBtn = document.getElementById('addDependentBtn');
-  if(addDependentBtn) addDependentBtn.onclick = openDependentFieldModal;
+  if(addDependentBtn) addDependentBtn.onclick = ()=> openDependentFieldModal(omScopedEntity());
   document.querySelectorAll('[data-del-dependent]').forEach(el=>{
     el.onclick = async ()=>{
       if(!canEditDependentFields()) return;
@@ -5330,7 +5764,7 @@ function wireSetupView(){
     };
   });
   const addAutoBtn = document.getElementById('addAutomationBtn');
-  if(addAutoBtn) addAutoBtn.onclick = openAutomationModal;
+  if(addAutoBtn) addAutoBtn.onclick = ()=> openAutomationModal(omScopedEntity());
   document.querySelectorAll('[data-del-automation]').forEach(el=>{
     el.onclick = async ()=>{
       if(!canEditGlobalSetup()) return;
@@ -5359,6 +5793,22 @@ function wireSetupView(){
   });
   const addGuideBtn = document.getElementById('addGuideBtn');
   if(addGuideBtn) addGuideBtn.onclick = ()=> openGuideEntryModal();
+  document.querySelectorAll('[data-add-guide-for]').forEach(el=>{
+    el.onclick = ()=> openGuideEntryModal(el.dataset.addGuideFor);
+  });
+  document.querySelectorAll('[data-edit-guide]').forEach(el=>{
+    el.onclick = ()=> openGuideEntryModal(null, el.dataset.editGuide);
+  });
+  document.querySelectorAll('[data-guide-up]').forEach(el=>{
+    el.onclick = ()=> moveGuideEntry(el.dataset.guideUp, -1);
+  });
+  document.querySelectorAll('[data-guide-down]').forEach(el=>{
+    el.onclick = ()=> moveGuideEntry(el.dataset.guideDown, 1);
+  });
+  document.querySelectorAll('[data-preview-guide]').forEach(el=>{
+    // Leaves Setup on purpose: the tour points at the object's real page.
+    el.onclick = ()=> startObjectWalkthrough(el.dataset.previewGuide);
+  });
   document.querySelectorAll('[data-del-guide]').forEach(el=>{
     el.onclick = async ()=>{
       if(!confirm('Delete this guide entry?')) return;
@@ -6061,30 +6511,95 @@ function renderGuideNoteCards(entries, tagFn){
    tour meant to help someone with zero records yet. */
 let tourState = null;
 
+/* Steps run in the order the admin arranged them in Setup, which is simply
+   their order within state.guideEntries. */
 function tourStepsFor(entityKey){
-  const entries = guideEntriesFor(entityKey);
-  return [...entries.filter(g=>!g.linkField), ...entries.filter(g=>g.linkField)];
+  return guideEntriesFor(entityKey);
+}
+
+function firstVisibleEl(...selectors){
+  for(const sel of selectors){
+    const el = document.querySelector(sel);
+    if(el && el.offsetParent !== null) return el;
+  }
+  return null;
 }
 
 function resolveTourTarget(step){
+  const ek = tourState.entityKey;
   if(step.linkField){
-    const el = document.getElementById(formFieldElementId(tourState.entityKey, step.linkField));
+    const el = document.getElementById(formFieldElementId(ek, step.linkField));
     const wrap = el && el.closest('.field');
     if(wrap && wrap.offsetParent !== null) return wrap;
     const modal = document.getElementById('modalBody');
     if(modal && document.getElementById('overlay').classList.contains('show')) return modal;
   }
-  return document.querySelector('.topbar') || document.getElementById('content');
+  let el = null;
+  if(step.target === 'nav') el = firstVisibleEl(`.navlink[data-view="${ek}"]`);
+  else if(step.target === 'add') el = firstVisibleEl('#addBtn');
+  else if(step.target === 'guide') el = firstVisibleEl('#topbarGuideBtn');
+  else if(step.target === 'search') el = firstVisibleEl('#tn-search');
+  else if(step.target === 'list') el = firstVisibleEl('#content table', '#content .pipeline', '#content');
+  return el || document.querySelector('.topbar') || document.getElementById('content');
 }
 
-function tourCardStyle(rect){
-  const cardW = 380, cardH = 240, margin = 18;
-  let top = rect.bottom + margin;
-  if(top + cardH > window.innerHeight) top = Math.max(margin, rect.top - cardH - margin);
-  let left = rect.left;
-  if(left + cardW > window.innerWidth - margin) left = window.innerWidth - cardW - margin;
-  if(left < margin) left = margin;
-  return `top:${top}px;left:${left}px;`;
+const TOUR_BUBBLE_ICON = `<svg viewBox="0 0 24 24" fill="currentColor"><rect x="2.8" y="3.8" width="18.4" height="12.6" rx="2"/><path d="M6.6 16.4h4.5l-5 4.1z"/></svg>`;
+const TOUR_CLOSE_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5.8 5.8l12.4 12.4M18.2 5.8 5.8 18.2"/></svg>`;
+
+/* Picks the side of the target to sit on — preferring beside it, since a
+   coach mark that covers the thing it describes is useless — and returns the
+   tail's offset along the card's facing edge so it points at the target. */
+function tourPlacement(rect){
+  const W = 380, H = 240, gap = 16, m = 14;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  let place;
+  if(rect.right + gap + W <= vw - m) place = 'right';
+  else if(rect.left - gap - W >= m) place = 'left';
+  else if(rect.bottom + gap + H <= vh - m) place = 'below';
+  else place = 'above';
+  let top, left;
+  if(place === 'right' || place === 'left'){
+    left = place === 'right' ? rect.right + gap : rect.left - gap - W;
+    top = rect.top + rect.height/2 - H/2;
+  } else {
+    top = place === 'below' ? rect.bottom + gap : rect.top - gap - H;
+    left = rect.left + rect.width/2 - W/2;
+  }
+  top = Math.min(Math.max(m, top), Math.max(m, vh - H - m));
+  left = Math.min(Math.max(m, left), Math.max(m, vw - W - m));
+  const along = (place === 'right' || place === 'left')
+    ? rect.top + rect.height/2 - top
+    : rect.left + rect.width/2 - left;
+  return { place, top, left, along, W };
+}
+
+/* Dragging is why the grip exists: the card can land on top of something the
+   user wants to see. A dragged card keeps its position until the step changes. */
+function wireTourDrag(card, grip){
+  grip.onpointerdown = (e)=>{
+    e.preventDefault();
+    const startX = e.clientX, startY = e.clientY;
+    const rect = card.getBoundingClientRect();
+    const baseTop = rect.top, baseLeft = rect.left;
+    card.style.transition = 'none';
+    grip.setPointerCapture(e.pointerId);
+    const move = (ev)=>{
+      if(!tourState) return;
+      const top = Math.max(8, Math.min(window.innerHeight - 70, baseTop + (ev.clientY - startY)));
+      const left = Math.max(8, Math.min(window.innerWidth - 90, baseLeft + (ev.clientX - startX)));
+      tourState.drag = { top, left };
+      card.style.top = top + 'px';
+      card.style.left = left + 'px';
+      card.dataset.dragged = '1';
+    };
+    const up = ()=>{
+      grip.removeEventListener('pointermove', move);
+      grip.removeEventListener('pointerup', up);
+      card.style.transition = '';
+    };
+    grip.addEventListener('pointermove', move);
+    grip.addEventListener('pointerup', up);
+  };
 }
 
 function endTour(){
@@ -6107,41 +6622,63 @@ function paintTourStep(){
   const step = tourState.steps[tourState.idx];
   const target = resolveTourTarget(step);
   const rect = target.getBoundingClientRect();
-  const label = EXPORT_SHEETS.find(s=>s.key===tourState.entityKey)?.label || tourState.entityKey;
   const isLast = tourState.idx === tourState.steps.length-1;
   const isFirst = tourState.idx === 0;
+  const p = tourPlacement(rect);
+  const pos = tourState.drag
+    ? `top:${tourState.drag.top}px;left:${tourState.drag.left}px;`
+    : `top:${p.top}px;left:${p.left}px;`;
+  const tailStyle = (p.place === 'right' || p.place === 'left')
+    ? `top:${p.along - 11}px;` : `left:${p.along - 11}px;`;
   overlay.innerHTML = `
     <div class="tour-blocker"></div>
     <div class="tour-spot" style="top:${rect.top-6}px;left:${rect.left-6}px;width:${rect.width+12}px;height:${rect.height+12}px;"></div>
-    <div class="tour-card" style="${tourCardStyle(rect)}">
-      <div class="tour-card-head">
-        <div class="tour-card-icon">${GUIDE_BOOK_ICON}</div>
-        <div>
-          <div class="tour-card-eyebrow">${esc(label)} walkthrough</div>
+    <div class="tour-card" data-place="${p.place}" ${tourState.drag?'data-dragged="1"':''} style="${pos}">
+      <span class="tour-tail" style="${tailStyle}"></span>
+      <div class="tour-card-main">
+        <div class="tour-card-top">
+          <div class="tour-card-icon">${TOUR_BUBBLE_ICON}</div>
           <div class="tour-card-title">${esc(step.title)}</div>
+          <button type="button" class="tour-close" id="tourCloseBtn" title="Close">${TOUR_CLOSE_ICON}</button>
         </div>
+        <div class="tour-card-body">${esc(step.body)}</div>
+        <div class="tour-step-count">Step ${tourState.idx+1} of ${tourState.steps.length}</div>
+        <span class="tour-grip" id="tourGrip" title="Drag to move"><span></span><span></span><span></span><span></span><span></span><span></span></span>
       </div>
-      <div class="tour-card-body">${esc(step.body)}</div>
-      <div class="tour-progress-row">
-        <div class="tour-progress-track"><div class="tour-progress-fill" style="width:${((tourState.idx+1)/tourState.steps.length)*100}%;"></div></div>
-        <span class="tour-progress-label">${tourState.idx+1} / ${tourState.steps.length}</span>
-      </div>
-      <div class="tour-card-actions">
-        <button type="button" class="tour-end-link" id="tourEndBtn">${isFirst ? 'Skip tour' : 'End tour'}</button>
-        <div style="display:flex;gap:8px;">
-          ${!isFirst ? `<button type="button" class="btn secondary" id="tourBackBtn">Back</button>` : ''}
-          <button type="button" class="btn" id="tourNextBtn">${isLast ? 'Finish' : 'Next'}</button>
+      <div class="tour-card-foot">
+        <button type="button" class="tour-btn tour-btn-ghost" id="tourEndBtn">${isFirst ? 'Skip' : 'End tour'}</button>
+        <div class="tour-foot-right">
+          ${!isFirst ? `<button type="button" class="tour-btn tour-btn-ghost" id="tourBackBtn">Back</button>` : ''}
+          <button type="button" class="tour-btn tour-btn-solid" id="tourNextBtn">${isLast ? 'Finish' : 'Next'}</button>
         </div>
       </div>
     </div>`;
+  const card = overlay.querySelector('.tour-card');
+  // The placement math assumes a 240px card; correct against the real height
+  // so a short card's tail still lands on the target and a tall one still fits.
+  if(card && !tourState.drag){
+    const h = card.offsetHeight;
+    const maxTop = Math.max(14, window.innerHeight - h - 14);
+    if(p.top > maxTop) card.style.top = maxTop + 'px';
+    if(p.place === 'right' || p.place === 'left'){
+      const tail = card.querySelector('.tour-tail');
+      const usedTop = parseFloat(card.style.top);
+      const along = Math.min(Math.max(18, rect.top + rect.height/2 - usedTop), h - 18);
+      if(tail) tail.style.top = (along - 11) + 'px';
+    }
+  }
   document.getElementById('tourEndBtn').onclick = endTour;
+  document.getElementById('tourCloseBtn').onclick = endTour;
   document.getElementById('tourNextBtn').onclick = ()=>{
     if(isLast){ endTour(); return; }
     tourState.idx++;
+    tourState.drag = null;
     advanceTourStep();
   };
   const backBtn = document.getElementById('tourBackBtn');
-  if(backBtn) backBtn.onclick = ()=>{ tourState.idx--; advanceTourStep(); };
+  if(backBtn) backBtn.onclick = ()=>{ tourState.idx--; tourState.drag = null; advanceTourStep(); };
+  const grip = document.getElementById('tourGrip');
+  if(card && grip) wireTourDrag(card, grip);
 }
 
 function advanceTourStep(){
@@ -6165,7 +6702,13 @@ function advanceTourStep(){
 function startObjectWalkthrough(entityKey){
   const steps = tourStepsFor(entityKey);
   if(!steps.length) return;
-  tourState = { entityKey, steps, idx: 0, modalOpenedByTour: false };
+  // A tour launched from Setup (or any other page) has to land on the object's
+  // own page first, or every step would point at UI that isn't on screen.
+  if(state.view !== entityKey){
+    state.view = entityKey;
+    render();
+  }
+  tourState = { entityKey, steps, idx: 0, modalOpenedByTour: false, drag: null };
   window.addEventListener('resize', paintTourStep);
   advanceTourStep();
 }
@@ -6442,16 +6985,87 @@ document.getElementById('qaScrollLeft').onclick = ()=>{ document.getElementById(
 document.getElementById('qaScrollRight').onclick = ()=>{ document.getElementById('topnavQaScroll').scrollBy({left:120, behavior:'smooth'}); };
 window.addEventListener('resize', updateQaScrollArrows);
 document.getElementById('topbarGuideBtn').onclick = ()=> startObjectWalkthrough(state.view);
-document.getElementById('setupGearBtn').onclick = ()=>{
-  if(state.view==='setup') return;
-  openConfirmModal({
-    title:'Enter Setup?',
-    message:"You're about to open the backend of the CRM — roles, validation rules, automation and sharing rules live here, and changes affect the whole team.",
-    confirmLabel:'Continue',
-    cancelLabel:'Go back',
-    onConfirm: ()=>{ state.returnView = state.view; state.view='setup'; render(); },
+/* ---------- Quick Settings flyout ----------
+   The gear opens this rather than jumping straight into the backend. Each row
+   is a named destination, so it navigates directly; only "Open Advanced Setup"
+   — the general trip into the backend — still asks for confirmation. */
+const QS_GROUPS = [
+  { label:'Customization', rows:[
+    { tab:'required', title:'Required Fields', desc:'Choose which fields must be filled in before a record saves.',
+      tint:'var(--olive-soft)', ink:'var(--olive)',
+      icon:`<path d="M9 11.6l2.3 2.3 4.7-5"/><rect x="3.6" y="3.6" width="16.8" height="16.8" rx="3"/>` },
+    { tab:'validation', title:'Validation Rules', desc:'Block bad data as it is entered.',
+      tint:'var(--rust-soft)', ink:'var(--rust)',
+      icon:`<path d="M12 3.4 20.4 7v5.2c0 4.3-3.4 7.6-8.4 9-5-1.4-8.4-4.7-8.4-9V7Z"/><path d="M12 8.6v4M12 15.6v.1"/>` },
+    { tab:'visibility', title:'Object & Field Visibility', desc:'Hide objects or fields from the rest of the team.',
+      tint:'var(--setup-blue-soft)', ink:'var(--setup-blue)',
+      icon:`<path d="M2.5 12S5.9 5.8 12 5.8 21.5 12 21.5 12 18.1 18.2 12 18.2 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.9"/>` },
+  ]},
+  { label:'Company', rows:[
+    { tab:'roles', title:'Roles', desc:'Set what each team member can reach.',
+      tint:'var(--amber-soft)', ink:'var(--amber)',
+      icon:`<circle cx="9.4" cy="8.4" r="3.5"/><path d="M2.8 20c.6-3.5 3.2-5.6 6.6-5.6S15.4 16.5 16 20"/><path d="M16.2 5.5a3.4 3.4 0 0 1 0 6.6"/>` },
+    { tab:'bigdeal', title:'Big Deal Alerts', desc:'Get told when a deal over your threshold lands.',
+      tint:'var(--ochre-soft)', ink:'var(--ochre)',
+      icon:`<path d="M18 8.6a6 6 0 1 0-12 0c0 6-2.4 7.4-2.4 7.4h16.8S18 14.6 18 8.6"/><path d="M13.7 19.6a2 2 0 0 1-3.4 0"/>` },
+    { tab:'guide', title:'Hands-on Guide', desc:'Write the walkthrough your team sees on each page.',
+      tint:'var(--sage-soft)', ink:'var(--sage)',
+      icon:`<path d="M4 19.3V5.7c0-.65.47-1.2 1.11-1.31L11 3.3v16.9l-5.72 1.1a1.1 1.1 0 0 1-1.28-1Z"/><path d="M20 19.3V5.7c0-.65-.47-1.2-1.11-1.31L13 3.3v16.9l5.72 1.1a1.1 1.1 0 0 0 1.28-1Z"/>` },
+  ]},
+];
+
+function renderQuickSettings(){
+  return `<button type="button" class="qs-advanced" id="qsAdvancedBtn">Open Advanced Setup
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13.4 4.4h6.2v6.2"/><path d="M19.6 4.4 11 13"/><path d="M18 14.4v4.1a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 18.5V7.5A1.5 1.5 0 0 1 5.5 6h4.1"/></svg>
+  </button>` + QS_GROUPS.map(g=>`<div class="qs-group">
+    <div class="qs-group-label">${esc(g.label)}</div>
+    ${g.rows.map(r=>`<button type="button" class="qs-row" data-qs-tab="${r.tab}">
+      <span class="qs-ico" style="--qs-tint:${r.tint};--qs-ink:${r.ink};"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${r.icon}</svg></span>
+      <span style="min-width:0;">
+        <span class="qs-row-title" style="display:block;">${esc(r.title)}</span>
+        <span class="qs-row-desc" style="display:block;">${esc(r.desc)}</span>
+      </span>
+    </button>`).join('')}
+  </div>`).join('');
+}
+
+function openQuickSettings(){
+  document.getElementById('qsBody').innerHTML = renderQuickSettings();
+  document.getElementById('qsPanel').classList.add('show');
+  document.getElementById('qsPanel').setAttribute('aria-hidden','false');
+  document.getElementById('qsBackdrop').classList.add('show');
+  document.querySelectorAll('[data-qs-tab]').forEach(btn=>{
+    btn.onclick = ()=>{
+      closeQuickSettings();
+      // Land on the named tab even if Setup was last left on Object Manager.
+      state.setupSection = 'home';
+      state.omObject = null;
+      state.setupTab = btn.dataset.qsTab;
+      if(state.view !== 'setup'){ state.returnView = state.view; state.view = 'setup'; }
+      render();
+    };
   });
-};
+  document.getElementById('qsAdvancedBtn').onclick = ()=>{
+    closeQuickSettings();
+    if(state.view==='setup') return;
+    openConfirmModal({
+      title:'Enter Setup?',
+      message:"You're about to open the backend of the CRM — roles, validation rules, automation and sharing rules live here, and changes affect the whole team.",
+      confirmLabel:'Continue',
+      cancelLabel:'Go back',
+      onConfirm: ()=>{ state.returnView = state.view; state.view='setup'; render(); },
+    });
+  };
+}
+function closeQuickSettings(){
+  document.getElementById('qsPanel').classList.remove('show');
+  document.getElementById('qsPanel').setAttribute('aria-hidden','true');
+  document.getElementById('qsBackdrop').classList.remove('show');
+}
+
+document.getElementById('setupGearBtn').onclick = openQuickSettings;
+document.getElementById('qsCloseBtn').onclick = closeQuickSettings;
+document.getElementById('qsBackdrop').onclick = closeQuickSettings;
 document.getElementById('setupBackBtn').onclick = ()=>{
   if(state.view==='setup' && setupDraft && !confirm('You have unsaved changes in Setup. Discard them and leave?')) return;
   setupDraft = null;
@@ -6848,6 +7462,7 @@ async function attemptLogin(){
 document.getElementById('loginBtn').onclick = attemptLogin;
 ensureTeamLoaded();
 loadChartPref();
+paintNavIcons();
 document.getElementById('loginPassword').onkeydown = (e)=>{ if(e.key==='Enter') attemptLogin(); };
 document.getElementById('loginEmail').onkeydown = (e)=>{ if(e.key==='Enter') document.getElementById('loginPassword').focus(); };
 document.getElementById('logoutBtn').onclick = ()=>{
