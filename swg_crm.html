@@ -1088,7 +1088,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0, ioEntity:null, ioMode:null };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, setupTab:'roles', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0, ioEntity:null, ioMode:null, ioReturnView:null };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -1943,8 +1943,16 @@ function renderImportExport(){
 
   if(importTables.length) return scopeChip + renderImportMapping();
 
+  /* One back control, whose job depends on the step: inside a panel it
+     steps back to the direction picker, and on the picker itself it
+     leaves for the list you came from -- so there's never a dead end,
+     and never two competing "back"s on screen at once. Arriving from
+     the sidebar there's nothing to return to, so it isn't drawn. */
+  const returnSheet = state.ioReturnView ? EXPORT_SHEETS.find(s=>s.key===state.ioReturnView) : null;
+
   if(!state.ioMode){
     return `${scopeChip}
+    ${returnSheet ? `<button type="button" class="io-back" id="ioReturnBtn">&larr; Back to ${esc(returnSheet.label)}</button>` : ''}
     <div class="io-choice">
       <button type="button" class="io-choice-card" data-io-mode="import">
         <span class="io-choice-icon">&darr;</span>
@@ -5820,6 +5828,12 @@ function attachContentHandlers(){
   });
   const ioBackBtn = document.getElementById('ioBackBtn');
   if(ioBackBtn) ioBackBtn.onclick = ()=>{ state.ioMode = null; render(); };
+  const ioReturnBtn = document.getElementById('ioReturnBtn');
+  if(ioReturnBtn) ioReturnBtn.onclick = ()=>{
+    state.view = state.ioReturnView;
+    state.ioEntity = null; state.ioMode = null; state.ioReturnView = null;
+    render();
+  };
   const ioScopeAll = document.getElementById('ioScopeAll');
   if(ioScopeAll) ioScopeAll.onclick = ()=>{ state.ioEntity = null; render(); };
   document.querySelectorAll('[data-export-all]').forEach(el=>{
@@ -6535,7 +6549,7 @@ document.querySelectorAll('.navlink').forEach(el=>{
     // one. (The in-progress mapping wizard is left alone deliberately:
     // importTables surviving a stray nav click is the difference between
     // a recoverable detour and losing the mapping.)
-    if(el.dataset.view==='rickroll'){ state.ioEntity = null; state.ioMode = null; }
+    if(el.dataset.view==='rickroll'){ state.ioEntity = null; state.ioMode = null; state.ioReturnView = null; }
     state.view = el.dataset.view;
     render();
   };
@@ -6575,6 +6589,7 @@ document.getElementById('addBtn').onclick = ()=>{
 document.getElementById('ioBtn').onclick = ()=>{
   if(!EXPORT_SHEETS.some(s=>s.key===state.view)) return;
   state.ioEntity = state.view;
+  state.ioReturnView = state.view;
   state.ioMode = null;
   state.view = 'rickroll';
   render();
