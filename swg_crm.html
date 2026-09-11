@@ -2049,6 +2049,37 @@ function exportPDF(selectedKeys){
   window.print();
 }
 
+/* Duplicate detection for an imported row, beyond a bare id match --
+   an external file (a legacy CRM export, a spreadsheet someone's kept by
+   hand) essentially never carries this app's own id_ format, so id-only
+   matching against it silently created a full duplicate for every row,
+   every time, even when the same person/deal already existed. Contacts
+   and customers get matched by email (case-insensitive) -- the same
+   convention the storefront webhook already uses to attach a new order
+   to an existing customer rather than making a second one. Deals get
+   matched by contact + title, since a deal has no email of its own.
+   Every other entity keeps the original id-only behavior; a duplicate
+   supplier/task/invoice is a much lower-stakes mistake than a duplicate
+   person, so this doesn't guess for those. */
+function findExistingRecordForImport(entityKey, obj, list, importedId){
+  if(importedId){
+    const byId = list.findIndex(x=>x.id===importedId);
+    if(byId>=0) return byId;
+  }
+  if((entityKey==='contacts' || entityKey==='customers') && obj.email){
+    const email = obj.email.trim().toLowerCase();
+    if(email){
+      const byEmail = list.findIndex(x=>(x.email||'').trim().toLowerCase()===email);
+      if(byEmail>=0) return byEmail;
+    }
+  }
+  if(entityKey==='deals' && obj.contactId && obj.title){
+    const title = obj.title.trim().toLowerCase();
+    const byDeal = list.findIndex(x=>x.contactId===obj.contactId && (x.title||'').trim().toLowerCase()===title);
+    if(byDeal>=0) return byDeal;
+  }
+  return -1;
+}
 async function runImport(){
   let added=0, updated=0;
   const touched = new Set();
@@ -2064,11 +2095,19 @@ async function runImport(){
         const h = t.fieldMap[f];
         obj[f] = coerceFieldValue(f, h ? row[h] : '');
       });
-      obj.id = idHeader && row[idHeader] ? String(row[idHeader]) : uid();
-      obj.createdAt = createdHeader && row[createdHeader] ? (new Date(row[createdHeader]).getTime()||Date.now()) : Date.now();
-      const idx = list.findIndex(x=>x.id===obj.id);
-      if(idx>=0){ list[idx] = {...list[idx], ...obj}; updated++; }
-      else { list.push(obj); added++; }
+      const importedId = idHeader && row[idHeader] ? String(row[idHeader]) : null;
+      const existingIdx = findExistingRecordForImport(t.entityKey, obj, list, importedId);
+      if(existingIdx>=0){
+        obj.id = list[existingIdx].id;
+        obj.createdAt = list[existingIdx].createdAt;
+        list[existingIdx] = {...list[existingIdx], ...obj};
+        updated++;
+      } else {
+        obj.id = importedId || uid();
+        obj.createdAt = createdHeader && row[createdHeader] ? (new Date(row[createdHeader]).getTime()||Date.now()) : Date.now();
+        list.push(obj);
+        added++;
+      }
     });
     touched.add(t.entityKey);
   });
