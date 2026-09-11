@@ -670,6 +670,17 @@
   .fc-kanban-select-wrap::after{content:'';position:absolute;right:8px;top:50%;width:4px;height:4px;border-right:1.2px solid var(--ink-soft);border-bottom:1.2px solid var(--ink-soft);transform:translateY(-60%) rotate(45deg);pointer-events:none;}
   .fc-kanban .fc-card-open{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--ink-soft);cursor:pointer;font-size:12px;flex:none;}
   .fc-kanban .fc-card-open:hover{background:var(--cream);color:var(--ink);}
+  /* Inline "mark shipped" tracking form -- appears on a card only while
+     it's Shipped but still missing tracking/carrier, so Hook 2 (the
+     shipping-confirmation email) can be queued right from the board
+     instead of requiring a detour into the full order-edit modal. Once
+     saved, the form is replaced by a plain read-only line (.fc-ship-done)
+     so there's no way to re-click and queue a second email. */
+  .fc-kanban .fc-ship-form{margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);display:flex;flex-direction:column;gap:5px;}
+  .fc-kanban .fc-ship-input{font-family:inherit;font-size:11px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--ink);width:100%;box-sizing:border-box;}
+  .fc-kanban .fc-ship-save{font-family:inherit;font-size:11px;padding:5px 8px;border-radius:6px;border:1px solid var(--amber);background:var(--amber-soft);color:var(--amber);cursor:pointer;font-weight:500;}
+  .fc-kanban .fc-ship-save:hover{background:var(--amber);color:#fff;}
+  .fc-kanban .fc-ship-done{margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);font-size:10.5px;color:var(--sage);}
 
   /* Requires-attention panel (phase 3) and order timeline (phase 2) */
   .fc-attn-panel{display:flex;flex-direction:column;gap:1px;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
@@ -2505,6 +2516,8 @@ function renderFcKanbanSection(){
         <div class="kcol-head"><span>${stage}</span><span>${items.length}</span></div>
         ${items.map(o=>{
           const summary = cpOrderSummary(o);
+          const needsTracking = o.status==='Shipped' && (!o.trackingNumber || !o.carrierName);
+          const hasTracking = o.status==='Shipped' && o.trackingNumber && o.carrierName;
           return `<div class="kcard">
             <div class="kcard-top">
               <span class="ledger-no mono">${esc(orderDisplayNumber(o))}</span>
@@ -2519,6 +2532,13 @@ function renderFcKanbanSection(){
               </span>
               <span class="fc-card-open" data-fc-open-order="${o.id}" title="Open order">&rarr;</span>
             </div>
+            ${needsTracking ? `
+            <div class="fc-ship-form">
+              <input type="text" class="fc-ship-input" id="fcTrack_${o.id}" placeholder="Tracking number" value="${esc(o.trackingNumber||'')}">
+              <input type="text" class="fc-ship-input" id="fcCarrier_${o.id}" placeholder="Carrier (e.g. Israel Post)" value="${esc(o.carrierName||'')}">
+              <button type="button" class="fc-ship-save" data-fc-save-tracking="${o.id}">Save &amp; notify customer</button>
+            </div>` : ''}
+            ${hasTracking ? `<div class="fc-ship-done">&#10003; ${esc(o.carrierName)} &middot; ${esc(o.trackingNumber)}</div>` : ''}
           </div>`;
         }).join('') || ''}
       </div>`;
@@ -5406,6 +5426,30 @@ async function setOrderFulfillmentStatus(orderId, newStatus){
   await dbUpdate('orders', order);
   await checkOrderStatusChange(order, prevStatus);
 }
+/* Fills in tracking/carrier for an order that's already Shipped (from the
+   kanban's inline form) and queues Hook 2 -- the same shipping-email path
+   checkOrderStatusChange already uses, just invoked with prevStatus=null.
+   That's a deliberate, safe reuse of its own guard: `prevStatus===order.status`
+   is false (null !== 'Shipped') so it proceeds to the email-queueing branch,
+   while `prevStatus!==null` is false so it correctly skips logging a second
+   order_events row -- no fake "status changed" event for a status that
+   didn't actually change here, just the tracking info. The card only shows
+   this form while trackingNumber/carrierName are still missing, so this
+   can't be clicked twice into sending a duplicate email. */
+async function saveOrderTrackingAndNotify(orderId){
+  const order = state.orders.find(o=>o.id===orderId);
+  if(!order) return;
+  const trackInput = document.getElementById(`fcTrack_${orderId}`);
+  const carrierInput = document.getElementById(`fcCarrier_${orderId}`);
+  const tracking = trackInput ? trackInput.value.trim() : '';
+  const carrier = carrierInput ? carrierInput.value.trim() : '';
+  if(!tracking || !carrier){ toast('Enter both a tracking number and a carrier before notifying the customer.'); return; }
+  order.trackingNumber = tracking;
+  order.carrierName = carrier;
+  render();
+  await dbUpdate('orders', order);
+  await checkOrderStatusChange(order, null);
+}
 /* All Customer & Fulfillment Command Center wiring, consolidated here so
    the search box's targeted update (below) can re-run just this after
    swapping the table/kanban sub-trees' innerHTML, instead of either
@@ -5470,6 +5514,9 @@ function wireFulfillmentCommandCenter(){
   // Fulfillment kanban -- status dropdown per card, no drag-and-drop.
   document.querySelectorAll('[data-fc-order-stage]').forEach(el=>{
     el.onchange = ()=>{ setOrderFulfillmentStatus(el.dataset.fcOrderStage, el.value); };
+  });
+  document.querySelectorAll('[data-fc-save-tracking]').forEach(el=>{
+    el.onclick = ()=>{ saveOrderTrackingAndNotify(el.dataset.fcSaveTracking); };
   });
 
   // Requires Attention -- each item opens the relevant drawer directly.
