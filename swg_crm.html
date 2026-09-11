@@ -681,6 +681,8 @@
   .fc-kanban .fc-ship-save{font-family:inherit;font-size:11px;padding:5px 8px;border-radius:6px;border:1px solid var(--amber);background:var(--amber-soft);color:var(--amber);cursor:pointer;font-weight:500;}
   .fc-kanban .fc-ship-save:hover{background:var(--amber);color:#fff;}
   .fc-kanban .fc-ship-done{margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);font-size:10.5px;color:var(--sage);}
+  .fc-kanban .fc-carrier-select,
+  .fc-kanban .fc-carrier-other{font-family:inherit;font-size:11px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--ink);width:100%;box-sizing:border-box;}
 
   /* Requires-attention panel (phase 3) and order timeline (phase 2) */
   .fc-attn-panel{display:flex;flex-direction:column;gap:1px;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
@@ -1141,6 +1143,40 @@ const LEAD_SOURCES = ['Instagram','TikTok','Referral','Ad','Other'];
 const LEAD_HIDDEN_FOR = ['Kfir','David'];
 const OSTATUS = ['Pending','Shipped','Delivered','Cancelled'];
 const OSTATUS_NEW = ['Pending','Shipped','Delivered']; // no Cancelled on creation
+
+/* Real carriers this business actually ships with -- starts with just
+   Israel Post, since that's the one confirmed for the current (Israel-only)
+   MVP. "Other" stays as an escape hatch for anything not yet on this list
+   (and for old orders whose carrierName predates this list existing) rather
+   than locking data entry to only these names. Add to this array as more
+   carriers get onboarded -- every call site below already renders/reads
+   whatever's in it, nothing else needs to change. */
+const CARRIERS = ['דואר ישראל'];
+function renderCarrierField(idPrefix, currentValue){
+  const isOther = !!currentValue && !CARRIERS.includes(currentValue);
+  return `<select id="${idPrefix}_sel" class="fc-carrier-select" data-carrier-other-id="${idPrefix}_other">
+      ${CARRIERS.map(c=>`<option value="${esc(c)}" ${currentValue===c?'selected':''}>${esc(c)}</option>`).join('')}
+      <option value="__other__" ${isOther?'selected':''}>Other…</option>
+    </select>
+    <input type="text" class="fc-carrier-other" id="${idPrefix}_other" placeholder="Carrier name" value="${esc(isOther?currentValue:'')}" style="margin-top:6px;${isOther?'':'display:none;'}">`;
+}
+function readCarrierField(idPrefix){
+  const sel = document.getElementById(idPrefix+'_sel');
+  if(!sel) return '';
+  if(sel.value==='__other__'){
+    const other = document.getElementById(idPrefix+'_other');
+    return other ? other.value.trim() : '';
+  }
+  return sel.value;
+}
+function wireCarrierSelects(){
+  document.querySelectorAll('.fc-carrier-select').forEach(sel=>{
+    sel.onchange = ()=>{
+      const other = document.getElementById(sel.dataset.carrierOtherId);
+      if(other) other.style.display = sel.value==='__other__' ? '' : 'none';
+    };
+  });
+}
 const TSTATUS = ['Open','Done'];
 const TSTATUS_NEW = ['Open']; // no Done on creation
 const ISTATUS = ['Unpaid','Paid','Overdue'];
@@ -2535,7 +2571,7 @@ function renderFcKanbanSection(){
             ${needsTracking ? `
             <div class="fc-ship-form">
               <input type="text" class="fc-ship-input" id="fcTrack_${o.id}" placeholder="Tracking number" value="${esc(o.trackingNumber||'')}">
-              <input type="text" class="fc-ship-input" id="fcCarrier_${o.id}" placeholder="Carrier (e.g. Israel Post)" value="${esc(o.carrierName||'')}">
+              ${renderCarrierField('fcCarrier_'+o.id, o.carrierName||'')}
               <button type="button" class="fc-ship-save" data-fc-save-tracking="${o.id}">Save &amp; notify customer</button>
             </div>` : ''}
             ${hasTracking ? `<div class="fc-ship-done">&#10003; ${esc(o.carrierName)} &middot; ${esc(o.trackingNumber)}</div>` : ''}
@@ -5440,9 +5476,8 @@ async function saveOrderTrackingAndNotify(orderId){
   const order = state.orders.find(o=>o.id===orderId);
   if(!order) return;
   const trackInput = document.getElementById(`fcTrack_${orderId}`);
-  const carrierInput = document.getElementById(`fcCarrier_${orderId}`);
   const tracking = trackInput ? trackInput.value.trim() : '';
-  const carrier = carrierInput ? carrierInput.value.trim() : '';
+  const carrier = readCarrierField(`fcCarrier_${orderId}`);
   if(!tracking || !carrier){ toast('Enter both a tracking number and a carrier before notifying the customer.'); return; }
   order.trackingNumber = tracking;
   order.carrierName = carrier;
@@ -5518,6 +5553,7 @@ function wireFulfillmentCommandCenter(){
   document.querySelectorAll('[data-fc-save-tracking]').forEach(el=>{
     el.onclick = ()=>{ saveOrderTrackingAndNotify(el.dataset.fcSaveTracking); };
   });
+  wireCarrierSelects();
 
   // Requires Attention -- each item opens the relevant drawer directly.
   document.querySelectorAll('[data-fc-attn-order]').forEach(el=>{
@@ -5854,7 +5890,7 @@ function openModal(table, id){
       </div>`}
       <div id="f_shipWrap" style="${shipWrapStyle}">
         <div class="field"><label>Tracking number</label><input id="f_tracking" value="${item?esc(item.trackingNumber||''):''}"></div>
-        <div class="field"><label>Carrier</label><input id="f_carrier" value="${item?esc(item.carrierName||''):''}" placeholder="e.g. Israel Post"></div>
+        <div class="field"><label>Carrier</label>${renderCarrierField('f_carrier', item?(item.carrierName||''):'')}</div>
         <div class="field"><label>Tracking URL</label><input id="f_trackingUrl" value="${item?esc(item.trackingUrl||''):''}" placeholder="https://..."></div>
         <div class="shared-note">${contact && contact.email ? `Shipping email will be sent to ${esc(contact.email)} once tracking number and carrier are filled in.` : 'This contact has no email on file, so no shipping email can be sent.'}</div>
       </div>`;
@@ -6035,6 +6071,7 @@ function openModal(table, id){
         if(wrap) wrap.style.display = e.target.value==='Shipped' ? 'block' : 'none';
       };
     }
+    wireCarrierSelects();
   }
   if(table==='customers'){
     const kindSel = document.getElementById('f_kind');
@@ -6363,7 +6400,7 @@ async function saveModal(table, id){
     obj.currencies = msRead('f_curr_order');
     obj.status = document.getElementById('f_status').value;
     obj.trackingNumber = document.getElementById('f_tracking').value.trim();
-    obj.carrierName = document.getElementById('f_carrier').value.trim();
+    obj.carrierName = readCarrierField('f_carrier');
     obj.trackingUrl = document.getElementById('f_trackingUrl').value.trim();
     const confirmBox = document.getElementById('f_sendConfirm');
     sendOrderConfirmationRequested = !!(confirmBox && confirmBox.checked);
