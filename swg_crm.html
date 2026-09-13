@@ -397,6 +397,7 @@
   .overlay{display:none;position:fixed;inset:0;background:rgba(42,40,32,0.4);align-items:center;justify-content:center;z-index:50;}
   .overlay.show{display:flex;}
   .modal{background:var(--surface);border-radius:10px;padding:24px 26px;width:420px;max-width:90vw;max-height:86vh;overflow-y:auto;}
+  .modal.wide{width:620px;}
   .modal.modal-guide{width:600px;max-width:92vw;padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:84vh;}
   .guide-modal-head{background:linear-gradient(135deg,var(--setup-blue),#5B8FF6);color:#fff;padding:26px 30px 22px;flex-shrink:0;}
   .guide-modal-head .gm-icon{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
@@ -528,6 +529,108 @@
   .om-fact{padding:10px 0;border-bottom:1px solid var(--border);}
   .om-fact-k{font-size:11.5px;color:var(--ink-soft);margin-bottom:3px;}
   .om-fact-v{font-size:13.5px;color:var(--ink);}
+
+  /* Object Manager, Salesforce layout: a fixed-height scrolling rail beside the
+     detail pane, so a long tab list never pushes the page taller than the screen. */
+  .om-shell{display:flex;gap:0;border:1px solid var(--border);border-radius:10px;background:var(--surface);overflow:hidden;}
+  .om-rail{width:238px;flex-shrink:0;border-right:1px solid var(--border);background:var(--cream);max-height:calc(100vh - 210px);min-height:420px;overflow-y:auto;padding:10px 0;}
+  .om-rail::-webkit-scrollbar{width:9px;}
+  .om-rail::-webkit-scrollbar-thumb{background:var(--border);border-radius:5px;}
+  .om-rail-item{display:block;width:100%;text-align:left;padding:9px 20px;border:none;background:none;color:var(--setup-blue);cursor:pointer;font-family:inherit;font-size:13px;font-weight:400;line-height:1.35;border-left:3px solid transparent;}
+  .om-rail-item:hover{background:var(--setup-blue-soft);}
+  .om-rail-item.active{background:var(--surface);color:var(--ink);font-weight:600;border-left-color:var(--setup-blue);}
+  .om-pane{flex:1;min-width:0;padding:20px 24px 26px;max-height:calc(100vh - 210px);overflow-y:auto;}
+  .om-pane .io-card{border:none;padding:0;background:none;}
+  .om-pane .io-card + .io-card{margin-top:26px;padding-top:22px;border-top:1px solid var(--border);}
+  .om-detail-head{background:var(--cream);border:1px solid var(--border);border-radius:10px;padding:14px 20px 16px;margin-bottom:14px;}
+  .om-pane-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .om-pane-lead{color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;line-height:1.55;}
+  .om-empty{border:1px dashed var(--border);border-radius:9px;padding:22px;text-align:center;color:var(--ink-soft);font-size:12.5px;}
+  .om-pill.mdr{background:var(--umber-soft);color:var(--umber);}
+  .om-pill.lookup{background:var(--setup-blue-soft);color:var(--setup-blue);}
+  .om-pill.dflt{background:var(--amber-soft);color:var(--amber);}
+  .om-pill.off{background:var(--border);color:var(--ink-soft);}
+  .om-bar{height:6px;border-radius:3px;background:var(--border);overflow:hidden;min-width:90px;}
+  .om-bar span{display:block;height:100%;background:var(--setup-blue);}
+  .om-bar.warn span{background:var(--rust);}
+
+  /* Layout / record-page preview canvases */
+  .lay-section{border:1px solid var(--border);border-radius:9px;margin-bottom:10px;background:var(--surface);}
+  .lay-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 13px;border-bottom:1px solid var(--border);background:var(--cream);border-radius:9px 9px 0 0;}
+  .lay-section-name{font-size:12.5px;font-weight:700;color:var(--ink);}
+  .lay-fields{display:grid;gap:7px;padding:12px 13px;}
+  .lay-fields.cols-1{grid-template-columns:1fr;}
+  .lay-fields.cols-2{grid-template-columns:1fr 1fr;}
+  .lay-field{border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--ink);background:var(--cream);display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .lay-field .req-dot{color:var(--rust);font-weight:700;}
+  .lrp-canvas{display:grid;gap:10px;}
+  .lrp-canvas.t-two{grid-template-columns:2fr 1fr;}
+  .lrp-canvas.t-three{grid-template-columns:1fr 2fr 1fr;}
+  .lrp-canvas.t-one{grid-template-columns:1fr;}
+  .lrp-region{border:1px dashed var(--border);border-radius:9px;padding:10px;min-height:110px;background:var(--cream);}
+  .lrp-region-label{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-soft);margin-bottom:8px;}
+  .lrp-comp{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:12px;color:var(--ink);margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .lrp-comp .x{color:var(--ink-soft);cursor:pointer;font-size:13px;line-height:1;}
+  .lrp-comp .x:hover{color:var(--rust);}
+  .lrp-header{background:var(--setup-blue-soft);border:1px solid var(--setup-blue);color:var(--setup-blue);border-radius:8px;padding:9px 12px;font-size:12px;font-weight:600;margin-bottom:10px;}
+
+  /* Flow Trigger Explorer */
+  .fte-head{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px;}
+  .fte-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;}
+  .fte-card{border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:14px 16px;}
+  .fte-card h4{margin:0 0 4px;font-size:13.5px;color:var(--ink);}
+  .fte-card .fte-count{font-size:11.5px;color:var(--ink-soft);}
+  .fte-flow{border-top:1px solid var(--border);padding:8px 0 0;margin-top:9px;font-size:12px;color:var(--ink);}
+  .fte-flow + .fte-flow{margin-top:6px;}
+  .fte-steps{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-bottom:18px;}
+  .fte-step{display:flex;align-items:center;gap:8px;padding:7px 14px 7px 11px;border:1px solid var(--border);background:var(--surface);border-radius:20px;font-size:12px;color:var(--ink-soft);}
+  .fte-step b{width:19px;height:19px;border-radius:50%;background:var(--border);color:var(--ink-soft);display:flex;align-items:center;justify-content:center;font-size:11px;}
+  .fte-step.active{border-color:var(--setup-blue);color:var(--setup-blue);font-weight:600;}
+  .fte-step.active b{background:var(--setup-blue);color:#fff;}
+  .fte-step.done{border-color:var(--sage);color:var(--sage);}
+  .fte-step.done b{background:var(--sage);color:#fff;}
+  .fte-step-link{width:16px;height:1px;background:var(--border);}
+  .fte-choice{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;}
+  .fte-opt{text-align:left;border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:13px 15px;cursor:pointer;font-family:inherit;}
+  .fte-opt:hover{border-color:var(--setup-blue);}
+  .fte-opt.sel{border-color:var(--setup-blue);background:var(--setup-blue-soft);}
+  .fte-opt-t{font-size:13px;font-weight:600;color:var(--ink);display:block;margin-bottom:3px;}
+  .fte-opt-d{font-size:11.5px;color:var(--ink-soft);line-height:1.5;display:block;}
+  .fte-recap{background:var(--cream);border:1px solid var(--border);border-radius:9px;padding:12px 15px;font-size:12.5px;color:var(--ink);line-height:1.75;}
+
+  /* Administration */
+  .adm-head{display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px;flex-wrap:wrap;}
+  .adm-card{border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:14px 16px;margin-bottom:10px;}
+  .adm-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .adm-name{font-size:13.5px;font-weight:700;color:var(--ink);}
+  .adm-sub{font-size:11.5px;color:var(--ink-soft);margin-top:2px;line-height:1.5;}
+  .adm-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;}
+  .adm-chip{font-size:11px;border:1px solid var(--border);border-radius:12px;padding:2px 9px;color:var(--ink-soft);background:var(--cream);}
+  .adm-chip.on{border-color:var(--setup-blue);color:var(--setup-blue);background:var(--setup-blue-soft);}
+  .perm-grid{width:100%;border-collapse:collapse;font-size:12px;}
+  .perm-grid th{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-soft);text-align:center;padding:7px 4px;}
+  .perm-grid th:first-child{text-align:left;}
+  .perm-grid td{padding:6px 4px;text-align:center;border-top:1px solid var(--border);}
+  .perm-grid td:first-child{text-align:left;font-weight:600;color:var(--ink);}
+
+  /* Email templates */
+  .tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+  .tpl-card{border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:7px;}
+  .tpl-card h4{margin:0;font-size:13.5px;color:var(--ink);}
+  .tpl-subject{font-size:12px;color:var(--ink-soft);line-height:1.5;}
+  .tpl-folder{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--umber);}
+  .tpl-tools{display:flex;gap:6px;margin-top:auto;padding-top:6px;flex-wrap:wrap;}
+  .tpl-preview{border:1px solid var(--border);border-radius:9px;background:#fff;color:#23201a;padding:18px 20px;font-size:13px;line-height:1.6;}
+  .tpl-preview .tp-sub{font-weight:700;font-size:14px;border-bottom:1px solid #e6e1d6;padding-bottom:9px;margin-bottom:12px;}
+  #tpl_body{width:100%;min-height:190px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink);resize:vertical;box-sizing:border-box;}
+  @media(max-width:900px){
+    .om-shell{flex-direction:column;}
+    .om-rail{width:auto;max-height:none;min-height:0;border-right:none;border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:6px;}
+    .om-rail-item{white-space:nowrap;border-left:none;border-bottom:3px solid transparent;}
+    .om-rail-item.active{border-left-color:transparent;border-bottom-color:var(--setup-blue);}
+    .om-pane{max-height:none;}
+    .lrp-canvas.t-two,.lrp-canvas.t-three{grid-template-columns:1fr;}
+  }
 
   /* Quick Settings — a right-edge flyout of the settings people reach for most,
      so common admin jobs don't need a trip through the whole backend. */
@@ -1082,6 +1185,7 @@
     <div class="navlink" data-view="tickets" data-nav-group="support"><span class="nav-ico"></span>Tickets</div>
     <div class="nav-group-label" data-nav-group="admin">Admin</div>
     <div class="navlink" data-view="team" data-nav-group="admin"><span class="nav-ico"></span>Team</div>
+    <div class="navlink" data-view="administration" data-nav-group="admin"><span class="nav-ico"></span>Administration</div>
     <div class="sidebar-foot">
       <div class="theme-toggle" id="themeToggle">
         <button type="button" data-theme-choice="system" title="Match system">Auto</button>
@@ -1178,7 +1282,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, setupTab:'roles', setupSection:'home', omObject:null, omTab:'details', omFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0 };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, setupTab:'validation', setupSection:'home', omObject:null, omTab:'details', omFilter:'', recordTypes:[], pageLayouts:[], recordPages:[], relationships:[], profiles:[], permissionSets:[], permissionSetGroups:[], publicGroups:[], emailTemplates:[], adminTab:'profiles', adminReturnView:'dashboard', flowExplorer:false, flowWizard:null, emailTemplateFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0 };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -1290,6 +1394,7 @@ const NAV_ICONS = {
   finance:`<path d="M3.4 20.6h17.2"/><rect x="5.4" y="12" width="3.4" height="6.4" rx="1"/><rect x="10.6" y="7.6" width="3.4" height="10.8" rx="1"/><rect x="15.8" y="10" width="3.4" height="8.4" rx="1"/>`,
   emails:`<rect x="2.8" y="5" width="18.4" height="14" rx="2.2"/><path d="M3.4 6.6 12 13l8.6-6.4"/>`,
   tickets:`<circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="3.4"/><path d="M6 6l3.6 3.6M14.4 14.4 18 18M18 6l-3.6 3.6M9.6 14.4 6 18"/>`,
+  administration:`<path d="M12 3.2 20 6.6v5.1c0 4.4-3.3 7.9-8 9.1-4.7-1.2-8-4.7-8-9.1V6.6z"/><path d="M9.2 11.9l2 2 3.6-3.8"/>`,
   team:`<circle cx="9.4" cy="8.4" r="3.5"/><path d="M2.8 20c.6-3.5 3.2-5.6 6.6-5.6S15.4 16.5 16 20"/><path d="M16.2 5.5a3.4 3.4 0 0 1 0 6.6"/><path d="M17.8 14.7c2 .7 3.3 2.4 3.7 5.3"/>`,
 };
 function navIconSVG(view){
@@ -1307,7 +1412,8 @@ const ACCENTS = {
   dashboard:'var(--ink-fixed)', home:'var(--amber)', contacts:'var(--amber)', leads:'var(--ochre)', customers:'var(--sage)',
   distributors:'var(--umber)', suppliers:'var(--clay)', deals:'var(--ochre)', orders:'var(--umber)',
   tasks:'var(--olive)', invoices:'var(--rust)', payments:'var(--rust)', team:'var(--ink)', finance:'var(--sage)',
-  emails:'var(--umber)', tickets:'var(--clay)', search:'var(--ink)', rickroll:'var(--ink)'
+  emails:'var(--umber)', tickets:'var(--clay)', search:'var(--ink)', rickroll:'var(--ink)',
+  administration:'var(--setup-blue)'
 };
 const CONTINENTS = ['Africa','Asia','Europe','North America','South America','Oceania','Middle East'];
 const SUBREGIONS = {
@@ -1519,6 +1625,15 @@ const KEYS = {
   schemaLayout: 'schemaLayout',
   objectVisibility: 'objectVisibility',
   fieldVisibility: 'fieldVisibility',
+  recordTypes: 'recordTypes',
+  pageLayouts: 'pageLayouts',
+  recordPages: 'recordPages',
+  relationships: 'relationships',
+  profiles: 'profiles',
+  permissionSets: 'permissionSets',
+  permissionSetGroups: 'permissionSetGroups',
+  publicGroups: 'publicGroups',
+  emailTemplates: 'emailTemplates',
 };
 
 /* Which slice of state each key holds, so a reload can restore them. */
@@ -1528,6 +1643,9 @@ const SETTING_DEFAULTS = {
   sharingRules: {}, quickActionPrefs: {}, bigDealAlerts: [],
   bigDealAlert: { enabled:false, threshold:10000, currency:'USD' },
   schemaLayout: {}, objectVisibility: {}, fieldVisibility: {},
+  recordTypes: [], pageLayouts: [], recordPages: [], relationships: [],
+  profiles: [], permissionSets: [], permissionSetGroups: [], publicGroups: [],
+  emailTemplates: [],
 };
 
 /* Saves one settings key. Errors are logged rather than thrown: a failed
@@ -1735,6 +1853,7 @@ function setActiveNav(){
 function navLinkHidden(entity){
   if((entity==='invoices' || entity==='payments' || entity==='finance') && !isPrivileged()) return true;
   if(entity==='team' && !isAdmin()) return true;
+  if(entity==='administration' && !canAccessSetup()) return true;
   if(entity==='leads' && !canSeeLeads()) return true;
   if(SETUP_ENTITIES.includes(entity) && isObjectHidden(entity) && !personaIsAdmin()) return true;
   return false;
@@ -1745,7 +1864,7 @@ function updateNavVisibility(){
     setupGear.style.display = canAccessSetup() ? 'flex' : 'none';
     setupGear.classList.toggle('active', state.view==='setup');
   }
-  const gatedEntities = Array.from(new Set(['invoices','payments','finance','team', ...SETUP_ENTITIES]));
+  const gatedEntities = Array.from(new Set(['invoices','payments','finance','team','administration', ...SETUP_ENTITIES]));
   gatedEntities.forEach(entity=>{
     const link = document.querySelector(`.navlink[data-view="${entity}"]`);
     if(link) link.classList.toggle('hidden-role', navLinkHidden(entity));
@@ -1765,6 +1884,7 @@ function render(){
   if(state.view==='payments' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='finance' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='team' && !isAdmin()) state.view = 'dashboard';
+  if(state.view==='administration' && !canAccessSetup()) state.view = 'dashboard';
   if(state.view==='setup' && !canAccessSetup()) state.view = 'dashboard';
   if(state.view==='leads' && !canSeeLeads()) state.view = 'dashboard';
   if(SETUP_ENTITIES.includes(state.view) && isObjectHidden(state.view) && !personaIsAdmin()) state.view = 'dashboard';
@@ -1792,7 +1912,8 @@ function render(){
     team:['Team','Manage who has access to the ledger'],
     emails:['Emails','Automated messages the CRM sends on your behalf'],
     tickets:['Tickets','Customer enquiries from the website and elsewhere'],
-    setup:['Setup','Roles, validation rules, automation and sharing'],
+    setup:['Setup','Validation rules, automation, sharing and the Object Manager'],
+    administration:['Administration','Profiles, roles, permission sets and public groups'],
     customerProfile:['Customer',''],
     search:['Search','Find anything across all tabs'],
     rickroll:['Import / Export','Move data in and out of the ledger']};
@@ -1807,7 +1928,7 @@ function render(){
   document.getElementById('mainArea').style.setProperty('--accent', ACCENTS[state.view] || 'var(--amber)');
   const addLabels = {contacts:'contact', leads:'lead', customers:'customer', distributors:'distributor', suppliers:'supplier', deals:'deal', tasks:'task', invoices:'invoice', payments:'payment', team:'team member'};
   const addBtn = document.getElementById('addBtn');
-  const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets','setup','customerProfile'];
+  const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets','setup','customerProfile','administration'];
   addBtn.style.display = noAdd.includes(state.view) ? 'none' : 'inline-block';
   addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
   const guideBtn = document.getElementById('topbarGuideBtn');
@@ -1839,6 +1960,7 @@ function render(){
   if(state.view==='tickets') c.innerHTML = renderTickets();
   if(state.view==='team') c.innerHTML = renderTeam();
   if(state.view==='setup') c.innerHTML = renderSetup();
+  if(state.view==='administration'){ c.innerHTML = renderAdministration(); wireAdministration(); }
   if(state.view==='search') c.innerHTML = renderSearchShell();
   if(state.view==='rickroll') c.innerHTML = renderImportExport();
   if(SETUP_ENTITIES.includes(state.view)) applyFieldVisibilityToTable(state.view);
@@ -4261,6 +4383,7 @@ function renderEmailKPIs(st){
     {accent:'var(--amber)', cls:'amber', val:String(st.queued), lbl:'Waiting in queue'},
     {accent:'var(--rust)',  cls:'rust',  val:String(st.failed), lbl:'Failed, last 30 days'},
     {accent:'var(--umber)', cls:'umber', val:String(EMAIL_AUTOMATIONS.length), lbl:'Automations live'},
+    {accent:'var(--olive)', cls:'olive', val:String((state.emailTemplates||[]).length), lbl:'Templates you can edit'},
   ];
   return `<div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(168px,1fr));">${cards.map(c=>
     `<div class="stat-card kpi-card ${c.cls}" style="--kpi-accent:${c.accent};">
@@ -4334,6 +4457,236 @@ function renderEmailDeliveries(st){
   </div>`;
 }
 
+/* ---------- Email templates ----------
+   The automated messages above are written in code and shipped with the app --
+   deliberately, because a broken order confirmation costs a sale. These are the
+   other half: messages the team writes and edits themselves, for the sends that
+   are a person deciding to say something rather than the system reacting.
+
+   A template is a subject line and a body with {{merge fields}} in it. Preview
+   fills those fields from a real record so nobody has to imagine what it will
+   look like. Nothing here sends on its own -- a template is picked, previewed
+   and copied, or handed to the email service by key. */
+const TEMPLATE_FOLDERS = ['Sales','Customer Care','Distributors','Suppliers','Marketing','Internal'];
+const TEMPLATE_LOCALES = [
+  {key:'en', label:'English'},
+  {key:'he', label:'Hebrew'},
+];
+/* Merge fields are grouped by where their value comes from, so the picker reads
+   as "what do I know about this recipient" rather than as one long list. */
+const MERGE_FIELDS = [
+  {group:'Recipient', fields:[
+    {token:'{{name}}', desc:'Their full name'},
+    {token:'{{firstName}}', desc:'First name only'},
+    {token:'{{company}}', desc:'Their company'},
+    {token:'{{email}}', desc:'Their email address'},
+    {token:'{{country}}', desc:'Their country'},
+  ]},
+  {group:'Deal / Order', fields:[
+    {token:'{{dealTitle}}', desc:'The deal name'},
+    {token:'{{amount}}', desc:'Deal or order value'},
+    {token:'{{currency}}', desc:'Currency code'},
+    {token:'{{orderNumber}}', desc:'Order reference'},
+    {token:'{{stage}}', desc:'Current stage or status'},
+  ]},
+  {group:'Sender', fields:[
+    {token:'{{myName}}', desc:'Your name'},
+    {token:'{{myEmail}}', desc:'Your email'},
+    {token:'{{company}}', desc:'Siddha Wellness Group'},
+    {token:'{{today}}', desc:"Today's date"},
+  ]},
+];
+const TEMPLATE_STARTERS = [
+  {name:'Follow-up after a call', folder:'Sales',
+   subject:'Good talking to you, {{firstName}}',
+   body:"Hi {{firstName}},\n\nThanks for the call today. Here's a short recap of what we agreed:\n\n• \n• \n\nI'll come back to you by {{today}} with the next step.\n\nBest,\n{{myName}}\nSiddha Wellness Group"},
+  {name:'Quote sent', folder:'Sales',
+   subject:'Your quote for {{dealTitle}}',
+   body:"Hi {{firstName}},\n\nAttached is the quote for {{dealTitle}} — {{amount}} {{currency}}.\n\nIt's valid for 30 days. Any questions, just reply to this email.\n\nBest,\n{{myName}}"},
+  {name:'Order on its way', folder:'Customer Care',
+   subject:'Your order {{orderNumber}} has shipped',
+   body:"Hi {{firstName}},\n\nYour order {{orderNumber}} is on its way to {{country}}.\n\nWe'll send tracking details as soon as the courier scans it.\n\nThank you for choosing Siddha Wellness Group.\n{{myName}}"},
+  {name:'Distributor check-in', folder:'Distributors',
+   subject:'Checking in — {{company}}',
+   body:"Hi {{firstName}},\n\nJust checking in on how things are moving at {{company}} this quarter.\n\nIs there anything you need from us — stock, materials, pricing?\n\nBest,\n{{myName}}"},
+];
+
+function canEditEmailTemplates(){ return isAdmin() || roleFor(state.currentUser)==='Manager' || roleFor(state.currentUser)==='Marketing'; }
+
+/* Fills merge fields from a real record where one exists, and from a clearly
+   fake placeholder where it doesn't, so a preview is never a wall of
+   {{unresolved}} tokens. */
+function templateMergeValues(){
+  const customer = state.customers[0] || state.contacts[0] || {};
+  const deal = state.deals[0] || {};
+  const order = state.orders[0] || {};
+  const name = customer.name || 'Dana Cohen';
+  return {
+    '{{name}}': name,
+    '{{firstName}}': String(name).split(' ')[0],
+    '{{company}}': customer.company || 'Siddha Wellness Group',
+    '{{email}}': customer.email || 'dana@example.com',
+    '{{country}}': customer.country || 'Israel',
+    '{{dealTitle}}': deal.title || 'Cinnamor Oregano — Q4 order',
+    '{{amount}}': deal.value != null ? Number(deal.value).toLocaleString() : '2,400',
+    '{{currency}}': (Array.isArray(deal.currencies) && deal.currencies[0]) || 'USD',
+    '{{orderNumber}}': order.id ? String(order.id).slice(-6).toUpperCase() : 'SY-10241',
+    '{{stage}}': deal.stage || order.status || 'In progress',
+    '{{myName}}': state.currentUser || 'Ariel',
+    '{{myEmail}}': (state.team.find(t=>t.name===state.currentUser)||{}).email || 'ariel@siddhayogaweb.com',
+    '{{today}}': new Date().toLocaleDateString(),
+  };
+}
+function applyMergeFields(text){
+  const values = templateMergeValues();
+  return String(text||'').replace(/\{\{\s*([A-Za-z]+)\s*\}\}/g, (whole, key)=>{
+    const hit = values['{{'+key+'}}'];
+    return hit === undefined ? whole : hit;
+  });
+}
+
+function renderEmailTemplates(){
+  const canEdit = canEditEmailTemplates();
+  const q = (state.emailTemplateFilter||'').trim().toLowerCase();
+  const all = state.emailTemplates || [];
+  const list = q ? all.filter(t=>
+      t.name.toLowerCase().includes(q) ||
+      (t.subject||'').toLowerCase().includes(q) ||
+      (t.folder||'').toLowerCase().includes(q)) : all;
+  return `<div class="panel">
+    ${panelHead('Email templates', 'Messages your team writes and sends by hand',
+      all.length + ' template' + (all.length===1?'':'s'))}
+    <p style="color:var(--ink-soft);font-size:12.5px;line-height:1.6;margin:0 0 14px;">
+      The automations above are fixed — they have to be. These are yours. Write the message once,
+      drop in a ${'{{merge field}}'} wherever a name or an amount belongs, and the preview fills it
+      from a real record so you can see exactly what lands in someone's inbox.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
+      ${canEdit ? `<button type="button" class="btn" id="tplNewBtn">+ New Template</button>
+      ${all.length ? '' : `<button type="button" class="btn secondary" id="tplStarterBtn">Add four starter templates</button>`}` : ''}
+      ${all.length ? `<input id="tplFilter" class="om-quickfind" placeholder="Find a template" value="${esc(state.emailTemplateFilter||'')}">` : ''}
+    </div>
+    ${canEdit ? '' : `<div class="readonly-note">👁 View only — ask Ariel or a manager to add a template.</div>`}
+    ${list.length ? `<div class="tpl-grid">${list.map(t=>`<div class="tpl-card">
+      <div class="tpl-folder">${esc(t.folder||'General')}${t.locale==='he'?' · Hebrew':''}</div>
+      <h4>${esc(t.name)}</h4>
+      <div class="tpl-subject"><strong>Subject:</strong> ${esc(t.subject||'(no subject)')}</div>
+      <div class="tpl-subject" style="opacity:.8;">${esc(String(t.body||'').slice(0,90))}${String(t.body||'').length>90?'…':''}</div>
+      <div class="tpl-tools">
+        <button type="button" class="eml-btn" data-tpl-preview="${t.id}">Preview</button>
+        ${canEdit?`<button type="button" class="eml-btn" data-tpl-edit="${t.id}">Edit</button>
+        <button type="button" class="eml-btn" data-tpl-copy="${t.id}">Duplicate</button>
+        <button type="button" class="eml-btn" data-tpl-del="${t.id}">Delete</button>`:''}
+      </div>
+    </div>`).join('')}</div>`
+    : `<div class="fin-empty">${all.length ? `No template matches "${esc(state.emailTemplateFilter||'')}".`
+        : 'No templates yet. Start from scratch, or drop in the four starters and edit them.'}</div>`}
+  </div>`;
+}
+
+function openTemplateModal(id, copyOf){
+  if(!canEditEmailTemplates()) return;
+  const source = (id || copyOf) ? state.emailTemplates.find(t=>t.id===(id||copyOf)) : null;
+  const editing = id ? source : null;
+  document.getElementById('modalBody').className = 'modal wide';
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">${editing?'Edit':'New'} email template</h2>
+    <div class="field"><label>Template name</label>
+      <input id="tpl_name" value="${esc(source ? (editing?source.name:source.name+' (copy)') : '')}" placeholder="e.g. Follow-up after a call"></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <div class="field" style="flex:1;min-width:160px;"><label>Folder</label>
+        <select id="tpl_folder">${TEMPLATE_FOLDERS.map(f=>`<option ${source && source.folder===f?'selected':''}>${esc(f)}</option>`).join('')}</select></div>
+      <div class="field" style="flex:1;min-width:140px;"><label>Language</label>
+        <select id="tpl_locale">${TEMPLATE_LOCALES.map(l=>`<option value="${l.key}" ${source && source.locale===l.key?'selected':''}>${esc(l.label)}</option>`).join('')}</select></div>
+    </div>
+    <div class="field"><label>Subject line</label>
+      <input id="tpl_subject" value="${esc(source?source.subject:'')}" placeholder="e.g. Good talking to you, {{firstName}}"></div>
+    <div class="field"><label>Body</label>
+      <textarea id="tpl_body" placeholder="Write the message. Click a merge field below to drop it in at the cursor.">${esc(source?source.body:'')}</textarea></div>
+    <div class="formula-wizard">
+      <p class="fw-label">Merge fields — click to insert</p>
+      ${MERGE_FIELDS.map(g=>`<div style="margin-bottom:9px;">
+        <div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-soft);margin-bottom:5px;">${esc(g.group)}</div>
+        <div class="fw-chips" style="margin-bottom:0;">${g.fields.map(f=>`<button type="button" class="fw-chip" data-tpl-merge="${esc(f.token)}" title="${esc(f.desc)}">${esc(f.token)}</button>`).join('')}</div>
+      </div>`).join('')}
+      <button type="button" class="btn secondary" id="tpl_previewBtn" style="margin-top:4px;">Preview with real data</button>
+    </div>
+    <div id="tpl_previewWrap" style="display:none;margin-top:14px;"></div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="tpl_saveBtn">${editing?'Save template':'Create template'}</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+
+  document.querySelectorAll('[data-tpl-merge]').forEach(btn=>{
+    btn.onclick = ()=> insertAtCursor('tpl_body', btn.dataset.tplMerge);
+  });
+  document.getElementById('tpl_previewBtn').onclick = ()=>{
+    const wrap = document.getElementById('tpl_previewWrap');
+    wrap.style.display = 'block';
+    wrap.innerHTML = renderTemplatePreview({
+      subject: document.getElementById('tpl_subject').value,
+      body: document.getElementById('tpl_body').value,
+      locale: document.getElementById('tpl_locale').value,
+    });
+  };
+
+  document.getElementById('tpl_saveBtn').onclick = async ()=>{
+    const name = document.getElementById('tpl_name').value.trim();
+    if(!name){ alert('Give the template a name.'); return; }
+    const payload = {
+      name,
+      folder: document.getElementById('tpl_folder').value,
+      locale: document.getElementById('tpl_locale').value,
+      subject: document.getElementById('tpl_subject').value.trim(),
+      body: document.getElementById('tpl_body').value,
+      updatedAt: Date.now(),
+      updatedBy: state.currentUser || '',
+    };
+    if(editing) Object.assign(editing, payload);
+    else state.emailTemplates.push({id:uid(), createdAt:Date.now(), ...payload});
+    await saveKey(KEYS.emailTemplates, state.emailTemplates);
+    closeModal();
+    toast(`Template "${name}" saved.`);
+    render();
+  };
+}
+
+function renderTemplatePreview(tpl){
+  const rtl = tpl.locale==='he';
+  return `<div class="tpl-preview" ${rtl?'dir="rtl"':''}>
+    <div class="tp-sub">${esc(applyMergeFields(tpl.subject) || '(no subject)')}</div>
+    <div style="white-space:pre-wrap;">${esc(applyMergeFields(tpl.body) || '(empty body)')}</div>
+  </div>
+  <div style="font-size:11.5px;color:var(--ink-soft);margin-top:8px;line-height:1.5;">
+    Merge fields are filled from a real record where you have one, and from a placeholder where you don't.
+    An unknown ${'{{token}}'} is left exactly as written so a typo is easy to spot.</div>`;
+}
+
+function openTemplatePreviewModal(id){
+  const tpl = state.emailTemplates.find(t=>t.id===id);
+  if(!tpl) return;
+  document.getElementById('modalBody').className = 'modal wide';
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">${esc(tpl.name)}</h2>
+    <div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:14px;">
+      ${esc(tpl.folder||'General')} · from ${esc(EMAIL_SENDER)}</div>
+    ${renderTemplatePreview(tpl)}
+    <div class="modal-actions">
+      <button class="btn secondary" id="cancelBtn">Close</button>
+      <button class="btn" id="tpl_copyTextBtn">Copy to clipboard</button>
+    </div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  document.getElementById('tpl_copyTextBtn').onclick = async ()=>{
+    const text = applyMergeFields(tpl.subject) + '\n\n' + applyMergeFields(tpl.body);
+    try{
+      await navigator.clipboard.writeText(text);
+      toast('Copied — paste it into your mail client.');
+    }catch(e){
+      // Clipboard access is blocked in some browsers unless the page is
+      // focused and served over https, so fall back to showing the text
+      // rather than failing silently.
+      toast('Copy blocked by the browser — select the text above instead.');
+    }
+  };
+}
+
 function renderEmails(){
   const st = emailStats();
   const head = `<div class="fin-head">
@@ -4343,6 +4696,7 @@ function renderEmails(){
   return head
     + renderEmailKPIs(st)
     + renderEmailAutomations()
+    + renderEmailTemplates()
     + `<div class="fin-cols">${renderEmailConfig()}${renderEmailDeliveries(st)}</div>`;
 }
 
@@ -4373,9 +4727,454 @@ function renderTeam(){
   }).join('')}</div>`;
 }
 
+/* ================================================================
+   Administration
+   ----------------------------------------------------------------
+   Who can do what, kept together and kept out of Setup. Setup answers
+   "how does this object behave"; Administration answers "what is this
+   person allowed to touch". They were mixed before -- Roles sat in the
+   Setup tab list next to Validation Rules -- which meant granting someone
+   access and changing how Deals validate were the same trip.
+
+   The five screens stack the way Salesforce's do:
+     Profile             -- the baseline every user gets exactly one of.
+     Permission Set      -- extra grants laid on top, as many as you like.
+     Permission Set Group-- a bundle of sets, assigned in one move.
+     Role                -- where someone sits in the hierarchy.
+     Public Group        -- a named list of people, for sharing and alerts.
+
+   Profiles and permission sets here are stored, editable and readable by
+   the whole team. They do not yet override the hardcoded FULL_ADMIN /
+   CO_ADMINS / PRIVILEGED checks that gate the app's own screens -- the
+   same honest limitation the Roles tab has always carried, now stated in
+   the UI as well as in this comment.
+   ================================================================ */
+const ADMIN_TABS = [
+  {key:'profiles', label:'Profiles', blurb:'The baseline. Every person has exactly one.'},
+  {key:'permsets', label:'Permission Sets', blurb:'Extra access laid on top of a profile.'},
+  {key:'permsetgroups', label:'Permission Set Groups', blurb:'Several permission sets, assigned as one.'},
+  {key:'roles', label:'Roles', blurb:'Where someone sits in the hierarchy.'},
+  {key:'publicgroups', label:'Public Groups', blurb:'A named list of people, for sharing and alerts.'},
+];
+const OBJECT_PERMS = [
+  {key:'read', label:'Read'},
+  {key:'create', label:'Create'},
+  {key:'edit', label:'Edit'},
+  {key:'del', label:'Delete'},
+  {key:'viewAll', label:'View All'},
+  {key:'modifyAll', label:'Modify All'},
+];
+const SYSTEM_PERMS = [
+  {key:'setup', label:'Open Setup'},
+  {key:'manageUsers', label:'Manage team members'},
+  {key:'exportData', label:'Export data'},
+  {key:'importData', label:'Import data'},
+  {key:'manageFlows', label:'Build flows and automation'},
+  {key:'viewFinance', label:'See Finance, Invoices and Payments'},
+  {key:'sendEmail', label:'Send email from templates'},
+];
+const ADMIN_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 20 6.6v5.1c0 4.4-3.3 7.9-8 9.1-4.7-1.2-8-4.7-8-9.1V6.6z"/><path d="M9.2 11.9l2 2 3.6-3.8"/></svg>`;
+
+function canEditAdministration(){ return isAdmin(); }
+function permLabel(key){ return (SYSTEM_PERMS.find(p=>p.key===key)||{}).label || key; }
+function emptyObjectPerms(){
+  const map = {};
+  SETUP_ENTITIES.forEach(e=>{ map[e] = {}; });
+  return map;
+}
+function objectPermsSummary(perms){
+  const granted = SETUP_ENTITIES.filter(e=>OBJECT_PERMS.some(p=>(perms||{})[e] && perms[e][p.key]));
+  if(!granted.length) return 'No object access granted';
+  if(granted.length === SETUP_ENTITIES.length) return 'Access on every object';
+  return granted.map(e=>objectLabel(e)).join(', ');
+}
+
+function renderAdministration(){
+  const tab = state.adminTab;
+  return `<div class="adm-head">
+    <div class="om-head-icon">${ADMIN_ICON}</div>
+    <div style="flex:1;min-width:0;">
+      <div class="om-eyebrow">Administration</div>
+      <div class="om-head-title">Access &amp; permissions</div>
+      <div class="om-head-sub">Who can see what, and who can change it</div>
+    </div>
+  </div>
+  <div class="setup-layout">
+    <nav class="setup-sidenav">
+      ${ADMIN_TABS.map(t=>`<button type="button" class="setup-nav-item ${tab===t.key?'active':''}" data-admin-tab="${t.key}">${esc(t.label)}</button>`).join('')}
+    </nav>
+    <div class="setup-body">${renderAdministrationBody(tab)}</div>
+  </div>`;
+}
+
+function renderAdministrationBody(tab){
+  if(tab==='permsets') return renderPermissionSets();
+  if(tab==='permsetgroups') return renderPermissionSetGroups();
+  if(tab==='roles') return renderAdminRoles();
+  if(tab==='publicgroups') return renderPublicGroups();
+  return renderProfiles();
+}
+
+function adminIntro(tab){
+  const t = ADMIN_TABS.find(x=>x.key===tab);
+  return `<p class="om-pane-lead">${esc(t?t.blurb:'')}</p>`;
+}
+
+function renderProfiles(){
+  const canEdit = canEditAdministration();
+  return `<div class="io-card">
+    <h3 class="om-pane-title">Profiles</h3>
+    <p class="om-pane-lead">A profile is the floor someone stands on: what they can do before any extra
+      permission is added. Everyone has exactly one. If two people need almost the same access,
+      give them the same profile and use a permission set for the difference.</p>
+    ${canEdit ? `<div class="om-pane-actions"><button type="button" class="btn" id="admNewProfile">+ New Profile</button></div>`
+              : `<div class="readonly-note">👁 View only — only an admin can change profiles.</div>`}
+    ${state.profiles.length ? state.profiles.map(pf=>`<div class="adm-card">
+      <div class="adm-card-head">
+        <div style="min-width:0;">
+          <div class="adm-name">${esc(pf.name)}</div>
+          <div class="adm-sub">${esc(pf.description||'No description')}</div>
+          <div class="adm-sub">Objects: ${esc(objectPermsSummary(pf.objectPerms))}</div>
+          <div class="adm-sub">Assigned to: ${(pf.members||[]).length ? esc((pf.members||[]).join(', ')) : 'nobody yet'}</div>
+        </div>
+        ${canEdit ? `<div class="row-actions"><span data-edit-profile="${pf.id}">edit</span><span data-del-profile="${pf.id}">delete</span></div>` : ''}
+      </div>
+      <div class="adm-chips">${(pf.systemPerms||[]).map(k=>`<span class="adm-chip on">${esc(permLabel(k))}</span>`).join('') || `<span class="adm-chip">No system permissions</span>`}</div>
+    </div>`).join('') : `<div class="om-empty">No profiles yet. Create one — "Sales Rep" and "Support" are good first two.</div>`}
+    <div class="readonly-note" style="margin-top:14px;">Heads up: profiles and permission sets are recorded here and visible to the team,
+      but the app's own screens still gate on the built-in Admin / Manager roles. Treat these as the access plan until that switch is made.</div>
+  </div>`;
+}
+
+function renderPermissionSets(){
+  const canEdit = canEditAdministration();
+  return `<div class="io-card">
+    <h3 class="om-pane-title">Permission Sets</h3>
+    <p class="om-pane-lead">A permission set is a small bundle of extra access you hand to someone on top of their profile —
+      like lending a colleague one extra key instead of moving them into a different office.
+      Someone can hold as many as they need.</p>
+    ${canEdit ? `<div class="om-pane-actions"><button type="button" class="btn" id="admNewPermSet">+ New Permission Set</button></div>`
+              : `<div class="readonly-note">👁 View only — only an admin can change permission sets.</div>`}
+    ${state.permissionSets.length ? state.permissionSets.map(ps=>`<div class="adm-card">
+      <div class="adm-card-head">
+        <div style="min-width:0;">
+          <div class="adm-name">${esc(ps.name)} <span class="mono" style="font-size:11px;font-weight:400;color:var(--ink-soft);">${esc(ps.apiName||'')}</span></div>
+          <div class="adm-sub">${esc(ps.description||'No description')}</div>
+          <div class="adm-sub">Objects: ${esc(objectPermsSummary(ps.objectPerms))}</div>
+          <div class="adm-sub">Assigned to: ${(ps.members||[]).length ? esc((ps.members||[]).join(', ')) : 'nobody yet'}</div>
+        </div>
+        ${canEdit ? `<div class="row-actions"><span data-edit-permset="${ps.id}">edit</span><span data-del-permset="${ps.id}">delete</span></div>` : ''}
+      </div>
+      <div class="adm-chips">${(ps.systemPerms||[]).map(k=>`<span class="adm-chip on">${esc(permLabel(k))}</span>`).join('') || `<span class="adm-chip">Object access only</span>`}</div>
+    </div>`).join('') : `<div class="om-empty">No permission sets yet.</div>`}
+  </div>`;
+}
+
+function renderPermissionSetGroups(){
+  const canEdit = canEditAdministration();
+  return `<div class="io-card">
+    <h3 class="om-pane-title">Permission Set Groups</h3>
+    <p class="om-pane-lead">A group is several permission sets tied together so you can hand them over in one move.
+      Useful when a job needs the same four sets every time — bundle them once, assign the bundle.</p>
+    ${canEdit ? `<div class="om-pane-actions">
+      <button type="button" class="btn" id="admNewPermSetGroup" ${state.permissionSets.length?'':'disabled title="Create a permission set first"'}>+ New Permission Set Group</button>
+    </div>` : `<div class="readonly-note">👁 View only — only an admin can change permission set groups.</div>`}
+    ${state.permissionSets.length ? '' : `<div class="readonly-note">A group is made of permission sets, so create at least one of those first.</div>`}
+    ${state.permissionSetGroups.length ? state.permissionSetGroups.map(g=>`<div class="adm-card">
+      <div class="adm-card-head">
+        <div style="min-width:0;">
+          <div class="adm-name">${esc(g.name)}</div>
+          <div class="adm-sub">${esc(g.description||'No description')}</div>
+          <div class="adm-sub">Assigned to: ${(g.members||[]).length ? esc((g.members||[]).join(', ')) : 'nobody yet'}</div>
+        </div>
+        ${canEdit ? `<div class="row-actions"><span data-edit-psg="${g.id}">edit</span><span data-del-psg="${g.id}">delete</span></div>` : ''}
+      </div>
+      <div class="adm-chips">${(g.setIds||[]).map(id=>{
+        const ps = state.permissionSets.find(x=>x.id===id);
+        return `<span class="adm-chip on">${esc(ps?ps.name:'Deleted set')}</span>`;
+      }).join('') || `<span class="adm-chip">Empty group</span>`}</div>
+    </div>`).join('') : `<div class="om-empty">No permission set groups yet.</div>`}
+  </div>`;
+}
+
+function renderAdminRoles(){
+  return renderSetupRoles();
+}
+
+function renderPublicGroups(){
+  const canEdit = canEditAdministration();
+  return `<div class="io-card">
+    <h3 class="om-pane-title">Public Groups</h3>
+    <p class="om-pane-lead">A public group is just a named list of people — "India Team", "Everyone in Ops".
+      Once it has a name you can share records with it or point an alert at it, instead of
+      naming the same five people over and over.</p>
+    ${canEdit ? `<div class="om-pane-actions"><button type="button" class="btn" id="admNewPublicGroup">+ New Public Group</button></div>`
+              : `<div class="readonly-note">👁 View only — only an admin can change public groups.</div>`}
+    ${state.publicGroups.length ? state.publicGroups.map(g=>`<div class="adm-card">
+      <div class="adm-card-head">
+        <div style="min-width:0;">
+          <div class="adm-name">${esc(g.name)}</div>
+          <div class="adm-sub">${esc(g.description||'No description')}</div>
+        </div>
+        ${canEdit ? `<div class="row-actions"><span data-edit-pubgroup="${g.id}">edit</span><span data-del-pubgroup="${g.id}">delete</span></div>` : ''}
+      </div>
+      <div class="adm-chips">
+        ${(g.members||[]).map(n=>`<span class="adm-chip on">${esc(n)}</span>`).join('')}
+        ${(g.roles||[]).map(r=>`<span class="adm-chip">Role: ${esc(r)}</span>`).join('')}
+        ${!(g.members||[]).length && !(g.roles||[]).length ? `<span class="adm-chip">Nobody in this group yet</span>` : ''}
+      </div>
+    </div>`).join('') : `<div class="om-empty">No public groups yet.</div>`}
+  </div>`;
+}
+
+/* One editor serves profiles and permission sets: the fields are the same and
+   the only real difference is which list the row lands in and whether it also
+   carries an API name. */
+function openAccessModal(kind, id){
+  if(!canEditAdministration()) return;
+  const isProfile = kind==='profile';
+  const list = isProfile ? state.profiles : state.permissionSets;
+  const editing = id ? list.find(x=>x.id===id) : null;
+  const perms = editing ? JSON.parse(JSON.stringify(editing.objectPerms||emptyObjectPerms())) : emptyObjectPerms();
+  SETUP_ENTITIES.forEach(e=>{ perms[e] = perms[e] || {}; });
+  const noun = isProfile ? 'profile' : 'permission set';
+
+  document.getElementById('modalBody').className = 'modal wide';
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">${editing?'Edit':'New'} ${esc(noun)}</h2>
+    <div class="field"><label>Name</label>
+      <input id="ac_name" value="${esc(editing?editing.name:'')}" placeholder="${isProfile?'e.g. Sales Rep':'e.g. Export Data'}"></div>
+    ${isProfile ? '' : `<div class="field"><label>API name</label>
+      <input id="ac_api" class="mono" value="${esc(editing?(editing.apiName||''):'')}" placeholder="Auto-filled from the name"></div>`}
+    <div class="field"><label>Description</label>
+      <input id="ac_desc" value="${esc(editing?(editing.description||''):'')}" placeholder="What is this for?"></div>
+    <div class="field"><label>Object permissions</label>
+      <div style="overflow-x:auto;">
+      <table class="perm-grid"><thead><tr><th>Object</th>${OBJECT_PERMS.map(p=>`<th>${esc(p.label)}</th>`).join('')}</tr></thead><tbody>
+      ${SETUP_ENTITIES.map(e=>`<tr><td>${esc(objectLabel(e))}</td>
+        ${OBJECT_PERMS.map(p=>`<td><input type="checkbox" data-ac-perm="${e}:${p.key}" ${perms[e][p.key]?'checked':''}></td>`).join('')}
+      </tr>`).join('')}
+      </tbody></table></div>
+      <div style="font-size:11.5px;color:var(--ink-soft);margin-top:7px;line-height:1.5;">
+        View All and Modify All reach past sharing rules — tick them only for people who genuinely need every record.</div>
+    </div>
+    <div class="field"><label>System permissions</label>
+      <div style="display:flex;flex-wrap:wrap;gap:9px 16px;">
+        ${SYSTEM_PERMS.map(p=>`<label style="font-size:12.5px;display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" data-ac-sys="${p.key}" ${editing && (editing.systemPerms||[]).includes(p.key)?'checked':''}>${esc(p.label)}</label>`).join('')}
+      </div></div>
+    <div class="field"><label>Assigned to</label>
+      <div style="display:flex;flex-wrap:wrap;gap:9px 16px;">
+        ${teamNames().map(n=>`<label style="font-size:12.5px;display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" data-ac-member="${esc(n)}" ${editing && (editing.members||[]).includes(n)?'checked':''}>${esc(n)}</label>`).join('')}
+      </div></div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="ac_saveBtn">Save ${esc(noun)}</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+
+  if(!isProfile){
+    const nameEl = document.getElementById('ac_name');
+    const apiEl = document.getElementById('ac_api');
+    let touched = !!editing;
+    apiEl.oninput = ()=>{ touched = true; };
+    nameEl.oninput = ()=>{ if(!touched) apiEl.value = apiNameFrom(nameEl.value); };
+  }
+
+  document.getElementById('ac_saveBtn').onclick = async ()=>{
+    const name = document.getElementById('ac_name').value.trim();
+    if(!name){ alert(`Give the ${noun} a name.`); return; }
+    const objectPerms = emptyObjectPerms();
+    document.querySelectorAll('[data-ac-perm]').forEach(cb=>{
+      const [entity, key] = cb.dataset.acPerm.split(':');
+      if(cb.checked) objectPerms[entity][key] = true;
+    });
+    const payload = {
+      name,
+      description: document.getElementById('ac_desc').value.trim(),
+      objectPerms,
+      systemPerms: Array.from(document.querySelectorAll('[data-ac-sys]:checked')).map(cb=>cb.dataset.acSys),
+      members: Array.from(document.querySelectorAll('[data-ac-member]:checked')).map(cb=>cb.dataset.acMember),
+    };
+    if(!isProfile) payload.apiName = document.getElementById('ac_api').value.trim() || apiNameFrom(name);
+    if(editing) Object.assign(editing, payload);
+    else list.push({id:uid(), createdAt:Date.now(), ...payload});
+    await saveKey(isProfile ? KEYS.profiles : KEYS.permissionSets, list);
+    closeModal();
+    toast(`${name} saved.`);
+    renderAdministrationView();
+  };
+}
+
+function openPermSetGroupModal(id){
+  if(!canEditAdministration()) return;
+  const editing = id ? state.permissionSetGroups.find(g=>g.id===id) : null;
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">${editing?'Edit':'New'} permission set group</h2>
+    <div class="field"><label>Name</label>
+      <input id="pg_name" value="${esc(editing?editing.name:'')}" placeholder="e.g. Ops Starter Pack"></div>
+    <div class="field"><label>Description</label>
+      <input id="pg_desc" value="${esc(editing?(editing.description||''):'')}" placeholder="Who is this bundle for?"></div>
+    <div class="field"><label>Permission sets in this group</label>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${state.permissionSets.map(ps=>`<label style="font-size:12.5px;display:flex;align-items:flex-start;gap:7px;">
+          <input type="checkbox" data-pg-set="${ps.id}" ${editing && (editing.setIds||[]).includes(ps.id)?'checked':''} style="margin-top:2px;">
+          <span><strong>${esc(ps.name)}</strong><br><span style="color:var(--ink-soft);font-size:11.5px;">${esc(ps.description||'No description')}</span></span>
+        </label>`).join('') || '<span style="font-size:12px;color:var(--ink-soft);">No permission sets exist yet.</span>'}
+      </div></div>
+    <div class="field"><label>Assigned to</label>
+      <div style="display:flex;flex-wrap:wrap;gap:9px 16px;">
+        ${teamNames().map(n=>`<label style="font-size:12.5px;display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" data-pg-member="${esc(n)}" ${editing && (editing.members||[]).includes(n)?'checked':''}>${esc(n)}</label>`).join('')}
+      </div></div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="pg_saveBtn">Save group</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  document.getElementById('pg_saveBtn').onclick = async ()=>{
+    const name = document.getElementById('pg_name').value.trim();
+    if(!name){ alert('Give the group a name.'); return; }
+    const payload = {
+      name,
+      description: document.getElementById('pg_desc').value.trim(),
+      setIds: Array.from(document.querySelectorAll('[data-pg-set]:checked')).map(cb=>cb.dataset.pgSet),
+      members: Array.from(document.querySelectorAll('[data-pg-member]:checked')).map(cb=>cb.dataset.pgMember),
+    };
+    if(editing) Object.assign(editing, payload);
+    else state.permissionSetGroups.push({id:uid(), createdAt:Date.now(), ...payload});
+    await saveKey(KEYS.permissionSetGroups, state.permissionSetGroups);
+    closeModal();
+    toast(`${name} saved.`);
+    renderAdministrationView();
+  };
+}
+
+function openPublicGroupModal(id){
+  if(!canEditAdministration()) return;
+  const editing = id ? state.publicGroups.find(g=>g.id===id) : null;
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">${editing?'Edit':'New'} public group</h2>
+    <div class="field"><label>Group name</label>
+      <input id="pu_name" value="${esc(editing?editing.name:'')}" placeholder="e.g. India Team"></div>
+    <div class="field"><label>Description</label>
+      <input id="pu_desc" value="${esc(editing?(editing.description||''):'')}" placeholder="What is this group for?"></div>
+    <div class="field"><label>People</label>
+      <div style="display:flex;flex-wrap:wrap;gap:9px 16px;">
+        ${teamNames().map(n=>`<label style="font-size:12.5px;display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" data-pu-member="${esc(n)}" ${editing && (editing.members||[]).includes(n)?'checked':''}>${esc(n)}</label>`).join('')}
+      </div></div>
+    <div class="field"><label>Whole roles</label>
+      <div style="display:flex;flex-wrap:wrap;gap:9px 16px;">
+        ${ROLE_LIST.map(r=>`<label style="font-size:12.5px;display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" data-pu-role="${esc(r)}" ${editing && (editing.roles||[]).includes(r)?'checked':''}>${esc(r)}</label>`).join('')}
+      </div>
+      <div style="font-size:11.5px;color:var(--ink-soft);margin-top:7px;">Adding a role means anyone who holds it is in the group — including people who join later.</div>
+    </div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="pu_saveBtn">Save group</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  document.getElementById('pu_saveBtn').onclick = async ()=>{
+    const name = document.getElementById('pu_name').value.trim();
+    if(!name){ alert('Give the group a name.'); return; }
+    const payload = {
+      name,
+      description: document.getElementById('pu_desc').value.trim(),
+      members: Array.from(document.querySelectorAll('[data-pu-member]:checked')).map(cb=>cb.dataset.puMember),
+      roles: Array.from(document.querySelectorAll('[data-pu-role]:checked')).map(cb=>cb.dataset.puRole),
+    };
+    if(editing) Object.assign(editing, payload);
+    else state.publicGroups.push({id:uid(), createdAt:Date.now(), ...payload});
+    await saveKey(KEYS.publicGroups, state.publicGroups);
+    closeModal();
+    toast(`${name} saved.`);
+    renderAdministrationView();
+  };
+}
+
+function renderAdministrationView(){
+  const c = document.getElementById('content');
+  if(!c || state.view!=='administration') return;
+  c.innerHTML = renderAdministration();
+  wireAdministration();
+}
+
+async function deleteAdminRow(listKey, storageKey, id, question){
+  if(!canEditAdministration()) return;
+  if(!confirm(question)) return;
+  state[listKey] = state[listKey].filter(x=>x.id!==id);
+  // A group that pointed at a deleted permission set would otherwise keep a
+  // dead id and render "Deleted set" forever.
+  if(listKey==='permissionSets'){
+    let touched = false;
+    state.permissionSetGroups.forEach(g=>{
+      if((g.setIds||[]).includes(id)){ g.setIds = g.setIds.filter(x=>x!==id); touched = true; }
+    });
+    if(touched) await saveKey(KEYS.permissionSetGroups, state.permissionSetGroups);
+  }
+  await saveKey(storageKey, state[listKey]);
+  renderAdministrationView();
+}
+
+function wireAdministration(){
+  document.querySelectorAll('[data-admin-tab]').forEach(btn=>{
+    btn.onclick = ()=>{
+      if(setupDraft && !confirm('You have unsaved changes here. Discard them and move on?')) return;
+      setupDraft = null;
+      state.adminTab = btn.dataset.adminTab;
+      renderAdministrationView();
+    };
+  });
+  const newProfile = document.getElementById('admNewProfile');
+  if(newProfile) newProfile.onclick = ()=> openAccessModal('profile');
+  document.querySelectorAll('[data-edit-profile]').forEach(el=>{
+    el.onclick = ()=> openAccessModal('profile', el.dataset.editProfile);
+  });
+  document.querySelectorAll('[data-del-profile]').forEach(el=>{
+    el.onclick = ()=> deleteAdminRow('profiles', KEYS.profiles, el.dataset.delProfile, 'Delete this profile?');
+  });
+  const newSet = document.getElementById('admNewPermSet');
+  if(newSet) newSet.onclick = ()=> openAccessModal('permset');
+  document.querySelectorAll('[data-edit-permset]').forEach(el=>{
+    el.onclick = ()=> openAccessModal('permset', el.dataset.editPermset);
+  });
+  document.querySelectorAll('[data-del-permset]').forEach(el=>{
+    el.onclick = ()=> deleteAdminRow('permissionSets', KEYS.permissionSets, el.dataset.delPermset, 'Delete this permission set? Any group using it will drop it too.');
+  });
+  const newGroup = document.getElementById('admNewPermSetGroup');
+  if(newGroup) newGroup.onclick = ()=> openPermSetGroupModal();
+  document.querySelectorAll('[data-edit-psg]').forEach(el=>{
+    el.onclick = ()=> openPermSetGroupModal(el.dataset.editPsg);
+  });
+  document.querySelectorAll('[data-del-psg]').forEach(el=>{
+    el.onclick = ()=> deleteAdminRow('permissionSetGroups', KEYS.permissionSetGroups, el.dataset.delPsg, 'Delete this permission set group?');
+  });
+  const newPub = document.getElementById('admNewPublicGroup');
+  if(newPub) newPub.onclick = ()=> openPublicGroupModal();
+  document.querySelectorAll('[data-edit-pubgroup]').forEach(el=>{
+    el.onclick = ()=> openPublicGroupModal(el.dataset.editPubgroup);
+  });
+  document.querySelectorAll('[data-del-pubgroup]').forEach(el=>{
+    el.onclick = ()=> deleteAdminRow('publicGroups', KEYS.publicGroups, el.dataset.delPubgroup, 'Delete this public group?');
+  });
+  // The Roles screen is the Setup renderer reused verbatim, so it needs the
+  // same staged-save wiring -- pointed at this view's re-render, not Setup's.
+  document.querySelectorAll('[data-role-for]').forEach(sel=>{
+    sel.onchange = ()=>{
+      if(!canEditRoles()) return;
+      const teamId = sel.dataset.roleFor, role = sel.value;
+      if(!setupDraftActive('roles')) setupDraft = { tab:'roles', data:setupDraftSeed('roles') };
+      setupDraft.data[teamId] = role;
+      renderAdministrationView();
+    };
+  });
+  document.querySelectorAll('.setup-save-btn').forEach(btn=>{
+    btn.onclick = async ()=>{ await saveSetupDraft(); renderAdministrationView(); };
+  });
+  document.querySelectorAll('.setup-cancel-btn').forEach(btn=>{
+    btn.onclick = ()=>{ setupDraft = null; renderAdministrationView(); };
+  });
+}
+
 /* ---------- Setup: roles, validation rules, automation, sharing ---------- */
+/* Roles, profiles, permission sets and public groups used to sit in this list.
+   They are people-shaped settings rather than object-shaped ones, so they now
+   live in Administration, reached from the sidebar instead of through Setup. */
 const SETUP_TABS = [
-  {key:'roles', label:'Roles'},
   {key:'validation', label:'Validation Rules'},
   {key:'dependent', label:'Dependent Fields'},
   {key:'required', label:'Required Fields'},
@@ -4601,8 +5400,18 @@ async function runFlowAction(step, entityKey, obj, flowName){
   }
 }
 
-async function runFlows(entityKey, obj){
-  const flows = state.flows.filter(f=>f.entity===entityKey);
+/* Flows carry a trigger now. Anything saved before that existed has no
+   `trigger` field, and those ran on create only -- so an absent trigger reads
+   as 'created' rather than as "every event", which would silently start firing
+   old flows on edits. */
+function flowTrigger(flow){ return flow.trigger || 'created'; }
+function flowMatchesEvent(flow, event){
+  const t = flowTrigger(flow);
+  if(t==='created_updated') return event==='created' || event==='updated';
+  return t === event;
+}
+async function runFlows(entityKey, obj, event){
+  const flows = state.flows.filter(f=>f.entity===entityKey && flowMatchesEvent(f, event||'created'));
   for(const flow of flows){
     const passed = flow.steps.filter(s=>s.type==='condition').every(s=>evalCondition(s.op, obj[s.field], s.value));
     if(!passed) continue;
@@ -4843,19 +5652,198 @@ function renderSetupFlows(){
   const flows = state.flows;
   return `<div class="io-card">
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Build multi-step automations — a chain of conditions that must all pass, followed by one or more actions. Like Automation, but for more than one rule at a time. Open to everyone with Setup access.</p>
-    <table><thead><tr><th>Name</th><th>Object</th><th>Steps</th><th></th></tr></thead><tbody>
+    <div class="om-pane-actions">
+      <button class="btn" id="addFlowBtn">+ Create flow</button>
+      <button type="button" class="btn secondary" id="openFlowExplorerBtn">⌁ Flow Trigger Explorer</button>
+    </div>
+    <p style="color:var(--ink-soft);font-size:11.5px;margin:0 0 14px;">New to flows? Open the Trigger Explorer — it shows what already
+      fires on each object and then walks you through building a new one, one question at a time.</p>
+    <table><thead><tr><th>Name</th><th>Object</th><th>Trigger</th><th>Steps</th><th></th></tr></thead><tbody>
     ${flows.map(f=>{
       const nCond = f.steps.filter(s=>s.type==='condition').length;
       const nAct = f.steps.filter(s=>s.type==='action').length;
       return `<tr>
       <td style="font-size:12px;font-weight:600;">${esc(f.name)}</td>
       <td style="font-size:12px;">${esc(EXPORT_SHEETS.find(s=>s.key===f.entity)?.label||f.entity)}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(flowTriggerLabel(flowTrigger(f)))}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${nCond} condition${nCond===1?'':'s'}, ${nAct} action${nAct===1?'':'s'}</td>
       <td class="row-actions"><span data-del-flow="${f.id}">delete</span></td>
-    </tr>`;}).join('') || `<tr><td colspan="4" style="text-align:center;color:var(--ink-soft);padding:20px;">No flows yet.</td></tr>`}
+    </tr>`;}).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--ink-soft);padding:20px;">No flows yet.</td></tr>`}
     </tbody></table>
-    <button class="btn" id="addFlowBtn" style="margin-top:14px;">+ Create flow</button>
   </div>`;
+}
+
+/* ---------- Flow Trigger Explorer ----------
+   Two jobs in one screen. The map answers "what already happens when a record
+   changes?" -- grouped by object and trigger, because that is how a flow
+   actually fires. The wizard answers "how do I add one?" by asking a single
+   question per step instead of handing over the whole builder at once. A flow
+   built here is an ordinary flow: same shape, same storage, same runner. */
+const FLOW_TRIGGERS = [
+  {key:'created', label:'A record is created',
+   blurb:'Runs once, the moment a new record is saved for the first time.'},
+  {key:'updated', label:'A record is updated',
+   blurb:'Runs every time an existing record is edited and saved.'},
+  {key:'created_updated', label:'A record is created or updated',
+   blurb:'Runs on both — use it when the rule should hold no matter how the record got that way.'},
+];
+function flowTriggerLabel(key){ return (FLOW_TRIGGERS.find(t=>t.key===key)||FLOW_TRIGGERS[0]).label; }
+
+const FLOW_WIZARD_STEPS = [
+  {key:'object', label:'Object'},
+  {key:'trigger', label:'Trigger'},
+  {key:'conditions', label:'Conditions'},
+  {key:'actions', label:'Actions'},
+  {key:'review', label:'Review'},
+];
+
+function renderFlowExplorer(){
+  const wiz = state.flowWizard;
+  return `<div class="om-detail-head">
+    <div class="om-crumb">
+      <span class="om-crumb-link" data-fte-crumb="setup">Setup</span>
+      <span class="om-crumb-sep">&gt;</span>
+      <span class="om-crumb-link" data-fte-crumb="flows">Flows</span>
+      <span class="om-crumb-sep">&gt;</span>
+      <span style="color:var(--ink-soft);">Flow Trigger Explorer</span>
+    </div>
+    <div class="om-detail-title" style="margin-bottom:0;">Flow Trigger Explorer</div>
+  </div>
+  ${wiz ? renderFlowWizard(wiz) : renderFlowTriggerMap()}`;
+}
+
+function renderFlowTriggerMap(){
+  const objectsWithFlows = SETUP_ENTITIES.filter(e=>state.flows.some(f=>f.entity===e));
+  const objects = objectsWithFlows.length ? objectsWithFlows : SETUP_ENTITIES;
+  return `<div class="fte-head">
+    <div style="flex:1;min-width:220px;">
+      <div class="om-eyebrow">Where automation fires</div>
+      <p style="color:var(--ink-soft);font-size:12.5px;margin:6px 0 0;line-height:1.6;">
+        Every flow belongs to one object and one trigger. Think of each object as a door:
+        the trigger is what opens it, the conditions decide who gets through, and the actions
+        are what happens on the other side. Below is every door that currently has something behind it.</p>
+    </div>
+    <button type="button" class="btn" id="fteStartBtn">+ New Flow — guide me</button>
+  </div>
+  <div class="fte-grid">
+    ${objects.map(e=>{
+      const flows = state.flows.filter(f=>f.entity===e);
+      const byTrigger = FLOW_TRIGGERS.map(t=>({t, list:flows.filter(f=>flowTrigger(f)===t.key)})).filter(x=>x.list.length);
+      return `<div class="fte-card">
+        <h4>${esc(objectLabel(e))}</h4>
+        <div class="fte-count">${flows.length} flow${flows.length===1?'':'s'} · ${state.automations.filter(a=>a.entity===e).length} automation${state.automations.filter(a=>a.entity===e).length===1?'':'s'}</div>
+        ${byTrigger.map(({t,list})=>`<div class="fte-flow">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-soft);margin-bottom:5px;">When ${esc(t.label.toLowerCase())}</div>
+          ${list.map(f=>{
+            const nCond = f.steps.filter(x=>x.type==='condition').length;
+            const nAct = f.steps.filter(x=>x.type==='action').length;
+            return `<div style="margin-bottom:4px;">
+              <strong style="font-weight:600;">${esc(f.name)}</strong>
+              <span style="color:var(--ink-soft);font-size:11.5px;"> — ${nCond} condition${nCond===1?'':'s'}, ${nAct} action${nAct===1?'':'s'}</span>
+            </div>`;
+          }).join('')}
+        </div>`).join('') || `<div class="fte-flow" style="color:var(--ink-soft);">Nothing fires on ${esc(objectLabel(e))} yet.</div>`}
+        <div style="margin-top:11px;"><button type="button" class="btn secondary" data-fte-new="${e}" style="padding:5px 12px;font-size:12px;">Build one here</button></div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function newFlowWizard(entity){
+  return {step:0, entity: entity || SETUP_ENTITIES[0], trigger:'created', name:'', conditions:[], actions:[]};
+}
+
+function renderFlowWizard(wiz){
+  const fields = entityFieldsFor(wiz.entity);
+  const rail = FLOW_WIZARD_STEPS.map((st,i)=>`
+    ${i?'<span class="fte-step-link"></span>':''}
+    <span class="fte-step ${i===wiz.step?'active':(i<wiz.step?'done':'')}"><b>${i<wiz.step?'✓':i+1}</b>${esc(st.label)}</span>`).join('');
+
+  let body = '';
+  if(wiz.step===0){
+    body = `<h3 class="om-pane-title">Which object should this flow watch?</h3>
+      <p class="om-pane-lead">A flow only ever watches one kind of record. Pick the one whose changes should set it off.</p>
+      <div class="fte-choice">
+        ${SETUP_ENTITIES.map(e=>`<button type="button" class="fte-opt ${wiz.entity===e?'sel':''}" data-fte-object="${e}">
+          <span class="fte-opt-t">${esc(objectLabel(e))}</span>
+          <span class="fte-opt-d">${state.flows.filter(f=>f.entity===e).length} flow${state.flows.filter(f=>f.entity===e).length===1?'':'s'} already here · ${objectRecordCount(e)} records</span>
+        </button>`).join('')}
+      </div>`;
+  } else if(wiz.step===1){
+    body = `<h3 class="om-pane-title">What should set it off?</h3>
+      <p class="om-pane-lead">This is the door opening. Nothing else in the flow runs until this happens to a ${esc(singularLabel(wiz.entity).toLowerCase())}.</p>
+      <div class="fte-choice">
+        ${FLOW_TRIGGERS.map(t=>`<button type="button" class="fte-opt ${wiz.trigger===t.key?'sel':''}" data-fte-trigger="${t.key}">
+          <span class="fte-opt-t">${esc(t.label)}</span>
+          <span class="fte-opt-d">${esc(t.blurb)}</span>
+        </button>`).join('')}
+      </div>`;
+  } else if(wiz.step===2){
+    body = `<h3 class="om-pane-title">Should it run every time, or only sometimes?</h3>
+      <p class="om-pane-lead">Conditions are the bouncer on the door. Every one you add must be true, or the flow stops here.
+        Add none and the flow runs on every ${esc(singularLabel(wiz.entity).toLowerCase())} that hits the trigger.</p>
+      <div class="flow-steps" id="fteCondWrap">
+        ${wiz.conditions.map((c,i)=>`<div class="flow-step-row">
+          <span class="flow-step-badge cond">If</span>
+          <select data-fte-cond="${i}" data-fte-part="field">${fields.map(f=>`<option value="${f}" ${c.field===f?'selected':''}>${esc(prettyField(f))}</option>`).join('')}</select>
+          <select data-fte-cond="${i}" data-fte-part="op">${COND_OPS.filter(o=>o.key!=='any').map(o=>`<option value="${o.key}" ${c.op===o.key?'selected':''}>${esc(o.label)}</option>`).join('')}</select>
+          <input data-fte-cond="${i}" data-fte-part="value" value="${esc(c.value||'')}" placeholder="value">
+          <span class="flow-step-remove" data-fte-cond-remove="${i}" title="Remove">✕</span>
+        </div>`).join('') || `<p style="color:var(--ink-soft);font-size:12px;padding:4px 0;">No conditions — this flow will run every time.</p>`}
+      </div>
+      <button type="button" class="btn secondary" id="fteAddCond" style="margin-top:10px;">+ Add condition</button>`;
+  } else if(wiz.step===3){
+    body = `<h3 class="om-pane-title">What should happen?</h3>
+      <p class="om-pane-lead">These run in order once the conditions pass. A flow needs at least one.</p>
+      <div class="flow-steps" id="fteActWrap">
+        ${wiz.actions.map((a,i)=>renderFlowStepRow({...a, type:'action'}, i, fields).replace(/data-flow-idx=/g,'data-fte-act=').replace(/data-flow-part=/g,'data-fte-part=').replace(/data-flow-remove=/g,'data-fte-act-remove=')).join('')
+          || `<p style="color:var(--ink-soft);font-size:12px;padding:4px 0;">No actions yet — add at least one below.</p>`}
+      </div>
+      <button type="button" class="btn secondary" id="fteAddAct" style="margin-top:10px;">+ Add action</button>`;
+  } else {
+    const condText = wiz.conditions.length
+      ? wiz.conditions.map(c=>`<li>${esc(prettyField(c.field))} ${esc((COND_OPS.find(o=>o.key===c.op)||{}).label||c.op)} <strong>${esc(c.value||'(empty)')}</strong></li>`).join('')
+      : '<li>No conditions — it runs every time.</li>';
+    const actText = wiz.actions.map(a=>`<li>${esc(describeFlowAction(a))}</li>`).join('') || '<li style="color:var(--rust);">No actions yet — go back and add one.</li>';
+    body = `<h3 class="om-pane-title">Here's the whole flow in one sentence</h3>
+      <div class="fte-recap">
+        When <strong>${esc(flowTriggerLabel(wiz.trigger).toLowerCase())}</strong> on <strong>${esc(objectLabel(wiz.entity))}</strong>…
+        <ul style="margin:8px 0 0 18px;padding:0;">${condText}</ul>
+        <div style="margin-top:10px;">…then:</div>
+        <ul style="margin:8px 0 0 18px;padding:0;">${actText}</ul>
+      </div>
+      <div class="field" style="margin-top:16px;"><label>Name this flow</label>
+        <input id="fte_name" value="${esc(wiz.name)}" placeholder="e.g. Welcome new customers"></div>`;
+  }
+
+  const canNext = wiz.step<FLOW_WIZARD_STEPS.length-1;
+  return `<div class="io-card" style="border:1px solid var(--border);border-radius:10px;padding:20px 24px;background:var(--surface);">
+    <div class="fte-steps">${rail}</div>
+    ${body}
+    <div style="display:flex;gap:8px;margin-top:22px;flex-wrap:wrap;">
+      <button type="button" class="btn secondary" id="fteBackBtn">${wiz.step===0?'Cancel':'Back'}</button>
+      ${canNext ? `<button type="button" class="btn" id="fteNextBtn">Next</button>`
+                : `<button type="button" class="btn" id="fteSaveBtn">Save flow</button>`}
+    </div>
+  </div>`;
+}
+
+/* A name people can read back later, built from what the flow actually does,
+   so the last step isn't a blank box after four questions. */
+function suggestFlowName(wiz){
+  const first = wiz.actions[0];
+  const verb = first && first.action==='create_task' ? 'Task'
+             : first && first.action==='set_field' ? 'Update'
+             : 'Alert';
+  const when = wiz.trigger==='updated' ? 'on update' : wiz.trigger==='created_updated' ? 'on save' : 'on new';
+  return `${verb} ${when} ${singularLabel(wiz.entity).toLowerCase()}`;
+}
+
+function describeFlowAction(a){
+  if(a.action==='create_task') return `Create a task: "${a.taskTitle||'(untitled)'}"${a.taskDueInDays?`, due in ${a.taskDueInDays} day(s)`:''}`;
+  if(a.action==='set_field') return `Set ${prettyField(a.field||'')} to "${a.value||''}"`;
+  if(a.action==='toast') return `Show the message: "${a.message||''}"`;
+  return 'Action';
 }
 
 const SCHEMA_ENTITIES = ['contacts','leads','customers','distributors','suppliers','deals','orders','tasks','invoices','payments'];
@@ -4890,11 +5878,26 @@ function defaultSchemaPos(entity){
 function schemaPosFor(entity){
   return state.schemaLayout[entity] || defaultSchemaPos(entity);
 }
+/* The built-in map plus anything an admin has since created in Object Manager,
+   so a relationship made there shows up here instead of only on its own tab.
+   Master-detail draws solid, like the other structural links. */
+function schemaRelationships(){
+  const custom = state.relationships
+    .filter(r=>SCHEMA_ENTITIES.includes(r.childEntity) && SCHEMA_ENTITIES.includes(r.parentEntity))
+    .map(r=>({from:r.childEntity, to:r.parentEntity, solid:r.type==='master', custom:true}));
+  const seen = new Set(SCHEMA_RELATIONSHIPS.map(r=>r.from+'>'+r.to));
+  return SCHEMA_RELATIONSHIPS.concat(custom.filter(r=>{
+    const key = r.from+'>'+r.to;
+    if(seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }));
+}
 function renderSetupSchema(){
   const canEdit = canEditGlobalSetup();
   const pos = {};
   SCHEMA_ENTITIES.forEach(e=>{ pos[e] = schemaPosFor(e); });
-  const lines = SCHEMA_RELATIONSHIPS.map(rel=>{
+  const lines = schemaRelationships().map(rel=>{
     const a = pos[rel.from], b = pos[rel.to];
     return `<line id="schemaLine-${rel.from}-${rel.to}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${rel.solid?'var(--setup-blue)':'var(--ink-soft)'}" stroke-width="${rel.solid?2:1.3}" stroke-dasharray="${rel.solid?'':'4 4'}" opacity="${rel.solid?0.85:0.55}"/>`;
   }).join('');
@@ -4922,7 +5925,7 @@ function paintSchemaNode(entity){
   const text = document.getElementById('schemaText-'+entity);
   if(rect){ rect.setAttribute('x', p.x-58); rect.setAttribute('y', p.y-18); }
   if(text){ text.setAttribute('x', p.x); text.setAttribute('y', p.y+5); }
-  SCHEMA_RELATIONSHIPS.forEach(rel=>{
+  schemaRelationships().forEach(rel=>{
     if(rel.from!==entity && rel.to!==entity) return;
     const line = document.getElementById('schemaLine-'+rel.from+'-'+rel.to);
     if(!line) return;
@@ -5052,9 +6055,16 @@ function renderSetupBigDeal(){
    through nine global tabs to find the three rules that touch Deals. Each
    sub-tab reuses the global renderer scoped to this object, so there is one
    implementation of each feature and the staged Save/Cancel bar still works. */
+/* The rail follows Salesforce's own order so anyone who has used Setup there
+   finds the same entry in the same place. Everything above the divider is a
+   real, editable screen; nothing here is decorative. */
 const OM_TABS = [
   {key:'details', label:'Details'},
-  {key:'fields', label:'Fields & Relationships'},
+  {key:'fields', label:'Fields &amp; Relationships'},
+  {key:'pagelayouts', label:'Page Layouts'},
+  {key:'recordpages', label:'Lightning Record Pages'},
+  {key:'recordtypes', label:'Record Types'},
+  {key:'limits', label:'Object Limits'},
   {key:'required', label:'Required Fields'},
   {key:'validation', label:'Validation Rules'},
   {key:'dependent', label:'Dependent Fields'},
@@ -5086,7 +6096,8 @@ function renderObjectManagerList(){
   </div>
   <div class="io-card" style="padding-top:6px;">
     <table class="om-table"><thead><tr>
-      <th>Label</th><th>API Name</th><th>Type</th><th style="text-align:right;">Fields</th><th style="text-align:right;">Records</th><th>Visibility</th>
+      <th>Label</th><th>API Name</th><th>Type</th><th style="text-align:right;">Fields</th><th style="text-align:right;">Records</th>
+      <th style="text-align:right;">Layouts</th><th style="text-align:right;">Record Types</th><th>Visibility</th>
     </tr></thead><tbody>
     ${rows.map(e=>`<tr>
       <td><span class="om-link" data-om-open="${e}">${esc(objectLabel(e))}</span></td>
@@ -5094,10 +6105,12 @@ function renderObjectManagerList(){
       <td style="font-size:12px;color:var(--ink-soft);">Standard Object</td>
       <td style="text-align:right;font-size:12px;">${objectFieldCount(e)}</td>
       <td style="text-align:right;font-size:12px;">${objectRecordCount(e)}</td>
+      <td style="text-align:right;font-size:12px;color:var(--ink-soft);">${pageLayoutsFor(e).length}</td>
+      <td style="text-align:right;font-size:12px;color:var(--ink-soft);">${recordTypesFor(e).length || '—'}</td>
       <td style="font-size:12px;">${isObjectHidden(e)
         ? `<span class="om-pill hidden">Hidden</span>`
         : `<span class="om-pill">Visible</span>`}</td>
-    </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:20px;">No objects match "${esc(state.omFilter||'')}".</td></tr>`}
+    </tr>`).join('') || `<tr><td colspan="8" style="text-align:center;color:var(--ink-soft);padding:20px;">No objects match "${esc(state.omFilter||'')}".</td></tr>`}
     </tbody></table>
   </div>`;
 }
@@ -5105,6 +6118,10 @@ function renderObjectManagerList(){
 function renderObjectDetailBody(entity){
   const tab = state.omTab;
   if(tab==='fields') return renderObjectFields(entity);
+  if(tab==='pagelayouts') return renderObjectPageLayouts(entity);
+  if(tab==='recordpages') return renderObjectRecordPages(entity);
+  if(tab==='recordtypes') return renderObjectRecordTypes(entity);
+  if(tab==='limits') return renderObjectLimits(entity);
   if(tab==='required') return renderSetupRequired(entity);
   if(tab==='validation') return renderSetupValidation(entity);
   if(tab==='dependent') return renderSetupDependent(entity);
@@ -5115,16 +6132,49 @@ function renderObjectDetailBody(entity){
   return renderObjectDetails(entity);
 }
 
+/* Salesforce's Details pane leads with the identity of the object -- label,
+   API name, whether it is custom -- and only then the counts. The singular and
+   plural labels are derived from the object's own label rather than stored,
+   because every object here is standard and its label is fixed in code. */
+function singularLabel(entity){
+  const label = objectLabel(entity);
+  if(/ies$/.test(label)) return label.replace(/ies$/, 'y');
+  if(/ses$/.test(label)) return label.replace(/es$/, '');
+  if(/s$/.test(label)) return label.replace(/s$/, '');
+  return label;
+}
+const OBJECT_DESCRIPTIONS = {
+  contacts:'Everyone SWG talks to — suppliers, distributors, customers and marketing contacts in one book.',
+  leads:'Prospects being warmed up before they convert into a customer.',
+  customers:'Everyone who buys Cinnamor Oregano, with their country and shipping details.',
+  distributors:'Partners who carry SWG products into a continent or sub-region.',
+  suppliers:'Everyone SWG sources oils, bottles and materials from.',
+  deals:'Pipeline opportunities, from first conversation through to Won or Lost.',
+  tasks:'Follow-ups and to-dos, linked back to the record they came from.',
+  invoices:'Billing documents, either raised against an order or standalone.',
+  payments:'Money going out — what SWG owes suppliers, distributors and partners.',
+};
+
 function renderObjectDetails(entity){
   const sharing = SHARING_MODES.find(m=>m.key===(state.sharingRules[entity]||'everyone'));
   const reqCount = state.validationRules.filter(r=>r.entity===entity && r.type==='required').length;
   const hiddenFields = entityFieldsFor(entity).filter(f=>isFieldHidden(entity,f)).length;
-  const facts = [
+  const identity = [
+    ['Description', OBJECT_DESCRIPTIONS[entity] || '—'],
     ['API Name', entity, true],
-    ['Label', objectLabel(entity)],
-    ['Type', 'Standard Object'],
+    ['Custom', 'No'],
+    ['Singular Label', singularLabel(entity)],
+    ['Plural Label', objectLabel(entity)],
+    ['Record Name', 'Name'],
+    ['Deployment Status', 'Deployed'],
+  ];
+  const config = [
     ['Fields', String(objectFieldCount(entity))],
     ['Records', String(objectRecordCount(entity))],
+    ['Record types', String(recordTypesFor(entity).length)],
+    ['Page layouts', String(pageLayoutsFor(entity).length)],
+    ['Lightning record pages', String(recordPagesFor(entity).length)],
+    ['Relationships', String(relationshipsTouching(entity).length)],
     ['Hidden from team', isObjectHidden(entity) ? 'Yes' : 'No'],
     ['Visible to', sharing ? sharing.label : 'Everyone'],
     ['Required fields', String(reqCount)],
@@ -5132,27 +6182,55 @@ function renderObjectDetails(entity){
     ['Validation rules', String(state.validationRules.filter(r=>r.entity===entity && r.type!=='required').length)],
     ['Dependent field rules', String(state.dependentFields.filter(r=>r.entity===entity).length)],
     ['Automations', String(state.automations.filter(a=>a.entity===entity).length)],
+    ['Flows', String(state.flows.filter(f=>f.entity===entity).length)],
     ['Walkthrough steps', String(guideEntriesFor(entity).length)],
   ];
+  const facts = (list)=>`<div class="om-facts">${list.map(([k,v,mono])=>`<div class="om-fact">
+      <div class="om-fact-k">${esc(k)}</div>
+      <div class="om-fact-v${mono?' mono':''}">${esc(v)}</div>
+    </div>`).join('')}</div>`;
   return `<div class="io-card">
     <h3 class="om-pane-title">Details</h3>
-    <div class="om-facts">
-      ${facts.map(([k,v,mono])=>`<div class="om-fact">
-        <div class="om-fact-k">${esc(k)}</div>
-        <div class="om-fact-v${mono?' mono':''}">${esc(v)}</div>
-      </div>`).join('')}
-    </div>
+    ${facts(identity)}
+  </div>
+  <div class="io-card">
+    <h3 class="om-pane-title">What is configured on this object</h3>
+    ${facts(config)}
   </div>`;
 }
+
+/* ---------- Relationships ----------
+   A relationship is one row that both objects can see: the child gets a lookup
+   field, the parent gets a related list. Master-detail is the stricter of the
+   two -- the child cannot exist without its parent, so it is always required
+   and deleting the parent takes the children with it. Storing it once, on the
+   relationship, keeps the two objects' views of it from ever disagreeing. */
+const OBJ_REL_TYPES = [
+  {key:'lookup', label:'Lookup', blurb:'A loose link. The child can exist on its own, and deleting the parent just clears the field.'},
+  {key:'master', label:'Master-Detail', blurb:'A strict link. The child belongs to its parent, is always required, and is deleted with it.'},
+];
+const OBJ_REL_DELETE = [
+  {key:'clear', label:"Clear the field (don't allow deletion if it's required)"},
+  {key:'block', label:'Block the parent from being deleted while children exist'},
+  {key:'cascade', label:'Delete the children too (master-detail only)'},
+];
+function relationshipsFor(entity){ return state.relationships.filter(r=>r.childEntity===entity); }
+function relationshipsToward(entity){ return state.relationships.filter(r=>r.parentEntity===entity); }
+function relationshipsTouching(entity){ return state.relationships.filter(r=>r.childEntity===entity || r.parentEntity===entity); }
+function relTypeLabel(type){ return (OBJ_REL_TYPES.find(t=>t.key===type)||OBJ_REL_TYPES[0]).label; }
+function relDeleteLabel(key){ return (OBJ_REL_DELETE.find(b=>b.key===key)||OBJ_REL_DELETE[0]).label; }
 
 function renderObjectFields(entity){
   const fields = entityFieldsFor(entity);
   const guideFields = new Set(guideEntriesFor(entity).filter(g=>g.linkField).map(g=>g.linkField));
+  const outgoing = relationshipsFor(entity);
+  const incoming = relationshipsToward(entity);
+  const canEdit = canEditGlobalSetup();
   return `<div class="io-card">
-    <h3 class="om-pane-title">Fields & Relationships</h3>
-    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Every field on ${esc(objectLabel(entity))}, and the rules currently attached to it.</p>
+    <h3 class="om-pane-title">Fields &amp; Relationships</h3>
+    <p class="om-pane-lead">Every field on ${esc(objectLabel(entity))}, and the rules currently attached to it.</p>
     <table class="om-table"><thead><tr>
-      <th>Field Label</th><th>API Name</th><th>Required</th><th>Hidden</th><th>Rules</th><th>Guide step</th>
+      <th>Field Label</th><th>API Name</th><th>Type</th><th>Required</th><th>Hidden</th><th>Rules</th><th>Guide step</th>
     </tr></thead><tbody>
     ${fields.map(f=>{
       const rules = state.validationRules.filter(r=>r.entity===entity && r.field===f && r.type!=='required');
@@ -5160,15 +6238,285 @@ function renderObjectFields(entity){
       return `<tr>
         <td style="font-size:12.5px;font-weight:600;">${esc(prettyField(f))}</td>
         <td class="mono" style="font-size:12px;color:var(--ink-soft);">${esc(f)}</td>
+        <td style="font-size:12px;color:var(--ink-soft);">${esc(fieldTypeLabel(entity,f))}</td>
         <td>${isFieldRequired(entity,f) ? `<span class="om-pill req">Required</span>` : `<span style="color:var(--ink-soft);font-size:12px;">—</span>`}</td>
         <td>${isFieldHidden(entity,f) ? `<span class="om-pill hidden">Hidden</span>` : `<span style="color:var(--ink-soft);font-size:12px;">—</span>`}</td>
         <td style="font-size:12px;color:var(--ink-soft);">${rules.length+dep.length ? `${rules.length+dep.length} rule${rules.length+dep.length===1?'':'s'}` : '—'}</td>
         <td style="font-size:12px;color:var(--ink-soft);">${guideFields.has(f) ? 'Yes' : '—'}</td>
       </tr>`;
     }).join('')}
+    ${outgoing.map(r=>`<tr>
+        <td style="font-size:12.5px;font-weight:600;">${esc(r.label)}</td>
+        <td class="mono" style="font-size:12px;color:var(--ink-soft);">${esc(r.apiName)}</td>
+        <td><span class="om-pill ${r.type==='master'?'mdr':'lookup'}">${esc(relTypeLabel(r.type))}(${esc(objectLabel(r.parentEntity))})</span></td>
+        <td>${r.required || r.type==='master' ? `<span class="om-pill req">Required</span>` : `<span style="color:var(--ink-soft);font-size:12px;">—</span>`}</td>
+        <td><span style="color:var(--ink-soft);font-size:12px;">—</span></td>
+        <td style="font-size:12px;color:var(--ink-soft);">${esc(relDeleteLabel(r.deleteBehaviour).split('(')[0])}</td>
+        <td class="row-actions">${canEdit?`<span data-del-rel="${r.id}">delete</span>`:'—'}</td>
+      </tr>`).join('')}
+    </tbody></table>
+  </div>
+  <div class="io-card">
+    <h3 class="om-pane-title">Relationships</h3>
+    <p class="om-pane-lead">A relationship links two objects so a record on one can point at a record on the other —
+      an Invoice pointing at the Customer it belongs to, say. ${esc(objectLabel(entity))} is the
+      <strong>child</strong> in the first table (it holds the link) and the <strong>parent</strong> in the second
+      (it gets a related list of the records pointing at it).</p>
+    ${canEdit ? `<div class="om-pane-actions">
+      <button type="button" class="btn" data-new-rel="${entity}">+ New Relationship</button>
+    </div>` : `<div class="readonly-note">👁 View only — only an admin can create relationships.</div>`}
+    <h4 style="font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-soft);margin:14px 0 8px;">${esc(objectLabel(entity))} points at</h4>
+    <table class="om-table"><thead><tr>
+      <th>Field Label</th><th>API Name</th><th>Type</th><th>Parent Object</th><th>If the parent is deleted</th><th></th>
+    </tr></thead><tbody>
+    ${outgoing.map(r=>`<tr>
+      <td style="font-size:12.5px;font-weight:600;">${esc(r.label)}</td>
+      <td class="mono" style="font-size:12px;color:var(--ink-soft);">${esc(r.apiName)}</td>
+      <td><span class="om-pill ${r.type==='master'?'mdr':'lookup'}">${esc(relTypeLabel(r.type))}</span></td>
+      <td><span class="om-link" data-om-open="${esc(r.parentEntity)}">${esc(objectLabel(r.parentEntity))}</span></td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(relDeleteLabel(r.deleteBehaviour))}</td>
+      <td class="row-actions">${canEdit?`<span data-del-rel="${r.id}">delete</span>`:''}</td>
+    </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:18px;">${esc(objectLabel(entity))} doesn't point at any other object yet.</td></tr>`}
+    </tbody></table>
+    <h4 style="font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-soft);margin:20px 0 8px;">Points at ${esc(objectLabel(entity))}</h4>
+    <table class="om-table"><thead><tr>
+      <th>Child Object</th><th>Related List</th><th>Type</th><th>Field on the child</th><th></th>
+    </tr></thead><tbody>
+    ${incoming.map(r=>`<tr>
+      <td><span class="om-link" data-om-open="${esc(r.childEntity)}">${esc(objectLabel(r.childEntity))}</span></td>
+      <td style="font-size:12.5px;">${esc(r.relatedListLabel || objectLabel(r.childEntity))}</td>
+      <td><span class="om-pill ${r.type==='master'?'mdr':'lookup'}">${esc(relTypeLabel(r.type))}</span></td>
+      <td class="mono" style="font-size:12px;color:var(--ink-soft);">${esc(r.apiName)}</td>
+      <td class="row-actions">${canEdit?`<span data-del-rel="${r.id}">delete</span>`:''}</td>
+    </tr>`).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--ink-soft);padding:18px;">Nothing points at ${esc(objectLabel(entity))} yet.</td></tr>`}
     </tbody></table>
   </div>`;
 }
+
+/* Best-effort field type, read off the field name and the values actually
+   stored, so the column says something true without a schema to consult. */
+function fieldTypeLabel(entity, field){
+  if(/^(email)$/i.test(field)) return 'Email';
+  if(/^(phone)$/i.test(field)) return 'Phone';
+  if(/(date|dueDate)$/i.test(field)) return 'Date';
+  if(/^(amount|value|qty)$/i.test(field)) return 'Number';
+  if(/^(notes|description)$/i.test(field)) return 'Long Text Area';
+  if(/Id$/.test(field)) return 'Lookup';
+  if(EXPORT_ARRAY_FIELDS.has(field)) return 'Multi-Select Picklist';
+  const opts = fieldOptionsFor(entity, field);
+  if(opts && opts.length) return 'Picklist';
+  return 'Text';
+}
+/* Picklist detection reuses the values already present on saved records, which
+   is the only list this page has -- the form's own options live in markup. */
+function fieldOptionsFor(entity, field){
+  const rows = Array.isArray(state[entity]) ? state[entity] : [];
+  if(!rows.length) return null;
+  const vals = new Set();
+  for(const r of rows){
+    const v = r[field];
+    if(v===undefined || v===null || v==='' || typeof v === 'object') continue;
+    vals.add(String(v));
+    if(vals.size > 8) return null;
+  }
+  return vals.size >= 2 && vals.size <= 8 ? Array.from(vals) : null;
+}
+
+/* ---------- Page Layouts ----------
+   A page layout is the order and grouping of fields on a record. Each object
+   gets a Default layout on first visit -- generated from its real field list --
+   so the tab is never an empty shell, and admins edit from something real. */
+function pageLayoutsFor(entity){ return state.pageLayouts.filter(l=>l.entity===entity); }
+function defaultLayoutFields(entity){
+  const fields = entityFieldsFor(entity);
+  const half = Math.ceil(fields.length/2);
+  return [
+    {id:uid(), label:'Information', columns:2, fields:fields.slice(0,half)},
+    {id:uid(), label:'More Details', columns:2, fields:fields.slice(half)},
+  ].filter(sec=>sec.fields.length);
+}
+function makeDefaultLayout(entity){
+  return {id:uid(), entity, name:`${singularLabel(entity)} Layout`, isDefault:true,
+    sections:defaultLayoutFields(entity), recordTypes:[], createdAt:Date.now()};
+}
+
+function renderObjectPageLayouts(entity){
+  const layouts = pageLayoutsFor(entity);
+  const canEdit = canEditGlobalSetup();
+  return `<div class="io-card">
+    <h3 class="om-pane-title">Page Layouts</h3>
+    <p class="om-pane-lead">A page layout decides which fields appear on a ${esc(singularLabel(entity).toLowerCase())} record,
+      in what order, and under which headings. Think of it as the seating plan for the record page.</p>
+    ${canEdit ? `<div class="om-pane-actions">
+      <button type="button" class="btn" data-new-layout="${entity}">+ New Page Layout</button>
+      ${layouts.length ? '' : `<button type="button" class="btn secondary" data-seed-layout="${entity}">Generate the default layout</button>`}
+    </div>` : `<div class="readonly-note">👁 View only — only an admin can change page layouts.</div>`}
+    <table class="om-table"><thead><tr>
+      <th>Layout Name</th><th>Sections</th><th>Fields</th><th>Record Types</th><th>Default</th><th></th>
+    </tr></thead><tbody>
+    ${layouts.map(l=>`<tr>
+      <td><span class="om-link" data-edit-layout="${l.id}">${esc(l.name)}</span></td>
+      <td style="font-size:12px;color:var(--ink-soft);">${l.sections.length}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${l.sections.reduce((n,sec)=>n+sec.fields.length,0)}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${l.recordTypes && l.recordTypes.length ? esc(l.recordTypes.map(id=>recordTypeLabel(id)).join(', ')) : 'All'}</td>
+      <td>${l.isDefault ? `<span class="om-pill dflt">Default</span>` : (canEdit?`<span class="om-link" data-default-layout="${l.id}">make default</span>`:'—')}</td>
+      <td class="row-actions">${canEdit?`<span data-edit-layout="${l.id}">edit</span>${l.isDefault?'':`<span data-del-layout="${l.id}">delete</span>`}`:''}</td>
+    </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:20px;">No page layouts on ${esc(objectLabel(entity))} yet.</td></tr>`}
+    </tbody></table>
+  </div>
+  ${layouts.length ? `<div class="io-card">
+    <h3 class="om-pane-title">Preview — ${esc((layouts.find(l=>l.isDefault)||layouts[0]).name)}</h3>
+    <p class="om-pane-lead">This is the shape a ${esc(singularLabel(entity).toLowerCase())} record takes on this layout.</p>
+    ${renderLayoutPreview(entity, layouts.find(l=>l.isDefault)||layouts[0])}
+  </div>` : ''}`;
+}
+
+function renderLayoutPreview(entity, layout){
+  return layout.sections.map(sec=>`<div class="lay-section">
+    <div class="lay-section-head"><span class="lay-section-name">${esc(sec.label)}</span>
+      <span style="font-size:11px;color:var(--ink-soft);">${sec.columns} column${sec.columns===1?'':'s'} · ${sec.fields.length} field${sec.fields.length===1?'':'s'}</span></div>
+    <div class="lay-fields cols-${sec.columns}">
+      ${sec.fields.map(f=>`<div class="lay-field"><span>${esc(prettyField(f))}</span>${isFieldRequired(entity,f)?`<span class="req-dot">*</span>`:''}</div>`).join('')
+        || `<div style="font-size:12px;color:var(--ink-soft);">Empty section</div>`}
+    </div>
+  </div>`).join('') || `<div class="om-empty">This layout has no sections yet.</div>`;
+}
+
+/* ---------- Lightning Record Pages ----------
+   Where a page layout arranges fields, a record page arranges whole components
+   -- the detail panel, related lists, activity -- into regions. Templates are
+   just how many regions there are. */
+const LRP_TEMPLATES = [
+  {key:'one', label:'Header and One Region', regions:['main'], blurb:'Everything in a single wide column.'},
+  {key:'two', label:'Header and Two Regions', regions:['main','right'], blurb:'A wide main column with a narrow sidebar.'},
+  {key:'three', label:'Header and Three Regions', regions:['left','main','right'], blurb:'A sidebar either side of the main column.'},
+];
+const LRP_COMPONENTS = [
+  'Record Detail','Highlights Panel','Related Lists','Related Record','Activity Timeline',
+  'Chatter Feed','Path','Tabs','Report Chart','Rich Text','Guide Steps',
+];
+const LRP_REGION_LABELS = {left:'Left sidebar', main:'Main column', right:'Right sidebar'};
+function recordPagesFor(entity){ return state.recordPages.filter(p=>p.entity===entity); }
+function lrpTemplate(key){ return LRP_TEMPLATES.find(t=>t.key===key) || LRP_TEMPLATES[1]; }
+
+function renderObjectRecordPages(entity){
+  const pages = recordPagesFor(entity);
+  const canEdit = canEditGlobalSetup();
+  const active = pages.find(p=>p.isOrgDefault) || pages[0];
+  return `<div class="io-card">
+    <h3 class="om-pane-title">Lightning Record Pages</h3>
+    <p class="om-pane-lead">A record page is the whole screen someone sees when they open one
+      ${esc(singularLabel(entity).toLowerCase())} — not just the fields, but the panels around them.
+      Pick a template, drop components into its regions, and set one page as the org default.</p>
+    ${canEdit ? `<div class="om-pane-actions">
+      <button type="button" class="btn" data-new-recordpage="${entity}">+ New Lightning Record Page</button>
+    </div>` : `<div class="readonly-note">👁 View only — only an admin can change record pages.</div>`}
+    <table class="om-table"><thead><tr>
+      <th>Page Label</th><th>Template</th><th>Components</th><th>Activation</th><th></th>
+    </tr></thead><tbody>
+    ${pages.map(pg=>{
+      const total = Object.values(pg.regions||{}).reduce((n,list)=>n+list.length,0);
+      return `<tr>
+        <td><span class="om-link" data-edit-recordpage="${pg.id}">${esc(pg.name)}</span></td>
+        <td style="font-size:12px;color:var(--ink-soft);">${esc(lrpTemplate(pg.template).label)}</td>
+        <td style="font-size:12px;color:var(--ink-soft);">${total}</td>
+        <td>${pg.isOrgDefault ? `<span class="om-pill dflt">Org Default</span>` : (canEdit?`<span class="om-link" data-activate-recordpage="${pg.id}">activate</span>`:'—')}</td>
+        <td class="row-actions">${canEdit?`<span data-edit-recordpage="${pg.id}">edit</span><span data-del-recordpage="${pg.id}">delete</span>`:''}</td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--ink-soft);padding:20px;">No record pages on ${esc(objectLabel(entity))} yet.</td></tr>`}
+    </tbody></table>
+  </div>
+  ${active ? `<div class="io-card">
+    <h3 class="om-pane-title">Preview — ${esc(active.name)}</h3>
+    ${renderRecordPagePreview(entity, active)}
+  </div>` : ''}`;
+}
+
+function renderRecordPagePreview(entity, page){
+  const tpl = lrpTemplate(page.template);
+  return `<div class="lrp-header">${esc(singularLabel(entity))} Highlights — name, owner, key fields</div>
+  <div class="lrp-canvas t-${tpl.key}">
+    ${tpl.regions.map(region=>`<div class="lrp-region">
+      <div class="lrp-region-label">${esc(LRP_REGION_LABELS[region])}</div>
+      ${((page.regions||{})[region]||[]).map(c=>`<div class="lrp-comp"><span>${esc(c)}</span></div>`).join('')
+        || `<div style="font-size:11.5px;color:var(--ink-soft);">Empty region</div>`}
+    </div>`).join('')}
+  </div>`;
+}
+
+/* ---------- Record Types ----------
+   Record types split one object into variants -- a Wholesale order and a Retail
+   order are both Orders, but they don't want the same layout or the same
+   picklist values. Exactly one type per object is the default. */
+function recordTypesFor(entity){ return state.recordTypes.filter(rt=>rt.entity===entity); }
+function recordTypeLabel(id){
+  const rt = state.recordTypes.find(r=>r.id===id);
+  return rt ? rt.label : 'Unknown';
+}
+
+function renderObjectRecordTypes(entity){
+  const types = recordTypesFor(entity);
+  const canEdit = canEditGlobalSetup();
+  return `<div class="io-card">
+    <h3 class="om-pane-title">Record Types</h3>
+    <p class="om-pane-lead">Record types let one object behave like two. A Wholesale ${esc(singularLabel(entity).toLowerCase())}
+      and a Retail one are both ${esc(objectLabel(entity).toLowerCase())}, but each can get its own page layout and its own
+      picklist values. Every object starts with a single Master type; add more only when the two really differ.</p>
+    ${canEdit ? `<div class="om-pane-actions">
+      <button type="button" class="btn" data-new-recordtype="${entity}">+ New Record Type</button>
+    </div>` : `<div class="readonly-note">👁 View only — only an admin can change record types.</div>`}
+    <table class="om-table"><thead><tr>
+      <th>Label</th><th>API Name</th><th>Description</th><th>Page Layout</th><th>Default</th><th>Active</th><th></th>
+    </tr></thead><tbody>
+    ${types.map(rt=>`<tr>
+      <td><span class="om-link" data-edit-recordtype="${rt.id}">${esc(rt.label)}</span></td>
+      <td class="mono" style="font-size:12px;color:var(--ink-soft);">${esc(rt.apiName)}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(rt.description||'—')}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(rt.layoutId ? (state.pageLayouts.find(l=>l.id===rt.layoutId)||{}).name || 'Deleted layout' : 'Object default')}</td>
+      <td>${rt.isDefault ? `<span class="om-pill dflt">Default</span>` : (canEdit?`<span class="om-link" data-default-recordtype="${rt.id}">make default</span>`:'—')}</td>
+      <td>${rt.active ? `<span class="om-pill">Active</span>` : `<span class="om-pill off">Inactive</span>`}</td>
+      <td class="row-actions">${canEdit?`<span data-edit-recordtype="${rt.id}">edit</span><span data-del-recordtype="${rt.id}">delete</span>`:''}</td>
+    </tr>`).join('') || `<tr><td colspan="7" style="text-align:center;color:var(--ink-soft);padding:20px;">${esc(objectLabel(entity))} uses the Master record type only.</td></tr>`}
+    </tbody></table>
+  </div>`;
+}
+
+/* ---------- Object Limits ----------
+   Real counts against the ceilings this app actually enforces or would hit, so
+   the page is a usage report rather than a wall of invented numbers. */
+function renderObjectLimits(entity){
+  const rows = [
+    ['Custom fields', objectFieldCount(entity), 100],
+    ['Records', objectRecordCount(entity), 5000],
+    ['Validation rules', state.validationRules.filter(r=>r.entity===entity && r.type!=='required').length, 20],
+    ['Required-field rules', state.validationRules.filter(r=>r.entity===entity && r.type==='required').length, 40],
+    ['Dependent field rules', state.dependentFields.filter(r=>r.entity===entity).length, 20],
+    ['Relationships', relationshipsFor(entity).length, 25],
+    ['Page layouts', pageLayoutsFor(entity).length, 10],
+    ['Lightning record pages', recordPagesFor(entity).length, 10],
+    ['Record types', recordTypesFor(entity).length, 10],
+    ['Automations', state.automations.filter(a=>a.entity===entity).length, 20],
+    ['Flows', state.flows.filter(f=>f.entity===entity).length, 20],
+  ];
+  return `<div class="io-card">
+    <h3 class="om-pane-title">Object Limits</h3>
+    <p class="om-pane-lead">How much of ${esc(objectLabel(entity))} is used up. Nothing here needs action until a bar turns red.</p>
+    <table class="om-table"><thead><tr>
+      <th>Limit</th><th style="text-align:right;">Used</th><th style="text-align:right;">Max</th><th style="width:180px;">Usage</th>
+    </tr></thead><tbody>
+    ${rows.map(([label,used,max])=>{
+      const pct = Math.min(100, Math.round((used/max)*100));
+      return `<tr>
+        <td style="font-size:12.5px;font-weight:600;">${esc(label)}</td>
+        <td style="text-align:right;font-size:12px;" class="mono">${used}</td>
+        <td style="text-align:right;font-size:12px;color:var(--ink-soft);" class="mono">${max}</td>
+        <td><div class="om-bar${pct>=80?' warn':''}"><span style="width:${pct}%;"></span></div></td>
+      </tr>`;
+    }).join('')}
+    </tbody></table>
+  </div>`;
+}
+
 
 function renderObjectAccess(entity){
   if(!SHARING_ENTITIES.includes(entity)){
@@ -5225,28 +6573,33 @@ function renderObjectGuide(entity){
   </div>`;
 }
 
+/* The object page: a breadcrumb header card, then a two-pane shell whose left
+   rail scrolls on its own. Keeping the rail's height tied to the viewport is
+   what lets the full Salesforce tab list live there without the page itself
+   growing a second scrollbar. */
 function renderObjectDetail(entity){
-  return `<div class="om-crumb">
-    <span class="om-crumb-link" data-om-crumb="setup">Setup</span>
-    <span class="om-crumb-sep">&gt;</span>
-    <span class="om-crumb-link" data-om-crumb="objects">Object Manager</span>
+  return `<div class="om-detail-head">
+    <div class="om-crumb">
+      <span class="om-crumb-link" data-om-crumb="setup">Setup</span>
+      <span class="om-crumb-sep">&gt;</span>
+      <span class="om-crumb-link" data-om-crumb="objects">Object Manager</span>
+    </div>
+    <div class="om-detail-title" style="margin-bottom:0;">${esc(objectLabel(entity))}</div>
   </div>
-  <div class="om-detail-title">${esc(objectLabel(entity))}</div>
-  <div class="setup-layout">
-    <nav class="setup-sidenav">
-      ${OM_TABS.map(t=>`<button type="button" class="setup-nav-item ${state.omTab===t.key?'active':''}" data-om-tab="${t.key}">${t.label}</button>`).join('')}
+  <div class="om-shell">
+    <nav class="om-rail">
+      ${OM_TABS.map(t=>`<button type="button" class="om-rail-item ${state.omTab===t.key?'active':''}" data-om-tab="${t.key}">${t.label}</button>`).join('')}
     </nav>
-    <div class="setup-body">${renderObjectDetailBody(entity)}</div>
+    <div class="om-pane">${renderObjectDetailBody(entity)}</div>
   </div>`;
 }
 
 function renderSetupTabBody(){
-  if(state.setupTab==='roles') return renderSetupRoles();
   if(state.setupTab==='validation') return renderSetupValidation();
   if(state.setupTab==='dependent') return renderSetupDependent();
   if(state.setupTab==='required') return renderSetupRequired();
   if(state.setupTab==='automation') return renderSetupAutomation();
-  if(state.setupTab==='flows') return renderSetupFlows();
+  if(state.setupTab==='flows') return state.flowExplorer ? renderFlowExplorer() : renderSetupFlows();
   if(state.setupTab==='sharing') return renderSetupSharing();
   if(state.setupTab==='guide') return renderSetupGuide();
   if(state.setupTab==='bigdeal') return renderSetupBigDeal();
@@ -5275,9 +6628,13 @@ function renderSetup(){
   </div>`;
 }
 
+/* Setup and Administration share the staged-draft helpers (Roles is literally
+   the same renderer in both places), so a save triggered from Administration
+   must not repaint the page with Setup's markup. */
 function rerenderSetupView(){
   const c = document.getElementById('content');
   if(!c) return;
+  if(state.view==='administration'){ renderAdministrationView(); return; }
   c.innerHTML = renderSetup();
   wireSetupView();
 }
@@ -5524,11 +6881,309 @@ function renderFlowStepRow(step, idx, fields){
   </div>`;
 }
 
+/* ---------- Object Manager modals ----------
+   Each of these saves one row into a settings key and then re-renders Setup.
+   They deliberately do not use the staged Save/Cancel bar: a modal already has
+   its own explicit save, and mixing the two would give an admin two different
+   "are you sure" gestures for the same edit. */
+function apiNameFrom(label, suffix){
+  const base = String(label||'').trim().replace(/[^A-Za-z0-9]+/g,'_').replace(/^_+|_+$/g,'') || 'Custom';
+  return base + (suffix||'');
+}
+
+function openRelationshipModal(childEntity){
+  if(!canEditGlobalSetup()) return;
+  const others = SETUP_ENTITIES.filter(e=>e!==childEntity);
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">New relationship</h2>
+    <p style="font-size:12px;color:var(--ink-soft);line-height:1.6;margin:0 0 14px;">
+      You're adding a link <strong>from ${esc(objectLabel(childEntity))}</strong> to another object.
+      ${esc(objectLabel(childEntity))} holds the field; the object you pick gets a related list back.</p>
+    <div class="field"><label>Child object (holds the link)</label>
+      <input value="${esc(objectLabel(childEntity))}" disabled></div>
+    <div class="field"><label>Parent object (gets the related list)</label>
+      <select id="rl_parent">${others.map(e=>`<option value="${e}">${esc(objectLabel(e))}</option>`).join('')}</select></div>
+    <div class="field"><label>Relationship type</label>
+      <select id="rl_type">${OBJ_REL_TYPES.map(t=>`<option value="${t.key}">${esc(t.label)}</option>`).join('')}</select>
+      <div id="rl_typeHint" style="color:var(--ink-soft);font-size:11.5px;margin-top:5px;line-height:1.5;"></div></div>
+    <div class="field"><label>Field label (what the team sees on ${esc(objectLabel(childEntity))})</label>
+      <input id="rl_label" placeholder="e.g. Billing Customer"></div>
+    <div class="field"><label>API name</label>
+      <input id="rl_api" class="mono" placeholder="Auto-filled from the label"></div>
+    <div class="field"><label>Related list label (what the parent calls these records)</label>
+      <input id="rl_related" placeholder="e.g. ${esc(objectLabel(childEntity))}"></div>
+    <div class="field"><label><input type="checkbox" id="rl_required" style="margin-right:7px;">Required — a ${esc(singularLabel(childEntity).toLowerCase())} can't be saved without it</label></div>
+    <div class="field"><label>If the parent record is deleted</label>
+      <select id="rl_delete">${OBJ_REL_DELETE.map(b=>`<option value="${b.key}">${esc(b.label)}</option>`).join('')}</select></div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="rl_saveBtn">Create relationship</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+
+  const labelEl = document.getElementById('rl_label');
+  const apiEl = document.getElementById('rl_api');
+  let apiTouched = false;
+  apiEl.oninput = ()=>{ apiTouched = true; };
+  labelEl.oninput = ()=>{ if(!apiTouched) apiEl.value = apiNameFrom(labelEl.value, '__c'); };
+
+  // Master-detail is the strict end of the dial: always required, always
+  // cascade. Locking the two controls says so rather than letting an admin
+  // pick a combination the type doesn't actually allow.
+  function syncType(){
+    const type = document.getElementById('rl_type').value;
+    const master = type==='master';
+    document.getElementById('rl_typeHint').textContent = (OBJ_REL_TYPES.find(t=>t.key===type)||{}).blurb || '';
+    const req = document.getElementById('rl_required');
+    const del = document.getElementById('rl_delete');
+    if(master){ req.checked = true; req.disabled = true; del.value = 'cascade'; del.disabled = true; }
+    else { req.disabled = false; del.disabled = false; if(del.value==='cascade') del.value = 'clear'; }
+  }
+  document.getElementById('rl_type').onchange = syncType;
+  syncType();
+
+  document.getElementById('rl_saveBtn').onclick = async ()=>{
+    const label = labelEl.value.trim();
+    if(!label){ alert('Give the relationship a field label.'); return; }
+    const parentEntity = document.getElementById('rl_parent').value;
+    const type = document.getElementById('rl_type').value;
+    const apiName = apiEl.value.trim() || apiNameFrom(label, '__c');
+    if(state.relationships.some(r=>r.childEntity===childEntity && r.apiName===apiName)){
+      alert('That API name is already used on ' + objectLabel(childEntity) + '.'); return;
+    }
+    state.relationships.push({
+      id: uid(), childEntity, parentEntity, type, label, apiName,
+      relatedListLabel: document.getElementById('rl_related').value.trim() || objectLabel(childEntity),
+      required: type==='master' || document.getElementById('rl_required').checked,
+      deleteBehaviour: document.getElementById('rl_delete').value,
+      createdAt: Date.now(),
+    });
+    await saveKey(KEYS.relationships, state.relationships);
+    closeModal();
+    toast(`${label} now links ${objectLabel(childEntity)} to ${objectLabel(parentEntity)}.`);
+    rerenderSetupView();
+  };
+}
+
+function openPageLayoutModal(entity, layoutId){
+  if(!canEditGlobalSetup()) return;
+  const editing = layoutId ? state.pageLayouts.find(l=>l.id===layoutId) : null;
+  const target = editing ? editing.entity : entity;
+  // Edits work on a copy so Cancel really cancels.
+  let sections = editing ? editing.sections.map(sec=>({...sec, fields:[...sec.fields]}))
+                         : [{id:uid(), label:'Information', columns:2, fields:[]}];
+  const allFields = entityFieldsFor(target);
+  const types = recordTypesFor(target);
+
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">${editing?'Edit':'New'} page layout</h2>
+    <div class="field"><label>Layout name</label>
+      <input id="pl_name" value="${esc(editing?editing.name:singularLabel(target)+' Layout')}" placeholder="e.g. Wholesale Customer Layout"></div>
+    ${types.length ? `<div class="field"><label>Applies to record types <span style="color:var(--ink-soft);font-weight:400;">(none ticked = every record type)</span></label>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">${types.map(rt=>`<label style="font-size:12.5px;display:flex;align-items:center;gap:6px;">
+        <input type="checkbox" data-pl-rt="${rt.id}" ${editing && (editing.recordTypes||[]).includes(rt.id)?'checked':''}>${esc(rt.label)}</label>`).join('')}</div></div>` : ''}
+    <p style="font-size:11.5px;color:var(--ink-soft);margin:14px 0 6px;">Sections run top to bottom. Tick the fields that belong in each one.</p>
+    <div id="pl_sections"></div>
+    <button type="button" class="btn secondary" id="pl_addSection" style="margin-top:8px;">+ Add section</button>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="pl_saveBtn">${editing?'Save layout':'Create layout'}</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+
+  function refresh(){
+    document.getElementById('pl_sections').innerHTML = sections.map((sec,i)=>`<div class="lay-section">
+      <div class="lay-section-head">
+        <input data-pl-label="${i}" value="${esc(sec.label)}" style="flex:1;min-width:0;padding:5px 8px;font-size:12.5px;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--ink);">
+        <select data-pl-cols="${i}" style="width:auto;padding:5px 8px;font-size:12px;">
+          <option value="1" ${sec.columns===1?'selected':''}>1 column</option>
+          <option value="2" ${sec.columns===2?'selected':''}>2 columns</option>
+        </select>
+        <button type="button" class="guide-tool danger" data-pl-remove="${i}">Remove</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px 14px;padding:11px 13px;">
+        ${allFields.map(f=>`<label style="font-size:12px;display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" data-pl-field="${i}" value="${esc(f)}" ${sec.fields.includes(f)?'checked':''}>${esc(prettyField(f))}</label>`).join('')}
+      </div>
+    </div>`).join('');
+    document.querySelectorAll('[data-pl-label]').forEach(el=>{
+      el.oninput = ()=>{ sections[Number(el.dataset.plLabel)].label = el.value; };
+    });
+    document.querySelectorAll('[data-pl-cols]').forEach(el=>{
+      el.onchange = ()=>{ sections[Number(el.dataset.plCols)].columns = Number(el.value); };
+    });
+    document.querySelectorAll('[data-pl-remove]').forEach(el=>{
+      el.onclick = ()=>{ sections.splice(Number(el.dataset.plRemove),1); refresh(); };
+    });
+    document.querySelectorAll('[data-pl-field]').forEach(cb=>{
+      cb.onchange = ()=>{
+        const sec = sections[Number(cb.dataset.plField)];
+        if(cb.checked){ if(!sec.fields.includes(cb.value)) sec.fields.push(cb.value); }
+        else sec.fields = sec.fields.filter(f=>f!==cb.value);
+      };
+    });
+  }
+  document.getElementById('pl_addSection').onclick = ()=>{
+    sections.push({id:uid(), label:'New Section', columns:2, fields:[]});
+    refresh();
+  };
+  refresh();
+
+  document.getElementById('pl_saveBtn').onclick = async ()=>{
+    const name = document.getElementById('pl_name').value.trim();
+    if(!name){ alert('Give the layout a name.'); return; }
+    if(!sections.length){ alert('A layout needs at least one section.'); return; }
+    const recordTypes = Array.from(document.querySelectorAll('[data-pl-rt]:checked')).map(cb=>cb.dataset.plRt);
+    if(editing){
+      Object.assign(editing, {name, sections, recordTypes});
+    } else {
+      state.pageLayouts.push({id:uid(), entity:target, name, sections, recordTypes,
+        isDefault: !pageLayoutsFor(target).length, createdAt:Date.now()});
+    }
+    await saveKey(KEYS.pageLayouts, state.pageLayouts);
+    closeModal();
+    toast('Page layout saved.');
+    rerenderSetupView();
+  };
+}
+
+function openRecordPageModal(entity, pageId){
+  if(!canEditGlobalSetup()) return;
+  const editing = pageId ? state.recordPages.find(p=>p.id===pageId) : null;
+  const target = editing ? editing.entity : entity;
+  let template = editing ? editing.template : 'two';
+  let regions = editing ? JSON.parse(JSON.stringify(editing.regions||{}))
+                        : {main:['Record Detail','Related Lists'], right:['Activity Timeline'], left:[]};
+
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">${editing?'Edit':'New'} Lightning record page</h2>
+    <div class="field"><label>Page label</label>
+      <input id="rp_name" value="${esc(editing?editing.name:singularLabel(target)+' Record Page')}" placeholder="e.g. Customer Record Page"></div>
+    <div class="field"><label>Template</label>
+      <select id="rp_template">${LRP_TEMPLATES.map(t=>`<option value="${t.key}" ${template===t.key?'selected':''}>${esc(t.label)}</option>`).join('')}</select>
+      <div id="rp_tplHint" style="color:var(--ink-soft);font-size:11.5px;margin-top:5px;"></div></div>
+    <p style="font-size:11.5px;color:var(--ink-soft);margin:14px 0 6px;">Add components to each region. The preview updates as you go.</p>
+    <div id="rp_builder"></div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="rp_saveBtn">${editing?'Save page':'Create page'}</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+
+  function refresh(){
+    const tpl = lrpTemplate(template);
+    document.getElementById('rp_tplHint').textContent = tpl.blurb;
+    document.getElementById('rp_builder').innerHTML = `<div class="lrp-header">${esc(singularLabel(target))} Highlights</div>
+      <div class="lrp-canvas t-${tpl.key}">
+      ${tpl.regions.map(region=>`<div class="lrp-region">
+        <div class="lrp-region-label">${esc(LRP_REGION_LABELS[region])}</div>
+        ${(regions[region]||[]).map((c,i)=>`<div class="lrp-comp"><span>${esc(c)}</span><span class="x" data-rp-remove="${region}:${i}" title="Remove">✕</span></div>`).join('')}
+        <select data-rp-add="${region}" style="width:100%;padding:6px 8px;font-size:12px;margin-top:4px;">
+          <option value="">+ Add component…</option>
+          ${LRP_COMPONENTS.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}
+        </select>
+      </div>`).join('')}
+      </div>`;
+    document.querySelectorAll('[data-rp-add]').forEach(sel=>{
+      sel.onchange = ()=>{
+        if(!sel.value) return;
+        const region = sel.dataset.rpAdd;
+        regions[region] = regions[region] || [];
+        regions[region].push(sel.value);
+        refresh();
+      };
+    });
+    document.querySelectorAll('[data-rp-remove]').forEach(el=>{
+      el.onclick = ()=>{
+        const [region, idx] = el.dataset.rpRemove.split(':');
+        regions[region].splice(Number(idx),1);
+        refresh();
+      };
+    });
+  }
+  document.getElementById('rp_template').onchange = ()=>{
+    template = document.getElementById('rp_template').value;
+    // Regions the new template doesn't have keep their components in state so
+    // switching back and forth doesn't quietly throw an admin's work away.
+    lrpTemplate(template).regions.forEach(r=>{ regions[r] = regions[r] || []; });
+    refresh();
+  };
+  refresh();
+
+  document.getElementById('rp_saveBtn').onclick = async ()=>{
+    const name = document.getElementById('rp_name').value.trim();
+    if(!name){ alert('Give the record page a label.'); return; }
+    const kept = {};
+    lrpTemplate(template).regions.forEach(r=>{ kept[r] = regions[r] || []; });
+    if(editing){
+      Object.assign(editing, {name, template, regions:kept});
+    } else {
+      state.recordPages.push({id:uid(), entity:target, name, template, regions:kept,
+        isOrgDefault: !recordPagesFor(target).length, createdAt:Date.now()});
+    }
+    await saveKey(KEYS.recordPages, state.recordPages);
+    closeModal();
+    toast('Record page saved.');
+    rerenderSetupView();
+  };
+}
+
+function openRecordTypeModal(entity, typeId){
+  if(!canEditGlobalSetup()) return;
+  const editing = typeId ? state.recordTypes.find(rt=>rt.id===typeId) : null;
+  const target = editing ? editing.entity : entity;
+  const layouts = pageLayoutsFor(target);
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">${editing?'Edit':'New'} record type</h2>
+    <p style="font-size:12px;color:var(--ink-soft);line-height:1.6;margin:0 0 14px;">
+      A record type is a variant of ${esc(objectLabel(target))} — same object, different shape.</p>
+    <div class="field"><label>Label</label>
+      <input id="rt_label" value="${esc(editing?editing.label:'')}" placeholder="e.g. Wholesale"></div>
+    <div class="field"><label>API name</label>
+      <input id="rt_api" class="mono" value="${esc(editing?editing.apiName:'')}" placeholder="Auto-filled from the label"></div>
+    <div class="field"><label>Description</label>
+      <input id="rt_desc" value="${esc(editing?(editing.description||''):'')}" placeholder="When should someone pick this one?"></div>
+    <div class="field"><label>Page layout for this record type</label>
+      <select id="rt_layout"><option value="">Object default</option>
+        ${layouts.map(l=>`<option value="${l.id}" ${editing && editing.layoutId===l.id?'selected':''}>${esc(l.name)}</option>`).join('')}</select></div>
+    <div class="field"><label><input type="checkbox" id="rt_active" ${!editing || editing.active?'checked':''} style="margin-right:7px;">Active</label></div>
+    <div class="field"><label><input type="checkbox" id="rt_default" ${editing && editing.isDefault?'checked':''} style="margin-right:7px;">Make this the default record type for ${esc(objectLabel(target))}</label></div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="rt_saveBtn">${editing?'Save record type':'Create record type'}</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+
+  const labelEl = document.getElementById('rt_label');
+  const apiEl = document.getElementById('rt_api');
+  let apiTouched = !!editing;
+  apiEl.oninput = ()=>{ apiTouched = true; };
+  labelEl.oninput = ()=>{ if(!apiTouched) apiEl.value = apiNameFrom(labelEl.value); };
+
+  document.getElementById('rt_saveBtn').onclick = async ()=>{
+    const label = labelEl.value.trim();
+    if(!label){ alert('Give the record type a label.'); return; }
+    const apiName = apiEl.value.trim() || apiNameFrom(label);
+    if(state.recordTypes.some(rt=>rt.entity===target && rt.apiName===apiName && rt.id!==(editing&&editing.id))){
+      alert('That API name is already used on ' + objectLabel(target) + '.'); return;
+    }
+    const makeDefault = document.getElementById('rt_default').checked;
+    const payload = {
+      label, apiName,
+      description: document.getElementById('rt_desc').value.trim(),
+      layoutId: document.getElementById('rt_layout').value || '',
+      active: document.getElementById('rt_active').checked,
+    };
+    if(editing) Object.assign(editing, payload);
+    else state.recordTypes.push({id:uid(), entity:target, isDefault:false, createdAt:Date.now(), ...payload});
+    // Exactly one default per object, so setting one clears the rest.
+    if(makeDefault){
+      const id = editing ? editing.id : state.recordTypes[state.recordTypes.length-1].id;
+      state.recordTypes.forEach(rt=>{ if(rt.entity===target) rt.isDefault = rt.id===id; });
+    } else if(editing && editing.isDefault){
+      editing.isDefault = false;
+    }
+    await saveKey(KEYS.recordTypes, state.recordTypes);
+    closeModal();
+    toast('Record type saved.');
+    rerenderSetupView();
+  };
+}
+
 function openFlowModal(){
   flowBuilderSteps = [];
   document.getElementById('modalBody').innerHTML = `<h2 class="display">New flow</h2>
     <div class="field"><label>Flow name</label><input id="fl_name" placeholder="e.g. Welcome new customers"></div>
-    <div class="field"><label>Runs when this object is created</label><select id="fl_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}">${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
+    <div class="field"><label>Object</label><select id="fl_entity">${SETUP_ENTITIES.map(e=>`<option value="${e}">${esc(EXPORT_SHEETS.find(s=>s.key===e).label)}</option>`).join('')}</select></div>
+    <div class="field"><label>Runs when</label><select id="fl_trigger">${FLOW_TRIGGERS.map(t=>`<option value="${t.key}">${esc(t.label)}</option>`).join('')}</select></div>
     <p style="font-size:11.5px;color:var(--ink-soft);margin:10px 0 2px;">Steps run in order: every condition must pass, then every action runs.</p>
     <div class="flow-steps" id="flowStepsWrap"></div>
     <div style="display:flex;gap:8px;margin:10px 0 4px;">
@@ -5571,7 +7226,8 @@ function openFlowModal(){
     const name = document.getElementById('fl_name').value.trim();
     if(!name){ alert('Give the flow a name.'); return; }
     if(!flowBuilderSteps.length){ alert('Add at least one condition or action.'); return; }
-    const flow = { id:uid(), name, entity: document.getElementById('fl_entity').value, steps: flowBuilderSteps };
+    const flow = { id:uid(), name, entity: document.getElementById('fl_entity').value,
+      trigger: document.getElementById('fl_trigger').value, steps: flowBuilderSteps };
     state.flows.push(flow);
     await saveKey(KEYS.flows, state.flows);
     closeModal();
@@ -5659,12 +7315,20 @@ function wireSetupView(){
     rerenderSetupView();
   };
   document.querySelectorAll('[data-setup-tab]').forEach(btn=>{
-    btn.onclick = ()=> navAway(()=>{ state.setupTab = btn.dataset.setupTab; });
+    btn.onclick = ()=> navAway(()=>{
+      state.setupTab = btn.dataset.setupTab;
+      // Leaving Flows closes the explorer, so coming back lands on the list
+      // rather than reopening a half-finished wizard.
+      state.flowExplorer = false;
+      state.flowWizard = null;
+    });
   });
   document.querySelectorAll('[data-setup-section]').forEach(btn=>{
     btn.onclick = ()=> navAway(()=>{
       state.setupSection = btn.dataset.setupSection;
       if(state.setupSection === 'objects') state.omObject = null;
+      state.flowExplorer = false;
+      state.flowWizard = null;
     });
   });
   document.querySelectorAll('[data-om-open]').forEach(el=>{
@@ -5774,6 +7438,225 @@ function wireSetupView(){
       rerenderSetupView();
     };
   });
+  /* --- Object Manager: relationships, layouts, record pages, record types --- */
+  document.querySelectorAll('[data-new-rel]').forEach(el=>{
+    el.onclick = ()=> openRelationshipModal(el.dataset.newRel);
+  });
+  document.querySelectorAll('[data-del-rel]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
+      const rel = state.relationships.find(r=>r.id===el.dataset.delRel);
+      if(!rel) return;
+      if(!confirm(`Delete the "${rel.label}" relationship between ${objectLabel(rel.childEntity)} and ${objectLabel(rel.parentEntity)}?`)) return;
+      state.relationships = state.relationships.filter(r=>r.id!==el.dataset.delRel);
+      await saveKey(KEYS.relationships, state.relationships);
+      rerenderSetupView();
+    };
+  });
+  document.querySelectorAll('[data-new-layout]').forEach(el=>{
+    el.onclick = ()=> openPageLayoutModal(el.dataset.newLayout);
+  });
+  document.querySelectorAll('[data-edit-layout]').forEach(el=>{
+    el.onclick = ()=> openPageLayoutModal(null, el.dataset.editLayout);
+  });
+  document.querySelectorAll('[data-seed-layout]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
+      state.pageLayouts.push(makeDefaultLayout(el.dataset.seedLayout));
+      await saveKey(KEYS.pageLayouts, state.pageLayouts);
+      toast('Default layout generated from the object\'s fields.');
+      rerenderSetupView();
+    };
+  });
+  document.querySelectorAll('[data-default-layout]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
+      const layout = state.pageLayouts.find(l=>l.id===el.dataset.defaultLayout);
+      if(!layout) return;
+      state.pageLayouts.forEach(l=>{ if(l.entity===layout.entity) l.isDefault = l.id===layout.id; });
+      await saveKey(KEYS.pageLayouts, state.pageLayouts);
+      rerenderSetupView();
+    };
+  });
+  document.querySelectorAll('[data-del-layout]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
+      if(!confirm('Delete this page layout?')) return;
+      const gone = state.pageLayouts.find(l=>l.id===el.dataset.delLayout);
+      state.pageLayouts = state.pageLayouts.filter(l=>l.id!==el.dataset.delLayout);
+      // Record types pointing at it fall back to the object default rather
+      // than keeping a dangling id.
+      let typesTouched = false;
+      state.recordTypes.forEach(rt=>{ if(rt.layoutId===el.dataset.delLayout){ rt.layoutId=''; typesTouched = true; } });
+      await saveKey(KEYS.pageLayouts, state.pageLayouts);
+      if(typesTouched) await saveKey(KEYS.recordTypes, state.recordTypes);
+      if(gone && gone.isDefault){
+        const next = state.pageLayouts.find(l=>l.entity===gone.entity);
+        if(next){ next.isDefault = true; await saveKey(KEYS.pageLayouts, state.pageLayouts); }
+      }
+      rerenderSetupView();
+    };
+  });
+  document.querySelectorAll('[data-new-recordpage]').forEach(el=>{
+    el.onclick = ()=> openRecordPageModal(el.dataset.newRecordpage);
+  });
+  document.querySelectorAll('[data-edit-recordpage]').forEach(el=>{
+    el.onclick = ()=> openRecordPageModal(null, el.dataset.editRecordpage);
+  });
+  document.querySelectorAll('[data-activate-recordpage]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
+      const page = state.recordPages.find(pg=>pg.id===el.dataset.activateRecordpage);
+      if(!page) return;
+      state.recordPages.forEach(pg=>{ if(pg.entity===page.entity) pg.isOrgDefault = pg.id===page.id; });
+      await saveKey(KEYS.recordPages, state.recordPages);
+      toast(`${page.name} is now the org default.`);
+      rerenderSetupView();
+    };
+  });
+  document.querySelectorAll('[data-del-recordpage]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
+      if(!confirm('Delete this record page?')) return;
+      const gone = state.recordPages.find(pg=>pg.id===el.dataset.delRecordpage);
+      state.recordPages = state.recordPages.filter(pg=>pg.id!==el.dataset.delRecordpage);
+      if(gone && gone.isOrgDefault){
+        const next = state.recordPages.find(pg=>pg.entity===gone.entity);
+        if(next) next.isOrgDefault = true;
+      }
+      await saveKey(KEYS.recordPages, state.recordPages);
+      rerenderSetupView();
+    };
+  });
+  document.querySelectorAll('[data-new-recordtype]').forEach(el=>{
+    el.onclick = ()=> openRecordTypeModal(el.dataset.newRecordtype);
+  });
+  document.querySelectorAll('[data-edit-recordtype]').forEach(el=>{
+    el.onclick = ()=> openRecordTypeModal(null, el.dataset.editRecordtype);
+  });
+  document.querySelectorAll('[data-default-recordtype]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
+      const rt = state.recordTypes.find(x=>x.id===el.dataset.defaultRecordtype);
+      if(!rt) return;
+      state.recordTypes.forEach(x=>{ if(x.entity===rt.entity) x.isDefault = x.id===rt.id; });
+      await saveKey(KEYS.recordTypes, state.recordTypes);
+      rerenderSetupView();
+    };
+  });
+  document.querySelectorAll('[data-del-recordtype]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
+      if(!confirm('Delete this record type?')) return;
+      const gone = state.recordTypes.find(rt=>rt.id===el.dataset.delRecordtype);
+      state.recordTypes = state.recordTypes.filter(rt=>rt.id!==el.dataset.delRecordtype);
+      if(gone && gone.isDefault){
+        const next = state.recordTypes.find(rt=>rt.entity===gone.entity);
+        if(next) next.isDefault = true;
+      }
+      // Layouts that were scoped to it go back to applying everywhere.
+      let layoutsTouched = false;
+      state.pageLayouts.forEach(l=>{
+        if((l.recordTypes||[]).includes(el.dataset.delRecordtype)){
+          l.recordTypes = l.recordTypes.filter(id=>id!==el.dataset.delRecordtype);
+          layoutsTouched = true;
+        }
+      });
+      await saveKey(KEYS.recordTypes, state.recordTypes);
+      if(layoutsTouched) await saveKey(KEYS.pageLayouts, state.pageLayouts);
+      rerenderSetupView();
+    };
+  });
+  /* --- Flow Trigger Explorer --- */
+  const fteOpen = document.getElementById('openFlowExplorerBtn');
+  if(fteOpen) fteOpen.onclick = ()=> navAway(()=>{ state.flowExplorer = true; state.flowWizard = null; });
+  document.querySelectorAll('[data-fte-crumb]').forEach(el=>{
+    el.onclick = ()=>{
+      if(state.flowWizard && !confirm('Leave the flow builder? Nothing has been saved yet.')) return;
+      state.flowExplorer = false;
+      state.flowWizard = null;
+      if(el.dataset.fteCrumb === 'setup'){ state.setupSection = 'home'; state.omObject = null; }
+      rerenderSetupView();
+    };
+  });
+  const fteStart = document.getElementById('fteStartBtn');
+  if(fteStart) fteStart.onclick = ()=>{ state.flowWizard = newFlowWizard(); rerenderSetupView(); };
+  document.querySelectorAll('[data-fte-new]').forEach(el=>{
+    el.onclick = ()=>{ state.flowWizard = newFlowWizard(el.dataset.fteNew); state.flowWizard.step = 1; rerenderSetupView(); };
+  });
+  document.querySelectorAll('[data-fte-object]').forEach(el=>{
+    el.onclick = ()=>{
+      const wiz = state.flowWizard;
+      // Switching object mid-build invalidates every field reference, so the
+      // steps that name fields start clean rather than pointing at fields the
+      // new object doesn't have.
+      if(wiz.entity !== el.dataset.fteObject){ wiz.conditions = []; wiz.actions = []; }
+      wiz.entity = el.dataset.fteObject;
+      rerenderSetupView();
+    };
+  });
+  document.querySelectorAll('[data-fte-trigger]').forEach(el=>{
+    el.onclick = ()=>{ state.flowWizard.trigger = el.dataset.fteTrigger; rerenderSetupView(); };
+  });
+  document.querySelectorAll('[data-fte-cond]').forEach(el=>{
+    el.addEventListener('change', ()=>{
+      state.flowWizard.conditions[Number(el.dataset.fteCond)][el.dataset.ftePart] = el.value;
+    });
+  });
+  document.querySelectorAll('[data-fte-cond-remove]').forEach(el=>{
+    el.onclick = ()=>{ state.flowWizard.conditions.splice(Number(el.dataset.fteCondRemove),1); rerenderSetupView(); };
+  });
+  const fteAddCond = document.getElementById('fteAddCond');
+  if(fteAddCond) fteAddCond.onclick = ()=>{
+    const fields = entityFieldsFor(state.flowWizard.entity);
+    state.flowWizard.conditions.push({type:'condition', field:fields[0]||'', op:'equals', value:''});
+    rerenderSetupView();
+  };
+  document.querySelectorAll('[data-fte-act]').forEach(el=>{
+    el.addEventListener('change', ()=>{
+      const act = state.flowWizard.actions[Number(el.dataset.fteAct)];
+      act[el.dataset.ftePart] = el.value;
+      if(el.dataset.ftePart==='action') rerenderSetupView();
+    });
+  });
+  document.querySelectorAll('[data-fte-act-remove]').forEach(el=>{
+    el.onclick = ()=>{ state.flowWizard.actions.splice(Number(el.dataset.fteActRemove),1); rerenderSetupView(); };
+  });
+  const fteAddAct = document.getElementById('fteAddAct');
+  if(fteAddAct) fteAddAct.onclick = ()=>{
+    state.flowWizard.actions.push({type:'action', action:'create_task', taskTitle:'', taskDueInDays:''});
+    rerenderSetupView();
+  };
+  const fteBack = document.getElementById('fteBackBtn');
+  if(fteBack) fteBack.onclick = ()=>{
+    const wiz = state.flowWizard;
+    if(wiz.step===0) state.flowWizard = null;
+    else wiz.step--;
+    rerenderSetupView();
+  };
+  const fteNext = document.getElementById('fteNextBtn');
+  if(fteNext) fteNext.onclick = ()=>{
+    const wiz = state.flowWizard;
+    if(wiz.step===3 && !wiz.actions.length){ alert('A flow needs at least one action before you can review it.'); return; }
+    if(wiz.step===3 && !wiz.name) wiz.name = suggestFlowName(wiz);
+    wiz.step++;
+    rerenderSetupView();
+  };
+  const fteSave = document.getElementById('fteSaveBtn');
+  if(fteSave) fteSave.onclick = async ()=>{
+    const wiz = state.flowWizard;
+    const name = (document.getElementById('fte_name').value || '').trim();
+    if(!name){ alert('Give the flow a name so the team knows what it does.'); return; }
+    if(!wiz.actions.length){ alert('A flow needs at least one action.'); return; }
+    state.flows.push({
+      id: uid(), name, entity: wiz.entity, trigger: wiz.trigger,
+      steps: wiz.conditions.map(c=>({...c, type:'condition'})).concat(wiz.actions.map(a=>({...a, type:'action'}))),
+    });
+    await saveKey(KEYS.flows, state.flows);
+    state.flowWizard = null;
+    toast(`"${name}" is live on ${objectLabel(wiz.entity)}.`);
+    rerenderSetupView();
+  };
   const addFlowBtn = document.getElementById('addFlowBtn');
   if(addFlowBtn) addFlowBtn.onclick = openFlowModal;
   document.querySelectorAll('[data-del-flow]').forEach(el=>{
@@ -5981,6 +7864,49 @@ function attachContentHandlers(){
   document.querySelectorAll('[data-eml-preview]').forEach(el=>{
     el.onclick = ()=>{ openEmailPreview(el.dataset.emlPreview); };
   });
+  const tplNew = document.getElementById('tplNewBtn');
+  if(tplNew) tplNew.onclick = ()=> openTemplateModal();
+  const tplStarter = document.getElementById('tplStarterBtn');
+  if(tplStarter) tplStarter.onclick = async ()=>{
+    if(!canEditEmailTemplates()) return;
+    TEMPLATE_STARTERS.forEach(t=>{
+      state.emailTemplates.push({id:uid(), createdAt:Date.now(), updatedAt:Date.now(),
+        updatedBy:state.currentUser||'', locale:'en', ...t});
+    });
+    await saveKey(KEYS.emailTemplates, state.emailTemplates);
+    toast('Four starter templates added — edit them to sound like you.');
+    render();
+  };
+  document.querySelectorAll('[data-tpl-preview]').forEach(el=>{
+    el.onclick = ()=> openTemplatePreviewModal(el.dataset.tplPreview);
+  });
+  document.querySelectorAll('[data-tpl-edit]').forEach(el=>{
+    el.onclick = ()=> openTemplateModal(el.dataset.tplEdit);
+  });
+  document.querySelectorAll('[data-tpl-copy]').forEach(el=>{
+    el.onclick = ()=> openTemplateModal(null, el.dataset.tplCopy);
+  });
+  document.querySelectorAll('[data-tpl-del]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!canEditEmailTemplates()) return;
+      const tpl = state.emailTemplates.find(t=>t.id===el.dataset.tplDel);
+      if(!tpl || !confirm(`Delete the template "${tpl.name}"?`)) return;
+      state.emailTemplates = state.emailTemplates.filter(t=>t.id!==el.dataset.tplDel);
+      await saveKey(KEYS.emailTemplates, state.emailTemplates);
+      render();
+    };
+  });
+  const tplFilter = document.getElementById('tplFilter');
+  if(tplFilter){
+    tplFilter.oninput = ()=>{
+      state.emailTemplateFilter = tplFilter.value;
+      render();
+      // render() rebuilds the input, so focus and caret have to be put back or
+      // the box loses the cursor after every keystroke.
+      const again = document.getElementById('tplFilter');
+      if(again){ again.focus(); again.selectionStart = again.selectionEnd = again.value.length; }
+    };
+  }
   document.querySelectorAll('[data-tkt-status]').forEach(el=>{
     el.onchange = ()=>{ setTicketStatus(el.dataset.tktStatus, el.value); };
   });
@@ -6966,9 +8892,11 @@ async function saveModal(table, id){
     }
     if(table!=='team'){
       await runAutomations(table, savedObj);
-      await runFlows(table, savedObj);
     }
   }
+  // Outside the wasNew block on purpose: a flow can be triggered by an edit,
+  // not just a create, and which one it wants is what its trigger says.
+  if(table!=='team') await runFlows(table, savedObj, wasNew ? 'created' : 'updated');
 }
 
 /* ---------- Init ---------- */
@@ -7001,8 +8929,13 @@ const QS_GROUPS = [
       tint:'var(--setup-blue-soft)', ink:'var(--setup-blue)',
       icon:`<path d="M2.5 12S5.9 5.8 12 5.8 21.5 12 21.5 12 18.1 18.2 12 18.2 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.9"/>` },
   ]},
+  { label:'Access', rows:[
+    { view:'administration', adminTab:'profiles', title:'Profiles & Permission Sets', desc:'Who can open what, in one place.',
+      tint:'var(--setup-blue-soft)', ink:'var(--setup-blue)',
+      icon:`<path d="M12 3.2 20 6.6v5.1c0 4.4-3.3 7.9-8 9.1-4.7-1.2-8-4.7-8-9.1V6.6z"/><path d="M9.2 11.9l2 2 3.6-3.8"/>` },
+  ]},
   { label:'Company', rows:[
-    { tab:'roles', title:'Roles', desc:'Set what each team member can reach.',
+    { view:'administration', adminTab:'roles', title:'Roles', desc:'Set what each team member can reach.',
       tint:'var(--amber-soft)', ink:'var(--amber)',
       icon:`<circle cx="9.4" cy="8.4" r="3.5"/><path d="M2.8 20c.6-3.5 3.2-5.6 6.6-5.6S15.4 16.5 16 20"/><path d="M16.2 5.5a3.4 3.4 0 0 1 0 6.6"/>` },
     { tab:'bigdeal', title:'Big Deal Alerts', desc:'Get told when a deal over your threshold lands.',
@@ -7019,7 +8952,7 @@ function renderQuickSettings(){
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13.4 4.4h6.2v6.2"/><path d="M19.6 4.4 11 13"/><path d="M18 14.4v4.1a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 18.5V7.5A1.5 1.5 0 0 1 5.5 6h4.1"/></svg>
   </button>` + QS_GROUPS.map(g=>`<div class="qs-group">
     <div class="qs-group-label">${esc(g.label)}</div>
-    ${g.rows.map(r=>`<button type="button" class="qs-row" data-qs-tab="${r.tab}">
+    ${g.rows.map(r=>`<button type="button" class="qs-row" ${r.view?`data-qs-view="${r.view}" data-qs-admin-tab="${r.adminTab||''}"`:`data-qs-tab="${r.tab}"`}>
       <span class="qs-ico" style="--qs-tint:${r.tint};--qs-ink:${r.ink};"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${r.icon}</svg></span>
       <span style="min-width:0;">
         <span class="qs-row-title" style="display:block;">${esc(r.title)}</span>
@@ -7034,6 +8967,14 @@ function openQuickSettings(){
   document.getElementById('qsPanel').classList.add('show');
   document.getElementById('qsPanel').setAttribute('aria-hidden','false');
   document.getElementById('qsBackdrop').classList.add('show');
+  document.querySelectorAll('[data-qs-view]').forEach(btn=>{
+    btn.onclick = ()=>{
+      closeQuickSettings();
+      if(btn.dataset.qsAdminTab) state.adminTab = btn.dataset.qsAdminTab;
+      if(state.view !== btn.dataset.qsView){ state.returnView = state.view; state.view = btn.dataset.qsView; }
+      render();
+    };
+  });
   document.querySelectorAll('[data-qs-tab]').forEach(btn=>{
     btn.onclick = ()=>{
       closeQuickSettings();
