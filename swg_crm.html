@@ -496,6 +496,33 @@
   .setup-nav-item{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:7px;border:none;background:none;color:var(--ink-soft);cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;transition:background .15s,color .15s;}
   .setup-nav-item:hover{background:var(--setup-blue-soft);color:var(--setup-blue);}
   .setup-nav-item.active{background:var(--setup-blue);color:#fff;}
+  /* Company Settings lives in the side-nav as a collapsible group, the way
+     the Settings tree in the reference CRM does: the header opens and closes
+     it, the children are the real pages. */
+  .setup-nav-group{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:9px 12px;border-radius:7px;border:none;background:none;color:var(--ink);cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;transition:background .15s,color .15s;}
+  .setup-nav-group:hover{background:var(--setup-blue-soft);color:var(--setup-blue);}
+  .setup-nav-group.has-active{color:var(--setup-blue);}
+  .setup-nav-chevron{width:13px;height:13px;flex-shrink:0;transition:transform .15s;}
+  .setup-nav-group.open .setup-nav-chevron{transform:rotate(90deg);}
+  .setup-nav-children{display:flex;flex-direction:column;gap:2px;margin:2px 0 6px;}
+  .setup-nav-children .setup-nav-item{padding-left:26px;font-size:12.5px;}
+  /* Company Settings pages: paired fields, day rows and the small preview
+     cards each page uses to show what the setting actually does. */
+  .cs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 16px;}
+  .cs-section-title{font-size:13px;font-weight:600;margin:18px 0 10px;padding-top:14px;border-top:1px solid var(--border);}
+  .cs-section-title:first-child{margin-top:0;padding-top:0;border-top:none;}
+  .cs-check{display:flex;align-items:flex-start;gap:9px;cursor:pointer;font-size:12.5px;color:var(--ink);margin-bottom:10px;line-height:1.45;}
+  .cs-check input{width:auto;margin-top:2px;flex-shrink:0;}
+  .cs-check span small{display:block;color:var(--ink-soft);font-size:11.5px;}
+  .cs-day{display:grid;grid-template-columns:34px 96px 1fr 1fr;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);}
+  .cs-day:last-child{border-bottom:none;}
+  .cs-day input[type=time]{width:100%;padding:6px 8px;border-radius:6px;border:1px solid var(--border);font-family:inherit;font-size:12.5px;background:var(--cream);color:var(--ink);}
+  .cs-note{background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-size:12px;color:var(--ink-soft);line-height:1.5;margin-bottom:14px;}
+  .cs-preview{background:var(--cream);border:1px dashed var(--border);border-radius:8px;padding:12px 14px;font-size:12.5px;color:var(--ink);margin-top:6px;}
+  .cs-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+  .cs-pill.on{background:var(--sage-soft);color:var(--sage);}
+  .cs-pill.off{background:var(--clay-soft);color:var(--clay);}
+  .cs-langs{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:2px 14px;}
   .setup-body{flex:1;min-width:0;}
   /* Setup section tabs (Home / Object Manager) */
   .setup-sections{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:20px;}
@@ -1178,7 +1205,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, setupTab:'roles', setupSection:'home', omObject:null, omTab:'details', omFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0 };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, companySettings:{}, companyNavOpen:false, setupTab:'roles', setupSection:'home', omObject:null, omTab:'details', omFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0 };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -1519,6 +1546,7 @@ const KEYS = {
   schemaLayout: 'schemaLayout',
   objectVisibility: 'objectVisibility',
   fieldVisibility: 'fieldVisibility',
+  companySettings: 'companySettings',
 };
 
 /* Which slice of state each key holds, so a reload can restore them. */
@@ -1528,6 +1556,7 @@ const SETTING_DEFAULTS = {
   sharingRules: {}, quickActionPrefs: {}, bigDealAlerts: [],
   bigDealAlert: { enabled:false, threshold:10000, currency:'USD' },
   schemaLayout: {}, objectVisibility: {}, fieldVisibility: {},
+  companySettings: {},
 };
 
 /* Saves one settings key. Errors are logged rather than thrown: a failed
@@ -5047,6 +5076,487 @@ function renderSetupBigDeal(){
   </div>`;
 }
 
+/* ---------- Company Settings ----------
+   The company-wide half of Setup: the facts every other feature reads but no
+   single object owns -- who the company is, when it is open, which months its
+   financial year covers, which days it is closed, what language and units it
+   speaks, and which address it answers on.
+
+   All eight pages share one `companySettings` row, deep-merged over the
+   defaults below by companySettings(), so a page added later still reads a
+   row saved before it existed. Each page saves explicitly, like Big Deal
+   Alerts, rather than writing on every keystroke. */
+const CS_PAGES = [
+  {key:'cs_hours',    section:'hours',    label:'Business Hours'},
+  {key:'cs_info',     section:'info',     label:'Company Information'},
+  {key:'cs_privacy',  section:'privacy',  label:'Data Protection and Privacy'},
+  {key:'cs_fiscal',   section:'fiscal',   label:'Fiscal Year'},
+  {key:'cs_holidays', section:'holidays', label:'Holidays'},
+  {key:'cs_language', section:'language', label:'Language Settings'},
+  {key:'cs_maps',     section:'maps',     label:'Maps and Location Settings'},
+  {key:'cs_domain',   section:'domain',   label:'My Domain'},
+];
+const CS_KEYS = CS_PAGES.map(p=>p.key);
+const CS_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const CS_DAYS = [
+  {key:'sun', label:'Sunday'}, {key:'mon', label:'Monday'}, {key:'tue', label:'Tuesday'},
+  {key:'wed', label:'Wednesday'}, {key:'thu', label:'Thursday'}, {key:'fri', label:'Friday'},
+  {key:'sat', label:'Saturday'},
+];
+const CS_TIMEZONES = ['Asia/Jerusalem','Asia/Kolkata','Asia/Bangkok','Asia/Tokyo','Asia/Hong_Kong','Europe/London','Europe/Prague','Europe/Berlin','America/New_York','America/Los_Angeles','Australia/Sydney','UTC'];
+const CS_LANGUAGES = [
+  {code:'en', label:'English'}, {code:'he', label:'Hebrew'}, {code:'hi', label:'Hindi'},
+  {code:'th', label:'Thai'}, {code:'ja', label:'Japanese'}, {code:'cs', label:'Czech'},
+  {code:'fr', label:'French'}, {code:'es', label:'Spanish'}, {code:'de', label:'German'},
+  {code:'ar', label:'Arabic'},
+];
+const CS_DATE_FORMATS = [
+  {key:'dd/mm/yyyy', label:'31/12/2025 (day first)'},
+  {key:'mm/dd/yyyy', label:'12/31/2025 (month first)'},
+  {key:'yyyy-mm-dd', label:'2025-12-31 (ISO)'},
+];
+const CS_LAWFUL_BASES = ['Consent','Legitimate interest','Contract','Legal obligation','Vital interest','Public interest'];
+const CS_MAP_PROVIDERS = [
+  {key:'google', label:'Google Maps'},
+  {key:'osm', label:'OpenStreetMap'},
+  {key:'mapbox', label:'Mapbox'},
+];
+const CS_DOMAIN_REDIRECTS = [
+  {key:'prompt', label:'Warn, then redirect to the new domain'},
+  {key:'redirect', label:'Redirect straight to the new domain'},
+  {key:'none', label:'Do not redirect old links'},
+];
+
+const CS_DEFAULTS = {
+  info: {
+    name:'Siddha Wellness Group', division:'Essential Oils', primaryContact:'Daniel',
+    phone:'', email:'customer@siddhayogaweb.com', website:'https://siddhayogaweb.com',
+    street:'', city:'', region:'', postcode:'', country:'Israel',
+    currency:'USD', timeZone:'Asia/Jerusalem', description:'',
+  },
+  hours: {
+    timeZone:'Asia/Jerusalem', alwaysOpen:false, respectHolidays:true,
+    days: {
+      sun:{open:true,  from:'09:00', to:'18:00'},
+      mon:{open:true,  from:'09:00', to:'18:00'},
+      tue:{open:true,  from:'09:00', to:'18:00'},
+      wed:{open:true,  from:'09:00', to:'18:00'},
+      thu:{open:true,  from:'09:00', to:'18:00'},
+      fri:{open:false, from:'09:00', to:'13:00'},
+      sat:{open:false, from:'09:00', to:'18:00'},
+    },
+  },
+  privacy: {
+    enabled:false, lawfulBasis:'Consent', consentOnLeads:true, consentOnContacts:true,
+    trackEmailConsent:true, retentionMonths:24, policyUrl:'', dpoEmail:'',
+  },
+  fiscal: { type:'standard', startMonth:0, naming:'start' },
+  holidays: { list:[] },
+  language: { defaultLang:'en', enabled:['en','he'], dateFormat:'dd/mm/yyyy', weekStart:0, timeFormat:'24' },
+  maps: { enabled:true, provider:'google', defaultCountry:'Israel', units:'km', autocomplete:true, showOnRecords:true },
+  domain: { subdomain:'swg', rootDomain:'siddhayogaweb.com', deployed:false, redirect:'prompt', loginHeading:'Siddha Wellness Group CRM', hideFooter:false },
+};
+
+/* Merges the stored row over the defaults one level deep (two for the day map
+   inside Business Hours), so a missing field falls back instead of blanking. */
+function companySettings(){
+  const stored = state.companySettings || {};
+  const out = {};
+  for(const [section, defaults] of Object.entries(CS_DEFAULTS)){
+    out[section] = {...defaults, ...(stored[section]||{})};
+  }
+  out.hours.days = {...CS_DEFAULTS.hours.days};
+  const storedDays = (stored.hours && stored.hours.days) || {};
+  CS_DAYS.forEach(d=>{ out.hours.days[d.key] = {...CS_DEFAULTS.hours.days[d.key], ...(storedDays[d.key]||{})}; });
+  out.holidays.list = Array.isArray(out.holidays.list) ? out.holidays.list : [];
+  out.language.enabled = Array.isArray(out.language.enabled) ? out.language.enabled : ['en'];
+  return out;
+}
+function csPageSection(tabKey){ return (CS_PAGES.find(p=>p.key===tabKey)||{}).section; }
+function csPageLabel(tabKey){ return (CS_PAGES.find(p=>p.key===tabKey)||{}).label || 'Company Settings'; }
+
+/* Writes one or more sections back. Everything the pages change goes through
+   here so there is a single place that touches the settings row. */
+async function saveCompanySettings(patch, message){
+  if(!canEditGlobalSetup()) return;
+  const current = companySettings();
+  const next = {...current};
+  for(const [section, values] of Object.entries(patch||{})){
+    next[section] = {...(current[section]||{}), ...values};
+  }
+  state.companySettings = next;
+  await saveKey(KEYS.companySettings, next);
+  toast(message || 'Company settings saved.');
+  rerenderSetupView();
+}
+
+/* Reads every [data-cs] control on the open page into a {section:{field:value}}
+   patch, so each page's Save button needs no per-field wiring. */
+function csCollectForm(){
+  const patch = {};
+  document.querySelectorAll('#setupTabBody [data-cs]').forEach(el=>{
+    const [section, field] = el.dataset.cs.split('.');
+    if(!section || !field) return;
+    let value;
+    if(el.type === 'checkbox') value = el.checked;
+    else if(el.type === 'number' || el.dataset.csNum) value = Number(el.value) || 0;
+    else value = el.value;
+    (patch[section] = patch[section] || {})[field] = value;
+  });
+  document.querySelectorAll('#setupTabBody [data-cs-day]').forEach(el=>{
+    const [day, field] = el.dataset.csDay.split('.');
+    const hours = patch.hours = patch.hours || {};
+    const days = hours.days = hours.days || {};
+    const row = days[day] = days[day] || {};
+    row[field] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+  const multi = {};
+  document.querySelectorAll('#setupTabBody [data-cs-multi]').forEach(el=>{
+    const [section, field] = el.dataset.csMulti.split('.');
+    const bucket = multi[section+'.'+field] = multi[section+'.'+field] || {section, field, values:[]};
+    if(el.checked) bucket.values.push(el.value);
+  });
+  Object.values(multi).forEach(b=>{ (patch[b.section] = patch[b.section] || {})[b.field] = b.values; });
+  if(patch.hours && patch.hours.days){
+    const merged = companySettings().hours.days;
+    CS_DAYS.forEach(d=>{ merged[d.key] = {...merged[d.key], ...(patch.hours.days[d.key]||{})}; });
+    patch.hours.days = merged;
+  }
+  return patch;
+}
+
+function csSaveButton(){
+  return canEditGlobalSetup()
+    ? `<button class="btn" id="csSaveBtn" style="margin-top:8px;">Save</button>`
+    : '';
+}
+function csReadonlyNote(){
+  return canEditGlobalSetup() ? '' : `<div class="readonly-note">&#128065; View only &mdash; only an admin can change company settings.</div>`;
+}
+function csDisabled(){ return canEditGlobalSetup() ? '' : 'disabled'; }
+/* numeric:true marks a select whose values are numbers (a month index, a day
+   index). Without it the collector hands back the string "3" and arithmetic
+   like startMonth + 2 concatenates instead of adding. */
+function csSelect(path, options, selected, numeric){
+  return `<select data-cs="${path}" ${numeric?'data-cs-num="1"':''} ${csDisabled()}>${options.map(o=>{
+    const value = typeof o === 'string' ? o : o.key;
+    const label = typeof o === 'string' ? o : o.label;
+    return `<option value="${esc(value)}" ${String(selected)===String(value)?'selected':''}>${esc(label)}</option>`;
+  }).join('')}</select>`;
+}
+function csText(path, value, type, extra){
+  return `<input type="${type||'text'}" data-cs="${path}" value="${esc(value ?? '')}" ${extra||''} ${csDisabled()}>`;
+}
+function csCheck(path, checked, title, sub){
+  return `<label class="cs-check"><input type="checkbox" data-cs="${path}" ${checked?'checked':''} ${csDisabled()}>
+    <span>${esc(title)}${sub?`<small>${esc(sub)}</small>`:''}</span></label>`;
+}
+
+/* ---- Company Information ---- */
+function renderCsInfo(){
+  const c = companySettings().info;
+  return `<div class="io-card">
+    <p>The company record the rest of the CRM quotes from: invoices, order confirmations and the email footer all read these details, so the address here is the address a customer sees.</p>
+    ${csReadonlyNote()}
+    <div class="cs-section-title">Identity</div>
+    <div class="cs-grid">
+      <div class="field"><label>Company name</label>${csText('info.name', c.name)}</div>
+      <div class="field"><label>Division / brand</label>${csText('info.division', c.division)}</div>
+      <div class="field"><label>Primary contact</label>${csSelect('info.primaryContact', teamNames(), c.primaryContact)}</div>
+      <div class="field"><label>Phone</label>${csText('info.phone', c.phone, 'tel')}</div>
+      <div class="field"><label>Support email</label>${csText('info.email', c.email, 'email')}</div>
+      <div class="field"><label>Website</label>${csText('info.website', c.website, 'url')}</div>
+    </div>
+    <div class="cs-section-title">Address</div>
+    <div class="field"><label>Street</label>${csText('info.street', c.street)}</div>
+    <div class="cs-grid">
+      <div class="field"><label>City</label>${csText('info.city', c.city)}</div>
+      <div class="field"><label>State / region</label>${csText('info.region', c.region)}</div>
+      <div class="field"><label>Postcode</label>${csText('info.postcode', c.postcode)}</div>
+      <div class="field"><label>Country</label>${csSelect('info.country', COUNTRIES, c.country)}</div>
+    </div>
+    <div class="cs-section-title">Locale defaults</div>
+    <div class="cs-grid">
+      <div class="field"><label>Default currency</label>${csSelect('info.currency', CURRENCIES.map(x=>({key:x, label:`${x} (${CURRENCY_SYMBOLS[x]||''})`})), c.currency)}</div>
+      <div class="field"><label>Time zone</label>${csSelect('info.timeZone', CS_TIMEZONES, c.timeZone)}</div>
+    </div>
+    <div class="field"><label>Description</label><textarea data-cs="info.description" ${csDisabled()}>${esc(c.description||'')}</textarea></div>
+    ${csSaveButton()}
+  </div>`;
+}
+
+/* ---- Business Hours ---- */
+function csMinutesOfDay(hhmm){
+  const [h, m] = String(hhmm||'00:00').split(':').map(Number);
+  return (h||0) * 60 + (m||0);
+}
+/* "Open now" is answered in the company's own time zone, not the browser's --
+   a rep in India reading the badge should see Israel's answer. */
+function csNowInZone(zone){
+  try{
+    const parts = new Intl.DateTimeFormat('en-GB', {timeZone:zone, weekday:'short', hour:'2-digit', minute:'2-digit', hour12:false, year:'numeric', month:'2-digit', day:'2-digit'})
+      .formatToParts(new Date());
+    const get = t => (parts.find(p=>p.type===t)||{}).value;
+    const dayMap = {Sun:'sun', Mon:'mon', Tue:'tue', Wed:'wed', Thu:'thu', Fri:'fri', Sat:'sat'};
+    return {
+      day: dayMap[get('weekday')] || 'sun',
+      minutes: Number(get('hour'))*60 + Number(get('minute')),
+      iso: `${get('year')}-${get('month')}-${get('day')}`,
+    };
+  }catch(e){
+    const d = new Date();
+    return {day: CS_DAYS[d.getDay()].key, minutes: d.getHours()*60 + d.getMinutes(), iso: d.toISOString().slice(0,10)};
+  }
+}
+function csHolidayToday(iso){
+  const list = companySettings().holidays.list;
+  return list.find(h=>{
+    if(!h.date) return false;
+    return h.recurring ? h.date.slice(5) === iso.slice(5) : h.date === iso;
+  });
+}
+function csOpenNow(){
+  const h = companySettings().hours;
+  const now = csNowInZone(h.timeZone);
+  if(h.respectHolidays){
+    const holiday = csHolidayToday(now.iso);
+    if(holiday) return {open:false, why:`Closed &mdash; ${esc(holiday.name||'holiday')}`};
+  }
+  if(h.alwaysOpen) return {open:true, why:'Open &mdash; open 24/7'};
+  const day = h.days[now.day];
+  if(!day || !day.open) return {open:false, why:`Closed &mdash; not a working day`};
+  const from = csMinutesOfDay(day.from), to = csMinutesOfDay(day.to);
+  if(now.minutes >= from && now.minutes < to) return {open:true, why:`Open &mdash; until ${esc(day.to)}`};
+  return {open:false, why:`Closed &mdash; opens ${esc(day.from)}`};
+}
+function renderCsHours(){
+  const h = companySettings().hours;
+  const status = csOpenNow();
+  return `<div class="io-card">
+    <p>When the team is reachable. Task due dates, the fulfillment centre's "stale order" warnings and the automated emails all treat these as working hours, so an order that lands on a closed day is not counted late.</p>
+    ${csReadonlyNote()}
+    <div class="cs-preview" style="margin:0 0 16px;">Right now: <span class="cs-pill ${status.open?'on':'off'}">${status.why}</span></div>
+    <div class="cs-grid">
+      <div class="field"><label>Time zone</label>${csSelect('hours.timeZone', CS_TIMEZONES, h.timeZone)}</div>
+    </div>
+    ${csCheck('hours.alwaysOpen', h.alwaysOpen, 'Open 24 hours, 7 days a week', 'Ignores the per-day hours below.')}
+    ${csCheck('hours.respectHolidays', h.respectHolidays, 'Treat company holidays as closed days', 'Uses the list on the Holidays page.')}
+    <div class="cs-section-title">Working days</div>
+    <div>${CS_DAYS.map(d=>{
+      const row = h.days[d.key];
+      return `<div class="cs-day">
+        <input type="checkbox" data-cs-day="${d.key}.open" ${row.open?'checked':''} ${csDisabled()}>
+        <span style="font-size:12.5px;">${d.label}</span>
+        <input type="time" data-cs-day="${d.key}.from" value="${esc(row.from)}" ${csDisabled()}>
+        <input type="time" data-cs-day="${d.key}.to" value="${esc(row.to)}" ${csDisabled()}>
+      </div>`;
+    }).join('')}</div>
+    ${csSaveButton()}
+  </div>`;
+}
+
+/* ---- Data Protection and Privacy ---- */
+function renderCsPrivacy(){
+  const p = companySettings().privacy;
+  return `<div class="io-card">
+    <p>Consent and retention, in one place. Turning this on adds a consent question to the forms you pick and records the lawful basis on every new person, so a customer asking "what do you hold on me?" has an answer.</p>
+    ${csReadonlyNote()}
+    ${csCheck('privacy.enabled', p.enabled, 'Enable data protection and privacy handling', 'Off means nothing below is applied.')}
+    <div class="cs-section-title">Lawful basis</div>
+    <div class="cs-grid">
+      <div class="field"><label>Default lawful basis</label>${csSelect('privacy.lawfulBasis', CS_LAWFUL_BASES, p.lawfulBasis)}</div>
+      <div class="field"><label>Keep personal data for (months)</label>${csText('privacy.retentionMonths', p.retentionMonths, 'number', 'min="1" step="1"')}</div>
+    </div>
+    ${csCheck('privacy.consentOnLeads', p.consentOnLeads, 'Ask for consent on new leads')}
+    ${csCheck('privacy.consentOnContacts', p.consentOnContacts, 'Ask for consent on new contacts')}
+    ${csCheck('privacy.trackEmailConsent', p.trackEmailConsent, 'Record marketing-email consent separately', 'A customer can agree to order updates and refuse marketing.')}
+    <div class="cs-section-title">Who to point people at</div>
+    <div class="cs-grid">
+      <div class="field"><label>Privacy policy URL</label>${csText('privacy.policyUrl', p.policyUrl, 'url')}</div>
+      <div class="field"><label>Data protection contact email</label>${csText('privacy.dpoEmail', p.dpoEmail, 'email')}</div>
+    </div>
+    <div class="cs-note">Retention is a reminder, not a shredder: records past ${Number(p.retentionMonths)||0} months are flagged for review rather than deleted, so nothing disappears without someone deciding.</div>
+    ${csSaveButton()}
+  </div>`;
+}
+
+/* ---- Fiscal Year ---- */
+function csFiscalQuarters(startMonth){
+  const start = Number(startMonth) || 0;
+  return [0,1,2,3].map(q=>{
+    const first = (start + q*3) % 12;
+    const last = (start + q*3 + 2) % 12;
+    return {label:`Q${q+1}`, range:`${CS_MONTHS[first]} &ndash; ${CS_MONTHS[last]}`};
+  });
+}
+function csFiscalYearLabel(f){
+  const now = new Date();
+  const year = now.getFullYear();
+  const start = Number(f.startMonth) || 0;
+  if(f.type === 'standard' || start === 0) return String(year);
+  const started = now.getMonth() >= start ? year : year - 1;
+  return f.naming === 'end' ? String(started + 1) : `${started}–${String(started+1).slice(2)}`;
+}
+function renderCsFiscal(){
+  const f = companySettings().fiscal;
+  const startMonth = f.type === 'standard' ? 0 : f.startMonth;
+  return `<div class="io-card">
+    <p>Which twelve months count as one year for revenue. The dashboard, the finance panel and every "this year" comparison read it from here &mdash; change it and the quarters move with it.</p>
+    ${csReadonlyNote()}
+    <div class="cs-grid">
+      <div class="field"><label>Fiscal year type</label>${csSelect('fiscal.type', [{key:'standard', label:'Standard (January – December)'}, {key:'custom', label:'Custom start month'}], f.type)}</div>
+      <div class="field"><label>Starts in</label>${csSelect('fiscal.startMonth', CS_MONTHS.map((m,i)=>({key:i, label:m})), startMonth, true)}</div>
+      <div class="field"><label>Name the year after its</label>${csSelect('fiscal.naming', [{key:'start', label:'Starting year (2025–26)'}, {key:'end', label:'Ending year (2026)'}], f.naming)}</div>
+    </div>
+    <div class="cs-preview">
+      <div style="font-weight:600;margin-bottom:6px;">Current fiscal year: ${esc(csFiscalYearLabel({...f, startMonth}))}</div>
+      ${csFiscalQuarters(startMonth).map(q=>`<div>${q.label} &middot; ${q.range}</div>`).join('')}
+    </div>
+    ${csSaveButton()}
+  </div>`;
+}
+
+/* ---- Holidays ---- */
+function renderCsHolidays(){
+  const list = [...companySettings().holidays.list].sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));
+  const canEdit = canEditGlobalSetup();
+  return `<div class="io-card">
+    <p>Days the company is closed. Business Hours can treat these as non-working days, so an order arriving on a holiday is not chased for being slow.</p>
+    ${csReadonlyNote()}
+    ${canEdit ? `<div class="cs-grid" style="align-items:end;">
+      <div class="field"><label>Holiday</label><input type="text" id="csHolidayName" placeholder="Rosh Hashanah"></div>
+      <div class="field"><label>Date</label><input type="date" id="csHolidayDate"></div>
+      <div class="field"><label>Repeats</label><select id="csHolidayRecurring"><option value="yes">Every year, same date</option><option value="no">This year only</option></select></div>
+      <div class="field"><button class="btn" id="csHolidayAddBtn" style="width:100%;">Add holiday</button></div>
+    </div>` : ''}
+    <table><thead><tr><th>Holiday</th><th>Date</th><th>Repeats</th><th></th></tr></thead><tbody>
+    ${list.map(h=>`<tr>
+      <td style="font-size:12.5px;font-weight:600;">${esc(h.name)}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(h.date||'—')}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${h.recurring ? 'Every year' : 'Once'}</td>
+      <td class="row-actions">${canEdit ? `<span data-del-holiday="${esc(h.id)}">remove</span>` : ''}</td>
+    </tr>`).join('') || `<tr><td colspan="4" style="text-align:center;color:var(--ink-soft);padding:20px;">No holidays yet.</td></tr>`}
+    </tbody></table>
+  </div>`;
+}
+
+/* ---- Language Settings ---- */
+function renderCsLanguage(){
+  const l = companySettings().language;
+  return `<div class="io-card">
+    <p>The languages the CRM writes in. The default is what a customer gets when nothing else is known about them; the enabled list is what the automated emails offer &mdash; today those templates ship in English and Hebrew.</p>
+    ${csReadonlyNote()}
+    <div class="cs-grid">
+      <div class="field"><label>Default language</label>${csSelect('language.defaultLang', CS_LANGUAGES.map(x=>({key:x.code, label:x.label})), l.defaultLang)}</div>
+      <div class="field"><label>Date format</label>${csSelect('language.dateFormat', CS_DATE_FORMATS, l.dateFormat)}</div>
+      <div class="field"><label>Time format</label>${csSelect('language.timeFormat', [{key:'24', label:'24-hour (18:30)'}, {key:'12', label:'12-hour (6:30 PM)'}], l.timeFormat)}</div>
+      <div class="field"><label>Week starts on</label>${csSelect('language.weekStart', CS_DAYS.map((d,i)=>({key:i, label:d.label})), l.weekStart, true)}</div>
+    </div>
+    <div class="cs-section-title">Languages the team can use</div>
+    <div class="cs-langs">${CS_LANGUAGES.map(x=>`<label class="cs-check">
+      <input type="checkbox" data-cs-multi="language.enabled" value="${x.code}" ${l.enabled.includes(x.code)?'checked':''} ${csDisabled()}>
+      <span>${esc(x.label)}</span></label>`).join('')}</div>
+    ${csSaveButton()}
+  </div>`;
+}
+
+/* ---- Maps and Location Settings ---- */
+function renderCsMaps(){
+  const m = companySettings().maps;
+  return `<div class="io-card">
+    <p>How addresses are shown and checked. With maps on, an address on a customer or order gets a map link and a tidy-up suggestion as it is typed &mdash; which is what keeps shipping addresses from arriving half-written.</p>
+    ${csReadonlyNote()}
+    ${csCheck('maps.enabled', m.enabled, 'Enable maps and location features')}
+    ${csCheck('maps.autocomplete', m.autocomplete, 'Suggest addresses while typing')}
+    ${csCheck('maps.showOnRecords', m.showOnRecords, 'Show a map on customer and order records')}
+    <div class="cs-section-title">Defaults</div>
+    <div class="cs-grid">
+      <div class="field"><label>Map provider</label>${csSelect('maps.provider', CS_MAP_PROVIDERS, m.provider)}</div>
+      <div class="field"><label>Default country</label>${csSelect('maps.defaultCountry', COUNTRIES, m.defaultCountry)}</div>
+      <div class="field"><label>Distance units</label>${csSelect('maps.units', [{key:'km', label:'Kilometres'}, {key:'mi', label:'Miles'}], m.units)}</div>
+    </div>
+    <div class="cs-note">Address suggestions are sent to ${esc((CS_MAP_PROVIDERS.find(p=>p.key===m.provider)||{}).label || 'the map provider')} as they are typed. Turn autocomplete off if an address should never leave the CRM.</div>
+    ${csSaveButton()}
+  </div>`;
+}
+
+/* ---- My Domain ---- */
+function csDomainUrl(d){
+  const sub = String(d.subdomain||'').trim().toLowerCase().replace(/[^a-z0-9-]/g,'');
+  return `https://${sub || 'your-company'}.${String(d.rootDomain||'').trim() || 'example.com'}`;
+}
+function renderCsDomain(){
+  const d = companySettings().domain;
+  const canEdit = canEditGlobalSetup();
+  return `<div class="io-card">
+    <p>The address the team logs in at. Until it is deployed the domain is just reserved &mdash; deploying is what sends everyone to the new link, so do it once the name is final.</p>
+    ${csReadonlyNote()}
+    <div class="cs-grid">
+      <div class="field"><label>Subdomain</label>${csText('domain.subdomain', d.subdomain, 'text', 'placeholder="swg"')}</div>
+      <div class="field"><label>Root domain</label>${csText('domain.rootDomain', d.rootDomain)}</div>
+    </div>
+    <div class="cs-preview" style="margin-bottom:14px;">
+      Your CRM will answer at <strong>${esc(csDomainUrl(d))}</strong>
+      <span class="cs-pill ${d.deployed?'on':'off'}" style="margin-left:8px;">${d.deployed ? 'Deployed' : 'Not deployed'}</span>
+    </div>
+    <div class="field"><label>Old links should</label>${csSelect('domain.redirect', CS_DOMAIN_REDIRECTS, d.redirect)}</div>
+    <div class="cs-section-title">Login page</div>
+    <div class="field"><label>Heading shown above the login box</label>${csText('domain.loginHeading', d.loginHeading)}</div>
+    ${csCheck('domain.hideFooter', d.hideFooter, 'Hide the default footer on the login page')}
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      ${csSaveButton()}
+      ${canEdit ? `<button class="btn secondary" id="csDomainDeployBtn" style="margin-top:8px;">${d.deployed ? 'Roll back to the old address' : 'Deploy to the whole team'}</button>` : ''}
+    </div>
+  </div>`;
+}
+
+function renderCompanySettingsPage(tabKey){
+  if(tabKey === 'cs_info') return renderCsInfo();
+  if(tabKey === 'cs_hours') return renderCsHours();
+  if(tabKey === 'cs_privacy') return renderCsPrivacy();
+  if(tabKey === 'cs_fiscal') return renderCsFiscal();
+  if(tabKey === 'cs_holidays') return renderCsHolidays();
+  if(tabKey === 'cs_language') return renderCsLanguage();
+  if(tabKey === 'cs_maps') return renderCsMaps();
+  if(tabKey === 'cs_domain') return renderCsDomain();
+  return '';
+}
+
+/* Every Company Settings page shares the same Save button, plus the two pages
+   that also act on a row of their own. */
+function wireCompanySettings(){
+  const saveBtn = document.getElementById('csSaveBtn');
+  if(saveBtn) saveBtn.onclick = ()=> saveCompanySettings(csCollectForm(), `${csPageLabel(state.setupTab)} saved.`);
+
+  const addHoliday = document.getElementById('csHolidayAddBtn');
+  if(addHoliday) addHoliday.onclick = async ()=>{
+    const name = document.getElementById('csHolidayName').value.trim();
+    const date = document.getElementById('csHolidayDate').value;
+    if(!name || !date){ toast('A holiday needs a name and a date.'); return; }
+    const list = [...companySettings().holidays.list, {
+      id: uid(), name, date,
+      recurring: document.getElementById('csHolidayRecurring').value === 'yes',
+    }];
+    await saveCompanySettings({holidays:{list}}, 'Holiday added.');
+  };
+  document.querySelectorAll('[data-del-holiday]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
+      const list = companySettings().holidays.list.filter(h=>h.id !== el.dataset.delHoliday);
+      await saveCompanySettings({holidays:{list}}, 'Holiday removed.');
+    };
+  });
+
+  const deployBtn = document.getElementById('csDomainDeployBtn');
+  if(deployBtn) deployBtn.onclick = async ()=>{
+    const form = csCollectForm();
+    const deployed = !companySettings().domain.deployed;
+    const domain = {...(form.domain||{}), deployed};
+    if(deployed && !String(domain.subdomain||'').trim()){ toast('Pick a subdomain first.'); return; }
+    await saveCompanySettings({...form, domain}, deployed ? 'Domain deployed to the team.' : 'Rolled back to the old address.');
+  };
+}
+
 /* ---------- Object Manager ----------
    One place to see every object and open its own settings, instead of hunting
    through nine global tabs to find the three rules that touch Deals. Each
@@ -5241,6 +5751,7 @@ function renderObjectDetail(entity){
 }
 
 function renderSetupTabBody(){
+  if(CS_KEYS.includes(state.setupTab)) return renderCompanySettingsPage(state.setupTab);
   if(state.setupTab==='roles') return renderSetupRoles();
   if(state.setupTab==='validation') return renderSetupValidation();
   if(state.setupTab==='dependent') return renderSetupDependent();
@@ -5258,8 +5769,17 @@ function renderSetupSection(){
   if(state.setupSection === 'objects'){
     return state.omObject ? renderObjectDetail(state.omObject) : renderObjectManagerList();
   }
+  const companyActive = CS_KEYS.includes(state.setupTab);
+  const companyOpen = state.companyNavOpen || companyActive;
   return `<div class="setup-layout">
     <nav class="setup-sidenav">
+      <button type="button" class="setup-nav-group ${companyOpen?'open':''} ${companyActive?'has-active':''}" data-setup-group="company" aria-expanded="${companyOpen}">
+        <svg class="setup-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+        Company Settings
+      </button>
+      ${companyOpen ? `<div class="setup-nav-children">
+        ${CS_PAGES.map(pg=>`<button type="button" class="setup-nav-item ${state.setupTab===pg.key?'active':''}" data-setup-tab="${pg.key}">${pg.label}</button>`).join('')}
+      </div>` : ''}
       ${SETUP_TABS.map(t=>`<button type="button" class="setup-nav-item ${state.setupTab===t.key?'active':''}" data-setup-tab="${t.key}">${t.label}</button>`).join('')}
     </nav>
     <div class="setup-body" id="setupTabBody">${renderSetupTabBody()}</div>
@@ -5661,6 +6181,14 @@ function wireSetupView(){
   document.querySelectorAll('[data-setup-tab]').forEach(btn=>{
     btn.onclick = ()=> navAway(()=>{ state.setupTab = btn.dataset.setupTab; });
   });
+  const groupBtn = document.querySelector('[data-setup-group="company"]');
+  if(groupBtn) groupBtn.onclick = ()=>{
+    // Collapsing the group it is standing in would strand the open page, so
+    // an active child keeps it open until you navigate elsewhere.
+    if(CS_KEYS.includes(state.setupTab)) return;
+    state.companyNavOpen = !state.companyNavOpen;
+    rerenderSetupView();
+  };
   document.querySelectorAll('[data-setup-section]').forEach(btn=>{
     btn.onclick = ()=> navAway(()=>{
       state.setupSection = btn.dataset.setupSection;
@@ -5695,6 +6223,7 @@ function wireSetupView(){
     state.omObject = null;
   });
   if(state.setupTab==='schema') wireSchemaVisualizer();
+  if(CS_KEYS.includes(state.setupTab)) wireCompanySettings();
   document.querySelectorAll('.setup-save-btn').forEach(btn=>{ btn.onclick = saveSetupDraft; });
   document.querySelectorAll('.setup-cancel-btn').forEach(btn=>{ btn.onclick = cancelSetupDraft; });
   document.querySelectorAll('[data-hide-object]').forEach(cb=>{
@@ -7002,6 +7531,12 @@ const QS_GROUPS = [
       icon:`<path d="M2.5 12S5.9 5.8 12 5.8 21.5 12 21.5 12 18.1 18.2 12 18.2 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.9"/>` },
   ]},
   { label:'Company', rows:[
+    { tab:'cs_info', title:'Company Information', desc:'Name, address and the defaults every invoice quotes.',
+      tint:'var(--setup-blue-soft)', ink:'var(--setup-blue)',
+      icon:`<path d="M3.6 20.4h16.8"/><path d="M5.6 20.4V6.2l6.4-2.6 6.4 2.6v14.2"/><path d="M9.4 10.2h1.6M13 10.2h1.6M9.4 14h1.6M13 14h1.6"/>` },
+    { tab:'cs_hours', title:'Business Hours', desc:'When the team is open, and which days are closed.',
+      tint:'var(--olive-soft)', ink:'var(--olive)',
+      icon:`<circle cx="12" cy="12" r="8.6"/><path d="M12 7.2V12l3.2 1.9"/>` },
     { tab:'roles', title:'Roles', desc:'Set what each team member can reach.',
       tint:'var(--amber-soft)', ink:'var(--amber)',
       icon:`<circle cx="9.4" cy="8.4" r="3.5"/><path d="M2.8 20c.6-3.5 3.2-5.6 6.6-5.6S15.4 16.5 16 20"/><path d="M16.2 5.5a3.4 3.4 0 0 1 0 6.6"/>` },
