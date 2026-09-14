@@ -1309,7 +1309,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, companySettings:{}, companyNavOpen:true, setupTab:'validation', setupSection:'home', omObject:null, omTab:'details', omFilter:'', recordTypes:[], pageLayouts:[], recordPages:[], relationships:[], profiles:[], permissionSets:[], permissionSetGroups:[], publicGroups:[], emailTemplates:[], adminTab:'profiles', adminReturnView:'dashboard', flowExplorer:false, flowWizard:null, emailTemplateFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0 };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, companySettings:{}, companyNavOpen:true, setupTab:'automation', setupSection:'home', omObject:null, omTab:'details', omSection:'objects', omFilter:'', recordTypes:[], pageLayouts:[], recordPages:[], relationships:[], profiles:[], permissionSets:[], permissionSetGroups:[], publicGroups:[], emailTemplates:[], adminTab:'profiles', adminReturnView:'dashboard', flowExplorer:false, flowWizard:null, emailTemplateFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0 };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -4779,6 +4779,7 @@ function renderTeam(){
    the UI as well as in this comment.
    ================================================================ */
 const ADMIN_TABS = [
+  {key:'users', label:'Users', blurb:'The people with a seat in the CRM.'},
   {key:'profiles', label:'Profiles', blurb:'The baseline. Every person has exactly one.'},
   {key:'permsets', label:'Permission Sets', blurb:'Extra access laid on top of a profile.'},
   {key:'permsetgroups', label:'Permission Set Groups', blurb:'Several permission sets, assigned as one.'},
@@ -4837,6 +4838,7 @@ function renderAdministration(){
 }
 
 function renderAdministrationBody(tab){
+  if(tab==='users') return renderAdminUsers();
   if(tab==='permsets') return renderPermissionSets();
   if(tab==='permsetgroups') return renderPermissionSetGroups();
   if(tab==='roles') return renderAdminRoles();
@@ -4847,6 +4849,39 @@ function renderAdministrationBody(tab){
 function adminIntro(tab){
   const t = ADMIN_TABS.find(x=>x.key===tab);
   return `<p class="om-pane-lead">${esc(t?t.blurb:'')}</p>`;
+}
+
+/* Users is the account list: who exists, how to reach them, and what they are
+   carrying. Roles stays its own screen -- this one is about the person, that
+   one about where they sit. */
+function renderAdminUsers(){
+  const canEdit = isAdmin();
+  const canDel = canDeleteUsers();
+  return `<div class="io-card">
+    <h3 class="om-pane-title">Users</h3>
+    <p class="om-pane-lead">Everyone with a seat in the CRM. Adding someone here makes them pickable as a
+      record owner, a task assignee and a payee, so this is the first stop when a new person joins.</p>
+    ${canEdit ? `<div class="om-pane-actions"><button type="button" class="btn" id="admNewUser">+ New User</button></div>`
+              : `<div class="readonly-note">👁 View only — only an admin or co-admin can add or edit users.</div>`}
+    ${state.team.length ? `<table><thead><tr>
+      <th>Name</th><th>Email</th><th>Role</th><th style="text-align:right;">Open deals</th><th style="text-align:right;">Open tasks</th><th></th>
+    </tr></thead><tbody>
+    ${state.team.map(t=>{
+      const openDeals = state.deals.filter(d=>d.owner===t.name && d.stage!=='Won' && d.stage!=='Lost').length;
+      const openTasks = state.tasks.filter(x=>x.owner===t.name && x.status!=='Done').length;
+      return `<tr>
+        <td style="font-size:12.5px;font-weight:600;">${esc(t.name)}${t.name===FULL_ADMIN?` <span class="om-pill">Owner</span>`:''}</td>
+        <td style="font-size:12px;color:var(--ink-soft);">${esc(t.email||'—')}</td>
+        <td style="font-size:12px;color:var(--ink-soft);">${esc(roleFor(t.name))}</td>
+        <td style="text-align:right;font-size:12px;">${openDeals}</td>
+        <td style="text-align:right;font-size:12px;">${openTasks}</td>
+        <td class="row-actions">${canEdit?`<span data-edit-user="${t.id}">edit</span>`:''}${(canDel && t.name!==FULL_ADMIN)?`<span data-del-user="${t.id}">delete</span>`:''}</td>
+      </tr>`;
+    }).join('')}
+    </tbody></table>` : `<div class="om-empty">No users yet.</div>`}
+    <div class="readonly-note" style="margin-top:14px;">Only ${esc(FULL_ADMIN)} can delete a user — everything they own stays on the records, so removing
+      an account is a decision rather than a cleanup.</div>
+  </div>`;
 }
 
 function renderProfiles(){
@@ -5148,6 +5183,21 @@ function wireAdministration(){
       renderAdministrationView();
     };
   });
+  const newUser = document.getElementById('admNewUser');
+  if(newUser) newUser.onclick = ()=> startAddRecord('team');
+  document.querySelectorAll('[data-edit-user]').forEach(el=>{
+    el.onclick = ()=>{ if(isAdmin()) openModal('team', el.dataset.editUser); };
+  });
+  document.querySelectorAll('[data-del-user]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!canDeleteUsers()) return alert('Only ' + FULL_ADMIN + ' can delete team members.');
+      if(!confirm('Delete this user?')) return;
+      const id = el.dataset.delUser;
+      state.team = state.team.filter(x=>x.id!==id);
+      renderAdministrationView();
+      await dbDelete('team', id);
+    };
+  });
   const newProfile = document.getElementById('admNewProfile');
   if(newProfile) newProfile.onclick = ()=> openAccessModal('profile');
   document.querySelectorAll('[data-edit-profile]').forEach(el=>{
@@ -5202,17 +5252,16 @@ function wireAdministration(){
 /* ---------- Setup: roles, validation rules, automation, sharing ---------- */
 /* Roles, profiles, permission sets and public groups used to sit in this list.
    They are people-shaped settings rather than object-shaped ones, so they now
-   live in Administration, reached from the sidebar instead of through Setup. */
+   live in Administration, reached from the sidebar instead of through Setup.
+   Required Fields, Validation Rules, Dependent Fields and the Schema
+   Visualizer left too: they configure objects, so they sit under Object
+   Manager, in the same rail as the object list. */
 const SETUP_TABS = [
-  {key:'validation', label:'Validation Rules'},
-  {key:'dependent', label:'Dependent Fields'},
-  {key:'required', label:'Required Fields'},
   {key:'automation', label:'Automation'},
   {key:'flows', label:'Flows'},
   {key:'sharing', label:'Sharing Rules'},
   {key:'guide', label:'Hands-on Guide'},
   {key:'bigdeal', label:'Big Deal Alerts'},
-  {key:'schema', label:'Schema Visualizer'},
   {key:'visibility', label:'Object &amp; Field Visibility'},
 ];
 const SETUP_ENTITIES = ['contacts','leads','customers','distributors','suppliers','deals','tasks','invoices','payments'];
@@ -6583,28 +6632,45 @@ const OM_TABS = [
   {key:'automation', label:'Automation'},
   {key:'guide', label:'Hands-on Guide'},
 ];
+/* The Object Manager rail: the object list first, then the four tools that
+   configure objects across the board. Opening one object swaps the whole pane
+   for that object's page, which has its own rail (OM_TABS). */
+const OM_SECTIONS = [
+  {key:'objects', label:'Objects'},
+  {key:'required', label:'Required Fields'},
+  {key:'validation', label:'Validation Rules'},
+  {key:'dependent', label:'Dependent Fields'},
+  {key:'schema', label:'Schema Visualizer'},
+];
 const OM_STACK_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 20.8 7.7 12 12.2 3.2 7.7z"/><path d="M3.2 12 12 16.5l8.8-4.5"/><path d="M3.2 16.3 12 20.8l8.8-4.5"/></svg>`;
 
 function objectLabel(entity){ return EXPORT_SHEETS.find(s=>s.key===entity)?.label || entity; }
 function objectFieldCount(entity){ return entityFieldsFor(entity).length; }
 function objectRecordCount(entity){ return Array.isArray(state[entity]) ? state[entity].length : 0; }
 
-function renderObjectManagerList(){
-  const q = (state.omFilter||'').trim().toLowerCase();
-  const rows = SETUP_ENTITIES.filter(e=>!q || objectLabel(e).toLowerCase().includes(q) || e.includes(q));
+function renderObjectManagerHead(sec){
+  const onList = sec === 'objects';
+  const active = OM_SECTIONS.find(t=>t.key===sec);
   return `<div class="om-head-card">
     <div class="om-head-icon">${OM_STACK_ICON}</div>
     <div style="flex:1;min-width:0;">
       <div class="om-eyebrow">Setup</div>
       <div class="om-head-title">Object Manager</div>
-      <div class="om-head-sub">${SETUP_ENTITIES.length} items, sorted by label</div>
+      <div class="om-head-sub">${onList
+        ? `${SETUP_ENTITIES.length} items, sorted by label`
+        : `${esc(active?active.label:'')} — across every object`}</div>
     </div>
-    <div class="om-head-tools">
+    ${onList ? `<div class="om-head-tools">
       <input id="omQuickFind" class="om-quickfind" placeholder="Quick Find" value="${esc(state.omFilter||'')}">
-      <button type="button" class="btn secondary" id="omSchemaBtn">Schema Builder</button>
-    </div>
-  </div>
-  <div class="io-card" style="padding-top:6px;">
+      <button type="button" class="btn secondary" id="omSchemaBtn">Schema Visualizer</button>
+    </div>` : ''}
+  </div>`;
+}
+
+function renderObjectManagerList(){
+  const q = (state.omFilter||'').trim().toLowerCase();
+  const rows = SETUP_ENTITIES.filter(e=>!q || objectLabel(e).toLowerCase().includes(q) || e.includes(q));
+  return `<div class="io-card" style="padding-top:6px;">
     <table class="om-table"><thead><tr>
       <th>Label</th><th>API Name</th><th>Type</th><th style="text-align:right;">Fields</th><th style="text-align:right;">Records</th>
       <th style="text-align:right;">Layouts</th><th style="text-align:right;">Record Types</th><th>Visibility</th>
@@ -7106,24 +7172,41 @@ function renderObjectDetail(entity){
 
 function renderSetupTabBody(){
   if(CS_KEYS.includes(state.setupTab)) return renderCompanySettingsPage(state.setupTab);
-  if(state.setupTab==='validation') return renderSetupValidation();
-  if(state.setupTab==='dependent') return renderSetupDependent();
-  if(state.setupTab==='required') return renderSetupRequired();
   if(state.setupTab==='automation') return renderSetupAutomation();
   if(state.setupTab==='flows') return state.flowExplorer ? renderFlowExplorer() : renderSetupFlows();
   if(state.setupTab==='sharing') return renderSetupSharing();
   if(state.setupTab==='guide') return renderSetupGuide();
   if(state.setupTab==='bigdeal') return renderSetupBigDeal();
-  if(state.setupTab==='schema') return renderSetupSchema();
   if(state.setupTab==='visibility') return renderSetupVisibility();
   return '';
 }
+/* The Object Manager pane: its own rail, and either the object list, one of the
+   cross-object tools, or -- once an object is opened -- that object's page. */
+function renderObjectManagerSection(){
+  if(state.omObject) return renderObjectDetail(state.omObject);
+  const sec = OM_SECTIONS.some(t=>t.key===state.omSection) ? state.omSection : 'objects';
+  let body;
+  if(sec==='required') body = renderSetupRequired();
+  else if(sec==='validation') body = renderSetupValidation();
+  else if(sec==='dependent') body = renderSetupDependent();
+  else if(sec==='schema') body = renderSetupSchema();
+  else body = renderObjectManagerList();
+  return renderObjectManagerHead(sec) + `<div class="om-shell">
+    <nav class="om-rail">
+      ${OM_SECTIONS.map(t=>`<button type="button" class="om-rail-item ${sec===t.key?'active':''}" data-om-section="${t.key}">${t.label}</button>`).join('')}
+    </nav>
+    <div class="om-pane">${body}</div>
+  </div>`;
+}
 function renderSetupSection(){
-  if(state.setupSection === 'objects'){
-    return state.omObject ? renderObjectDetail(state.omObject) : renderObjectManagerList();
-  }
+  if(state.setupSection === 'objects') return renderObjectManagerSection();
+  // A tab that moved to Object Manager would otherwise leave the pane blank.
+  if(!CS_KEYS.includes(state.setupTab) && !SETUP_TABS.some(t=>t.key===state.setupTab)) state.setupTab = SETUP_TABS[0].key;
   const companyActive = CS_KEYS.includes(state.setupTab);
-  const companyOpen = state.companyNavOpen || companyActive;
+  // The group closes even while one of its pages is open: the point of the
+  // arrow is a shorter list. The header keeps the active tint so the page you
+  // are on is still accounted for, and reopening puts you back on it.
+  const companyOpen = state.companyNavOpen;
   return `<div class="setup-layout">
     <nav class="setup-sidenav">
       <button type="button" class="setup-nav-group ${companyOpen?'open':''} ${companyActive?'has-active':''}" data-setup-group="company" aria-expanded="${companyOpen}">
@@ -7845,9 +7928,8 @@ function wireSetupView(){
   });
   const groupBtn = document.querySelector('[data-setup-group="company"]');
   if(groupBtn) groupBtn.onclick = ()=>{
-    // Collapsing the group it is standing in would strand the open page, so
-    // an active child keeps it open until you navigate elsewhere.
-    if(CS_KEYS.includes(state.setupTab)) return;
+    // Collapsing is not an edit, so it never disturbs a staged draft or the
+    // page in the pane -- it only shortens the list.
     state.companyNavOpen = !state.companyNavOpen;
     rerenderSetupView();
   };
@@ -7868,7 +7950,7 @@ function wireSetupView(){
   document.querySelectorAll('[data-om-crumb]').forEach(el=>{
     el.onclick = ()=> navAway(()=>{
       if(el.dataset.omCrumb === 'setup'){ state.setupSection = 'home'; state.omObject = null; }
-      else state.omObject = null;
+      else { state.omObject = null; state.omSection = 'objects'; }
     });
   });
   const omFind = document.getElementById('omQuickFind');
@@ -7880,13 +7962,16 @@ function wireSetupView(){
       if(again){ again.focus(); again.selectionStart = again.selectionEnd = again.value.length; }
     };
   }
+  document.querySelectorAll('[data-om-section]').forEach(btn=>{
+    btn.onclick = ()=> navAway(()=>{ state.omSection = btn.dataset.omSection; state.omObject = null; });
+  });
   const omSchemaBtn = document.getElementById('omSchemaBtn');
   if(omSchemaBtn) omSchemaBtn.onclick = ()=> navAway(()=>{
-    state.setupSection = 'home';
-    state.setupTab = 'schema';
+    state.setupSection = 'objects';
+    state.omSection = 'schema';
     state.omObject = null;
   });
-  if(state.setupTab==='schema') wireSchemaVisualizer();
+  if(state.setupSection==='objects' && !state.omObject && state.omSection==='schema') wireSchemaVisualizer();
   if(CS_KEYS.includes(state.setupTab)) wireCompanySettings();
   document.querySelectorAll('.setup-save-btn').forEach(btn=>{ btn.onclick = saveSetupDraft; });
   document.querySelectorAll('.setup-cancel-btn').forEach(btn=>{ btn.onclick = cancelSetupDraft; });
@@ -9459,6 +9544,9 @@ const QS_GROUPS = [
       icon:`<path d="M2.5 12S5.9 5.8 12 5.8 21.5 12 21.5 12 18.1 18.2 12 18.2 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.9"/>` },
   ]},
   { label:'Access', rows:[
+    { view:'administration', adminTab:'users', title:'Users', desc:'Add, edit or remove the people with a CRM seat.',
+      tint:'var(--sage-soft)', ink:'var(--sage)',
+      icon:`<circle cx="12" cy="8" r="3.6"/><path d="M4.6 20c.7-3.8 3.6-6 7.4-6s6.7 2.2 7.4 6"/>` },
     { view:'administration', adminTab:'profiles', title:'Profiles & Permission Sets', desc:'Who can open what, in one place.',
       tint:'var(--setup-blue-soft)', ink:'var(--setup-blue)',
       icon:`<path d="M12 3.2 20 6.6v5.1c0 4.4-3.3 7.9-8 9.1-4.7-1.2-8-4.7-8-9.1V6.6z"/><path d="M9.2 11.9l2 2 3.6-3.8"/>` },
@@ -9513,10 +9601,17 @@ function openQuickSettings(){
   document.querySelectorAll('[data-qs-tab]').forEach(btn=>{
     btn.onclick = ()=>{
       closeQuickSettings();
-      // Land on the named tab even if Setup was last left on Object Manager.
-      state.setupSection = 'home';
+      // Land on the named destination wherever it now lives: the object-level
+      // tools sit under Object Manager, everything else under Setup Home.
+      const tab = btn.dataset.qsTab;
       state.omObject = null;
-      state.setupTab = btn.dataset.qsTab;
+      if(tab !== 'objects' && OM_SECTIONS.some(t=>t.key===tab)){
+        state.setupSection = 'objects';
+        state.omSection = tab;
+      } else {
+        state.setupSection = 'home';
+        state.setupTab = tab;
+      }
       if(state.view !== 'setup'){ state.returnView = state.view; state.view = 'setup'; }
       render();
     };
