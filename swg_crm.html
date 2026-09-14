@@ -493,7 +493,14 @@
   .setup-banner{background:var(--setup-blue-soft);color:var(--setup-blue);border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
   .setup-layout{display:flex;align-items:flex-start;gap:24px;}
   .setup-sidenav{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:2px;position:sticky;top:0;}
-  .setup-nav-item{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:7px;border:none;background:none;color:var(--ink-soft);cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;transition:background .15s,color .15s;}
+  .setup-nav-item{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left;padding:9px 12px;border-radius:7px;border:none;background:none;color:var(--ink-soft);cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;transition:background .15s,color .15s;}
+  .setup-nav-group{font-size:9.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1.1px;padding:0 12px;margin:14px 0 4px;opacity:.75;}
+  .setup-nav-group:first-child{margin-top:0;}
+  .setup-lock{font-size:10px;opacity:.6;flex-shrink:0;}
+  .setup-nav-item.active .setup-lock{opacity:.9;}
+  .rt-obj-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 8px;font-size:12.5px;font-weight:700;}
+  .rt-add-btn{padding:5px 12px;font-size:12px;}
+  .rt-link{background:none;border:none;padding:0;font-family:inherit;font-size:12px;color:var(--setup-blue);cursor:pointer;text-decoration:underline;}
   .setup-nav-item:hover{background:var(--setup-blue-soft);color:var(--setup-blue);}
   .setup-nav-item.active{background:var(--setup-blue);color:#fff;}
   .setup-body{flex:1;min-width:0;}
@@ -1178,7 +1185,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, setupTab:'roles', setupSection:'home', omObject:null, omTab:'details', omFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0 };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, recordTypes:{}, recordTypeAssignments:{}, compactLayouts:{}, reports:[], reportTypes:[], reportsTab:'reports', activeReportId:null, reportDraft:null, reportCollapsed:{}, setupTab:'recordtypes', setupSection:'home', omObject:null, omTab:'details', omFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0 };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -1394,13 +1401,43 @@ function roleFor(name){
   if(CO_ADMINS.includes(name)) return 'Manager';
   return 'Sales Rep';
 }
-function canAccessSetup(){ return isAdmin() || roleFor(state.currentUser)==='Manager'; }
+/* ---------- Two-tier Setup access ----------
+   Setup used to be admin-and-manager only, which left everyone else with no
+   way to adjust even the harmless, presentation-level parts of their own
+   objects. It is now open to the whole team, split into two tiers:
+
+     Personalize  -- Record Types and Compact Layouts. Anyone signed in can
+                     change these: they shape how records are labelled and
+                     what shows at a glance, and grant nobody any access.
+     Administer   -- Roles, sharing, object/field visibility, validation,
+                     automation and alerts. Still Ariel and David only
+                     (Daniel keeps his existing say over roles, required
+                     fields and big-deal alerts). Everyone else sees these
+                     tabs read-only, so they can understand the rules
+                     without being able to hand out access.
+
+   Every write path checks its own can* helper, so a non-admin who reaches an
+   admin tab -- by deep link, by the Quick Settings flyout, or by leaving a
+   stale draft behind -- still cannot save anything. */
+function canAccessSetup(){ return !!state.currentUser; }
 function canEditGlobalSetup(){ return isAdmin(); }
+function canPersonalizeSetup(){ return !!state.currentUser; }
 function isArielOrDaniel(){ return state.currentUser===FULL_ADMIN || state.currentUser==='Daniel'; }
 function canEditRoles(){ return isArielOrDaniel(); }
 function canEditBigDealAlert(){ return isArielOrDaniel(); }
 function canEditRequiredFields(){ return isAdmin() || state.currentUser==='Daniel'; }
 function canEditDependentFields(){ return isAdmin(); }
+/* Whether the signed-in user may edit the given Setup tab, used to draw the
+   lock badges in the sidenav. Tabs not listed here are admin-tier. */
+function canEditSetupTab(key){
+  if(key==='recordtypes' || key==='compact') return canPersonalizeSetup();
+  if(key==='roles') return canEditRoles();
+  if(key==='bigdeal') return canEditBigDealAlert();
+  if(key==='required') return canEditRequiredFields();
+  if(key==='dependent') return canEditDependentFields();
+  return canEditGlobalSetup();
+}
+const ADMIN_ONLY_NOTE = '\uD83D\uDD12 View only \u2014 this is an admin setting. Ariel or David can change it for you. You can still edit Record Types and Compact Layouts yourself.';
 
 const DEFAULT_TEAM = [
   {name:'Ariel', email:'ariel@siddhayogaweb.com'},
@@ -1519,6 +1556,11 @@ const KEYS = {
   schemaLayout: 'schemaLayout',
   objectVisibility: 'objectVisibility',
   fieldVisibility: 'fieldVisibility',
+  recordTypes: 'recordTypes',
+  recordTypeAssignments: 'recordTypeAssignments',
+  compactLayouts: 'compactLayouts',
+  reports: 'reports',
+  reportTypes: 'reportTypes',
 };
 
 /* Which slice of state each key holds, so a reload can restore them. */
@@ -1528,6 +1570,8 @@ const SETTING_DEFAULTS = {
   sharingRules: {}, quickActionPrefs: {}, bigDealAlerts: [],
   bigDealAlert: { enabled:false, threshold:10000, currency:'USD' },
   schemaLayout: {}, objectVisibility: {}, fieldVisibility: {},
+  recordTypes: {}, recordTypeAssignments: {}, compactLayouts: {},
+  reports: [], reportTypes: [],
 };
 
 /* Saves one settings key. Errors are logged rather than thrown: a failed
@@ -1841,7 +1885,10 @@ function render(){
   if(state.view==='setup') c.innerHTML = renderSetup();
   if(state.view==='search') c.innerHTML = renderSearchShell();
   if(state.view==='rickroll') c.innerHTML = renderImportExport();
-  if(SETUP_ENTITIES.includes(state.view)) applyFieldVisibilityToTable(state.view);
+  if(SETUP_ENTITIES.includes(state.view)){
+    applyFieldVisibilityToTable(state.view);
+    applyCompactLayoutToTable(state.view);
+  }
   attachContentHandlers();
 }
 
@@ -4374,18 +4421,27 @@ function renderTeam(){
 }
 
 /* ---------- Setup: roles, validation rules, automation, sharing ---------- */
+/* tier: 'personalize' -- anyone signed in can edit; 'admin' -- Ariel/David
+   (and Daniel where he already had a say). Non-admins still see every tab,
+   read-only, so nothing about the org's rules is hidden from them. */
 const SETUP_TABS = [
-  {key:'roles', label:'Roles'},
-  {key:'validation', label:'Validation Rules'},
-  {key:'dependent', label:'Dependent Fields'},
-  {key:'required', label:'Required Fields'},
-  {key:'automation', label:'Automation'},
-  {key:'flows', label:'Flows'},
-  {key:'sharing', label:'Sharing Rules'},
-  {key:'guide', label:'Hands-on Guide'},
-  {key:'bigdeal', label:'Big Deal Alerts'},
-  {key:'schema', label:'Schema Visualizer'},
-  {key:'visibility', label:'Object &amp; Field Visibility'},
+  {key:'recordtypes', label:'Record Types', tier:'personalize'},
+  {key:'compact', label:'Compact Layouts', tier:'personalize'},
+  {key:'roles', label:'Roles', tier:'admin'},
+  {key:'validation', label:'Validation Rules', tier:'admin'},
+  {key:'dependent', label:'Dependent Fields', tier:'admin'},
+  {key:'required', label:'Required Fields', tier:'admin'},
+  {key:'automation', label:'Automation', tier:'admin'},
+  {key:'flows', label:'Flows', tier:'admin'},
+  {key:'sharing', label:'Sharing Rules', tier:'admin'},
+  {key:'guide', label:'Hands-on Guide', tier:'admin'},
+  {key:'bigdeal', label:'Big Deal Alerts', tier:'admin'},
+  {key:'schema', label:'Schema Visualizer', tier:'admin'},
+  {key:'visibility', label:'Object &amp; Field Visibility', tier:'admin'},
+];
+const SETUP_TIERS = [
+  {key:'personalize', label:'Personalize'},
+  {key:'admin', label:'Administration'},
 ];
 const SETUP_ENTITIES = ['contacts','leads','customers','distributors','suppliers','deals','tasks','invoices','payments'];
 const SHARING_ENTITIES = ['contacts','leads','customers','distributors','suppliers','deals','tasks'];
@@ -4412,6 +4468,73 @@ const SHARING_MODES = [
 function entityFieldsFor(entityKey){
   const sheet = EXPORT_SHEETS.find(s=>s.key===entityKey);
   return sheet ? sheet.fields.filter(f=>f!=='id'&&f!=='createdAt') : [];
+}
+
+/* ---------- Record Types ----------
+   A record type is a named flavour of an object -- "Wholesale Customer" vs
+   "Retail Customer", say. It carries no permissions of its own, which is why
+   the whole team can define them; it just labels a record and gives Reports
+   something meaningful to group by.
+
+   The assignment (which record is which type) lives in a settings map rather
+   than a new column on every table, so no schema migration is needed and a
+   record can never fail to insert because a column is missing. */
+function recordTypesFor(entity){ return state.recordTypes[entity] || []; }
+function activeRecordTypes(entity){ return recordTypesFor(entity).filter(rt=>rt.active!==false); }
+function defaultRecordTypeId(entity){
+  const list = activeRecordTypes(entity);
+  const def = list.find(rt=>rt.isDefault);
+  return def ? def.id : (list[0] ? list[0].id : '');
+}
+function recordTypeIdOf(entity, recordId){ return (state.recordTypeAssignments[entity]||{})[recordId] || ''; }
+function recordTypeLabel(entity, recordId){
+  const rt = recordTypesFor(entity).find(x=>x.id===recordTypeIdOf(entity, recordId));
+  return rt ? rt.name : '';
+}
+async function assignRecordType(entity, recordId, rtId){
+  const map = { ...(state.recordTypeAssignments || {}) };
+  const forEntity = { ...(map[entity] || {}) };
+  if(rtId) forEntity[recordId] = rtId; else delete forEntity[recordId];
+  map[entity] = forEntity;
+  state.recordTypeAssignments = map;
+  await saveKey(KEYS.recordTypeAssignments, map);
+}
+/* Drops assignments pointing at a record type that no longer exists, so a
+   deleted type does not leave records labelled with a dangling id. */
+async function pruneRecordTypeAssignments(entity){
+  const valid = new Set(recordTypesFor(entity).map(rt=>rt.id));
+  const forEntity = state.recordTypeAssignments[entity] || {};
+  const kept = Object.fromEntries(Object.entries(forEntity).filter(([,rtId])=>valid.has(rtId)));
+  if(Object.keys(kept).length === Object.keys(forEntity).length) return;
+  state.recordTypeAssignments = { ...state.recordTypeAssignments, [entity]: kept };
+  await saveKey(KEYS.recordTypeAssignments, state.recordTypeAssignments);
+}
+
+/* ---------- Compact Layouts ----------
+   Which fields an object shows at a glance in its list view. An entity with
+   no saved layout shows everything, so this starts out invisible and only
+   ever narrows what is on screen. It never hides a field from Setup, from
+   the Add/Edit form or from Reports -- that is Field Visibility's job, and
+   that one stays admin-only. */
+function compactLayoutFor(entity){
+  const saved = state.compactLayouts[entity];
+  return Array.isArray(saved) && saved.length ? saved.filter(f=>entityFieldsFor(entity).includes(f)) : null;
+}
+function isFieldInCompactLayout(entity, field){
+  const layout = compactLayoutFor(entity);
+  return !layout || layout.includes(field);
+}
+/* Hides list-view columns left out of the object's compact layout. Runs
+   alongside applyFieldVisibilityToTable and uses the same data-field-col
+   markers, so an object whose renderer has not been marked up simply keeps
+   showing every column. */
+function applyCompactLayoutToTable(entity){
+  const layout = compactLayoutFor(entity);
+  if(!layout) return;
+  entityFieldsFor(entity).forEach(field=>{
+    if(layout.includes(field)) return;
+    document.querySelectorAll(`#content [data-field-col="${field}"]`).forEach(el=>{ el.style.display = 'none'; });
+  });
 }
 
 /* ---------- Safe formula mini-language (no eval/Function — tokenize/parse/evaluate) ---------- */
@@ -4635,6 +4758,14 @@ function setupDraftSeed(tab){
   if(tab==='required') return state.validationRules.map(r=>({...r}));
   if(tab==='sharing') return {...state.sharingRules};
   if(tab==='visibility') return { objectVisibility:{...state.objectVisibility}, fieldVisibility:{...state.fieldVisibility} };
+  if(tab==='compact'){
+    /* Seeded with an explicit list per object -- including objects with no
+       saved layout, which seed as "every field" -- so unticking the first
+       box produces a real list rather than mutating a null. */
+    const seed = {};
+    SETUP_ENTITIES.forEach(e=>{ seed[e] = (compactLayoutFor(e) || entityFieldsFor(e)).slice(); });
+    return seed;
+  }
   return null;
 }
 function stageSetupChange(tab, mutate){
@@ -4658,6 +4789,17 @@ async function saveSetupDraft(){
     state.fieldVisibility = data.fieldVisibility;
     await saveKey(KEYS.objectVisibility, state.objectVisibility);
     await saveKey(KEYS.fieldVisibility, state.fieldVisibility);
+  } else if(tab==='compact'){
+    /* An object showing every field is stored as "no layout", so a later
+       field added to EXPORT_SHEETS shows up instead of being silently
+       excluded by a stale list. */
+    const next = {};
+    SETUP_ENTITIES.forEach(e=>{
+      const picked = (data[e]||[]).filter(f=>entityFieldsFor(e).includes(f));
+      if(picked.length && picked.length < entityFieldsFor(e).length) next[e] = picked;
+    });
+    state.compactLayouts = next;
+    await saveKey(KEYS.compactLayouts, next);
   }
   setupDraft = null;
   toast('Changes saved.');
@@ -4681,8 +4823,8 @@ function renderSetupRoles(){
   const canEdit = canEditRoles();
   const roles = setupDraftActive('roles') ? setupDraft.data : null;
   return `<div class="io-card">
-    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Assign each team member a role. Admins and Managers can open Setup; only Ariel can delete a team member.</p>
-    ${canEdit ? '' : `<div class="readonly-note">👁 View only — only Ariel or Daniel can change roles.</div>`}
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Assign each team member a role. Everyone can open Setup and personalize their record types and compact layouts; only Ariel and David can change the admin settings, and only Ariel can delete a team member.</p>
+    ${canEdit ? '' : `<div class="readonly-note">🔒 View only — handing out roles is an admin setting. Only Ariel or Daniel can change these.</div>`}
     ${renderSetupSaveBar('top')}
     <table><thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody>
     ${state.team.map(t=>`<tr>
@@ -4841,8 +4983,10 @@ function renderSetupAutomation(onlyEntity){
 
 function renderSetupFlows(){
   const flows = state.flows;
+  const canEdit = canEditGlobalSetup();
   return `<div class="io-card">
-    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Build multi-step automations — a chain of conditions that must all pass, followed by one or more actions. Like Automation, but for more than one rule at a time. Open to everyone with Setup access.</p>
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Build multi-step automations — a chain of conditions that must all pass, followed by one or more actions. Like Automation, but for more than one rule at a time.</p>
+    ${canEdit ? '' : `<div class="readonly-note">${esc(ADMIN_ONLY_NOTE)}</div>`}
     <table><thead><tr><th>Name</th><th>Object</th><th>Steps</th><th></th></tr></thead><tbody>
     ${flows.map(f=>{
       const nCond = f.steps.filter(s=>s.type==='condition').length;
@@ -4851,10 +4995,10 @@ function renderSetupFlows(){
       <td style="font-size:12px;font-weight:600;">${esc(f.name)}</td>
       <td style="font-size:12px;">${esc(EXPORT_SHEETS.find(s=>s.key===f.entity)?.label||f.entity)}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${nCond} condition${nCond===1?'':'s'}, ${nAct} action${nAct===1?'':'s'}</td>
-      <td class="row-actions"><span data-del-flow="${f.id}">delete</span></td>
+      <td class="row-actions">${canEdit ? `<span data-del-flow="${f.id}">delete</span>` : ''}</td>
     </tr>`;}).join('') || `<tr><td colspan="4" style="text-align:center;color:var(--ink-soft);padding:20px;">No flows yet.</td></tr>`}
     </tbody></table>
-    <button class="btn" id="addFlowBtn" style="margin-top:14px;">+ Create flow</button>
+    ${canEdit ? `<button class="btn" id="addFlowBtn" style="margin-top:14px;">+ Create flow</button>` : ''}
   </div>`;
 }
 
@@ -4988,8 +5132,10 @@ function renderSetupSharing(onlyEntity){
 
 function renderSetupGuide(){
   const objectsWithSteps = SETUP_ENTITIES.filter(e=>guideEntriesFor(e).length);
+  const canEdit = canEditGlobalSetup();
   return `<div class="io-card">
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 16px;">Build a guided walkthrough for each object, the way Salesforce does. Each step is a card that points at a real place on the page — the menu item, the <strong>+ Add</strong> button, the list, or one field on the Add form. Your team takes the tour by clicking <strong>Guide</strong> at the top of that object's page.</p>
+    ${canEdit ? '' : `<div class="readonly-note">${esc(ADMIN_ONLY_NOTE)}</div>`}
     ${objectsWithSteps.map(entity=>{
       const steps = guideEntriesFor(entity);
       return `<div class="guide-object-block">
@@ -4997,7 +5143,7 @@ function renderSetupGuide(){
           <div class="guide-object-name">${esc(EXPORT_SHEETS.find(s=>s.key===entity).label)}<span class="guide-step-count">${steps.length} step${steps.length===1?'':'s'}</span></div>
           <div style="display:flex;gap:7px;">
             <button type="button" class="btn secondary" data-preview-guide="${entity}">▷ Preview</button>
-            <button type="button" class="btn secondary" data-add-guide-for="${entity}">+ Add step</button>
+            ${canEdit ? `<button type="button" class="btn secondary" data-add-guide-for="${entity}">+ Add step</button>` : ''}
           </div>
         </div>
         ${steps.map((g,i)=>`<div class="guide-step-row">
@@ -5008,15 +5154,15 @@ function renderSetupGuide(){
             <div class="guide-step-target">Points at: ${esc(guideTargetLabel(g))}</div>
           </div>
           <div class="guide-step-tools">
-            <button type="button" class="guide-tool" data-guide-up="${g.id}" ${i===0?'disabled':''} title="Move up">↑</button>
+            ${canEdit ? `<button type="button" class="guide-tool" data-guide-up="${g.id}" ${i===0?'disabled':''} title="Move up">↑</button>
             <button type="button" class="guide-tool" data-guide-down="${g.id}" ${i===steps.length-1?'disabled':''} title="Move down">↓</button>
             <button type="button" class="guide-tool" data-edit-guide="${g.id}" title="Edit">Edit</button>
-            <button type="button" class="guide-tool danger" data-del-guide="${g.id}" title="Delete">Delete</button>
+            <button type="button" class="guide-tool danger" data-del-guide="${g.id}" title="Delete">Delete</button>` : ''}
           </div>
         </div>`).join('')}
       </div>`;
     }).join('') || `<div class="readonly-note" style="text-align:center;">No walkthrough steps yet — add the first one below.</div>`}
-    <button class="btn" id="addGuideBtn" style="margin-top:16px;">+ Add walkthrough step</button>
+    ${canEdit ? `<button class="btn" id="addGuideBtn" style="margin-top:16px;">+ Add walkthrough step</button>` : ''}
   </div>`;
 }
 
@@ -5055,6 +5201,8 @@ function renderSetupBigDeal(){
 const OM_TABS = [
   {key:'details', label:'Details'},
   {key:'fields', label:'Fields & Relationships'},
+  {key:'recordtypes', label:'Record Types', tier:'personalize'},
+  {key:'compact', label:'Compact Layout', tier:'personalize'},
   {key:'required', label:'Required Fields'},
   {key:'validation', label:'Validation Rules'},
   {key:'dependent', label:'Dependent Fields'},
@@ -5105,6 +5253,8 @@ function renderObjectManagerList(){
 function renderObjectDetailBody(entity){
   const tab = state.omTab;
   if(tab==='fields') return renderObjectFields(entity);
+  if(tab==='recordtypes') return renderSetupRecordTypes(entity);
+  if(tab==='compact') return renderSetupCompact(entity);
   if(tab==='required') return renderSetupRequired(entity);
   if(tab==='validation') return renderSetupValidation(entity);
   if(tab==='dependent') return renderSetupDependent(entity);
@@ -5131,6 +5281,8 @@ function renderObjectDetails(entity){
     ['Hidden fields', String(hiddenFields)],
     ['Validation rules', String(state.validationRules.filter(r=>r.entity===entity && r.type!=='required').length)],
     ['Dependent field rules', String(state.dependentFields.filter(r=>r.entity===entity).length)],
+    ['Record types', String(recordTypesFor(entity).length)],
+    ['Compact layout', (compactLayoutFor(entity) || entityFieldsFor(entity)).length + ' of ' + entityFieldsFor(entity).length + ' fields'],
     ['Automations', String(state.automations.filter(a=>a.entity===entity).length)],
     ['Walkthrough steps', String(guideEntriesFor(entity).length)],
   ];
@@ -5182,6 +5334,7 @@ function renderObjectAccess(entity){
 
 function renderObjectAutomation(entity){
   const flows = state.flows.filter(f=>f.entity===entity);
+  const canEdit = canEditGlobalSetup();
   return renderSetupAutomation(entity) + `<div class="io-card" style="margin-top:16px;">
     <h3 class="om-pane-title">Flows</h3>
     <table><thead><tr><th>Name</th><th>Steps</th><th></th></tr></thead><tbody>
@@ -5191,22 +5344,24 @@ function renderObjectAutomation(entity){
       return `<tr>
         <td style="font-size:12px;font-weight:600;">${esc(f.name)}</td>
         <td style="font-size:12px;color:var(--ink-soft);">${nCond} condition${nCond===1?'':'s'}, ${nAct} action${nAct===1?'':'s'}</td>
-        <td class="row-actions"><span data-del-flow="${f.id}">delete</span></td>
+        <td class="row-actions">${canEdit ? `<span data-del-flow="${f.id}">delete</span>` : ''}</td>
       </tr>`;
     }).join('') || `<tr><td colspan="3" style="text-align:center;color:var(--ink-soft);padding:20px;">No flows on ${esc(objectLabel(entity))} yet.</td></tr>`}
     </tbody></table>
-    <button class="btn" id="addFlowBtn" style="margin-top:14px;">+ Create flow</button>
+    ${canEdit ? `<button class="btn" id="addFlowBtn" style="margin-top:14px;">+ Create flow</button>` : ''}
   </div>`;
 }
 
 function renderObjectGuide(entity){
   const steps = guideEntriesFor(entity);
+  const canEdit = canEditGlobalSetup();
   return `<div class="io-card">
     <h3 class="om-pane-title">Hands-on Guide</h3>
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">The walkthrough your team sees when they click <strong>Guide</strong> on the ${esc(objectLabel(entity))} page.</p>
+    ${canEdit ? '' : `<div class="readonly-note">${esc(ADMIN_ONLY_NOTE)}</div>`}
     <div style="display:flex;gap:7px;margin-bottom:12px;">
       ${steps.length ? `<button type="button" class="btn secondary" data-preview-guide="${entity}">▷ Preview</button>` : ''}
-      <button type="button" class="btn secondary" data-add-guide-for="${entity}">+ Add step</button>
+      ${canEdit ? `<button type="button" class="btn secondary" data-add-guide-for="${entity}">+ Add step</button>` : ''}
     </div>
     ${steps.map((g,i)=>`<div class="guide-step-row">
       <div class="guide-step-num">${i+1}</div>
@@ -5216,10 +5371,10 @@ function renderObjectGuide(entity){
         <div class="guide-step-target">Points at: ${esc(guideTargetLabel(g))}</div>
       </div>
       <div class="guide-step-tools">
-        <button type="button" class="guide-tool" data-guide-up="${g.id}" ${i===0?'disabled':''} title="Move up">↑</button>
+        ${canEdit ? `<button type="button" class="guide-tool" data-guide-up="${g.id}" ${i===0?'disabled':''} title="Move up">↑</button>
         <button type="button" class="guide-tool" data-guide-down="${g.id}" ${i===steps.length-1?'disabled':''} title="Move down">↓</button>
         <button type="button" class="guide-tool" data-edit-guide="${g.id}" title="Edit">Edit</button>
-        <button type="button" class="guide-tool danger" data-del-guide="${g.id}" title="Delete">Delete</button>
+        <button type="button" class="guide-tool danger" data-del-guide="${g.id}" title="Delete">Delete</button>` : ''}
       </div>
     </div>`).join('') || `<div class="readonly-note" style="text-align:center;">No walkthrough steps for ${esc(objectLabel(entity))} yet.</div>`}
   </div>`;
@@ -5234,13 +5389,157 @@ function renderObjectDetail(entity){
   <div class="om-detail-title">${esc(objectLabel(entity))}</div>
   <div class="setup-layout">
     <nav class="setup-sidenav">
-      ${OM_TABS.map(t=>`<button type="button" class="setup-nav-item ${state.omTab===t.key?'active':''}" data-om-tab="${t.key}">${t.label}</button>`).join('')}
+      ${OM_TABS.map(t=>`<button type="button" class="setup-nav-item ${state.omTab===t.key?'active':''}" data-om-tab="${t.key}">
+        <span>${t.label}</span>${(t.tier==='personalize' || t.key==='details' || t.key==='fields' || canEditSetupTab(t.key)) ? '' : `<span class="setup-lock" title="Admin setting \u2014 view only for you">\uD83D\uDD12</span>`}
+      </button>`).join('')}
     </nav>
     <div class="setup-body">${renderObjectDetailBody(entity)}</div>
   </div>`;
 }
 
+/* ---------- Personalize tier: Record Types ---------- */
+function renderSetupRecordTypes(onlyEntity){
+  const canEdit = canPersonalizeSetup();
+  const entities = onlyEntity ? [onlyEntity] : SETUP_ENTITIES;
+  return `<div class="io-card">
+    <h3 class="om-pane-title">Record Types</h3>
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Give an object named flavours \u2014 "Wholesale Customer" and "Retail Customer", say \u2014 so the team can tell records apart and Reports can group by them. A record type never grants or removes access, so anyone on the team can set these up.</p>
+    ${canEdit ? '' : `<div class="readonly-note">\uD83D\uDC41 View only \u2014 sign in to change record types.</div>`}
+    ${entities.map(entity=>{
+      const types = recordTypesFor(entity);
+      const assigned = state.recordTypeAssignments[entity] || {};
+      return `<div style="margin-bottom:22px;">
+        <div class="rt-obj-head">
+          <span>${esc(objectLabel(entity))}</span>
+          ${canEdit ? `<button type="button" class="btn secondary rt-add-btn" data-add-rt="${entity}">+ New record type</button>` : ''}
+        </div>
+        <table class="om-table"><thead><tr>
+          <th>Name</th><th>Description</th><th style="text-align:right;">Records</th><th>Default</th><th>Status</th><th></th>
+        </tr></thead><tbody>
+        ${types.map(rt=>{
+          const used = Object.values(assigned).filter(id=>id===rt.id).length;
+          return `<tr>
+            <td style="font-size:12.5px;font-weight:600;">${esc(rt.name)}</td>
+            <td style="font-size:12px;color:var(--ink-soft);">${esc(rt.description||'\u2014')}</td>
+            <td style="text-align:right;font-size:12px;">${used}</td>
+            <td>${rt.isDefault
+              ? `<span class="om-pill">Default</span>`
+              : (canEdit ? `<button type="button" class="rt-link" data-default-rt="${entity}:${rt.id}">Make default</button>` : `<span style="color:var(--ink-soft);font-size:12px;">\u2014</span>`)}</td>
+            <td>${rt.active===false ? `<span class="om-pill hidden">Inactive</span>` : `<span class="om-pill req">Active</span>`}</td>
+            <td class="row-actions">${canEdit ? `
+              <span data-edit-rt="${entity}:${rt.id}">edit</span>
+              <span data-toggle-rt="${entity}:${rt.id}">${rt.active===false?'activate':'deactivate'}</span>
+              <span class="danger" data-del-rt="${entity}:${rt.id}">delete</span>` : ''}</td>
+          </tr>`;
+        }).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:18px;">No record types on ${esc(objectLabel(entity))} \u2014 every record is just a plain ${esc(objectLabel(entity).replace(/s$/,'').toLowerCase())}.</td></tr>`}
+        </tbody></table>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function openRecordTypeModal(entity, rtId){
+  if(!canPersonalizeSetup()) return;
+  const rt = rtId ? recordTypesFor(entity).find(x=>x.id===rtId) : null;
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">${rt?'Edit':'New'} record type</h2>
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">On ${esc(objectLabel(entity))}.</p>
+    <div class="field"><label>Name</label><input id="rt_name" value="${rt?esc(rt.name):''}" placeholder="e.g. Wholesale Customer"></div>
+    <div class="field"><label>Description</label><textarea id="rt_desc" placeholder="What kind of record is this?">${rt?esc(rt.description||''):''}</textarea></div>
+    <label class="required-field-row"><input type="checkbox" id="rt_default" ${rt&&rt.isDefault?'checked':''}><span>Make this the default for new ${esc(objectLabel(entity).toLowerCase())}</span></label>
+    <div class="modal-actions">
+      <button class="btn secondary" id="cancelBtn">Cancel</button>
+      <button class="btn" id="rtSaveBtn">${rt?'Save':'Create'}</button>
+    </div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  document.getElementById('rtSaveBtn').onclick = async ()=>{
+    const name = document.getElementById('rt_name').value.trim();
+    if(!name) return alert('Give the record type a name.');
+    const list = recordTypesFor(entity).map(x=>({...x}));
+    const makeDefault = document.getElementById('rt_default').checked;
+    if(rt){
+      const target = list.find(x=>x.id===rt.id);
+      target.name = name;
+      target.description = document.getElementById('rt_desc').value.trim();
+      target.isDefault = makeDefault;
+    } else {
+      list.push({ id:uid(), name, description:document.getElementById('rt_desc').value.trim(), active:true, isDefault:makeDefault || !list.length });
+    }
+    // Exactly one default per object.
+    const defId = (list.find(x=>x.isDefault) || {}).id;
+    list.forEach(x=>{ x.isDefault = x.id===defId; });
+    state.recordTypes = { ...state.recordTypes, [entity]: list };
+    await saveKey(KEYS.recordTypes, state.recordTypes);
+    closeModal();
+    rerenderSetupView();
+    toast(rt ? 'Record type saved.' : 'Record type created.');
+  };
+}
+
+async function deleteRecordType(entity, rtId){
+  if(!canPersonalizeSetup()) return;
+  const rt = recordTypesFor(entity).find(x=>x.id===rtId);
+  if(!rt) return;
+  const used = Object.values(state.recordTypeAssignments[entity]||{}).filter(id=>id===rtId).length;
+  const warn = used ? ` ${used} record${used===1?'':'s'} currently use it and will go back to having no record type.` : '';
+  if(!confirm(`Delete the "${rt.name}" record type?${warn}`)) return;
+  const list = recordTypesFor(entity).filter(x=>x.id!==rtId);
+  if(list.length && !list.some(x=>x.isDefault)) list[0].isDefault = true;
+  state.recordTypes = { ...state.recordTypes, [entity]: list };
+  await saveKey(KEYS.recordTypes, state.recordTypes);
+  await pruneRecordTypeAssignments(entity);
+  rerenderSetupView();
+  toast('Record type deleted.');
+}
+
+async function mutateRecordType(entity, rtId, mutate){
+  if(!canPersonalizeSetup()) return;
+  const list = recordTypesFor(entity).map(x=>({...x}));
+  const target = list.find(x=>x.id===rtId);
+  if(!target) return;
+  mutate(target, list);
+  state.recordTypes = { ...state.recordTypes, [entity]: list };
+  await saveKey(KEYS.recordTypes, state.recordTypes);
+  rerenderSetupView();
+}
+
+/* ---------- Personalize tier: Compact Layouts ---------- */
+function renderSetupCompact(onlyEntity){
+  const canEdit = canPersonalizeSetup();
+  const draft = setupDraftActive('compact') ? setupDraft.data : null;
+  const layoutOf = (entity)=>{
+    if(draft) return Array.isArray(draft[entity]) && draft[entity].length ? draft[entity] : null;
+    return compactLayoutFor(entity);
+  };
+  const shown = (entity, f)=>{ const l = layoutOf(entity); return !l || l.includes(f); };
+  return `<div class="io-card">
+    <h3 class="om-pane-title">Compact Layouts</h3>
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Pick the columns each object shows at a glance in its list view. Unticking a field only tidies the table \u2014 the field is still on the record, still on the Add/Edit form and still available in Reports. Leave every field ticked to show the full table.</p>
+    ${canEdit ? '' : `<div class="readonly-note">\uD83D\uDC41 View only \u2014 sign in to change compact layouts.</div>`}
+    ${renderSetupSaveBar('top')}
+    ${(onlyEntity ? [onlyEntity] : SETUP_ENTITIES).map(entity=>{
+      const fields = entityFieldsFor(entity);
+      const on = fields.filter(f=>shown(entity,f)).length;
+      return `<div style="margin-bottom:18px;">
+        <div class="rt-obj-head">
+          <span>${esc(objectLabel(entity))} <span style="font-weight:400;color:var(--ink-soft);font-size:11.5px;">\u00b7 ${on} of ${fields.length} shown</span></span>
+          ${canEdit ? `<button type="button" class="rt-link" data-compact-all="${entity}">Show all</button>` : ''}
+        </div>
+        <div class="required-field-grid">
+          ${fields.map(f=>`<label class="required-field-row">
+            <input type="checkbox" data-compact-entity="${entity}" data-compact-field="${f}" ${shown(entity,f)?'checked':''} ${canEdit?'':'disabled'}>
+            <span>${esc(prettyField(f))}</span>
+          </label>`).join('')}
+        </div>
+      </div>`;
+    }).join('')}
+    ${renderSetupSaveBar('bottom')}
+  </div>`;
+}
+
 function renderSetupTabBody(){
+  if(state.setupTab==='recordtypes') return renderSetupRecordTypes();
+  if(state.setupTab==='compact') return renderSetupCompact();
   if(state.setupTab==='roles') return renderSetupRoles();
   if(state.setupTab==='validation') return renderSetupValidation();
   if(state.setupTab==='dependent') return renderSetupDependent();
@@ -5260,13 +5559,21 @@ function renderSetupSection(){
   }
   return `<div class="setup-layout">
     <nav class="setup-sidenav">
-      ${SETUP_TABS.map(t=>`<button type="button" class="setup-nav-item ${state.setupTab===t.key?'active':''}" data-setup-tab="${t.key}">${t.label}</button>`).join('')}
+      ${SETUP_TIERS.map(tier=>`
+        <div class="setup-nav-group">${esc(tier.label)}</div>
+        ${SETUP_TABS.filter(t=>t.tier===tier.key).map(t=>`<button type="button" class="setup-nav-item ${state.setupTab===t.key?'active':''}" data-setup-tab="${t.key}">
+          <span>${t.label}</span>${canEditSetupTab(t.key) ? '' : `<span class="setup-lock" title="Admin setting \u2014 view only for you">\uD83D\uDD12</span>`}
+        </button>`).join('')}
+      `).join('')}
     </nav>
     <div class="setup-body" id="setupTabBody">${renderSetupTabBody()}</div>
   </div>`;
 }
 function renderSetup(){
-  return `<div class="setup-banner">🔧 You're in the backend — changes here affect the whole team.</div>
+  const banner = canEditGlobalSetup()
+    ? `🔧 You're in the backend — changes here affect the whole team.`
+    : `🔧 You're in the backend. Record Types and Compact Layouts are yours to change; the admin settings below are view-only — ask Ariel or David for those.`;
+  return `<div class="setup-banner">${banner}</div>
   <div class="setup-sections">
     <button type="button" class="setup-section-tab ${state.setupSection==='home'?'active':''}" data-setup-section="home">Home</button>
     <button type="button" class="setup-section-tab ${state.setupSection==='objects'?'active':''}" data-setup-section="objects">Object Manager</button>
@@ -5405,6 +5712,7 @@ function guideTargetLabel(g){
 }
 
 function openGuideEntryModal(presetEntity, editId){
+  if(!canEditGlobalSetup()) return;
   const editing = editId ? state.guideEntries.find(g=>g.id===editId) : null;
   const entityFor = editing ? editing.linkEntity : (presetEntity || SETUP_ENTITIES[0]);
   document.getElementById('modalBody').innerHTML = `<h2 class="display">${editing?'Edit':'New'} walkthrough step</h2>
@@ -5446,6 +5754,7 @@ function openGuideEntryModal(presetEntity, editId){
 /* Reordering swaps an entry with its neighbour *within the same object*, so the
    flat guideEntries array doubles as each object's step order. */
 async function moveGuideEntry(id, dir){
+  if(!canEditGlobalSetup()) return;
   const entry = state.guideEntries.find(g=>g.id===id);
   if(!entry) return;
   const siblings = state.guideEntries.filter(g=>g.linkEntity===entry.linkEntity);
@@ -5525,6 +5834,7 @@ function renderFlowStepRow(step, idx, fields){
 }
 
 function openFlowModal(){
+  if(!canEditGlobalSetup()) return;
   flowBuilderSteps = [];
   document.getElementById('modalBody').innerHTML = `<h2 class="display">New flow</h2>
     <div class="field"><label>Flow name</label><input id="fl_name" placeholder="e.g. Welcome new customers"></div>
@@ -5695,6 +6005,60 @@ function wireSetupView(){
     state.omObject = null;
   });
   if(state.setupTab==='schema') wireSchemaVisualizer();
+  document.querySelectorAll('[data-add-rt]').forEach(btn=>{
+    btn.onclick = ()=> openRecordTypeModal(btn.dataset.addRt, null);
+  });
+  document.querySelectorAll('[data-edit-rt]').forEach(el=>{
+    el.onclick = ()=>{ const [entity, id] = el.dataset.editRt.split(':'); openRecordTypeModal(entity, id); };
+  });
+  document.querySelectorAll('[data-del-rt]').forEach(el=>{
+    el.onclick = ()=>{ const [entity, id] = el.dataset.delRt.split(':'); deleteRecordType(entity, id); };
+  });
+  document.querySelectorAll('[data-default-rt]').forEach(el=>{
+    el.onclick = ()=>{
+      const [entity, id] = el.dataset.defaultRt.split(':');
+      mutateRecordType(entity, id, (target, list)=>{ list.forEach(x=>{ x.isDefault = x.id===id; }); target.active = true; });
+    };
+  });
+  document.querySelectorAll('[data-toggle-rt]').forEach(el=>{
+    el.onclick = ()=>{
+      const [entity, id] = el.dataset.toggleRt.split(':');
+      mutateRecordType(entity, id, (target, list)=>{
+        target.active = target.active===false;
+        /* A deactivated default would leave new records with no type to fall
+           back on, so the default moves to the first type still active. */
+        if(!target.active && target.isDefault){
+          target.isDefault = false;
+          const next = list.find(x=>x.id!==id && x.active!==false);
+          if(next) next.isDefault = true;
+        }
+      });
+    };
+  });
+  document.querySelectorAll('[data-compact-field]').forEach(cb=>{
+    cb.onchange = ()=>{
+      if(!canPersonalizeSetup()){ cb.checked = !cb.checked; return; }
+      const entity = cb.dataset.compactEntity, field = cb.dataset.compactField, on = cb.checked;
+      stageSetupChange('compact', data=>{
+        const list = data[entity] || [];
+        if(on){
+          /* Re-inserted in the object's own field order, so ticking a box
+             back on does not shuffle the column to the end of the table. */
+          const order = entityFieldsFor(entity);
+          data[entity] = order.filter(f=>f===field || list.includes(f));
+        } else {
+          data[entity] = list.filter(f=>f!==field);
+        }
+      });
+    };
+  });
+  document.querySelectorAll('[data-compact-all]').forEach(btn=>{
+    btn.onclick = ()=>{
+      if(!canPersonalizeSetup()) return;
+      const entity = btn.dataset.compactAll;
+      stageSetupChange('compact', data=>{ data[entity] = entityFieldsFor(entity).slice(); });
+    };
+  });
   document.querySelectorAll('.setup-save-btn').forEach(btn=>{ btn.onclick = saveSetupDraft; });
   document.querySelectorAll('.setup-cancel-btn').forEach(btn=>{ btn.onclick = cancelSetupDraft; });
   document.querySelectorAll('[data-hide-object]').forEach(cb=>{
@@ -5778,6 +6142,7 @@ function wireSetupView(){
   if(addFlowBtn) addFlowBtn.onclick = openFlowModal;
   document.querySelectorAll('[data-del-flow]').forEach(el=>{
     el.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
       if(!confirm('Delete this flow?')) return;
       state.flows = state.flows.filter(f=>f.id!==el.dataset.delFlow);
       await saveKey(KEYS.flows, state.flows);
@@ -5811,6 +6176,7 @@ function wireSetupView(){
   });
   document.querySelectorAll('[data-del-guide]').forEach(el=>{
     el.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
       if(!confirm('Delete this guide entry?')) return;
       state.guideEntries = state.guideEntries.filter(g=>g.id!==el.dataset.delGuide);
       await saveKey(KEYS.guideEntries, state.guideEntries);
@@ -6074,6 +6440,8 @@ function attachContentHandlers(){
       state[table] = state[table].filter(x=>x.id!==id);
       render();
       await dbDelete(table, id);
+      // Drop the record's type assignment so it cannot outlive the record.
+      if((state.recordTypeAssignments[table]||{})[id]) await assignRecordType(table, id, '');
     };
   });
   document.querySelectorAll('[data-stage]').forEach(el=>{
@@ -6354,6 +6722,19 @@ function openModal(table, id){
     html = `<h2 class="display">${isEdit?'Edit':'Add'} team member</h2>
       <div class="field"><label>Name</label><input id="f_name" value="${item?esc(item.name):''}"></div>
       <div class="field"><label>Email</label><input id="f_email" type="email" value="${item?esc(item.email||''):''}" placeholder="name@siddhayogaweb.com"></div>`;
+  }
+  /* Record Type sits directly under the modal heading, ahead of the object's
+     own fields, so it reads as "what kind of record is this" before the
+     details. Only objects that actually have an active record type get the
+     picker -- everyone else's form is untouched. */
+  if(SETUP_ENTITIES.includes(table) && activeRecordTypes(table).length){
+    const currentRt = isEdit ? recordTypeIdOf(table, id) : defaultRecordTypeId(table);
+    const rtField = `<div class="field"><label>Record Type</label><select id="f_recordType">
+        <option value="">\u2014 none \u2014</option>
+        ${activeRecordTypes(table).map(rt=>`<option value="${rt.id}" ${currentRt===rt.id?'selected':''}>${esc(rt.name)}</option>`).join('')}
+      </select></div>`;
+    const afterHeading = html.indexOf('</h2>');
+    if(afterHeading !== -1) html = html.slice(0, afterHeading+5) + rtField + html.slice(afterHeading+5);
   }
   html += `<div class="modal-actions">
       <button class="btn secondary" id="cancelBtn">Cancel</button>
@@ -6828,6 +7209,11 @@ function openQuickActionsCustomizeModal(){
 async function saveModal(table, id){
   const isEdit = !!id;
   let obj = isEdit ? state[table].find(x=>x.id===id) : { id: uid(), createdAt: Date.now(), owner: state.viewingAs };
+  /* Read before any early return closes over a stale DOM. null means the
+     form had no Record Type picker at all, which must not be confused with
+     the picker being set to "none". */
+  const rtSelect = document.getElementById('f_recordType');
+  const pickedRecordType = rtSelect ? rtSelect.value : null;
   const prevOrderStatus = (table==='orders' && isEdit) ? obj.status : null;
   let sendOrderConfirmationRequested = false;
   const readCompany = ()=>{
@@ -6949,6 +7335,7 @@ async function saveModal(table, id){
   if(!isEdit) state[table].push(obj);
   const wasNew = !isEdit;
   const savedObj = obj;
+  if(pickedRecordType !== null) await assignRecordType(table, obj.id, pickedRecordType);
   if(table==='deals') await checkBigDealAlert(savedObj);
   closeModal();
   render();
@@ -6990,6 +7377,14 @@ document.getElementById('topbarGuideBtn').onclick = ()=> startObjectWalkthrough(
    is a named destination, so it navigates directly; only "Open Advanced Setup"
    — the general trip into the backend — still asks for confirmation. */
 const QS_GROUPS = [
+  { label:'Personalize', rows:[
+    { tab:'recordtypes', title:'Record Types', desc:'Name the different flavours of an object, like wholesale vs retail.',
+      tint:'var(--umber-soft)', ink:'var(--umber)',
+      icon:`<path d="M12 3.2 20.8 7.7 12 12.2 3.2 7.7z"/><path d="M3.2 12 12 16.5l8.8-4.5"/>` },
+    { tab:'compact', title:'Compact Layouts', desc:'Choose the columns each list shows at a glance.',
+      tint:'var(--sage-soft)', ink:'var(--sage)',
+      icon:`<rect x="3.4" y="4.6" width="17.2" height="14.8" rx="2.4"/><path d="M3.4 9.4h17.2M9.2 9.4v10"/>` },
+  ]},
   { label:'Customization', rows:[
     { tab:'required', title:'Required Fields', desc:'Choose which fields must be filled in before a record saves.',
       tint:'var(--olive-soft)', ink:'var(--olive)',
@@ -7050,7 +7445,9 @@ function openQuickSettings(){
     if(state.view==='setup') return;
     openConfirmModal({
       title:'Enter Setup?',
-      message:"You're about to open the backend of the CRM — roles, validation rules, automation and sharing rules live here, and changes affect the whole team.",
+      message: canEditGlobalSetup()
+        ? "You're about to open the backend of the CRM — roles, validation rules, automation and sharing rules live here, and changes affect the whole team."
+        : "You're about to open the backend of the CRM. You can set up record types and compact layouts; the admin settings are there to read, but only Ariel or David can change them.",
       confirmLabel:'Continue',
       cancelLabel:'Go back',
       onConfirm: ()=>{ state.returnView = state.view; state.view='setup'; render(); },
