@@ -127,6 +127,7 @@
   .navlink[data-view="distributors"],.navlink[data-view="orders"],.navlink[data-view="emails"]{--nav-accent:var(--umber);--nav-accent-soft:var(--umber-soft);}
   .navlink[data-view="suppliers"],.navlink[data-view="tickets"]{--nav-accent:var(--clay);--nav-accent-soft:var(--clay-soft);}
   .navlink[data-view="tasks"]{--nav-accent:var(--olive);--nav-accent-soft:var(--olive-soft);}
+  .navlink[data-view="reports"]{--nav-accent:var(--setup-blue);--nav-accent-soft:var(--setup-blue-soft);}
   .navlink[data-view="invoices"],.navlink[data-view="payments"]{--nav-accent:var(--rust);--nav-accent-soft:var(--rust-soft);}
   .navlink .nav-ico{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);transition:color .14s;}
   .navlink .nav-ico svg{width:100%;height:100%;display:block;}
@@ -501,6 +502,23 @@
   .rt-obj-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 8px;font-size:12.5px;font-weight:700;}
   .rt-add-btn{padding:5px 12px;font-size:12px;}
   .rt-link{background:none;border:none;padding:0;font-family:inherit;font-size:12px;color:var(--setup-blue);cursor:pointer;text-decoration:underline;}
+  /* ---------- Reports ---------- */
+  .rep-tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:20px;}
+  .rep-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px;}
+  .rep-head-title{font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:var(--ink);}
+  .rep-head-sub{font-size:12.5px;color:var(--ink-soft);margin-top:3px;}
+  .rep-builder{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:20px;align-items:start;}
+  .rep-filter-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) auto;gap:6px;align-items:center;margin-bottom:8px;}
+  .rep-filter-row select,.rep-filter-row input{width:100%;min-width:0;}
+  .rep-summary-strip{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+  .rep-stat{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 16px;min-width:130px;}
+  .rep-stat-k{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-soft);}
+  .rep-stat-v{font-size:17px;color:var(--ink);margin-top:3px;}
+  .rep-group-head{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;padding:8px 0;font-family:inherit;cursor:pointer;text-align:left;color:var(--ink);}
+  .rep-group-caret{color:var(--ink-soft);font-size:12px;width:12px;flex-shrink:0;}
+  .rep-group-name{font-size:13.5px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .rep-group-meta{margin-left:auto;font-size:11.5px;color:var(--ink-soft);flex-shrink:0;}
+  @media (max-width:1100px){ .rep-builder{grid-template-columns:minmax(0,1fr);} }
   .setup-nav-item:hover{background:var(--setup-blue-soft);color:var(--setup-blue);}
   .setup-nav-item.active{background:var(--setup-blue);color:#fff;}
   .setup-body{flex:1;min-width:0;}
@@ -1072,6 +1090,7 @@
     <div class="nav-group-label" data-nav-group="workspace">Workspace</div>
     <div class="navlink" data-view="home" data-nav-group="workspace"><span class="nav-ico"></span>Home</div>
     <div class="navlink active" data-view="dashboard" data-nav-group="workspace"><span class="nav-ico"></span>Dashboard</div>
+    <div class="navlink" data-view="reports" data-nav-group="workspace"><span class="nav-ico"></span>Reports</div>
     <div class="nav-group-label" data-nav-group="records">Records</div>
     <div class="navlink" data-view="contacts" data-nav-group="records"><span class="nav-ico"></span>Contacts</div>
     <div class="navlink" data-view="leads" data-nav-group="records"><span class="nav-ico"></span>Leads</div>
@@ -1297,6 +1316,7 @@ const NAV_ICONS = {
   finance:`<path d="M3.4 20.6h17.2"/><rect x="5.4" y="12" width="3.4" height="6.4" rx="1"/><rect x="10.6" y="7.6" width="3.4" height="10.8" rx="1"/><rect x="15.8" y="10" width="3.4" height="8.4" rx="1"/>`,
   emails:`<rect x="2.8" y="5" width="18.4" height="14" rx="2.2"/><path d="M3.4 6.6 12 13l8.6-6.4"/>`,
   tickets:`<circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="3.4"/><path d="M6 6l3.6 3.6M14.4 14.4 18 18M18 6l-3.6 3.6M9.6 14.4 6 18"/>`,
+  reports:`<path d="M4.6 3.6h9.2l5.6 5.6v11.2a1.6 1.6 0 0 1-1.6 1.6H4.6A1.6 1.6 0 0 1 3 20.4V5.2a1.6 1.6 0 0 1 1.6-1.6Z"/><path d="M13.4 3.8v5.4h5.4"/><path d="M7.6 18v-3.6M11 18v-6M14.4 18v-2.2"/>`,
   team:`<circle cx="9.4" cy="8.4" r="3.5"/><path d="M2.8 20c.6-3.5 3.2-5.6 6.6-5.6S15.4 16.5 16 20"/><path d="M16.2 5.5a3.4 3.4 0 0 1 0 6.6"/><path d="M17.8 14.7c2 .7 3.3 2.4 3.7 5.3"/>`,
 };
 function navIconSVG(view){
@@ -1314,7 +1334,8 @@ const ACCENTS = {
   dashboard:'var(--ink-fixed)', home:'var(--amber)', contacts:'var(--amber)', leads:'var(--ochre)', customers:'var(--sage)',
   distributors:'var(--umber)', suppliers:'var(--clay)', deals:'var(--ochre)', orders:'var(--umber)',
   tasks:'var(--olive)', invoices:'var(--rust)', payments:'var(--rust)', team:'var(--ink)', finance:'var(--sage)',
-  emails:'var(--umber)', tickets:'var(--clay)', search:'var(--ink)', rickroll:'var(--ink)'
+  emails:'var(--umber)', tickets:'var(--clay)', search:'var(--ink)', rickroll:'var(--ink)',
+  reports:'var(--setup-blue)'
 };
 const CONTINENTS = ['Africa','Asia','Europe','North America','South America','Oceania','Middle East'];
 const SUBREGIONS = {
@@ -1836,6 +1857,7 @@ function render(){
     team:['Team','Manage who has access to the ledger'],
     emails:['Emails','Automated messages the CRM sends on your behalf'],
     tickets:['Tickets','Customer enquiries from the website and elsewhere'],
+    reports:['Reports','Ask the ledger a question and save the answer'],
     setup:['Setup','Roles, validation rules, automation and sharing'],
     customerProfile:['Customer',''],
     search:['Search','Find anything across all tabs'],
@@ -1851,7 +1873,7 @@ function render(){
   document.getElementById('mainArea').style.setProperty('--accent', ACCENTS[state.view] || 'var(--amber)');
   const addLabels = {contacts:'contact', leads:'lead', customers:'customer', distributors:'distributor', suppliers:'supplier', deals:'deal', tasks:'task', invoices:'invoice', payments:'payment', team:'team member'};
   const addBtn = document.getElementById('addBtn');
-  const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets','setup','customerProfile'];
+  const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets','setup','reports','customerProfile'];
   addBtn.style.display = noAdd.includes(state.view) ? 'none' : 'inline-block';
   addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
   const guideBtn = document.getElementById('topbarGuideBtn');
@@ -1882,6 +1904,7 @@ function render(){
   if(state.view==='emails') c.innerHTML = renderEmails();
   if(state.view==='tickets') c.innerHTML = renderTickets();
   if(state.view==='team') c.innerHTML = renderTeam();
+  if(state.view==='reports') c.innerHTML = renderReports();
   if(state.view==='setup') c.innerHTML = renderSetup();
   if(state.view==='search') c.innerHTML = renderSearchShell();
   if(state.view==='rickroll') c.innerHTML = renderImportExport();
@@ -5481,7 +5504,7 @@ async function deleteRecordType(entity, rtId){
   const rt = recordTypesFor(entity).find(x=>x.id===rtId);
   if(!rt) return;
   const used = Object.values(state.recordTypeAssignments[entity]||{}).filter(id=>id===rtId).length;
-  const warn = used ? ` ${used} record${used===1?'':'s'} currently use it and will go back to having no record type.` : '';
+  const warn = used ? ` ${used} record${used===1?' uses':'s use'} it and will go back to having no record type.` : '';
   if(!confirm(`Delete the "${rt.name}" record type?${warn}`)) return;
   const list = recordTypesFor(entity).filter(x=>x.id!==rtId);
   if(list.length && !list.some(x=>x.isDefault)) list[0].isDefault = true;
@@ -6575,6 +6598,937 @@ function attachContentHandlers(){
     render();
   };
   if(state.view==='setup') wireSetupView();
+  if(state.view==='reports') wireReportsView();
+}
+
+
+/* ============================================================================
+   Reports
+   ----------------------------------------------------------------------------
+   A report is a saved question about the ledger: which object to read, which
+   columns to show, what to filter out, how to group and summarize, and whether
+   to draw it as a chart. Reports are open to the whole team -- reading data is
+   not an admin power -- but a report can never show a row or a column its
+   reader could not already see: every run goes through visibleRecords(), skips
+   objects the reader has no access to, and drops fields hidden from them by
+   Field Visibility.
+
+   A report type is the shape a report is built on: which object, and
+   optionally one related object joined onto it. The built-in types cover every
+   object plus the joins people ask for most; anyone can define their own on
+   top of the same machinery.
+   ========================================================================= */
+
+const REPORT_ENTITIES = EXPORT_SHEETS.map(s=>s.key);
+/* Foreign keys we know the target of, so a custom report type can offer a
+   related object without the author having to describe the join. */
+const REPORT_LINK_TARGETS = { contactId:'contacts', customerId:'customers', orderId:'orders' };
+const REPORT_NUMERIC_FIELDS = new Set(['value','amount','qty']);
+const REPORT_DATE_FIELDS = new Set(['createdAt','dueDate']);
+
+const BUILTIN_REPORT_TYPES = [
+  {key:'bi_contacts', name:'Contacts', description:'Every contact in the ledger.', entity:'contacts'},
+  {key:'bi_leads', name:'Leads', description:'Prospects being warmed up.', entity:'leads'},
+  {key:'bi_customers', name:'Customers', description:'Everyone you sell to.', entity:'customers'},
+  {key:'bi_distributors', name:'Distributors', description:'Partners who distribute SWG products.', entity:'distributors'},
+  {key:'bi_suppliers', name:'Suppliers', description:'Everyone you source from.', entity:'suppliers'},
+  {key:'bi_deals', name:'Deals', description:'Pipeline across every stage.', entity:'deals'},
+  {key:'bi_orders', name:'Orders', description:'Order history and fulfillment status.', entity:'orders'},
+  {key:'bi_tasks', name:'Tasks', description:'Follow-ups and team to-dos.', entity:'tasks'},
+  {key:'bi_invoices', name:'Invoices', description:'Billing, linked to orders or standalone.', entity:'invoices'},
+  {key:'bi_payments', name:'Payments', description:'What SWG owes and pays out.', entity:'payments'},
+  {key:'bi_deals_contacts', name:'Deals with Contacts', description:'Each deal alongside the contact behind it.',
+    entity:'deals', join:{entity:'contacts', via:'contactId', label:'Contact'}},
+  {key:'bi_orders_contacts', name:'Orders with Contacts', description:'Each order alongside the contact who placed it.',
+    entity:'orders', join:{entity:'contacts', via:'contactId', label:'Contact'}},
+  {key:'bi_invoices_orders', name:'Invoices with Orders', description:'Each invoice alongside the order it bills for.',
+    entity:'invoices', join:{entity:'orders', via:'orderId', label:'Order'}},
+];
+
+const REPORT_OPS = [
+  {key:'contains', label:'contains', needsValue:true},
+  {key:'eq', label:'equals', needsValue:true},
+  {key:'ne', label:'does not equal', needsValue:true},
+  {key:'starts', label:'starts with', needsValue:true},
+  {key:'gt', label:'greater than', needsValue:true},
+  {key:'gte', label:'at least', needsValue:true},
+  {key:'lt', label:'less than', needsValue:true},
+  {key:'lte', label:'at most', needsValue:true},
+  {key:'empty', label:'is empty', needsValue:false},
+  {key:'notempty', label:'is not empty', needsValue:false},
+];
+const REPORT_FNS = [
+  {key:'count', label:'Record count'},
+  {key:'sum', label:'Sum of'},
+  {key:'avg', label:'Average of'},
+  {key:'min', label:'Smallest'},
+  {key:'max', label:'Largest'},
+];
+const REPORT_DATE_RANGES = [
+  {key:'all', label:'All time', days:0},
+  {key:'7d', label:'Last 7 days', days:7},
+  {key:'30d', label:'Last 30 days', days:30},
+  {key:'90d', label:'Last 90 days', days:90},
+  {key:'365d', label:'Last 12 months', days:365},
+];
+const REPORT_CHARTS = [
+  {key:'none', label:'No chart'},
+  {key:'bar', label:'Bar'},
+  {key:'donut', label:'Donut'},
+];
+const REPORT_COLORS = ['var(--amber)','var(--sage)','var(--ochre)','var(--umber)','var(--clay)','var(--olive)','var(--rust)','var(--setup-blue)'];
+
+/* ---------- Report types ---------- */
+function reportTypeList(){ return BUILTIN_REPORT_TYPES.concat(state.reportTypes || []); }
+function findReportType(key){ return reportTypeList().find(t=>t.key===key) || null; }
+function isCustomReportType(t){ return !!(t && t.custom); }
+
+/* A reader may only report on an object they can already open. Invoices and
+   Payments stay privileged, Leads stay hidden from whoever they are hidden
+   from, and an object hidden by Object Visibility stays hidden here too --
+   otherwise Reports would be a side door around all three. */
+function canReportOnEntity(entity){
+  if(entity==='invoices' || entity==='payments') return isPrivileged();
+  if(entity==='leads') return canSeeLeads();
+  if(isObjectHidden(entity) && !personaIsAdmin()) return false;
+  return true;
+}
+function reportTypeAvailable(t){
+  if(!t) return false;
+  if(!canReportOnEntity(t.entity)) return false;
+  return !t.join || canReportOnEntity(t.join.entity);
+}
+function availableReportTypes(){ return reportTypeList().filter(reportTypeAvailable); }
+
+/* Every column a report type can offer, in a stable order: the base object's
+   fields, its record type, when it was created, then the joined object's
+   fields. A custom type narrows this to the fields its author picked. */
+function reportColumnsFor(type){
+  if(!type) return [];
+  const cols = [];
+  entityFieldsFor(type.entity).forEach(f=>{
+    if(!personaIsAdmin() && isFieldHidden(type.entity, f)) return;
+    const link = REPORT_LINK_TARGETS[f];
+    cols.push({ key:f, label:link ? prettyField(f).replace(/ Id$/, '') : prettyField(f), source:'base', field:f, link,
+      numeric:REPORT_NUMERIC_FIELDS.has(f), date:REPORT_DATE_FIELDS.has(f) });
+  });
+  if(recordTypesFor(type.entity).length){
+    cols.push({ key:'__recordType', label:'Record Type', source:'recordType' });
+  }
+  cols.push({ key:'createdAt', label:'Created', source:'base', field:'createdAt', date:true });
+  if(type.join){
+    entityFieldsFor(type.join.entity).forEach(f=>{
+      if(!personaIsAdmin() && isFieldHidden(type.join.entity, f)) return;
+      const link = REPORT_LINK_TARGETS[f];
+      cols.push({ key:'rel.'+f, label:type.join.label+': '+(link ? prettyField(f).replace(/ Id$/, '') : prettyField(f)),
+        source:'join', field:f, link,
+        numeric:REPORT_NUMERIC_FIELDS.has(f), date:REPORT_DATE_FIELDS.has(f) });
+    });
+  }
+  if(!type.fields || !type.fields.length) return cols;
+  return cols.filter(c=>type.fields.includes(c.key));
+}
+function reportColumn(type, key){ return reportColumnsFor(type).find(c=>c.key===key) || null; }
+
+/* ---------- Reading values ---------- */
+/* A foreign key column reads out as the record it points at, not its id --
+   "Ada Kumar" rather than "id_m4x2k". Resolved here rather than at display
+   time so grouping, sorting, filtering and the export all agree. */
+function reportLinkLabel(entity, id){
+  if(!id) return '';
+  const rec = (state[entity]||[]).find(x=>x.id===id);
+  if(!rec) return String(id);
+  return rec.name || rec.title || rec.payee || rec.product || String(id);
+}
+function reportRawValue(type, col, rec){
+  if(!col) return '';
+  if(col.source==='recordType') return recordTypeLabel(type.entity, rec.id);
+  let v;
+  if(col.source==='join'){
+    const rel = (state[type.join.entity]||[]).find(x=>x.id===rec[type.join.via]);
+    v = rel ? rel[col.field] : '';
+  } else {
+    v = rec[col.field];
+  }
+  return col.link ? reportLinkLabel(col.link, v) : v;
+}
+function reportDisplayValue(col, v){
+  if(v === null || v === undefined || v === '') return '—';
+  if(Array.isArray(v)) return v.length ? v.join(', ') : '—';
+  if(col && col.date){
+    const n = Number(v);
+    const d = Number.isFinite(n) && String(v).length > 8 ? new Date(n) : new Date(v);
+    return isNaN(d.getTime()) ? String(v) : d.toISOString().slice(0,10);
+  }
+  if(col && col.numeric) return Number(v||0).toLocaleString();
+  return String(v);
+}
+function reportNumericValue(v){
+  const n = Number(Array.isArray(v) ? v.length : v);
+  return Number.isFinite(n) ? n : 0;
+}
+function reportCompareText(v){
+  if(v === null || v === undefined) return '';
+  return (Array.isArray(v) ? v.join(', ') : String(v)).toLowerCase();
+}
+
+function matchesReportFilter(col, raw, filter){
+  const op = filter.op;
+  const text = reportCompareText(raw);
+  if(op==='empty') return text==='';
+  if(op==='notempty') return text!=='';
+  const target = String(filter.value ?? '').trim().toLowerCase();
+  if(target==='') return true;
+  if(op==='contains') return text.includes(target);
+  if(op==='starts') return text.startsWith(target);
+  if(op==='eq') return text===target;
+  if(op==='ne') return text!==target;
+  /* Numeric comparisons fall back to a text comparison when either side is
+     not a number, so "greater than" on a Stage column still behaves. */
+  const a = Number(raw), b = Number(filter.value);
+  const numeric = Number.isFinite(a) && Number.isFinite(b);
+  if(op==='gt') return numeric ? a>b : text>target;
+  if(op==='gte') return numeric ? a>=b : text>=target;
+  if(op==='lt') return numeric ? a<b : text<target;
+  if(op==='lte') return numeric ? a<=b : text<=target;
+  return true;
+}
+
+function summarizeReportValues(fn, values){
+  if(fn==='count' || !values.length) return values.length;
+  const nums = values.map(reportNumericValue);
+  if(fn==='sum') return nums.reduce((s,n)=>s+n, 0);
+  if(fn==='avg') return nums.reduce((s,n)=>s+n, 0) / nums.length;
+  if(fn==='min') return Math.min(...nums);
+  if(fn==='max') return Math.max(...nums);
+  return values.length;
+}
+function formatReportSummary(fn, v){
+  if(fn==='count') return Number(v||0).toLocaleString();
+  const n = Number(v||0);
+  return fn==='avg' ? n.toLocaleString(undefined, {maximumFractionDigits:2}) : n.toLocaleString();
+}
+function reportSummaryLabel(report, type){
+  const fn = (report.summarize && report.summarize.fn) || 'count';
+  if(fn==='count') return 'Record count';
+  const col = reportColumn(type, report.summarize.col);
+  const def = REPORT_FNS.find(f=>f.key===fn);
+  return `${def ? def.label : fn} ${col ? col.label : '—'}`;
+}
+
+/* ---------- Running a report ---------- */
+function buildReport(report){
+  const type = findReportType(report.typeKey);
+  if(!type || !reportTypeAvailable(type)){
+    return { type:null, columns:[], rows:[], groups:[], grandSummary:0, blocked:true };
+  }
+  const allCols = reportColumnsFor(type);
+  const chosen = (report.columns || []).map(k=>allCols.find(c=>c.key===k)).filter(Boolean);
+  const columns = chosen.length ? chosen : allCols.slice(0, 6);
+
+  let records = visibleRecords(type.entity, state[type.entity] || []);
+
+  const range = REPORT_DATE_RANGES.find(r=>r.key===(report.dateRange||'all'));
+  if(range && range.days){
+    const cutoff = Date.now() - range.days*86400000;
+    records = records.filter(r=>Number(r.createdAt||0) >= cutoff);
+  }
+  (report.filters || []).forEach(f=>{
+    const col = reportColumn(type, f.col);
+    if(!col) return;
+    records = records.filter(rec=>matchesReportFilter(col, reportRawValue(type, col, rec), f));
+  });
+
+  let rows = records.map(rec=>{
+    const cells = {};
+    columns.forEach(c=>{ cells[c.key] = reportRawValue(type, c, rec); });
+    return { rec, cells };
+  });
+
+  const sortCol = reportColumn(type, report.sortCol);
+  if(sortCol && columns.some(c=>c.key===sortCol.key)){
+    const dir = report.sortDir==='desc' ? -1 : 1;
+    rows = rows.slice().sort((a,b)=>{
+      const av = a.cells[sortCol.key], bv = b.cells[sortCol.key];
+      if(sortCol.numeric || sortCol.date) return (reportNumericValue(av) - reportNumericValue(bv)) * dir;
+      return reportCompareText(av).localeCompare(reportCompareText(bv)) * dir;
+    });
+  }
+
+  const fn = (report.summarize && report.summarize.fn) || 'count';
+  const sumColKey = report.summarize && report.summarize.col;
+  const sumCol = fn==='count' ? null : reportColumn(type, sumColKey);
+  const valuesOf = (list)=> sumCol ? list.map(r=>reportRawValue(type, sumCol, r.rec)) : list.map(()=>1);
+
+  let groups = [];
+  const groupCol = reportColumn(type, report.groupBy);
+  if(groupCol){
+    const buckets = new Map();
+    rows.forEach(r=>{
+      const label = reportDisplayValue(groupCol, reportRawValue(type, groupCol, r.rec));
+      if(!buckets.has(label)) buckets.set(label, []);
+      buckets.get(label).push(r);
+    });
+    groups = Array.from(buckets.entries())
+      .map(([label, list])=>({ label, rows:list, summary:summarizeReportValues(fn, valuesOf(list)) }))
+      .sort((a,b)=> b.summary - a.summary || a.label.localeCompare(b.label));
+  }
+
+  return {
+    type, columns, rows, groups, groupCol,
+    grandSummary: summarizeReportValues(fn, valuesOf(rows)),
+    fn, summaryLabel: reportSummaryLabel(report, type), blocked:false,
+  };
+}
+
+/* ---------- Reports: shell ---------- */
+function savedReports(){
+  return (state.reports || []).filter(r=>reportTypeAvailable(findReportType(r.typeKey)));
+}
+function findReport(id){ return (state.reports || []).find(r=>r.id===id) || null; }
+function canEditReport(report){ return !!report && (report.owner===state.currentUser || isAdmin()); }
+
+function newReportDraft(typeKey){
+  const type = findReportType(typeKey) || availableReportTypes()[0];
+  const cols = reportColumnsFor(type).slice(0, 6).map(c=>c.key);
+  return {
+    id: uid(), createdAt: Date.now(), owner: state.currentUser,
+    name: '', description: '', typeKey: type ? type.key : '',
+    columns: cols, filters: [], dateRange: 'all',
+    groupBy: '', summarize: { fn:'count', col:'' }, chart: 'none',
+    sortCol: '', sortDir: 'asc',
+  };
+}
+
+function renderReports(){
+  if(state.reportDraft) return renderReportBuilder();
+  if(state.activeReportId) return renderReportRun();
+  return `<div class="rep-tabs">
+    <button type="button" class="setup-section-tab ${state.reportsTab!=='types'?'active':''}" data-reports-tab="reports">Reports</button>
+    <button type="button" class="setup-section-tab ${state.reportsTab==='types'?'active':''}" data-reports-tab="types">Report Types</button>
+  </div>
+  ${state.reportsTab==='types' ? renderReportTypesTab() : renderReportsListTab()}`;
+}
+
+/* ---------- Reports: saved list ---------- */
+function renderReportsListTab(){
+  const reports = savedReports();
+  const types = availableReportTypes();
+  if(!types.length){
+    return `<div class="empty"><div class="display">Nothing to report on yet</div>None of the objects you can open are available for reporting.</div>`;
+  }
+  return `<div class="rep-head">
+    <div>
+      <div class="rep-head-title">Saved reports</div>
+      <div class="rep-head-sub">${reports.length} report${reports.length===1?'':'s'} · built on ${types.length} report type${types.length===1?'':'s'}</div>
+    </div>
+    <button type="button" class="btn" id="repNewBtn">+ New report</button>
+  </div>
+  ${reports.length ? `<div class="io-card" style="padding-top:6px;">
+    <table class="om-table"><thead><tr>
+      <th>Name</th><th>Report type</th><th>Grouped by</th><th>Shows</th><th>Owner</th><th></th>
+    </tr></thead><tbody>
+    ${reports.map(r=>{
+      const type = findReportType(r.typeKey);
+      const groupCol = reportColumn(type, r.groupBy);
+      return `<tr>
+        <td>
+          <span class="om-link" data-run-report="${r.id}">${esc(r.name || 'Untitled report')}</span>
+          ${r.description ? `<div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px;">${esc(r.description)}</div>` : ''}
+        </td>
+        <td style="font-size:12px;color:var(--ink-soft);">${esc(type ? type.name : '—')}</td>
+        <td style="font-size:12px;color:var(--ink-soft);">${esc(groupCol ? groupCol.label : '—')}</td>
+        <td style="font-size:12px;color:var(--ink-soft);">${esc(reportSummaryLabel(r, type))}</td>
+        <td style="font-size:12px;color:var(--ink-soft);">${esc(r.owner || '—')}</td>
+        <td class="row-actions">
+          <span data-run-report="${r.id}">run</span>
+          ${canEditReport(r) ? `<span data-edit-report="${r.id}">edit</span>` : ''}
+          <span data-clone-report="${r.id}">clone</span>
+          ${canEditReport(r) ? `<span class="danger" data-del-report="${r.id}">delete</span>` : ''}
+        </td>
+      </tr>`;
+    }).join('')}
+    </tbody></table>
+  </div>` : `<div class="empty"><div class="display">No reports yet</div>Start from a built-in report type, or build your own in the Report Types tab.</div>`}`;
+}
+
+/* ---------- Reports: report types ---------- */
+function renderReportTypesTab(){
+  const builtins = BUILTIN_REPORT_TYPES.filter(reportTypeAvailable);
+  const customs = (state.reportTypes || []).filter(reportTypeAvailable);
+  const typeRow = (t, custom)=>{
+    const cols = reportColumnsFor(t);
+    return `<tr>
+      <td>
+        <span style="font-size:12.5px;font-weight:600;">${esc(t.name)}</span>
+        ${t.description ? `<div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px;">${esc(t.description)}</div>` : ''}
+      </td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(objectLabel(t.entity))}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${t.join ? esc(objectLabel(t.join.entity)) + ' (via ' + esc(prettyField(t.join.via)) + ')' : '—'}</td>
+      <td style="text-align:right;font-size:12px;">${cols.length}</td>
+      <td class="row-actions">
+        <span data-new-report-of="${t.key}">new report</span>
+        ${custom ? `<span data-edit-rtype="${t.key}">edit</span><span class="danger" data-del-rtype="${t.key}">delete</span>` : ''}
+      </td>
+    </tr>`;
+  };
+  return `<div class="rep-head">
+    <div>
+      <div class="rep-head-title">Report types</div>
+      <div class="rep-head-sub">The shape a report is built on — which object it reads, and what it can join to.</div>
+    </div>
+    <button type="button" class="btn" id="repNewTypeBtn">+ New custom report type</button>
+  </div>
+  <div class="io-card" style="padding-top:6px;margin-bottom:16px;">
+    <h3 class="om-pane-title">Built-in</h3>
+    <table class="om-table"><thead><tr>
+      <th>Name</th><th>Primary object</th><th>Related object</th><th style="text-align:right;">Fields</th><th></th>
+    </tr></thead><tbody>${builtins.map(t=>typeRow(t, false)).join('')}</tbody></table>
+  </div>
+  <div class="io-card" style="padding-top:6px;">
+    <h3 class="om-pane-title">Your custom report types</h3>
+    <table class="om-table"><thead><tr>
+      <th>Name</th><th>Primary object</th><th>Related object</th><th style="text-align:right;">Fields</th><th></th>
+    </tr></thead><tbody>
+    ${customs.map(t=>typeRow(t, true)).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--ink-soft);padding:20px;">None yet — build one to pin down exactly the fields your team reports on.</td></tr>`}
+    </tbody></table>
+  </div>`;
+}
+
+/* The field list a custom report type can choose from, before its own
+   narrowing is applied — i.e. every column the chosen object and join offer. */
+function customTypeFieldChoices(entity, joinEntity, joinVia){
+  const shape = { key:'__probe', entity, name:'', join: joinEntity ? {entity:joinEntity, via:joinVia, label:objectLabel(joinEntity)} : null };
+  return reportColumnsFor(shape);
+}
+
+function openReportTypeModal(typeKey){
+  const existing = typeKey ? (state.reportTypes || []).find(t=>t.key===typeKey) : null;
+  const entities = REPORT_ENTITIES.filter(canReportOnEntity);
+  if(!entities.length) return alert('There are no objects you can report on.');
+  const draft = existing
+    ? { entity: existing.entity, joinVia: existing.join ? existing.join.via : '', fields: (existing.fields||[]).slice() }
+    : { entity: entities[0], joinVia: '', fields: [] };
+
+  const linkOptionsFor = (entity)=> entityFieldsFor(entity)
+    .filter(f=>REPORT_LINK_TARGETS[f] && canReportOnEntity(REPORT_LINK_TARGETS[f]) && REPORT_LINK_TARGETS[f]!==entity);
+
+  const body = ()=>{
+    const links = linkOptionsFor(draft.entity);
+    const joinEntity = draft.joinVia ? REPORT_LINK_TARGETS[draft.joinVia] : '';
+    const choices = customTypeFieldChoices(draft.entity, joinEntity, draft.joinVia);
+    const picked = draft.fields.length ? draft.fields : choices.map(c=>c.key);
+    return `<h2 class="display">${existing?'Edit':'New'} custom report type</h2>
+      <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Pin down one object, optionally a related one, and exactly the fields your team should report on.</p>
+      <div class="field"><label>Name</label><input id="crt_name" value="${existing?esc(existing.name):''}" placeholder="e.g. Wholesale deals by owner"></div>
+      <div class="field"><label>Description</label><input id="crt_desc" value="${existing?esc(existing.description||''):''}" placeholder="What question does this answer?"></div>
+      <div class="field"><label>Primary object</label><select id="crt_entity">
+        ${entities.map(e=>`<option value="${e}" ${draft.entity===e?'selected':''}>${esc(objectLabel(e))}</option>`).join('')}
+      </select></div>
+      <div class="field"><label>Related object (optional)</label><select id="crt_join">
+        <option value="">— none —</option>
+        ${links.map(f=>`<option value="${f}" ${draft.joinVia===f?'selected':''}>${esc(objectLabel(REPORT_LINK_TARGETS[f]))} — via ${esc(prettyField(f))}</option>`).join('')}
+      </select>${links.length ? '' : `<div style="font-size:11.5px;color:var(--ink-soft);margin-top:5px;">${esc(objectLabel(draft.entity))} has no link to another object you can report on.</div>`}</div>
+      <div class="field"><label>Fields this type exposes</label>
+        <div class="required-field-grid" id="crt_fields">
+          ${choices.map(c=>`<label class="required-field-row">
+            <input type="checkbox" data-crt-field="${esc(c.key)}" ${picked.includes(c.key)?'checked':''}>
+            <span>${esc(c.label)}</span>
+          </label>`).join('')}
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="cancelBtn">Cancel</button>
+        <button class="btn" id="crtSaveBtn">${existing?'Save':'Create'}</button>
+      </div>`;
+  };
+
+  const wire = ()=>{
+    document.getElementById('cancelBtn').onclick = closeModal;
+    /* The object and the join decide which fields exist, so changing either
+       redraws the picker. The name and description are carried across by
+       hand because the redraw rebuilds their inputs. */
+    const carry = ()=>{
+      const n = document.getElementById('crt_name').value;
+      const d = document.getElementById('crt_desc').value;
+      draft.fields = Array.from(document.querySelectorAll('[data-crt-field]')).filter(cb=>cb.checked).map(cb=>cb.dataset.crtField);
+      return [n, d];
+    };
+    document.getElementById('crt_entity').onchange = (e)=>{
+      const [n, d] = carry();
+      draft.entity = e.target.value; draft.joinVia = ''; draft.fields = [];
+      redraw(n, d);
+    };
+    document.getElementById('crt_join').onchange = (e)=>{
+      const [n, d] = carry();
+      draft.joinVia = e.target.value; draft.fields = [];
+      redraw(n, d);
+    };
+    document.getElementById('crtSaveBtn').onclick = async ()=>{
+      const name = document.getElementById('crt_name').value.trim();
+      if(!name) return alert('Give the report type a name.');
+      const fields = Array.from(document.querySelectorAll('[data-crt-field]')).filter(cb=>cb.checked).map(cb=>cb.dataset.crtField);
+      if(!fields.length) return alert('Pick at least one field for this report type to expose.');
+      const joinEntity = draft.joinVia ? REPORT_LINK_TARGETS[draft.joinVia] : '';
+      const record = {
+        key: existing ? existing.key : uid(),
+        custom: true,
+        owner: existing ? existing.owner : state.currentUser,
+        createdAt: existing ? existing.createdAt : Date.now(),
+        name,
+        description: document.getElementById('crt_desc').value.trim(),
+        entity: draft.entity,
+        join: joinEntity ? { entity:joinEntity, via:draft.joinVia, label:objectLabel(joinEntity) } : null,
+        fields,
+      };
+      const list = (state.reportTypes || []).filter(t=>t.key!==record.key);
+      list.push(record);
+      state.reportTypes = list;
+      await saveKey(KEYS.reportTypes, state.reportTypes);
+      closeModal();
+      render();
+      toast(existing ? 'Report type saved.' : 'Report type created.');
+    };
+  };
+  const redraw = (name, desc)=>{
+    document.getElementById('modalBody').innerHTML = body();
+    if(name !== undefined) document.getElementById('crt_name').value = name;
+    if(desc !== undefined) document.getElementById('crt_desc').value = desc;
+    wire();
+  };
+
+  document.getElementById('modalBody').innerHTML = body();
+  document.getElementById('overlay').classList.add('show');
+  wire();
+}
+
+async function deleteReportType(key){
+  const t = (state.reportTypes || []).find(x=>x.key===key);
+  if(!t) return;
+  const used = (state.reports || []).filter(r=>r.typeKey===key).length;
+  const warn = used ? ` ${used} saved report${used===1?' uses':'s use'} it and will stop working.` : '';
+  if(!confirm(`Delete the "${t.name}" report type?${warn}`)) return;
+  state.reportTypes = (state.reportTypes || []).filter(x=>x.key!==key);
+  await saveKey(KEYS.reportTypes, state.reportTypes);
+  render();
+  toast('Report type deleted.');
+}
+
+/* ---------- Reports: builder ---------- */
+function renderReportBuilder(){
+  const d = state.reportDraft;
+  const type = findReportType(d.typeKey);
+  const cols = reportColumnsFor(type);
+  const types = availableReportTypes();
+  const summarizeFn = (d.summarize && d.summarize.fn) || 'count';
+  return `<div class="rep-head">
+    <div>
+      <div class="rep-head-title">${d.name ? esc(d.name) : 'New report'}</div>
+      <div class="rep-head-sub">${esc(type ? type.name : 'Pick a report type')}</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button type="button" class="btn secondary" id="repCancelBtn">Cancel</button>
+      <button type="button" class="btn" id="repSaveBtn">Save &amp; run</button>
+    </div>
+  </div>
+  <div class="rep-builder">
+    <div class="io-card">
+      <h3 class="om-pane-title">1 · What it is</h3>
+      <div class="field"><label>Report name</label><input id="rep_name" value="${esc(d.name||'')}" placeholder="e.g. Open deals by owner"></div>
+      <div class="field"><label>Description</label><input id="rep_desc" value="${esc(d.description||'')}" placeholder="What question does this answer?"></div>
+      <div class="field"><label>Report type</label><select id="rep_type">
+        ${types.map(t=>`<option value="${t.key}" ${d.typeKey===t.key?'selected':''}>${esc(t.name)}</option>`).join('')}
+      </select></div>
+
+      <h3 class="om-pane-title" style="margin-top:20px;">2 · Columns</h3>
+      <p style="color:var(--ink-soft);font-size:12px;margin:0 0 10px;">Tick the fields the report should show, in the order they appear here.</p>
+      <div class="required-field-grid">
+        ${cols.map(c=>`<label class="required-field-row">
+          <input type="checkbox" data-rep-col="${esc(c.key)}" ${(d.columns||[]).includes(c.key)?'checked':''}>
+          <span>${esc(c.label)}</span>
+        </label>`).join('')}
+      </div>
+
+      <h3 class="om-pane-title" style="margin-top:20px;">3 · Filters</h3>
+      <div class="field"><label>Created</label><select id="rep_range">
+        ${REPORT_DATE_RANGES.map(r=>`<option value="${r.key}" ${d.dateRange===r.key?'selected':''}>${esc(r.label)}</option>`).join('')}
+      </select></div>
+      ${(d.filters||[]).map((f,i)=>{
+        const op = REPORT_OPS.find(o=>o.key===f.op) || REPORT_OPS[0];
+        return `<div class="rep-filter-row">
+          <select data-rep-filter-col="${i}">${cols.map(c=>`<option value="${esc(c.key)}" ${f.col===c.key?'selected':''}>${esc(c.label)}</option>`).join('')}</select>
+          <select data-rep-filter-op="${i}">${REPORT_OPS.map(o=>`<option value="${o.key}" ${f.op===o.key?'selected':''}>${esc(o.label)}</option>`).join('')}</select>
+          <input data-rep-filter-val="${i}" value="${esc(f.value||'')}" placeholder="value" ${op.needsValue?'':'disabled'}>
+          <button type="button" class="rt-link" data-rep-filter-del="${i}">remove</button>
+        </div>`;
+      }).join('')}
+      <button type="button" class="btn secondary" id="repAddFilterBtn" style="margin-top:6px;">+ Add filter</button>
+
+      <h3 class="om-pane-title" style="margin-top:20px;">4 · Group &amp; summarize</h3>
+      <div class="field"><label>Group rows by</label><select id="rep_group">
+        <option value="">— no grouping —</option>
+        ${cols.map(c=>`<option value="${esc(c.key)}" ${d.groupBy===c.key?'selected':''}>${esc(c.label)}</option>`).join('')}
+      </select></div>
+      <div class="field"><label>Summarize with</label><select id="rep_fn">
+        ${REPORT_FNS.map(f=>`<option value="${f.key}" ${summarizeFn===f.key?'selected':''}>${esc(f.label)}</option>`).join('')}
+      </select></div>
+      ${summarizeFn==='count' ? '' : `<div class="field"><label>Field to summarize</label><select id="rep_sumcol">
+        <option value="">— pick a field —</option>
+        ${cols.map(c=>`<option value="${esc(c.key)}" ${d.summarize.col===c.key?'selected':''}>${esc(c.label)}${c.numeric?'':' (counts values)'}</option>`).join('')}
+      </select></div>`}
+      <div class="field"><label>Chart</label><select id="rep_chart">
+        ${REPORT_CHARTS.map(c=>`<option value="${c.key}" ${d.chart===c.key?'selected':''}>${esc(c.label)}</option>`).join('')}
+      </select>${d.chart!=='none' && !d.groupBy ? `<div style="font-size:11.5px;color:var(--ink-soft);margin-top:5px;">A chart needs a grouping — pick one above.</div>` : ''}</div>
+
+      <h3 class="om-pane-title" style="margin-top:20px;">5 · Sort</h3>
+      <div class="field"><label>Sort rows by</label><select id="rep_sortcol">
+        <option value="">— as they come —</option>
+        ${cols.map(c=>`<option value="${esc(c.key)}" ${d.sortCol===c.key?'selected':''}>${esc(c.label)}</option>`).join('')}
+      </select></div>
+      <div class="field"><label>Direction</label><select id="rep_sortdir">
+        <option value="asc" ${d.sortDir!=='desc'?'selected':''}>Ascending</option>
+        <option value="desc" ${d.sortDir==='desc'?'selected':''}>Descending</option>
+      </select></div>
+    </div>
+    <div class="io-card" id="repPreviewCard">
+      <h3 class="om-pane-title">Preview</h3>
+      <div id="repPreview">${renderReportPreview(d)}</div>
+    </div>
+  </div>`;
+}
+
+function renderReportPreview(report){
+  const built = buildReport(report);
+  if(built.blocked) return `<div class="readonly-note">That report type is not available to you.</div>`;
+  const shown = built.rows.slice(0, 25);
+  return `<div class="rep-summary-strip">
+      <div class="rep-stat"><div class="rep-stat-k">Rows</div><div class="rep-stat-v mono">${built.rows.length.toLocaleString()}</div></div>
+      <div class="rep-stat"><div class="rep-stat-k">${esc(built.summaryLabel)}</div><div class="rep-stat-v mono">${esc(formatReportSummary(built.fn, built.grandSummary))}</div></div>
+      ${built.groupCol ? `<div class="rep-stat"><div class="rep-stat-k">Groups</div><div class="rep-stat-v mono">${built.groups.length}</div></div>` : ''}
+    </div>
+    ${built.rows.length ? `<div style="overflow-x:auto;"><table class="om-table"><thead><tr>
+      ${built.columns.map(c=>`<th>${esc(c.label)}</th>`).join('')}
+    </tr></thead><tbody>
+    ${shown.map(r=>`<tr>${built.columns.map(c=>`<td style="font-size:12px;">${esc(reportDisplayValue(c, r.cells[c.key]))}</td>`).join('')}</tr>`).join('')}
+    </tbody></table></div>
+    ${built.rows.length > shown.length ? `<div style="font-size:11.5px;color:var(--ink-soft);margin-top:10px;">Showing the first ${shown.length} of ${built.rows.length} rows — run the report to see them all.</div>` : ''}`
+    : `<div class="empty" style="margin-top:12px;"><div class="display">Nothing matches</div>Loosen a filter, or widen the date range.</div>`}`;
+}
+
+function refreshReportPreview(){
+  const el = document.getElementById('repPreview');
+  if(el && state.reportDraft) el.innerHTML = renderReportPreview(state.reportDraft);
+}
+
+/* ---------- Reports: running a saved report ---------- */
+function renderReportChart(built){
+  if(!built.groupCol || !built.groups.length) return '';
+  const segs = built.groups.slice(0, 12).map((g,i)=>({ ...g, color: REPORT_COLORS[i % REPORT_COLORS.length] }));
+  const total = segs.reduce((s,g)=>s+Math.max(0, g.summary), 0);
+  const legend = segs.map(g=>`<div class="legend-row">
+      <span class="legend-swatch" style="background:${g.color};"></span>
+      <span class="legend-name">${esc(g.label)}</span>
+      <span class="legend-count mono">${esc(formatReportSummary(built.fn, g.summary))}</span>
+    </div>`).join('');
+  if(built.chart==='donut'){
+    if(!total) return '';
+    let cum = 0;
+    const stops = segs.filter(g=>g.summary>0).map(g=>{
+      const start = (cum/total)*360; cum += g.summary;
+      return `${g.color} ${start}deg ${(cum/total)*360}deg`;
+    }).join(', ');
+    return `<div class="io-card" style="margin-bottom:16px;"><div class="donut-wrap">
+      <div class="donut" style="background:conic-gradient(${stops});">
+        <div class="donut-hole"><div class="dnum mono">${esc(formatReportSummary(built.fn, built.grandSummary))}</div><div class="dlbl">${esc(built.summaryLabel)}</div></div>
+      </div>
+      <div class="legend">${legend}</div>
+    </div></div>`;
+  }
+  const max = Math.max(...segs.map(g=>Math.abs(g.summary)), 1);
+  return `<div class="io-card" style="margin-bottom:16px;"><div class="bar-chart">
+    ${segs.map(g=>`<div class="bar-row">
+      <span class="bar-label">${esc(g.label)}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${(Math.abs(g.summary)/max)*100}%;background:${g.color};"></div></div>
+      <span class="bar-count mono">${esc(formatReportSummary(built.fn, g.summary))}</span>
+    </div>`).join('')}
+  </div></div>`;
+}
+
+function renderReportRun(){
+  const report = findReport(state.activeReportId);
+  if(!report) return `<div class="empty"><div class="display">Report not found</div>It may have been deleted.</div>`;
+  const built = buildReport(report);
+  if(built.blocked){
+    return `<div class="rep-head"><div><div class="rep-head-title">${esc(report.name||'Untitled report')}</div></div>
+      <button type="button" class="btn secondary" id="repBackBtn">Back to reports</button></div>
+      <div class="readonly-note">This report is built on a report type you do not have access to.</div>`;
+  }
+  const body = built.groupCol ? renderReportGroupedBody(built) : renderReportFlatBody(built);
+  const range = REPORT_DATE_RANGES.find(r=>r.key===(report.dateRange||'all'));
+  return `<div class="rep-head">
+    <div>
+      <div class="rep-head-title">${esc(report.name || 'Untitled report')}</div>
+      <div class="rep-head-sub">${esc(built.type.name)}${report.description ? ' · ' + esc(report.description) : ''}${range && range.days ? ' · ' + esc(range.label) : ''}</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button type="button" class="btn secondary" id="repBackBtn">Back</button>
+      <button type="button" class="btn secondary" id="repExportBtn">Export</button>
+      ${canEditReport(report) ? `<button type="button" class="btn" id="repEditBtn">Edit</button>` : ''}
+    </div>
+  </div>
+  <div class="rep-summary-strip">
+    <div class="rep-stat"><div class="rep-stat-k">Rows</div><div class="rep-stat-v mono">${built.rows.length.toLocaleString()}</div></div>
+    <div class="rep-stat"><div class="rep-stat-k">${esc(built.summaryLabel)}</div><div class="rep-stat-v mono">${esc(formatReportSummary(built.fn, built.grandSummary))}</div></div>
+    ${built.groupCol ? `<div class="rep-stat"><div class="rep-stat-k">Groups</div><div class="rep-stat-v mono">${built.groups.length}</div></div>` : ''}
+  </div>
+  ${report.chart!=='none' ? renderReportChart({ ...built, chart:report.chart }) : ''}
+  ${body}`;
+}
+
+function renderReportHeaderRow(built){
+  return `<tr>${built.columns.map(c=>`<th>${esc(c.label)}</th>`).join('')}</tr>`;
+}
+function renderReportRowCells(built, r){
+  return built.columns.map(c=>`<td style="font-size:12px;">${esc(reportDisplayValue(c, r.cells[c.key]))}</td>`).join('');
+}
+
+function renderReportFlatBody(built){
+  if(!built.rows.length) return `<div class="empty"><div class="display">Nothing matches</div>Loosen a filter, or widen the date range.</div>`;
+  return `<div class="io-card" style="padding-top:6px;"><div style="overflow-x:auto;">
+    <table class="om-table"><thead>${renderReportHeaderRow(built)}</thead><tbody>
+    ${built.rows.map(r=>`<tr>${renderReportRowCells(built, r)}</tr>`).join('')}
+    </tbody></table></div></div>`;
+}
+
+function renderReportGroupedBody(built){
+  if(!built.groups.length) return `<div class="empty"><div class="display">Nothing matches</div>Loosen a filter, or widen the date range.</div>`;
+  return built.groups.map(g=>{
+    const collapsed = !!state.reportCollapsed[g.label];
+    return `<div class="io-card" style="padding-top:6px;margin-bottom:12px;">
+      <button type="button" class="rep-group-head" data-rep-group="${esc(g.label)}">
+        <span class="rep-group-caret">${collapsed ? '▸' : '▾'}</span>
+        <span class="rep-group-name">${esc(g.label)}</span>
+        <span class="rep-group-meta mono">${g.rows.length} row${g.rows.length===1?'':'s'} · ${esc(formatReportSummary(built.fn, g.summary))}</span>
+      </button>
+      ${collapsed ? '' : `<div style="overflow-x:auto;"><table class="om-table"><thead>${renderReportHeaderRow(built)}</thead><tbody>
+        ${g.rows.map(r=>`<tr>${renderReportRowCells(built, r)}</tr>`).join('')}
+      </tbody></table></div>`}
+    </div>`;
+  }).join('');
+}
+
+/* Exports what the report actually shows -- the chosen columns, filtered,
+   sorted and with the group column first when there is one -- rather than the
+   raw object, so the spreadsheet matches the screen. */
+function exportReport(report){
+  const built = buildReport(report);
+  if(built.blocked || !built.rows.length) return toast('Nothing to export.');
+  const rows = built.rows.map(r=>{
+    const out = {};
+    if(built.groupCol) out[built.groupCol.label] = reportDisplayValue(built.groupCol, reportRawValue(built.type, built.groupCol, r.rec));
+    built.columns.forEach(c=>{ out[c.label] = reportDisplayValue(c, r.cells[c.key]); });
+    return out;
+  });
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Report');
+  const safe = (report.name || 'report').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase() || 'report';
+  XLSX.writeFile(wb, `swg-${safe}-${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+async function saveReportDraft(){
+  const d = state.reportDraft;
+  if(!d) return;
+  if(!d.name.trim()) return alert('Give the report a name.');
+  if(!d.typeKey) return alert('Pick a report type.');
+  if(!(d.columns || []).length) return alert('Pick at least one column.');
+  d.name = d.name.trim();
+  d.updatedAt = Date.now();
+  const list = (state.reports || []).filter(r=>r.id!==d.id);
+  list.push(d);
+  state.reports = list;
+  await saveKey(KEYS.reports, state.reports);
+  state.activeReportId = d.id;
+  state.reportDraft = null;
+  render();
+  toast('Report saved.');
+}
+
+async function deleteReport(id){
+  const r = findReport(id);
+  if(!canEditReport(r)) return alert('Only the person who built a report, or an admin, can delete it.');
+  if(!confirm(`Delete the report "${r.name || 'Untitled report'}"?`)) return;
+  state.reports = (state.reports || []).filter(x=>x.id!==id);
+  await saveKey(KEYS.reports, state.reports);
+  if(state.activeReportId===id) state.activeReportId = null;
+  render();
+  toast('Report deleted.');
+}
+
+/* ---------- Reports: wiring ---------- */
+function rerenderReportsView(){
+  const c = document.getElementById('content');
+  if(!c) return;
+  c.innerHTML = renderReports();
+  wireReportsView();
+}
+
+function wireReportsView(){
+  document.querySelectorAll('[data-reports-tab]').forEach(btn=>{
+    btn.onclick = ()=>{ state.reportsTab = btn.dataset.reportsTab; rerenderReportsView(); };
+  });
+
+  const newBtn = document.getElementById('repNewBtn');
+  if(newBtn) newBtn.onclick = ()=>{ state.reportDraft = newReportDraft(); rerenderReportsView(); };
+  const newTypeBtn = document.getElementById('repNewTypeBtn');
+  if(newTypeBtn) newTypeBtn.onclick = ()=> openReportTypeModal(null);
+
+  document.querySelectorAll('[data-run-report]').forEach(el=>{
+    el.onclick = ()=>{ state.activeReportId = el.dataset.runReport; state.reportCollapsed = {}; rerenderReportsView(); };
+  });
+  document.querySelectorAll('[data-edit-report]').forEach(el=>{
+    el.onclick = ()=>{
+      const r = findReport(el.dataset.editReport);
+      if(!canEditReport(r)) return;
+      state.reportDraft = JSON.parse(JSON.stringify(r));
+      rerenderReportsView();
+    };
+  });
+  document.querySelectorAll('[data-clone-report]').forEach(el=>{
+    el.onclick = ()=>{
+      const r = findReport(el.dataset.cloneReport);
+      if(!r) return;
+      /* A clone belongs to whoever made it, so someone can take a copy of a
+         colleague's report and change it without touching theirs. */
+      const copy = JSON.parse(JSON.stringify(r));
+      copy.id = uid();
+      copy.owner = state.currentUser;
+      copy.createdAt = Date.now();
+      copy.name = (r.name || 'Untitled report') + ' (copy)';
+      state.reportDraft = copy;
+      rerenderReportsView();
+    };
+  });
+  document.querySelectorAll('[data-del-report]').forEach(el=>{
+    el.onclick = ()=> deleteReport(el.dataset.delReport);
+  });
+  document.querySelectorAll('[data-new-report-of]').forEach(el=>{
+    el.onclick = ()=>{ state.reportDraft = newReportDraft(el.dataset.newReportOf); rerenderReportsView(); };
+  });
+  document.querySelectorAll('[data-edit-rtype]').forEach(el=>{
+    el.onclick = ()=> openReportTypeModal(el.dataset.editRtype);
+  });
+  document.querySelectorAll('[data-del-rtype]').forEach(el=>{
+    el.onclick = ()=> deleteReportType(el.dataset.delRtype);
+  });
+  document.querySelectorAll('[data-rep-group]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const label = btn.dataset.repGroup;
+      state.reportCollapsed = { ...state.reportCollapsed, [label]: !state.reportCollapsed[label] };
+      rerenderReportsView();
+    };
+  });
+
+  const backBtn = document.getElementById('repBackBtn');
+  if(backBtn) backBtn.onclick = ()=>{ state.activeReportId = null; rerenderReportsView(); };
+  const exportBtn = document.getElementById('repExportBtn');
+  if(exportBtn) exportBtn.onclick = ()=> exportReport(findReport(state.activeReportId));
+  const editBtn = document.getElementById('repEditBtn');
+  if(editBtn) editBtn.onclick = ()=>{
+    const r = findReport(state.activeReportId);
+    if(!canEditReport(r)) return;
+    state.reportDraft = JSON.parse(JSON.stringify(r));
+    rerenderReportsView();
+  };
+
+  wireReportBuilder();
+}
+
+/* The builder edits state.reportDraft in place. Typing only refreshes the
+   preview -- a full redraw would steal focus mid-word -- while anything that
+   changes which controls exist redraws the whole page. */
+function wireReportBuilder(){
+  const d = state.reportDraft;
+  if(!d) return;
+
+  const nameEl = document.getElementById('rep_name');
+  if(nameEl) nameEl.oninput = ()=>{ d.name = nameEl.value; };
+  const descEl = document.getElementById('rep_desc');
+  if(descEl) descEl.oninput = ()=>{ d.description = descEl.value; };
+
+  const typeEl = document.getElementById('rep_type');
+  if(typeEl) typeEl.onchange = ()=>{
+    d.typeKey = typeEl.value;
+    /* Columns, filters, grouping and sorting all name columns of the old
+       type, so they cannot survive the switch. */
+    d.columns = reportColumnsFor(findReportType(d.typeKey)).slice(0, 6).map(c=>c.key);
+    d.filters = [];
+    d.groupBy = '';
+    d.sortCol = '';
+    d.summarize = { fn:'count', col:'' };
+    rerenderReportsView();
+  };
+
+  document.querySelectorAll('[data-rep-col]').forEach(cb=>{
+    cb.onchange = ()=>{
+      const key = cb.dataset.repCol;
+      /* Kept in the report type's own field order so ticking a column back
+         on puts it where it belongs rather than at the end. */
+      const order = reportColumnsFor(findReportType(d.typeKey)).map(c=>c.key);
+      d.columns = cb.checked
+        ? order.filter(k=>k===key || (d.columns||[]).includes(k))
+        : (d.columns||[]).filter(k=>k!==key);
+      refreshReportPreview();
+    };
+  });
+
+  const rangeEl = document.getElementById('rep_range');
+  if(rangeEl) rangeEl.onchange = ()=>{ d.dateRange = rangeEl.value; refreshReportPreview(); };
+
+  const addFilterBtn = document.getElementById('repAddFilterBtn');
+  if(addFilterBtn) addFilterBtn.onclick = ()=>{
+    const cols = reportColumnsFor(findReportType(d.typeKey));
+    if(!cols.length) return;
+    d.filters = (d.filters||[]).concat([{ col: cols[0].key, op:'contains', value:'' }]);
+    rerenderReportsView();
+  };
+  document.querySelectorAll('[data-rep-filter-col]').forEach(sel=>{
+    sel.onchange = ()=>{ d.filters[Number(sel.dataset.repFilterCol)].col = sel.value; refreshReportPreview(); };
+  });
+  document.querySelectorAll('[data-rep-filter-op]').forEach(sel=>{
+    sel.onchange = ()=>{ d.filters[Number(sel.dataset.repFilterOp)].op = sel.value; rerenderReportsView(); };
+  });
+  document.querySelectorAll('[data-rep-filter-val]').forEach(inp=>{
+    inp.oninput = ()=>{ d.filters[Number(inp.dataset.repFilterVal)].value = inp.value; refreshReportPreview(); };
+  });
+  document.querySelectorAll('[data-rep-filter-del]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const i = Number(btn.dataset.repFilterDel);
+      d.filters = (d.filters||[]).filter((_,j)=>j!==i);
+      rerenderReportsView();
+    };
+  });
+
+  const groupEl = document.getElementById('rep_group');
+  if(groupEl) groupEl.onchange = ()=>{ d.groupBy = groupEl.value; refreshReportPreview(); };
+  const fnEl = document.getElementById('rep_fn');
+  if(fnEl) fnEl.onchange = ()=>{
+    d.summarize = { fn: fnEl.value, col: fnEl.value==='count' ? '' : (d.summarize.col || '') };
+    rerenderReportsView();
+  };
+  const sumColEl = document.getElementById('rep_sumcol');
+  if(sumColEl) sumColEl.onchange = ()=>{ d.summarize.col = sumColEl.value; refreshReportPreview(); };
+  const chartEl = document.getElementById('rep_chart');
+  if(chartEl) chartEl.onchange = ()=>{ d.chart = chartEl.value; rerenderReportsView(); };
+  const sortColEl = document.getElementById('rep_sortcol');
+  if(sortColEl) sortColEl.onchange = ()=>{ d.sortCol = sortColEl.value; refreshReportPreview(); };
+  const sortDirEl = document.getElementById('rep_sortdir');
+  if(sortDirEl) sortDirEl.onchange = ()=>{ d.sortDir = sortDirEl.value; refreshReportPreview(); };
+
+  const saveBtn = document.getElementById('repSaveBtn');
+  if(saveBtn) saveBtn.onclick = saveReportDraft;
+  const cancelBtn = document.getElementById('repCancelBtn');
+  if(cancelBtn) cancelBtn.onclick = ()=>{ state.reportDraft = null; rerenderReportsView(); };
 }
 
 /* ---------- Modal / forms ---------- */
