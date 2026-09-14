@@ -137,6 +137,7 @@
   .navlink[data-view="distributors"],.navlink[data-view="orders"],.navlink[data-view="emails"]{--nav-accent:var(--umber);--nav-accent-soft:var(--umber-soft);}
   .navlink[data-view="suppliers"],.navlink[data-view="tickets"]{--nav-accent:var(--clay);--nav-accent-soft:var(--clay-soft);}
   .navlink[data-view="tasks"]{--nav-accent:var(--olive);--nav-accent-soft:var(--olive-soft);}
+  .navlink[data-view="reports"]{--nav-accent:var(--setup-blue);--nav-accent-soft:var(--setup-blue-soft);}
   .navlink[data-view="invoices"],.navlink[data-view="payments"]{--nav-accent:var(--rust);--nav-accent-soft:var(--rust-soft);}
   .navlink .nav-ico{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);transition:color .14s;}
   .navlink .nav-ico svg{width:100%;height:100%;display:block;}
@@ -504,7 +505,31 @@
   .setup-banner{background:var(--setup-blue-soft);color:var(--setup-blue);border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
   .setup-layout{display:flex;align-items:flex-start;gap:24px;}
   .setup-sidenav{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:2px;position:sticky;top:0;}
-  .setup-nav-item{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:7px;border:none;background:none;color:var(--ink-soft);cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;transition:background .15s,color .15s;}
+  .setup-nav-item{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left;padding:9px 12px;border-radius:7px;border:none;background:none;color:var(--ink-soft);cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;transition:background .15s,color .15s;}
+  .setup-nav-group{font-size:9.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1.1px;padding:0 12px;margin:14px 0 4px;opacity:.75;}
+  .setup-nav-group:first-child{margin-top:0;}
+  .setup-lock{font-size:10px;opacity:.6;flex-shrink:0;}
+  .setup-nav-item.active .setup-lock{opacity:.9;}
+  .rt-obj-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 8px;font-size:12.5px;font-weight:700;}
+  .rt-add-btn{padding:5px 12px;font-size:12px;}
+  .rt-link{background:none;border:none;padding:0;font-family:inherit;font-size:12px;color:var(--setup-blue);cursor:pointer;text-decoration:underline;}
+  /* ---------- Reports ---------- */
+  .rep-tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:20px;}
+  .rep-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px;}
+  .rep-head-title{font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:var(--ink);}
+  .rep-head-sub{font-size:12.5px;color:var(--ink-soft);margin-top:3px;}
+  .rep-builder{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:20px;align-items:start;}
+  .rep-filter-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) auto;gap:6px;align-items:center;margin-bottom:8px;}
+  .rep-filter-row select,.rep-filter-row input{width:100%;min-width:0;}
+  .rep-summary-strip{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+  .rep-stat{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 16px;min-width:130px;}
+  .rep-stat-k{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-soft);}
+  .rep-stat-v{font-size:17px;color:var(--ink);margin-top:3px;}
+  .rep-group-head{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;padding:8px 0;font-family:inherit;cursor:pointer;text-align:left;color:var(--ink);}
+  .rep-group-caret{color:var(--ink-soft);font-size:12px;width:12px;flex-shrink:0;}
+  .rep-group-name{font-size:13.5px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .rep-group-meta{margin-left:auto;font-size:11.5px;color:var(--ink-soft);flex-shrink:0;}
+  @media (max-width:1100px){ .rep-builder{grid-template-columns:minmax(0,1fr);} }
   .setup-nav-item:hover{background:var(--setup-blue-soft);color:var(--setup-blue);}
   .setup-nav-item.active{background:var(--setup-blue);color:#fff;}
   /* Company Settings lives in the side-nav as a collapsible group, the way
@@ -1205,6 +1230,7 @@
     <div class="nav-group-label" data-nav-group="workspace">Workspace</div>
     <div class="navlink" data-view="home" data-nav-group="workspace"><span class="nav-ico"></span>Home</div>
     <div class="navlink active" data-view="dashboard" data-nav-group="workspace"><span class="nav-ico"></span>Dashboard</div>
+    <div class="navlink" data-view="reports" data-nav-group="workspace"><span class="nav-ico"></span>Reports</div>
     <div class="nav-group-label" data-nav-group="records">Records</div>
     <div class="navlink" data-view="contacts" data-nav-group="records"><span class="nav-ico"></span>Contacts</div>
     <div class="navlink" data-view="leads" data-nav-group="records"><span class="nav-ico"></span>Leads</div>
@@ -1319,7 +1345,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, companySettings:{}, companyNavOpen:true, setupTab:'automation', setupSection:'home', omObject:null, omTab:'details', omSection:'objects', omFilter:'', recordTypes:[], pageLayouts:[], recordPages:[], relationships:[], profiles:[], permissionSets:[], permissionSetGroups:[], publicGroups:[], emailTemplates:[], adminTab:'profiles', adminReturnView:'dashboard', flowExplorer:false, flowWizard:null, emailTemplateFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0 };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, companySettings:{}, companyNavOpen:true, setupTab:'automation', setupSection:'home', omObject:null, omTab:'details', omSection:'objects', omFilter:'', recordTypes:[], recordTypeAssignments:{}, compactLayouts:{}, reports:[], reportTypes:[], reportsTab:'reports', activeReportId:null, reportDraft:null, reportCollapsed:{}, pageLayouts:[], recordPages:[], relationships:[], profiles:[], permissionSets:[], permissionSetGroups:[], publicGroups:[], emailTemplates:[], adminTab:'profiles', adminReturnView:'dashboard', flowExplorer:false, flowWizard:null, emailTemplateFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0 };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -1431,6 +1457,7 @@ const NAV_ICONS = {
   finance:`<path d="M3.4 20.6h17.2"/><rect x="5.4" y="12" width="3.4" height="6.4" rx="1"/><rect x="10.6" y="7.6" width="3.4" height="10.8" rx="1"/><rect x="15.8" y="10" width="3.4" height="8.4" rx="1"/>`,
   emails:`<rect x="2.8" y="5" width="18.4" height="14" rx="2.2"/><path d="M3.4 6.6 12 13l8.6-6.4"/>`,
   tickets:`<circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="3.4"/><path d="M6 6l3.6 3.6M14.4 14.4 18 18M18 6l-3.6 3.6M9.6 14.4 6 18"/>`,
+  reports:`<path d="M4.6 3.6h9.2l5.6 5.6v11.2a1.6 1.6 0 0 1-1.6 1.6H4.6A1.6 1.6 0 0 1 3 20.4V5.2a1.6 1.6 0 0 1 1.6-1.6Z"/><path d="M13.4 3.8v5.4h5.4"/><path d="M7.6 18v-3.6M11 18v-6M14.4 18v-2.2"/>`,
   administration:`<path d="M12 3.2 20 6.6v5.1c0 4.4-3.3 7.9-8 9.1-4.7-1.2-8-4.7-8-9.1V6.6z"/><path d="M9.2 11.9l2 2 3.6-3.8"/>`,
   team:`<circle cx="9.4" cy="8.4" r="3.5"/><path d="M2.8 20c.6-3.5 3.2-5.6 6.6-5.6S15.4 16.5 16 20"/><path d="M16.2 5.5a3.4 3.4 0 0 1 0 6.6"/><path d="M17.8 14.7c2 .7 3.3 2.4 3.7 5.3"/>`,
 };
@@ -1450,7 +1477,7 @@ const ACCENTS = {
   distributors:'var(--umber)', suppliers:'var(--clay)', deals:'var(--ochre)', orders:'var(--umber)',
   tasks:'var(--olive)', invoices:'var(--rust)', payments:'var(--rust)', team:'var(--ink)', finance:'var(--sage)',
   emails:'var(--umber)', tickets:'var(--clay)', search:'var(--ink)', rickroll:'var(--ink)',
-  administration:'var(--setup-blue)'
+  reports:'var(--setup-blue)', administration:'var(--setup-blue)'
 };
 const CONTINENTS = ['Africa','Asia','Europe','North America','South America','Oceania','Middle East'];
 const SUBREGIONS = {
@@ -1537,18 +1564,51 @@ function roleFor(name){
   if(CO_ADMINS.includes(name)) return 'Manager';
   return 'Sales Rep';
 }
-function canAccessSetup(){ return isAdmin() || roleFor(state.currentUser)==='Manager'; }
+/* ---------- Who can reach what ----------
+   Three rings, widest first:
+
+     Setup         -- open to the whole team. Anyone signed in can look at how
+                      their objects are configured, and can edit the
+                      presentation-level parts (see canPersonalizeSetup).
+     Administer    -- Ariel and David only: validation, sharing, automation,
+                      flows, visibility, alerts, company settings and the
+                      structural half of Object Manager. Everyone else sees
+                      these read-only, so the org's rules stay legible without
+                      anyone being able to change them.
+     Administration-- narrower still, and its own screen rather than a Setup
+                      tab: profiles, permission sets, roles, public groups.
+                      Handing out access is never something Setup can do.
+
+   Setup used to be admin-and-manager only, which left everyone else with no
+   way to adjust even the harmless parts of their own objects. Every write
+   path checks its own can* helper, so a non-admin who reaches an admin pane
+   -- by deep link, by Quick Settings, or by leaving a stale draft behind --
+   still cannot save anything. */
+function canAccessSetup(){ return !!state.currentUser; }
 /* Administration hands out access itself, so it is narrower than Setup: only
    the two admins, Ariel and David. A Manager can open Setup and still never
    sees this -- the sidebar link is hidden, the Quick Settings rows are gone,
    and the view redirects if anyone lands on it another way. */
 function canAccessAdministration(){ return isAdmin(); }
 function canEditGlobalSetup(){ return isAdmin(); }
+function canPersonalizeSetup(){ return !!state.currentUser; }
 function isArielOrDaniel(){ return state.currentUser===FULL_ADMIN || state.currentUser==='Daniel'; }
 function canEditRoles(){ return isArielOrDaniel(); }
 function canEditBigDealAlert(){ return isArielOrDaniel(); }
 function canEditRequiredFields(){ return isAdmin() || state.currentUser==='Daniel'; }
 function canEditDependentFields(){ return isAdmin(); }
+/* Whether the signed-in user may edit the given Setup tab, used to draw the
+   lock badges in the sidenav. Tabs not listed here are admin-tier. */
+const SETUP_READONLY_TABS = ['details','fields','limits'];
+function canEditSetupTab(key){
+  if(SETUP_READONLY_TABS.includes(key)) return true;
+  if(key==='recordtypes' || key==='compact') return canPersonalizeSetup();
+  if(key==='bigdeal') return canEditBigDealAlert();
+  if(key==='required') return canEditRequiredFields();
+  if(key==='dependent') return canEditDependentFields();
+  return canEditGlobalSetup();
+}
+const ADMIN_ONLY_NOTE = '\uD83D\uDD12 View only \u2014 this is an admin setting. Ariel or David can change it for you. You can still edit Record Types and Compact Layouts yourself.';
 
 const DEFAULT_TEAM = [
   {name:'Ariel', email:'ariel@siddhayogaweb.com'},
@@ -1668,6 +1728,10 @@ const KEYS = {
   objectVisibility: 'objectVisibility',
   fieldVisibility: 'fieldVisibility',
   recordTypes: 'recordTypes',
+  recordTypeAssignments: 'recordTypeAssignments',
+  compactLayouts: 'compactLayouts',
+  reports: 'reports',
+  reportTypes: 'reportTypes',
   pageLayouts: 'pageLayouts',
   recordPages: 'recordPages',
   relationships: 'relationships',
@@ -1690,6 +1754,8 @@ const SETTING_DEFAULTS = {
   profiles: [], permissionSets: [], permissionSetGroups: [], publicGroups: [],
   emailTemplates: [],
   companySettings: {},
+  recordTypeAssignments: {}, compactLayouts: {},
+  reports: [], reportTypes: [],
 };
 
 /* Saves one settings key. Errors are logged rather than thrown: a failed
@@ -1956,6 +2022,7 @@ function render(){
     team:['Team','Manage who has access to the ledger'],
     emails:['Emails','Automated messages the CRM sends on your behalf'],
     tickets:['Tickets','Customer enquiries from the website and elsewhere'],
+    reports:['Reports','Ask the ledger a question and save the answer'],
     setup:['Setup','Validation rules, automation, sharing and the Object Manager'],
     administration:['Administration','Profiles, roles, permission sets and public groups'],
     customerProfile:['Customer',''],
@@ -1972,7 +2039,7 @@ function render(){
   document.getElementById('mainArea').style.setProperty('--accent', ACCENTS[state.view] || 'var(--amber)');
   const addLabels = {contacts:'contact', leads:'lead', customers:'customer', distributors:'distributor', suppliers:'supplier', deals:'deal', tasks:'task', invoices:'invoice', payments:'payment', team:'team member'};
   const addBtn = document.getElementById('addBtn');
-  const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets','setup','customerProfile','administration'];
+  const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets','setup','reports','customerProfile','administration'];
   addBtn.style.display = noAdd.includes(state.view) ? 'none' : 'inline-block';
   addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
   const guideBtn = document.getElementById('topbarGuideBtn');
@@ -2003,11 +2070,15 @@ function render(){
   if(state.view==='emails') c.innerHTML = renderEmails();
   if(state.view==='tickets') c.innerHTML = renderTickets();
   if(state.view==='team') c.innerHTML = renderTeam();
+  if(state.view==='reports') c.innerHTML = renderReports();
   if(state.view==='setup') c.innerHTML = renderSetup();
   if(state.view==='administration'){ c.innerHTML = renderAdministration(); wireAdministration(); }
   if(state.view==='search') c.innerHTML = renderSearchShell();
   if(state.view==='rickroll') c.innerHTML = renderImportExport();
-  if(SETUP_ENTITIES.includes(state.view)) applyFieldVisibilityToTable(state.view);
+  if(SETUP_ENTITIES.includes(state.view)){
+    applyFieldVisibilityToTable(state.view);
+    applyCompactLayoutToTable(state.view);
+  }
   attachContentHandlers();
 }
 
@@ -5270,7 +5341,11 @@ function wireAdministration(){
    live in Administration, reached from the sidebar instead of through Setup.
    Required Fields, Validation Rules, Dependent Fields and the Schema
    Visualizer left too: they configure objects, so they sit under Object
-   Manager, in the same rail as the object list. */
+   Manager, in the same rail as the object list.
+
+   Everything left here is admin-tier: a non-admin can read these panes but
+   not change them. What they *can* change -- Record Types and Compact Layout
+   -- lives on the object, in OM_TABS. */
 const SETUP_TABS = [
   {key:'automation', label:'Automation'},
   {key:'flows', label:'Flows'},
@@ -5304,6 +5379,71 @@ const SHARING_MODES = [
 function entityFieldsFor(entityKey){
   const sheet = EXPORT_SHEETS.find(s=>s.key===entityKey);
   return sheet ? sheet.fields.filter(f=>f!=='id'&&f!=='createdAt') : [];
+}
+
+/* ---------- Record Types: assigning one to a record ----------
+   Object Manager owns the record types themselves -- see renderObjectRecordTypes
+   and openRecordTypeModal, where they are defined per object with an API name,
+   a page layout and a default. What lives here is the other half: which
+   individual record is which type.
+
+   That assignment sits in a settings map rather than a new column on every
+   table, so no schema migration is needed and a record can never fail to
+   insert because a column is missing. Keyed by entity, then by record id. */
+function activeRecordTypes(entity){ return recordTypesFor(entity).filter(rt=>rt.active!==false); }
+function defaultRecordTypeId(entity){
+  const list = activeRecordTypes(entity);
+  const def = list.find(rt=>rt.isDefault);
+  return def ? def.id : (list[0] ? list[0].id : '');
+}
+function recordTypeIdOf(entity, recordId){ return (state.recordTypeAssignments[entity]||{})[recordId] || ''; }
+/* The label of the type one record carries. Distinct from recordTypeLabel(id),
+   which Object Manager uses to name a type it already has the id of. */
+function recordTypeOfRecord(entity, recordId){
+  const id = recordTypeIdOf(entity, recordId);
+  const rt = id ? recordTypesFor(entity).find(x=>x.id===id) : null;
+  return rt ? rt.label : '';
+}
+async function assignRecordType(entity, recordId, rtId){
+  const map = { ...(state.recordTypeAssignments || {}) };
+  const forEntity = { ...(map[entity] || {}) };
+  if(rtId) forEntity[recordId] = rtId; else delete forEntity[recordId];
+  map[entity] = forEntity;
+  state.recordTypeAssignments = map;
+  await saveKey(KEYS.recordTypeAssignments, map);
+}
+/* Drops assignments pointing at a record type that no longer exists, so a
+   deleted type does not leave records labelled with a dangling id. */
+async function pruneRecordTypeAssignments(entity){
+  const valid = new Set(recordTypesFor(entity).map(rt=>rt.id));
+  const forEntity = state.recordTypeAssignments[entity] || {};
+  const kept = Object.fromEntries(Object.entries(forEntity).filter(([,rtId])=>valid.has(rtId)));
+  if(Object.keys(kept).length === Object.keys(forEntity).length) return;
+  state.recordTypeAssignments = { ...state.recordTypeAssignments, [entity]: kept };
+  await saveKey(KEYS.recordTypeAssignments, state.recordTypeAssignments);
+}
+
+/* ---------- Compact Layouts ----------
+   Which fields an object shows at a glance in its list view. An entity with
+   no saved layout shows everything, so this starts out invisible and only
+   ever narrows what is on screen. It never hides a field from Setup, from
+   the Add/Edit form or from Reports -- that is Field Visibility's job, and
+   that one stays admin-only. */
+function compactLayoutFor(entity){
+  const saved = state.compactLayouts[entity];
+  return Array.isArray(saved) && saved.length ? saved.filter(f=>entityFieldsFor(entity).includes(f)) : null;
+}
+/* Hides list-view columns left out of the object's compact layout. Runs
+   alongside applyFieldVisibilityToTable and uses the same data-field-col
+   markers, so an object whose renderer has not been marked up simply keeps
+   showing every column. */
+function applyCompactLayoutToTable(entity){
+  const layout = compactLayoutFor(entity);
+  if(!layout) return;
+  entityFieldsFor(entity).forEach(field=>{
+    if(layout.includes(field)) return;
+    document.querySelectorAll(`#content [data-field-col="${field}"]`).forEach(el=>{ el.style.display = 'none'; });
+  });
 }
 
 /* ---------- Safe formula mini-language (no eval/Function — tokenize/parse/evaluate) ---------- */
@@ -5537,6 +5677,14 @@ function setupDraftSeed(tab){
   if(tab==='required') return state.validationRules.map(r=>({...r}));
   if(tab==='sharing') return {...state.sharingRules};
   if(tab==='visibility') return { objectVisibility:{...state.objectVisibility}, fieldVisibility:{...state.fieldVisibility} };
+  if(tab==='compact'){
+    /* Seeded with an explicit list per object -- including objects with no
+       saved layout, which seed as "every field" -- so unticking the first
+       box produces a real list rather than mutating a null. */
+    const seed = {};
+    SETUP_ENTITIES.forEach(e=>{ seed[e] = (compactLayoutFor(e) || entityFieldsFor(e)).slice(); });
+    return seed;
+  }
   return null;
 }
 function stageSetupChange(tab, mutate){
@@ -5560,6 +5708,17 @@ async function saveSetupDraft(){
     state.fieldVisibility = data.fieldVisibility;
     await saveKey(KEYS.objectVisibility, state.objectVisibility);
     await saveKey(KEYS.fieldVisibility, state.fieldVisibility);
+  } else if(tab==='compact'){
+    /* An object showing every field is stored as "no layout", so a later
+       field added to EXPORT_SHEETS shows up instead of being silently
+       excluded by a stale list. */
+    const next = {};
+    SETUP_ENTITIES.forEach(e=>{
+      const picked = (data[e]||[]).filter(f=>entityFieldsFor(e).includes(f));
+      if(picked.length && picked.length < entityFieldsFor(e).length) next[e] = picked;
+    });
+    state.compactLayouts = next;
+    await saveKey(KEYS.compactLayouts, next);
   }
   setupDraft = null;
   toast('Changes saved.');
@@ -5583,8 +5742,8 @@ function renderSetupRoles(){
   const canEdit = canEditRoles();
   const roles = setupDraftActive('roles') ? setupDraft.data : null;
   return `<div class="io-card">
-    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Assign each team member a role. Admins and Managers can open Setup; only Ariel can delete a team member.</p>
-    ${canEdit ? '' : `<div class="readonly-note">👁 View only — only Ariel or Daniel can change roles.</div>`}
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Assign each team member a role. Everyone can open Setup and personalize their record types and compact layouts; only Ariel and David can change the admin settings, and only Ariel can delete a team member.</p>
+    ${canEdit ? '' : `<div class="readonly-note">🔒 View only — handing out roles is an admin setting. Only Ariel or Daniel can change these.</div>`}
     ${renderSetupSaveBar('top')}
     <table><thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody>
     ${state.team.map(t=>`<tr>
@@ -5743,14 +5902,16 @@ function renderSetupAutomation(onlyEntity){
 
 function renderSetupFlows(){
   const flows = state.flows;
+  const canEdit = canEditGlobalSetup();
   return `<div class="io-card">
-    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Build multi-step automations — a chain of conditions that must all pass, followed by one or more actions. Like Automation, but for more than one rule at a time. Open to everyone with Setup access.</p>
-    <div class="om-pane-actions">
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Build multi-step automations — a chain of conditions that must all pass, followed by one or more actions. Like Automation, but for more than one rule at a time.</p>
+    ${canEdit ? `<div class="om-pane-actions">
       <button class="btn" id="addFlowBtn">+ Create flow</button>
       <button type="button" class="btn secondary" id="openFlowExplorerBtn">⌁ Flow Trigger Explorer</button>
     </div>
     <p style="color:var(--ink-soft);font-size:11.5px;margin:0 0 14px;">New to flows? Open the Trigger Explorer — it shows what already
-      fires on each object and then walks you through building a new one, one question at a time.</p>
+      fires on each object and then walks you through building a new one, one question at a time.</p>`
+    : `<div class="readonly-note">${esc(ADMIN_ONLY_NOTE)}</div>`}
     <table><thead><tr><th>Name</th><th>Object</th><th>Trigger</th><th>Steps</th><th></th></tr></thead><tbody>
     ${flows.map(f=>{
       const nCond = f.steps.filter(s=>s.type==='condition').length;
@@ -5760,7 +5921,7 @@ function renderSetupFlows(){
       <td style="font-size:12px;">${esc(EXPORT_SHEETS.find(s=>s.key===f.entity)?.label||f.entity)}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${esc(flowTriggerLabel(flowTrigger(f)))}</td>
       <td style="font-size:12px;color:var(--ink-soft);">${nCond} condition${nCond===1?'':'s'}, ${nAct} action${nAct===1?'':'s'}</td>
-      <td class="row-actions"><span data-del-flow="${f.id}">delete</span></td>
+      <td class="row-actions">${canEdit ? `<span data-del-flow="${f.id}">delete</span>` : ''}</td>
     </tr>`;}).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--ink-soft);padding:20px;">No flows yet.</td></tr>`}
     </tbody></table>
   </div>`;
@@ -6084,8 +6245,10 @@ function renderSetupSharing(onlyEntity){
 
 function renderSetupGuide(){
   const objectsWithSteps = SETUP_ENTITIES.filter(e=>guideEntriesFor(e).length);
+  const canEdit = canEditGlobalSetup();
   return `<div class="io-card">
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 16px;">Build a guided walkthrough for each object, the way Salesforce does. Each step is a card that points at a real place on the page — the menu item, the <strong>+ Add</strong> button, the list, or one field on the Add form. Your team takes the tour by clicking <strong>Guide</strong> at the top of that object's page.</p>
+    ${canEdit ? '' : `<div class="readonly-note">${esc(ADMIN_ONLY_NOTE)}</div>`}
     ${objectsWithSteps.map(entity=>{
       const steps = guideEntriesFor(entity);
       return `<div class="guide-object-block">
@@ -6093,7 +6256,7 @@ function renderSetupGuide(){
           <div class="guide-object-name">${esc(EXPORT_SHEETS.find(s=>s.key===entity).label)}<span class="guide-step-count">${steps.length} step${steps.length===1?'':'s'}</span></div>
           <div style="display:flex;gap:7px;">
             <button type="button" class="btn secondary" data-preview-guide="${entity}">▷ Preview</button>
-            <button type="button" class="btn secondary" data-add-guide-for="${entity}">+ Add step</button>
+            ${canEdit ? `<button type="button" class="btn secondary" data-add-guide-for="${entity}">+ Add step</button>` : ''}
           </div>
         </div>
         ${steps.map((g,i)=>`<div class="guide-step-row">
@@ -6104,15 +6267,15 @@ function renderSetupGuide(){
             <div class="guide-step-target">Points at: ${esc(guideTargetLabel(g))}</div>
           </div>
           <div class="guide-step-tools">
-            <button type="button" class="guide-tool" data-guide-up="${g.id}" ${i===0?'disabled':''} title="Move up">↑</button>
+            ${canEdit ? `<button type="button" class="guide-tool" data-guide-up="${g.id}" ${i===0?'disabled':''} title="Move up">↑</button>
             <button type="button" class="guide-tool" data-guide-down="${g.id}" ${i===steps.length-1?'disabled':''} title="Move down">↓</button>
             <button type="button" class="guide-tool" data-edit-guide="${g.id}" title="Edit">Edit</button>
-            <button type="button" class="guide-tool danger" data-del-guide="${g.id}" title="Delete">Delete</button>
+            <button type="button" class="guide-tool danger" data-del-guide="${g.id}" title="Delete">Delete</button>` : ''}
           </div>
         </div>`).join('')}
       </div>`;
     }).join('') || `<div class="readonly-note" style="text-align:center;">No walkthrough steps yet — add the first one below.</div>`}
-    <button class="btn" id="addGuideBtn" style="margin-top:16px;">+ Add walkthrough step</button>
+    ${canEdit ? `<button class="btn" id="addGuideBtn" style="margin-top:16px;">+ Add walkthrough step</button>` : ''}
   </div>`;
 }
 
@@ -6637,7 +6800,8 @@ const OM_TABS = [
   {key:'fields', label:'Fields &amp; Relationships'},
   {key:'pagelayouts', label:'Page Layouts'},
   {key:'recordpages', label:'Lightning Record Pages'},
-  {key:'recordtypes', label:'Record Types'},
+  {key:'recordtypes', label:'Record Types', tier:'personalize'},
+  {key:'compact', label:'Compact Layout', tier:'personalize'},
   {key:'limits', label:'Object Limits'},
   {key:'required', label:'Required Fields'},
   {key:'validation', label:'Validation Rules'},
@@ -6712,6 +6876,7 @@ function renderObjectDetailBody(entity){
   if(tab==='pagelayouts') return renderObjectPageLayouts(entity);
   if(tab==='recordpages') return renderObjectRecordPages(entity);
   if(tab==='recordtypes') return renderObjectRecordTypes(entity);
+  if(tab==='compact') return renderSetupCompact(entity);
   if(tab==='limits') return renderObjectLimits(entity);
   if(tab==='required') return renderSetupRequired(entity);
   if(tab==='validation') return renderSetupValidation(entity);
@@ -6772,6 +6937,7 @@ function renderObjectDetails(entity){
     ['Hidden fields', String(hiddenFields)],
     ['Validation rules', String(state.validationRules.filter(r=>r.entity===entity && r.type!=='required').length)],
     ['Dependent field rules', String(state.dependentFields.filter(r=>r.entity===entity).length)],
+    ['Compact layout', (compactLayoutFor(entity) || entityFieldsFor(entity)).length + ' of ' + entityFieldsFor(entity).length + ' fields'],
     ['Automations', String(state.automations.filter(a=>a.entity===entity).length)],
     ['Flows', String(state.flows.filter(f=>f.entity===entity).length)],
     ['Walkthrough steps', String(guideEntriesFor(entity).length)],
@@ -7047,17 +7213,19 @@ function recordTypeLabel(id){
 
 function renderObjectRecordTypes(entity){
   const types = recordTypesFor(entity);
-  const canEdit = canEditGlobalSetup();
+  const canEdit = canPersonalizeSetup();
   return `<div class="io-card">
     <h3 class="om-pane-title">Record Types</h3>
     <p class="om-pane-lead">Record types let one object behave like two. A Wholesale ${esc(singularLabel(entity).toLowerCase())}
       and a Retail one are both ${esc(objectLabel(entity).toLowerCase())}, but each can get its own page layout and its own
       picklist values. Every object starts with a single Master type; add more only when the two really differ.</p>
+    <p class="om-pane-lead">Once an object has an active type, its Add/Edit form grows a <strong>Record Type</strong> picker, and
+      Reports can group by it. Naming a flavour grants nobody any access, so anyone on the team can set these up.</p>
     ${canEdit ? `<div class="om-pane-actions">
       <button type="button" class="btn" data-new-recordtype="${entity}">+ New Record Type</button>
-    </div>` : `<div class="readonly-note">👁 View only — only an admin can change record types.</div>`}
+    </div>` : `<div class="readonly-note">👁 View only — sign in to change record types.</div>`}
     <table class="om-table"><thead><tr>
-      <th>Label</th><th>API Name</th><th>Description</th><th>Page Layout</th><th>Default</th><th>Active</th><th></th>
+      <th>Label</th><th>API Name</th><th>Description</th><th>Page Layout</th><th>Default</th><th>Active</th><th>Records</th><th></th>
     </tr></thead><tbody>
     ${types.map(rt=>`<tr>
       <td><span class="om-link" data-edit-recordtype="${rt.id}">${esc(rt.label)}</span></td>
@@ -7066,8 +7234,9 @@ function renderObjectRecordTypes(entity){
       <td style="font-size:12px;color:var(--ink-soft);">${esc(rt.layoutId ? (state.pageLayouts.find(l=>l.id===rt.layoutId)||{}).name || 'Deleted layout' : 'Object default')}</td>
       <td>${rt.isDefault ? `<span class="om-pill dflt">Default</span>` : (canEdit?`<span class="om-link" data-default-recordtype="${rt.id}">make default</span>`:'—')}</td>
       <td>${rt.active ? `<span class="om-pill">Active</span>` : `<span class="om-pill off">Inactive</span>`}</td>
+      <td style="text-align:right;font-size:12px;">${Object.values(state.recordTypeAssignments[entity]||{}).filter(id=>id===rt.id).length}</td>
       <td class="row-actions">${canEdit?`<span data-edit-recordtype="${rt.id}">edit</span><span data-del-recordtype="${rt.id}">delete</span>`:''}</td>
-    </tr>`).join('') || `<tr><td colspan="7" style="text-align:center;color:var(--ink-soft);padding:20px;">${esc(objectLabel(entity))} uses the Master record type only.</td></tr>`}
+    </tr>`).join('') || `<tr><td colspan="8" style="text-align:center;color:var(--ink-soft);padding:20px;">${esc(objectLabel(entity))} uses the Master record type only.</td></tr>`}
     </tbody></table>
   </div>`;
 }
@@ -7121,6 +7290,7 @@ function renderObjectAccess(entity){
 
 function renderObjectAutomation(entity){
   const flows = state.flows.filter(f=>f.entity===entity);
+  const canEdit = canEditGlobalSetup();
   return renderSetupAutomation(entity) + `<div class="io-card" style="margin-top:16px;">
     <h3 class="om-pane-title">Flows</h3>
     <table><thead><tr><th>Name</th><th>Steps</th><th></th></tr></thead><tbody>
@@ -7130,22 +7300,24 @@ function renderObjectAutomation(entity){
       return `<tr>
         <td style="font-size:12px;font-weight:600;">${esc(f.name)}</td>
         <td style="font-size:12px;color:var(--ink-soft);">${nCond} condition${nCond===1?'':'s'}, ${nAct} action${nAct===1?'':'s'}</td>
-        <td class="row-actions"><span data-del-flow="${f.id}">delete</span></td>
+        <td class="row-actions">${canEdit ? `<span data-del-flow="${f.id}">delete</span>` : ''}</td>
       </tr>`;
     }).join('') || `<tr><td colspan="3" style="text-align:center;color:var(--ink-soft);padding:20px;">No flows on ${esc(objectLabel(entity))} yet.</td></tr>`}
     </tbody></table>
-    <button class="btn" id="addFlowBtn" style="margin-top:14px;">+ Create flow</button>
+    ${canEdit ? `<button class="btn" id="addFlowBtn" style="margin-top:14px;">+ Create flow</button>` : ''}
   </div>`;
 }
 
 function renderObjectGuide(entity){
   const steps = guideEntriesFor(entity);
+  const canEdit = canEditGlobalSetup();
   return `<div class="io-card">
     <h3 class="om-pane-title">Hands-on Guide</h3>
     <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">The walkthrough your team sees when they click <strong>Guide</strong> on the ${esc(objectLabel(entity))} page.</p>
+    ${canEdit ? '' : `<div class="readonly-note">${esc(ADMIN_ONLY_NOTE)}</div>`}
     <div style="display:flex;gap:7px;margin-bottom:12px;">
       ${steps.length ? `<button type="button" class="btn secondary" data-preview-guide="${entity}">▷ Preview</button>` : ''}
-      <button type="button" class="btn secondary" data-add-guide-for="${entity}">+ Add step</button>
+      ${canEdit ? `<button type="button" class="btn secondary" data-add-guide-for="${entity}">+ Add step</button>` : ''}
     </div>
     ${steps.map((g,i)=>`<div class="guide-step-row">
       <div class="guide-step-num">${i+1}</div>
@@ -7155,10 +7327,10 @@ function renderObjectGuide(entity){
         <div class="guide-step-target">Points at: ${esc(guideTargetLabel(g))}</div>
       </div>
       <div class="guide-step-tools">
-        <button type="button" class="guide-tool" data-guide-up="${g.id}" ${i===0?'disabled':''} title="Move up">↑</button>
+        ${canEdit ? `<button type="button" class="guide-tool" data-guide-up="${g.id}" ${i===0?'disabled':''} title="Move up">↑</button>
         <button type="button" class="guide-tool" data-guide-down="${g.id}" ${i===steps.length-1?'disabled':''} title="Move down">↓</button>
         <button type="button" class="guide-tool" data-edit-guide="${g.id}" title="Edit">Edit</button>
-        <button type="button" class="guide-tool danger" data-del-guide="${g.id}" title="Delete">Delete</button>
+        <button type="button" class="guide-tool danger" data-del-guide="${g.id}" title="Delete">Delete</button>` : ''}
       </div>
     </div>`).join('') || `<div class="readonly-note" style="text-align:center;">No walkthrough steps for ${esc(objectLabel(entity))} yet.</div>`}
   </div>`;
@@ -7179,9 +7351,47 @@ function renderObjectDetail(entity){
   </div>
   <div class="om-shell">
     <nav class="om-rail">
-      ${OM_TABS.map(t=>`<button type="button" class="om-rail-item ${state.omTab===t.key?'active':''}" data-om-tab="${t.key}">${t.label}</button>`).join('')}
+      ${OM_TABS.map(t=>`<button type="button" class="om-rail-item ${state.omTab===t.key?'active':''}" data-om-tab="${t.key}">
+        <span>${t.label}</span>${canEditSetupTab(t.key) ? '' : `<span class="setup-lock" title="Admin setting \u2014 view only for you">\uD83D\uDD12</span>`}
+      </button>`).join('')}
     </nav>
     <div class="om-pane">${renderObjectDetailBody(entity)}</div>
+  </div>`;
+}
+
+/* ---------- Personalize tier: Compact Layouts ----------
+   The other personalize-tier pane, Record Types, is Object Manager's own
+   (renderObjectRecordTypes); only its per-record assignment lives outside it. */
+function renderSetupCompact(onlyEntity){
+  const canEdit = canPersonalizeSetup();
+  const draft = setupDraftActive('compact') ? setupDraft.data : null;
+  const layoutOf = (entity)=>{
+    if(draft) return Array.isArray(draft[entity]) && draft[entity].length ? draft[entity] : null;
+    return compactLayoutFor(entity);
+  };
+  const shown = (entity, f)=>{ const l = layoutOf(entity); return !l || l.includes(f); };
+  return `<div class="io-card">
+    <h3 class="om-pane-title">Compact Layouts</h3>
+    <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Pick the columns each object shows at a glance in its list view. Unticking a field only tidies the table \u2014 the field is still on the record, still on the Add/Edit form and still available in Reports. Leave every field ticked to show the full table.</p>
+    ${canEdit ? '' : `<div class="readonly-note">\uD83D\uDC41 View only \u2014 sign in to change compact layouts.</div>`}
+    ${renderSetupSaveBar('top')}
+    ${(onlyEntity ? [onlyEntity] : SETUP_ENTITIES).map(entity=>{
+      const fields = entityFieldsFor(entity);
+      const on = fields.filter(f=>shown(entity,f)).length;
+      return `<div style="margin-bottom:18px;">
+        <div class="rt-obj-head">
+          <span>${esc(objectLabel(entity))} <span style="font-weight:400;color:var(--ink-soft);font-size:11.5px;">\u00b7 ${on} of ${fields.length} shown</span></span>
+          ${canEdit ? `<button type="button" class="rt-link" data-compact-all="${entity}">Show all</button>` : ''}
+        </div>
+        <div class="required-field-grid">
+          ${fields.map(f=>`<label class="required-field-row">
+            <input type="checkbox" data-compact-entity="${entity}" data-compact-field="${f}" ${shown(entity,f)?'checked':''} ${canEdit?'':'disabled'}>
+            <span>${esc(prettyField(f))}</span>
+          </label>`).join('')}
+        </div>
+      </div>`;
+    }).join('')}
+    ${renderSetupSaveBar('bottom')}
   </div>`;
 }
 
@@ -7229,15 +7439,22 @@ function renderSetupSection(){
         Company Settings
       </button>
       ${companyOpen ? `<div class="setup-nav-children">
-        ${CS_PAGES.map(pg=>`<button type="button" class="setup-nav-item ${state.setupTab===pg.key?'active':''}" data-setup-tab="${pg.key}">${pg.label}</button>`).join('')}
+        ${CS_PAGES.map(pg=>`<button type="button" class="setup-nav-item ${state.setupTab===pg.key?'active':''}" data-setup-tab="${pg.key}">
+          <span>${pg.label}</span>${canEditGlobalSetup() ? '' : `<span class="setup-lock" title="Admin setting \u2014 view only for you">\uD83D\uDD12</span>`}
+        </button>`).join('')}
       </div>` : ''}
-      ${SETUP_TABS.map(t=>`<button type="button" class="setup-nav-item ${state.setupTab===t.key?'active':''}" data-setup-tab="${t.key}">${t.label}</button>`).join('')}
+      ${SETUP_TABS.map(t=>`<button type="button" class="setup-nav-item ${state.setupTab===t.key?'active':''}" data-setup-tab="${t.key}">
+        <span>${t.label}</span>${canEditSetupTab(t.key) ? '' : `<span class="setup-lock" title="Admin setting \u2014 view only for you">\uD83D\uDD12</span>`}
+      </button>`).join('')}
     </nav>
     <div class="setup-body" id="setupTabBody">${renderSetupTabBody()}</div>
   </div>`;
 }
 function renderSetup(){
-  return `<div class="setup-banner">🔧 You're in the backend — changes here affect the whole team.</div>
+  const banner = canEditGlobalSetup()
+    ? `🔧 You're in the backend — changes here affect the whole team.`
+    : `🔧 You're in the backend. These settings are view-only for you — ask Ariel or David to change one. Open <strong>Object Manager</strong> to set up your own record types and compact layouts.`;
+  return `<div class="setup-banner">${banner}</div>
   <div class="setup-sections">
     <button type="button" class="setup-section-tab ${state.setupSection==='home'?'active':''}" data-setup-section="home">Home</button>
     <button type="button" class="setup-section-tab ${state.setupSection==='objects'?'active':''}" data-setup-section="objects">Object Manager</button>
@@ -7380,6 +7597,7 @@ function guideTargetLabel(g){
 }
 
 function openGuideEntryModal(presetEntity, editId){
+  if(!canEditGlobalSetup()) return;
   const editing = editId ? state.guideEntries.find(g=>g.id===editId) : null;
   const entityFor = editing ? editing.linkEntity : (presetEntity || SETUP_ENTITIES[0]);
   document.getElementById('modalBody').innerHTML = `<h2 class="display">${editing?'Edit':'New'} walkthrough step</h2>
@@ -7421,6 +7639,7 @@ function openGuideEntryModal(presetEntity, editId){
 /* Reordering swaps an entry with its neighbour *within the same object*, so the
    flat guideEntries array doubles as each object's step order. */
 async function moveGuideEntry(id, dir){
+  if(!canEditGlobalSetup()) return;
   const entry = state.guideEntries.find(g=>g.id===id);
   if(!entry) return;
   const siblings = state.guideEntries.filter(g=>g.linkEntity===entry.linkEntity);
@@ -7738,7 +7957,7 @@ function openRecordPageModal(entity, pageId){
 }
 
 function openRecordTypeModal(entity, typeId){
-  if(!canEditGlobalSetup()) return;
+  if(!canPersonalizeSetup()) return;
   const editing = typeId ? state.recordTypes.find(rt=>rt.id===typeId) : null;
   const target = editing ? editing.entity : entity;
   const layouts = pageLayoutsFor(target);
@@ -7797,6 +8016,7 @@ function openRecordTypeModal(entity, typeId){
 }
 
 function openFlowModal(){
+  if(!canEditGlobalSetup()) return;
   flowBuilderSteps = [];
   document.getElementById('modalBody').innerHTML = `<h2 class="display">New flow</h2>
     <div class="field"><label>Flow name</label><input id="fl_name" placeholder="e.g. Welcome new customers"></div>
@@ -7988,6 +8208,30 @@ function wireSetupView(){
   });
   if(state.setupSection==='objects' && !state.omObject && state.omSection==='schema') wireSchemaVisualizer();
   if(CS_KEYS.includes(state.setupTab)) wireCompanySettings();
+  document.querySelectorAll('[data-compact-field]').forEach(cb=>{
+    cb.onchange = ()=>{
+      if(!canPersonalizeSetup()){ cb.checked = !cb.checked; return; }
+      const entity = cb.dataset.compactEntity, field = cb.dataset.compactField, on = cb.checked;
+      stageSetupChange('compact', data=>{
+        const list = data[entity] || [];
+        if(on){
+          /* Re-inserted in the object's own field order, so ticking a box
+             back on does not shuffle the column to the end of the table. */
+          const order = entityFieldsFor(entity);
+          data[entity] = order.filter(f=>f===field || list.includes(f));
+        } else {
+          data[entity] = list.filter(f=>f!==field);
+        }
+      });
+    };
+  });
+  document.querySelectorAll('[data-compact-all]').forEach(btn=>{
+    btn.onclick = ()=>{
+      if(!canPersonalizeSetup()) return;
+      const entity = btn.dataset.compactAll;
+      stageSetupChange('compact', data=>{ data[entity] = entityFieldsFor(entity).slice(); });
+    };
+  });
   document.querySelectorAll('.setup-save-btn').forEach(btn=>{ btn.onclick = saveSetupDraft; });
   document.querySelectorAll('.setup-cancel-btn').forEach(btn=>{ btn.onclick = cancelSetupDraft; });
   document.querySelectorAll('[data-hide-object]').forEach(cb=>{
@@ -8165,7 +8409,7 @@ function wireSetupView(){
   });
   document.querySelectorAll('[data-default-recordtype]').forEach(el=>{
     el.onclick = async ()=>{
-      if(!canEditGlobalSetup()) return;
+      if(!canPersonalizeSetup()) return;
       const rt = state.recordTypes.find(x=>x.id===el.dataset.defaultRecordtype);
       if(!rt) return;
       state.recordTypes.forEach(x=>{ if(x.entity===rt.entity) x.isDefault = x.id===rt.id; });
@@ -8175,7 +8419,7 @@ function wireSetupView(){
   });
   document.querySelectorAll('[data-del-recordtype]').forEach(el=>{
     el.onclick = async ()=>{
-      if(!canEditGlobalSetup()) return;
+      if(!canPersonalizeSetup()) return;
       if(!confirm('Delete this record type?')) return;
       const gone = state.recordTypes.find(rt=>rt.id===el.dataset.delRecordtype);
       state.recordTypes = state.recordTypes.filter(rt=>rt.id!==el.dataset.delRecordtype);
@@ -8193,6 +8437,7 @@ function wireSetupView(){
       });
       await saveKey(KEYS.recordTypes, state.recordTypes);
       if(layoutsTouched) await saveKey(KEYS.pageLayouts, state.pageLayouts);
+      if(gone) await pruneRecordTypeAssignments(gone.entity);
       rerenderSetupView();
     };
   });
@@ -8290,6 +8535,7 @@ function wireSetupView(){
   if(addFlowBtn) addFlowBtn.onclick = openFlowModal;
   document.querySelectorAll('[data-del-flow]').forEach(el=>{
     el.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
       if(!confirm('Delete this flow?')) return;
       state.flows = state.flows.filter(f=>f.id!==el.dataset.delFlow);
       await saveKey(KEYS.flows, state.flows);
@@ -8323,6 +8569,7 @@ function wireSetupView(){
   });
   document.querySelectorAll('[data-del-guide]').forEach(el=>{
     el.onclick = async ()=>{
+      if(!canEditGlobalSetup()) return;
       if(!confirm('Delete this guide entry?')) return;
       state.guideEntries = state.guideEntries.filter(g=>g.id!==el.dataset.delGuide);
       await saveKey(KEYS.guideEntries, state.guideEntries);
@@ -8629,6 +8876,8 @@ function attachContentHandlers(){
       state[table] = state[table].filter(x=>x.id!==id);
       render();
       await dbDelete(table, id);
+      // Drop the record's type assignment so it cannot outlive the record.
+      if((state.recordTypeAssignments[table]||{})[id]) await assignRecordType(table, id, '');
     };
   });
   document.querySelectorAll('[data-stage]').forEach(el=>{
@@ -8762,6 +9011,937 @@ function attachContentHandlers(){
     render();
   };
   if(state.view==='setup') wireSetupView();
+  if(state.view==='reports') wireReportsView();
+}
+
+
+/* ============================================================================
+   Reports
+   ----------------------------------------------------------------------------
+   A report is a saved question about the ledger: which object to read, which
+   columns to show, what to filter out, how to group and summarize, and whether
+   to draw it as a chart. Reports are open to the whole team -- reading data is
+   not an admin power -- but a report can never show a row or a column its
+   reader could not already see: every run goes through visibleRecords(), skips
+   objects the reader has no access to, and drops fields hidden from them by
+   Field Visibility.
+
+   A report type is the shape a report is built on: which object, and
+   optionally one related object joined onto it. The built-in types cover every
+   object plus the joins people ask for most; anyone can define their own on
+   top of the same machinery.
+   ========================================================================= */
+
+const REPORT_ENTITIES = EXPORT_SHEETS.map(s=>s.key);
+/* Foreign keys we know the target of, so a custom report type can offer a
+   related object without the author having to describe the join. */
+const REPORT_LINK_TARGETS = { contactId:'contacts', customerId:'customers', orderId:'orders' };
+const REPORT_NUMERIC_FIELDS = new Set(['value','amount','qty']);
+const REPORT_DATE_FIELDS = new Set(['createdAt','dueDate']);
+
+const BUILTIN_REPORT_TYPES = [
+  {key:'bi_contacts', name:'Contacts', description:'Every contact in the ledger.', entity:'contacts'},
+  {key:'bi_leads', name:'Leads', description:'Prospects being warmed up.', entity:'leads'},
+  {key:'bi_customers', name:'Customers', description:'Everyone you sell to.', entity:'customers'},
+  {key:'bi_distributors', name:'Distributors', description:'Partners who distribute SWG products.', entity:'distributors'},
+  {key:'bi_suppliers', name:'Suppliers', description:'Everyone you source from.', entity:'suppliers'},
+  {key:'bi_deals', name:'Deals', description:'Pipeline across every stage.', entity:'deals'},
+  {key:'bi_orders', name:'Orders', description:'Order history and fulfillment status.', entity:'orders'},
+  {key:'bi_tasks', name:'Tasks', description:'Follow-ups and team to-dos.', entity:'tasks'},
+  {key:'bi_invoices', name:'Invoices', description:'Billing, linked to orders or standalone.', entity:'invoices'},
+  {key:'bi_payments', name:'Payments', description:'What SWG owes and pays out.', entity:'payments'},
+  {key:'bi_deals_contacts', name:'Deals with Contacts', description:'Each deal alongside the contact behind it.',
+    entity:'deals', join:{entity:'contacts', via:'contactId', label:'Contact'}},
+  {key:'bi_orders_contacts', name:'Orders with Contacts', description:'Each order alongside the contact who placed it.',
+    entity:'orders', join:{entity:'contacts', via:'contactId', label:'Contact'}},
+  {key:'bi_invoices_orders', name:'Invoices with Orders', description:'Each invoice alongside the order it bills for.',
+    entity:'invoices', join:{entity:'orders', via:'orderId', label:'Order'}},
+];
+
+const REPORT_OPS = [
+  {key:'contains', label:'contains', needsValue:true},
+  {key:'eq', label:'equals', needsValue:true},
+  {key:'ne', label:'does not equal', needsValue:true},
+  {key:'starts', label:'starts with', needsValue:true},
+  {key:'gt', label:'greater than', needsValue:true},
+  {key:'gte', label:'at least', needsValue:true},
+  {key:'lt', label:'less than', needsValue:true},
+  {key:'lte', label:'at most', needsValue:true},
+  {key:'empty', label:'is empty', needsValue:false},
+  {key:'notempty', label:'is not empty', needsValue:false},
+];
+const REPORT_FNS = [
+  {key:'count', label:'Record count'},
+  {key:'sum', label:'Sum of'},
+  {key:'avg', label:'Average of'},
+  {key:'min', label:'Smallest'},
+  {key:'max', label:'Largest'},
+];
+const REPORT_DATE_RANGES = [
+  {key:'all', label:'All time', days:0},
+  {key:'7d', label:'Last 7 days', days:7},
+  {key:'30d', label:'Last 30 days', days:30},
+  {key:'90d', label:'Last 90 days', days:90},
+  {key:'365d', label:'Last 12 months', days:365},
+];
+const REPORT_CHARTS = [
+  {key:'none', label:'No chart'},
+  {key:'bar', label:'Bar'},
+  {key:'donut', label:'Donut'},
+];
+const REPORT_COLORS = ['var(--amber)','var(--sage)','var(--ochre)','var(--umber)','var(--clay)','var(--olive)','var(--rust)','var(--setup-blue)'];
+
+/* ---------- Report types ---------- */
+function reportTypeList(){ return BUILTIN_REPORT_TYPES.concat(state.reportTypes || []); }
+function findReportType(key){ return reportTypeList().find(t=>t.key===key) || null; }
+function isCustomReportType(t){ return !!(t && t.custom); }
+
+/* A reader may only report on an object they can already open. Invoices and
+   Payments stay privileged, Leads stay hidden from whoever they are hidden
+   from, and an object hidden by Object Visibility stays hidden here too --
+   otherwise Reports would be a side door around all three. */
+function canReportOnEntity(entity){
+  if(entity==='invoices' || entity==='payments') return isPrivileged();
+  if(entity==='leads') return canSeeLeads();
+  if(isObjectHidden(entity) && !personaIsAdmin()) return false;
+  return true;
+}
+function reportTypeAvailable(t){
+  if(!t) return false;
+  if(!canReportOnEntity(t.entity)) return false;
+  return !t.join || canReportOnEntity(t.join.entity);
+}
+function availableReportTypes(){ return reportTypeList().filter(reportTypeAvailable); }
+
+/* Every column a report type can offer, in a stable order: the base object's
+   fields, its record type, when it was created, then the joined object's
+   fields. A custom type narrows this to the fields its author picked. */
+function reportColumnsFor(type){
+  if(!type) return [];
+  const cols = [];
+  entityFieldsFor(type.entity).forEach(f=>{
+    if(!personaIsAdmin() && isFieldHidden(type.entity, f)) return;
+    const link = REPORT_LINK_TARGETS[f];
+    cols.push({ key:f, label:link ? prettyField(f).replace(/ Id$/, '') : prettyField(f), source:'base', field:f, link,
+      numeric:REPORT_NUMERIC_FIELDS.has(f), date:REPORT_DATE_FIELDS.has(f) });
+  });
+  if(recordTypesFor(type.entity).length){
+    cols.push({ key:'__recordType', label:'Record Type', source:'recordType' });
+  }
+  cols.push({ key:'createdAt', label:'Created', source:'base', field:'createdAt', date:true });
+  if(type.join){
+    entityFieldsFor(type.join.entity).forEach(f=>{
+      if(!personaIsAdmin() && isFieldHidden(type.join.entity, f)) return;
+      const link = REPORT_LINK_TARGETS[f];
+      cols.push({ key:'rel.'+f, label:type.join.label+': '+(link ? prettyField(f).replace(/ Id$/, '') : prettyField(f)),
+        source:'join', field:f, link,
+        numeric:REPORT_NUMERIC_FIELDS.has(f), date:REPORT_DATE_FIELDS.has(f) });
+    });
+  }
+  if(!type.fields || !type.fields.length) return cols;
+  return cols.filter(c=>type.fields.includes(c.key));
+}
+function reportColumn(type, key){ return reportColumnsFor(type).find(c=>c.key===key) || null; }
+
+/* ---------- Reading values ---------- */
+/* A foreign key column reads out as the record it points at, not its id --
+   "Ada Kumar" rather than "id_m4x2k". Resolved here rather than at display
+   time so grouping, sorting, filtering and the export all agree. */
+function reportLinkLabel(entity, id){
+  if(!id) return '';
+  const rec = (state[entity]||[]).find(x=>x.id===id);
+  if(!rec) return String(id);
+  return rec.name || rec.title || rec.payee || rec.product || String(id);
+}
+function reportRawValue(type, col, rec){
+  if(!col) return '';
+  if(col.source==='recordType') return recordTypeOfRecord(type.entity, rec.id);
+  let v;
+  if(col.source==='join'){
+    const rel = (state[type.join.entity]||[]).find(x=>x.id===rec[type.join.via]);
+    v = rel ? rel[col.field] : '';
+  } else {
+    v = rec[col.field];
+  }
+  return col.link ? reportLinkLabel(col.link, v) : v;
+}
+function reportDisplayValue(col, v){
+  if(v === null || v === undefined || v === '') return '—';
+  if(Array.isArray(v)) return v.length ? v.join(', ') : '—';
+  if(col && col.date){
+    const n = Number(v);
+    const d = Number.isFinite(n) && String(v).length > 8 ? new Date(n) : new Date(v);
+    return isNaN(d.getTime()) ? String(v) : d.toISOString().slice(0,10);
+  }
+  if(col && col.numeric) return Number(v||0).toLocaleString();
+  return String(v);
+}
+function reportNumericValue(v){
+  const n = Number(Array.isArray(v) ? v.length : v);
+  return Number.isFinite(n) ? n : 0;
+}
+function reportCompareText(v){
+  if(v === null || v === undefined) return '';
+  return (Array.isArray(v) ? v.join(', ') : String(v)).toLowerCase();
+}
+
+function matchesReportFilter(col, raw, filter){
+  const op = filter.op;
+  const text = reportCompareText(raw);
+  if(op==='empty') return text==='';
+  if(op==='notempty') return text!=='';
+  const target = String(filter.value ?? '').trim().toLowerCase();
+  if(target==='') return true;
+  if(op==='contains') return text.includes(target);
+  if(op==='starts') return text.startsWith(target);
+  if(op==='eq') return text===target;
+  if(op==='ne') return text!==target;
+  /* Numeric comparisons fall back to a text comparison when either side is
+     not a number, so "greater than" on a Stage column still behaves. */
+  const a = Number(raw), b = Number(filter.value);
+  const numeric = Number.isFinite(a) && Number.isFinite(b);
+  if(op==='gt') return numeric ? a>b : text>target;
+  if(op==='gte') return numeric ? a>=b : text>=target;
+  if(op==='lt') return numeric ? a<b : text<target;
+  if(op==='lte') return numeric ? a<=b : text<=target;
+  return true;
+}
+
+function summarizeReportValues(fn, values){
+  if(fn==='count' || !values.length) return values.length;
+  const nums = values.map(reportNumericValue);
+  if(fn==='sum') return nums.reduce((s,n)=>s+n, 0);
+  if(fn==='avg') return nums.reduce((s,n)=>s+n, 0) / nums.length;
+  if(fn==='min') return Math.min(...nums);
+  if(fn==='max') return Math.max(...nums);
+  return values.length;
+}
+function formatReportSummary(fn, v){
+  if(fn==='count') return Number(v||0).toLocaleString();
+  const n = Number(v||0);
+  return fn==='avg' ? n.toLocaleString(undefined, {maximumFractionDigits:2}) : n.toLocaleString();
+}
+function reportSummaryLabel(report, type){
+  const fn = (report.summarize && report.summarize.fn) || 'count';
+  if(fn==='count') return 'Record count';
+  const col = reportColumn(type, report.summarize.col);
+  const def = REPORT_FNS.find(f=>f.key===fn);
+  return `${def ? def.label : fn} ${col ? col.label : '—'}`;
+}
+
+/* ---------- Running a report ---------- */
+function buildReport(report){
+  const type = findReportType(report.typeKey);
+  if(!type || !reportTypeAvailable(type)){
+    return { type:null, columns:[], rows:[], groups:[], grandSummary:0, blocked:true };
+  }
+  const allCols = reportColumnsFor(type);
+  const chosen = (report.columns || []).map(k=>allCols.find(c=>c.key===k)).filter(Boolean);
+  const columns = chosen.length ? chosen : allCols.slice(0, 6);
+
+  let records = visibleRecords(type.entity, state[type.entity] || []);
+
+  const range = REPORT_DATE_RANGES.find(r=>r.key===(report.dateRange||'all'));
+  if(range && range.days){
+    const cutoff = Date.now() - range.days*86400000;
+    records = records.filter(r=>Number(r.createdAt||0) >= cutoff);
+  }
+  (report.filters || []).forEach(f=>{
+    const col = reportColumn(type, f.col);
+    if(!col) return;
+    records = records.filter(rec=>matchesReportFilter(col, reportRawValue(type, col, rec), f));
+  });
+
+  let rows = records.map(rec=>{
+    const cells = {};
+    columns.forEach(c=>{ cells[c.key] = reportRawValue(type, c, rec); });
+    return { rec, cells };
+  });
+
+  const sortCol = reportColumn(type, report.sortCol);
+  if(sortCol && columns.some(c=>c.key===sortCol.key)){
+    const dir = report.sortDir==='desc' ? -1 : 1;
+    rows = rows.slice().sort((a,b)=>{
+      const av = a.cells[sortCol.key], bv = b.cells[sortCol.key];
+      if(sortCol.numeric || sortCol.date) return (reportNumericValue(av) - reportNumericValue(bv)) * dir;
+      return reportCompareText(av).localeCompare(reportCompareText(bv)) * dir;
+    });
+  }
+
+  const fn = (report.summarize && report.summarize.fn) || 'count';
+  const sumColKey = report.summarize && report.summarize.col;
+  const sumCol = fn==='count' ? null : reportColumn(type, sumColKey);
+  const valuesOf = (list)=> sumCol ? list.map(r=>reportRawValue(type, sumCol, r.rec)) : list.map(()=>1);
+
+  let groups = [];
+  const groupCol = reportColumn(type, report.groupBy);
+  if(groupCol){
+    const buckets = new Map();
+    rows.forEach(r=>{
+      const label = reportDisplayValue(groupCol, reportRawValue(type, groupCol, r.rec));
+      if(!buckets.has(label)) buckets.set(label, []);
+      buckets.get(label).push(r);
+    });
+    groups = Array.from(buckets.entries())
+      .map(([label, list])=>({ label, rows:list, summary:summarizeReportValues(fn, valuesOf(list)) }))
+      .sort((a,b)=> b.summary - a.summary || a.label.localeCompare(b.label));
+  }
+
+  return {
+    type, columns, rows, groups, groupCol,
+    grandSummary: summarizeReportValues(fn, valuesOf(rows)),
+    fn, summaryLabel: reportSummaryLabel(report, type), blocked:false,
+  };
+}
+
+/* ---------- Reports: shell ---------- */
+function savedReports(){
+  return (state.reports || []).filter(r=>reportTypeAvailable(findReportType(r.typeKey)));
+}
+function findReport(id){ return (state.reports || []).find(r=>r.id===id) || null; }
+function canEditReport(report){ return !!report && (report.owner===state.currentUser || isAdmin()); }
+
+function newReportDraft(typeKey){
+  const type = findReportType(typeKey) || availableReportTypes()[0];
+  const cols = reportColumnsFor(type).slice(0, 6).map(c=>c.key);
+  return {
+    id: uid(), createdAt: Date.now(), owner: state.currentUser,
+    name: '', description: '', typeKey: type ? type.key : '',
+    columns: cols, filters: [], dateRange: 'all',
+    groupBy: '', summarize: { fn:'count', col:'' }, chart: 'none',
+    sortCol: '', sortDir: 'asc',
+  };
+}
+
+function renderReports(){
+  if(state.reportDraft) return renderReportBuilder();
+  if(state.activeReportId) return renderReportRun();
+  return `<div class="rep-tabs">
+    <button type="button" class="setup-section-tab ${state.reportsTab!=='types'?'active':''}" data-reports-tab="reports">Reports</button>
+    <button type="button" class="setup-section-tab ${state.reportsTab==='types'?'active':''}" data-reports-tab="types">Report Types</button>
+  </div>
+  ${state.reportsTab==='types' ? renderReportTypesTab() : renderReportsListTab()}`;
+}
+
+/* ---------- Reports: saved list ---------- */
+function renderReportsListTab(){
+  const reports = savedReports();
+  const types = availableReportTypes();
+  if(!types.length){
+    return `<div class="empty"><div class="display">Nothing to report on yet</div>None of the objects you can open are available for reporting.</div>`;
+  }
+  return `<div class="rep-head">
+    <div>
+      <div class="rep-head-title">Saved reports</div>
+      <div class="rep-head-sub">${reports.length} report${reports.length===1?'':'s'} · built on ${types.length} report type${types.length===1?'':'s'}</div>
+    </div>
+    <button type="button" class="btn" id="repNewBtn">+ New report</button>
+  </div>
+  ${reports.length ? `<div class="io-card" style="padding-top:6px;">
+    <table class="om-table"><thead><tr>
+      <th>Name</th><th>Report type</th><th>Grouped by</th><th>Shows</th><th>Owner</th><th></th>
+    </tr></thead><tbody>
+    ${reports.map(r=>{
+      const type = findReportType(r.typeKey);
+      const groupCol = reportColumn(type, r.groupBy);
+      return `<tr>
+        <td>
+          <span class="om-link" data-run-report="${r.id}">${esc(r.name || 'Untitled report')}</span>
+          ${r.description ? `<div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px;">${esc(r.description)}</div>` : ''}
+        </td>
+        <td style="font-size:12px;color:var(--ink-soft);">${esc(type ? type.name : '—')}</td>
+        <td style="font-size:12px;color:var(--ink-soft);">${esc(groupCol ? groupCol.label : '—')}</td>
+        <td style="font-size:12px;color:var(--ink-soft);">${esc(reportSummaryLabel(r, type))}</td>
+        <td style="font-size:12px;color:var(--ink-soft);">${esc(r.owner || '—')}</td>
+        <td class="row-actions">
+          <span data-run-report="${r.id}">run</span>
+          ${canEditReport(r) ? `<span data-edit-report="${r.id}">edit</span>` : ''}
+          <span data-clone-report="${r.id}">clone</span>
+          ${canEditReport(r) ? `<span class="danger" data-del-report="${r.id}">delete</span>` : ''}
+        </td>
+      </tr>`;
+    }).join('')}
+    </tbody></table>
+  </div>` : `<div class="empty"><div class="display">No reports yet</div>Start from a built-in report type, or build your own in the Report Types tab.</div>`}`;
+}
+
+/* ---------- Reports: report types ---------- */
+function renderReportTypesTab(){
+  const builtins = BUILTIN_REPORT_TYPES.filter(reportTypeAvailable);
+  const customs = (state.reportTypes || []).filter(reportTypeAvailable);
+  const typeRow = (t, custom)=>{
+    const cols = reportColumnsFor(t);
+    return `<tr>
+      <td>
+        <span style="font-size:12.5px;font-weight:600;">${esc(t.name)}</span>
+        ${t.description ? `<div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px;">${esc(t.description)}</div>` : ''}
+      </td>
+      <td style="font-size:12px;color:var(--ink-soft);">${esc(objectLabel(t.entity))}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${t.join ? esc(objectLabel(t.join.entity)) + ' (via ' + esc(prettyField(t.join.via)) + ')' : '—'}</td>
+      <td style="text-align:right;font-size:12px;">${cols.length}</td>
+      <td class="row-actions">
+        <span data-new-report-of="${t.key}">new report</span>
+        ${custom ? `<span data-edit-rtype="${t.key}">edit</span><span class="danger" data-del-rtype="${t.key}">delete</span>` : ''}
+      </td>
+    </tr>`;
+  };
+  return `<div class="rep-head">
+    <div>
+      <div class="rep-head-title">Report types</div>
+      <div class="rep-head-sub">The shape a report is built on — which object it reads, and what it can join to.</div>
+    </div>
+    <button type="button" class="btn" id="repNewTypeBtn">+ New custom report type</button>
+  </div>
+  <div class="io-card" style="padding-top:6px;margin-bottom:16px;">
+    <h3 class="om-pane-title">Built-in</h3>
+    <table class="om-table"><thead><tr>
+      <th>Name</th><th>Primary object</th><th>Related object</th><th style="text-align:right;">Fields</th><th></th>
+    </tr></thead><tbody>${builtins.map(t=>typeRow(t, false)).join('')}</tbody></table>
+  </div>
+  <div class="io-card" style="padding-top:6px;">
+    <h3 class="om-pane-title">Your custom report types</h3>
+    <table class="om-table"><thead><tr>
+      <th>Name</th><th>Primary object</th><th>Related object</th><th style="text-align:right;">Fields</th><th></th>
+    </tr></thead><tbody>
+    ${customs.map(t=>typeRow(t, true)).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--ink-soft);padding:20px;">None yet — build one to pin down exactly the fields your team reports on.</td></tr>`}
+    </tbody></table>
+  </div>`;
+}
+
+/* The field list a custom report type can choose from, before its own
+   narrowing is applied — i.e. every column the chosen object and join offer. */
+function customTypeFieldChoices(entity, joinEntity, joinVia){
+  const shape = { key:'__probe', entity, name:'', join: joinEntity ? {entity:joinEntity, via:joinVia, label:objectLabel(joinEntity)} : null };
+  return reportColumnsFor(shape);
+}
+
+function openReportTypeModal(typeKey){
+  const existing = typeKey ? (state.reportTypes || []).find(t=>t.key===typeKey) : null;
+  const entities = REPORT_ENTITIES.filter(canReportOnEntity);
+  if(!entities.length) return alert('There are no objects you can report on.');
+  const draft = existing
+    ? { entity: existing.entity, joinVia: existing.join ? existing.join.via : '', fields: (existing.fields||[]).slice() }
+    : { entity: entities[0], joinVia: '', fields: [] };
+
+  const linkOptionsFor = (entity)=> entityFieldsFor(entity)
+    .filter(f=>REPORT_LINK_TARGETS[f] && canReportOnEntity(REPORT_LINK_TARGETS[f]) && REPORT_LINK_TARGETS[f]!==entity);
+
+  const body = ()=>{
+    const links = linkOptionsFor(draft.entity);
+    const joinEntity = draft.joinVia ? REPORT_LINK_TARGETS[draft.joinVia] : '';
+    const choices = customTypeFieldChoices(draft.entity, joinEntity, draft.joinVia);
+    const picked = draft.fields.length ? draft.fields : choices.map(c=>c.key);
+    return `<h2 class="display">${existing?'Edit':'New'} custom report type</h2>
+      <p style="color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;">Pin down one object, optionally a related one, and exactly the fields your team should report on.</p>
+      <div class="field"><label>Name</label><input id="crt_name" value="${existing?esc(existing.name):''}" placeholder="e.g. Wholesale deals by owner"></div>
+      <div class="field"><label>Description</label><input id="crt_desc" value="${existing?esc(existing.description||''):''}" placeholder="What question does this answer?"></div>
+      <div class="field"><label>Primary object</label><select id="crt_entity">
+        ${entities.map(e=>`<option value="${e}" ${draft.entity===e?'selected':''}>${esc(objectLabel(e))}</option>`).join('')}
+      </select></div>
+      <div class="field"><label>Related object (optional)</label><select id="crt_join">
+        <option value="">— none —</option>
+        ${links.map(f=>`<option value="${f}" ${draft.joinVia===f?'selected':''}>${esc(objectLabel(REPORT_LINK_TARGETS[f]))} — via ${esc(prettyField(f))}</option>`).join('')}
+      </select>${links.length ? '' : `<div style="font-size:11.5px;color:var(--ink-soft);margin-top:5px;">${esc(objectLabel(draft.entity))} has no link to another object you can report on.</div>`}</div>
+      <div class="field"><label>Fields this type exposes</label>
+        <div class="required-field-grid" id="crt_fields">
+          ${choices.map(c=>`<label class="required-field-row">
+            <input type="checkbox" data-crt-field="${esc(c.key)}" ${picked.includes(c.key)?'checked':''}>
+            <span>${esc(c.label)}</span>
+          </label>`).join('')}
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="cancelBtn">Cancel</button>
+        <button class="btn" id="crtSaveBtn">${existing?'Save':'Create'}</button>
+      </div>`;
+  };
+
+  const wire = ()=>{
+    document.getElementById('cancelBtn').onclick = closeModal;
+    /* The object and the join decide which fields exist, so changing either
+       redraws the picker. The name and description are carried across by
+       hand because the redraw rebuilds their inputs. */
+    const carry = ()=>{
+      const n = document.getElementById('crt_name').value;
+      const d = document.getElementById('crt_desc').value;
+      draft.fields = Array.from(document.querySelectorAll('[data-crt-field]')).filter(cb=>cb.checked).map(cb=>cb.dataset.crtField);
+      return [n, d];
+    };
+    document.getElementById('crt_entity').onchange = (e)=>{
+      const [n, d] = carry();
+      draft.entity = e.target.value; draft.joinVia = ''; draft.fields = [];
+      redraw(n, d);
+    };
+    document.getElementById('crt_join').onchange = (e)=>{
+      const [n, d] = carry();
+      draft.joinVia = e.target.value; draft.fields = [];
+      redraw(n, d);
+    };
+    document.getElementById('crtSaveBtn').onclick = async ()=>{
+      const name = document.getElementById('crt_name').value.trim();
+      if(!name) return alert('Give the report type a name.');
+      const fields = Array.from(document.querySelectorAll('[data-crt-field]')).filter(cb=>cb.checked).map(cb=>cb.dataset.crtField);
+      if(!fields.length) return alert('Pick at least one field for this report type to expose.');
+      const joinEntity = draft.joinVia ? REPORT_LINK_TARGETS[draft.joinVia] : '';
+      const record = {
+        key: existing ? existing.key : uid(),
+        custom: true,
+        owner: existing ? existing.owner : state.currentUser,
+        createdAt: existing ? existing.createdAt : Date.now(),
+        name,
+        description: document.getElementById('crt_desc').value.trim(),
+        entity: draft.entity,
+        join: joinEntity ? { entity:joinEntity, via:draft.joinVia, label:objectLabel(joinEntity) } : null,
+        fields,
+      };
+      const list = (state.reportTypes || []).filter(t=>t.key!==record.key);
+      list.push(record);
+      state.reportTypes = list;
+      await saveKey(KEYS.reportTypes, state.reportTypes);
+      closeModal();
+      render();
+      toast(existing ? 'Report type saved.' : 'Report type created.');
+    };
+  };
+  const redraw = (name, desc)=>{
+    document.getElementById('modalBody').innerHTML = body();
+    if(name !== undefined) document.getElementById('crt_name').value = name;
+    if(desc !== undefined) document.getElementById('crt_desc').value = desc;
+    wire();
+  };
+
+  document.getElementById('modalBody').innerHTML = body();
+  document.getElementById('overlay').classList.add('show');
+  wire();
+}
+
+async function deleteReportType(key){
+  const t = (state.reportTypes || []).find(x=>x.key===key);
+  if(!t) return;
+  const used = (state.reports || []).filter(r=>r.typeKey===key).length;
+  const warn = used ? ` ${used} saved report${used===1?' uses':'s use'} it and will stop working.` : '';
+  if(!confirm(`Delete the "${t.name}" report type?${warn}`)) return;
+  state.reportTypes = (state.reportTypes || []).filter(x=>x.key!==key);
+  await saveKey(KEYS.reportTypes, state.reportTypes);
+  render();
+  toast('Report type deleted.');
+}
+
+/* ---------- Reports: builder ---------- */
+function renderReportBuilder(){
+  const d = state.reportDraft;
+  const type = findReportType(d.typeKey);
+  const cols = reportColumnsFor(type);
+  const types = availableReportTypes();
+  const summarizeFn = (d.summarize && d.summarize.fn) || 'count';
+  return `<div class="rep-head">
+    <div>
+      <div class="rep-head-title">${d.name ? esc(d.name) : 'New report'}</div>
+      <div class="rep-head-sub">${esc(type ? type.name : 'Pick a report type')}</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button type="button" class="btn secondary" id="repCancelBtn">Cancel</button>
+      <button type="button" class="btn" id="repSaveBtn">Save &amp; run</button>
+    </div>
+  </div>
+  <div class="rep-builder">
+    <div class="io-card">
+      <h3 class="om-pane-title">1 · What it is</h3>
+      <div class="field"><label>Report name</label><input id="rep_name" value="${esc(d.name||'')}" placeholder="e.g. Open deals by owner"></div>
+      <div class="field"><label>Description</label><input id="rep_desc" value="${esc(d.description||'')}" placeholder="What question does this answer?"></div>
+      <div class="field"><label>Report type</label><select id="rep_type">
+        ${types.map(t=>`<option value="${t.key}" ${d.typeKey===t.key?'selected':''}>${esc(t.name)}</option>`).join('')}
+      </select></div>
+
+      <h3 class="om-pane-title" style="margin-top:20px;">2 · Columns</h3>
+      <p style="color:var(--ink-soft);font-size:12px;margin:0 0 10px;">Tick the fields the report should show, in the order they appear here.</p>
+      <div class="required-field-grid">
+        ${cols.map(c=>`<label class="required-field-row">
+          <input type="checkbox" data-rep-col="${esc(c.key)}" ${(d.columns||[]).includes(c.key)?'checked':''}>
+          <span>${esc(c.label)}</span>
+        </label>`).join('')}
+      </div>
+
+      <h3 class="om-pane-title" style="margin-top:20px;">3 · Filters</h3>
+      <div class="field"><label>Created</label><select id="rep_range">
+        ${REPORT_DATE_RANGES.map(r=>`<option value="${r.key}" ${d.dateRange===r.key?'selected':''}>${esc(r.label)}</option>`).join('')}
+      </select></div>
+      ${(d.filters||[]).map((f,i)=>{
+        const op = REPORT_OPS.find(o=>o.key===f.op) || REPORT_OPS[0];
+        return `<div class="rep-filter-row">
+          <select data-rep-filter-col="${i}">${cols.map(c=>`<option value="${esc(c.key)}" ${f.col===c.key?'selected':''}>${esc(c.label)}</option>`).join('')}</select>
+          <select data-rep-filter-op="${i}">${REPORT_OPS.map(o=>`<option value="${o.key}" ${f.op===o.key?'selected':''}>${esc(o.label)}</option>`).join('')}</select>
+          <input data-rep-filter-val="${i}" value="${esc(f.value||'')}" placeholder="value" ${op.needsValue?'':'disabled'}>
+          <button type="button" class="rt-link" data-rep-filter-del="${i}">remove</button>
+        </div>`;
+      }).join('')}
+      <button type="button" class="btn secondary" id="repAddFilterBtn" style="margin-top:6px;">+ Add filter</button>
+
+      <h3 class="om-pane-title" style="margin-top:20px;">4 · Group &amp; summarize</h3>
+      <div class="field"><label>Group rows by</label><select id="rep_group">
+        <option value="">— no grouping —</option>
+        ${cols.map(c=>`<option value="${esc(c.key)}" ${d.groupBy===c.key?'selected':''}>${esc(c.label)}</option>`).join('')}
+      </select></div>
+      <div class="field"><label>Summarize with</label><select id="rep_fn">
+        ${REPORT_FNS.map(f=>`<option value="${f.key}" ${summarizeFn===f.key?'selected':''}>${esc(f.label)}</option>`).join('')}
+      </select></div>
+      ${summarizeFn==='count' ? '' : `<div class="field"><label>Field to summarize</label><select id="rep_sumcol">
+        <option value="">— pick a field —</option>
+        ${cols.map(c=>`<option value="${esc(c.key)}" ${d.summarize.col===c.key?'selected':''}>${esc(c.label)}${c.numeric?'':' (counts values)'}</option>`).join('')}
+      </select></div>`}
+      <div class="field"><label>Chart</label><select id="rep_chart">
+        ${REPORT_CHARTS.map(c=>`<option value="${c.key}" ${d.chart===c.key?'selected':''}>${esc(c.label)}</option>`).join('')}
+      </select>${d.chart!=='none' && !d.groupBy ? `<div style="font-size:11.5px;color:var(--ink-soft);margin-top:5px;">A chart needs a grouping — pick one above.</div>` : ''}</div>
+
+      <h3 class="om-pane-title" style="margin-top:20px;">5 · Sort</h3>
+      <div class="field"><label>Sort rows by</label><select id="rep_sortcol">
+        <option value="">— as they come —</option>
+        ${cols.map(c=>`<option value="${esc(c.key)}" ${d.sortCol===c.key?'selected':''}>${esc(c.label)}</option>`).join('')}
+      </select></div>
+      <div class="field"><label>Direction</label><select id="rep_sortdir">
+        <option value="asc" ${d.sortDir!=='desc'?'selected':''}>Ascending</option>
+        <option value="desc" ${d.sortDir==='desc'?'selected':''}>Descending</option>
+      </select></div>
+    </div>
+    <div class="io-card" id="repPreviewCard">
+      <h3 class="om-pane-title">Preview</h3>
+      <div id="repPreview">${renderReportPreview(d)}</div>
+    </div>
+  </div>`;
+}
+
+function renderReportPreview(report){
+  const built = buildReport(report);
+  if(built.blocked) return `<div class="readonly-note">That report type is not available to you.</div>`;
+  const shown = built.rows.slice(0, 25);
+  return `<div class="rep-summary-strip">
+      <div class="rep-stat"><div class="rep-stat-k">Rows</div><div class="rep-stat-v mono">${built.rows.length.toLocaleString()}</div></div>
+      <div class="rep-stat"><div class="rep-stat-k">${esc(built.summaryLabel)}</div><div class="rep-stat-v mono">${esc(formatReportSummary(built.fn, built.grandSummary))}</div></div>
+      ${built.groupCol ? `<div class="rep-stat"><div class="rep-stat-k">Groups</div><div class="rep-stat-v mono">${built.groups.length}</div></div>` : ''}
+    </div>
+    ${built.rows.length ? `<div style="overflow-x:auto;"><table class="om-table"><thead><tr>
+      ${built.columns.map(c=>`<th>${esc(c.label)}</th>`).join('')}
+    </tr></thead><tbody>
+    ${shown.map(r=>`<tr>${built.columns.map(c=>`<td style="font-size:12px;">${esc(reportDisplayValue(c, r.cells[c.key]))}</td>`).join('')}</tr>`).join('')}
+    </tbody></table></div>
+    ${built.rows.length > shown.length ? `<div style="font-size:11.5px;color:var(--ink-soft);margin-top:10px;">Showing the first ${shown.length} of ${built.rows.length} rows — run the report to see them all.</div>` : ''}`
+    : `<div class="empty" style="margin-top:12px;"><div class="display">Nothing matches</div>Loosen a filter, or widen the date range.</div>`}`;
+}
+
+function refreshReportPreview(){
+  const el = document.getElementById('repPreview');
+  if(el && state.reportDraft) el.innerHTML = renderReportPreview(state.reportDraft);
+}
+
+/* ---------- Reports: running a saved report ---------- */
+function renderReportChart(built){
+  if(!built.groupCol || !built.groups.length) return '';
+  const segs = built.groups.slice(0, 12).map((g,i)=>({ ...g, color: REPORT_COLORS[i % REPORT_COLORS.length] }));
+  const total = segs.reduce((s,g)=>s+Math.max(0, g.summary), 0);
+  const legend = segs.map(g=>`<div class="legend-row">
+      <span class="legend-swatch" style="background:${g.color};"></span>
+      <span class="legend-name">${esc(g.label)}</span>
+      <span class="legend-count mono">${esc(formatReportSummary(built.fn, g.summary))}</span>
+    </div>`).join('');
+  if(built.chart==='donut'){
+    if(!total) return '';
+    let cum = 0;
+    const stops = segs.filter(g=>g.summary>0).map(g=>{
+      const start = (cum/total)*360; cum += g.summary;
+      return `${g.color} ${start}deg ${(cum/total)*360}deg`;
+    }).join(', ');
+    return `<div class="io-card" style="margin-bottom:16px;"><div class="donut-wrap">
+      <div class="donut" style="background:conic-gradient(${stops});">
+        <div class="donut-hole"><div class="dnum mono">${esc(formatReportSummary(built.fn, built.grandSummary))}</div><div class="dlbl">${esc(built.summaryLabel)}</div></div>
+      </div>
+      <div class="legend">${legend}</div>
+    </div></div>`;
+  }
+  const max = Math.max(...segs.map(g=>Math.abs(g.summary)), 1);
+  return `<div class="io-card" style="margin-bottom:16px;"><div class="bar-chart">
+    ${segs.map(g=>`<div class="bar-row">
+      <span class="bar-label">${esc(g.label)}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${(Math.abs(g.summary)/max)*100}%;background:${g.color};"></div></div>
+      <span class="bar-count mono">${esc(formatReportSummary(built.fn, g.summary))}</span>
+    </div>`).join('')}
+  </div></div>`;
+}
+
+function renderReportRun(){
+  const report = findReport(state.activeReportId);
+  if(!report) return `<div class="empty"><div class="display">Report not found</div>It may have been deleted.</div>`;
+  const built = buildReport(report);
+  if(built.blocked){
+    return `<div class="rep-head"><div><div class="rep-head-title">${esc(report.name||'Untitled report')}</div></div>
+      <button type="button" class="btn secondary" id="repBackBtn">Back to reports</button></div>
+      <div class="readonly-note">This report is built on a report type you do not have access to.</div>`;
+  }
+  const body = built.groupCol ? renderReportGroupedBody(built) : renderReportFlatBody(built);
+  const range = REPORT_DATE_RANGES.find(r=>r.key===(report.dateRange||'all'));
+  return `<div class="rep-head">
+    <div>
+      <div class="rep-head-title">${esc(report.name || 'Untitled report')}</div>
+      <div class="rep-head-sub">${esc(built.type.name)}${report.description ? ' · ' + esc(report.description) : ''}${range && range.days ? ' · ' + esc(range.label) : ''}</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button type="button" class="btn secondary" id="repBackBtn">Back</button>
+      <button type="button" class="btn secondary" id="repExportBtn">Export</button>
+      ${canEditReport(report) ? `<button type="button" class="btn" id="repEditBtn">Edit</button>` : ''}
+    </div>
+  </div>
+  <div class="rep-summary-strip">
+    <div class="rep-stat"><div class="rep-stat-k">Rows</div><div class="rep-stat-v mono">${built.rows.length.toLocaleString()}</div></div>
+    <div class="rep-stat"><div class="rep-stat-k">${esc(built.summaryLabel)}</div><div class="rep-stat-v mono">${esc(formatReportSummary(built.fn, built.grandSummary))}</div></div>
+    ${built.groupCol ? `<div class="rep-stat"><div class="rep-stat-k">Groups</div><div class="rep-stat-v mono">${built.groups.length}</div></div>` : ''}
+  </div>
+  ${report.chart!=='none' ? renderReportChart({ ...built, chart:report.chart }) : ''}
+  ${body}`;
+}
+
+function renderReportHeaderRow(built){
+  return `<tr>${built.columns.map(c=>`<th>${esc(c.label)}</th>`).join('')}</tr>`;
+}
+function renderReportRowCells(built, r){
+  return built.columns.map(c=>`<td style="font-size:12px;">${esc(reportDisplayValue(c, r.cells[c.key]))}</td>`).join('');
+}
+
+function renderReportFlatBody(built){
+  if(!built.rows.length) return `<div class="empty"><div class="display">Nothing matches</div>Loosen a filter, or widen the date range.</div>`;
+  return `<div class="io-card" style="padding-top:6px;"><div style="overflow-x:auto;">
+    <table class="om-table"><thead>${renderReportHeaderRow(built)}</thead><tbody>
+    ${built.rows.map(r=>`<tr>${renderReportRowCells(built, r)}</tr>`).join('')}
+    </tbody></table></div></div>`;
+}
+
+function renderReportGroupedBody(built){
+  if(!built.groups.length) return `<div class="empty"><div class="display">Nothing matches</div>Loosen a filter, or widen the date range.</div>`;
+  return built.groups.map(g=>{
+    const collapsed = !!state.reportCollapsed[g.label];
+    return `<div class="io-card" style="padding-top:6px;margin-bottom:12px;">
+      <button type="button" class="rep-group-head" data-rep-group="${esc(g.label)}">
+        <span class="rep-group-caret">${collapsed ? '▸' : '▾'}</span>
+        <span class="rep-group-name">${esc(g.label)}</span>
+        <span class="rep-group-meta mono">${g.rows.length} row${g.rows.length===1?'':'s'} · ${esc(formatReportSummary(built.fn, g.summary))}</span>
+      </button>
+      ${collapsed ? '' : `<div style="overflow-x:auto;"><table class="om-table"><thead>${renderReportHeaderRow(built)}</thead><tbody>
+        ${g.rows.map(r=>`<tr>${renderReportRowCells(built, r)}</tr>`).join('')}
+      </tbody></table></div>`}
+    </div>`;
+  }).join('');
+}
+
+/* Exports what the report actually shows -- the chosen columns, filtered,
+   sorted and with the group column first when there is one -- rather than the
+   raw object, so the spreadsheet matches the screen. */
+function exportReport(report){
+  const built = buildReport(report);
+  if(built.blocked || !built.rows.length) return toast('Nothing to export.');
+  const rows = built.rows.map(r=>{
+    const out = {};
+    if(built.groupCol) out[built.groupCol.label] = reportDisplayValue(built.groupCol, reportRawValue(built.type, built.groupCol, r.rec));
+    built.columns.forEach(c=>{ out[c.label] = reportDisplayValue(c, r.cells[c.key]); });
+    return out;
+  });
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Report');
+  const safe = (report.name || 'report').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase() || 'report';
+  XLSX.writeFile(wb, `swg-${safe}-${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+async function saveReportDraft(){
+  const d = state.reportDraft;
+  if(!d) return;
+  if(!d.name.trim()) return alert('Give the report a name.');
+  if(!d.typeKey) return alert('Pick a report type.');
+  if(!(d.columns || []).length) return alert('Pick at least one column.');
+  d.name = d.name.trim();
+  d.updatedAt = Date.now();
+  const list = (state.reports || []).filter(r=>r.id!==d.id);
+  list.push(d);
+  state.reports = list;
+  await saveKey(KEYS.reports, state.reports);
+  state.activeReportId = d.id;
+  state.reportDraft = null;
+  render();
+  toast('Report saved.');
+}
+
+async function deleteReport(id){
+  const r = findReport(id);
+  if(!canEditReport(r)) return alert('Only the person who built a report, or an admin, can delete it.');
+  if(!confirm(`Delete the report "${r.name || 'Untitled report'}"?`)) return;
+  state.reports = (state.reports || []).filter(x=>x.id!==id);
+  await saveKey(KEYS.reports, state.reports);
+  if(state.activeReportId===id) state.activeReportId = null;
+  render();
+  toast('Report deleted.');
+}
+
+/* ---------- Reports: wiring ---------- */
+function rerenderReportsView(){
+  const c = document.getElementById('content');
+  if(!c) return;
+  c.innerHTML = renderReports();
+  wireReportsView();
+}
+
+function wireReportsView(){
+  document.querySelectorAll('[data-reports-tab]').forEach(btn=>{
+    btn.onclick = ()=>{ state.reportsTab = btn.dataset.reportsTab; rerenderReportsView(); };
+  });
+
+  const newBtn = document.getElementById('repNewBtn');
+  if(newBtn) newBtn.onclick = ()=>{ state.reportDraft = newReportDraft(); rerenderReportsView(); };
+  const newTypeBtn = document.getElementById('repNewTypeBtn');
+  if(newTypeBtn) newTypeBtn.onclick = ()=> openReportTypeModal(null);
+
+  document.querySelectorAll('[data-run-report]').forEach(el=>{
+    el.onclick = ()=>{ state.activeReportId = el.dataset.runReport; state.reportCollapsed = {}; rerenderReportsView(); };
+  });
+  document.querySelectorAll('[data-edit-report]').forEach(el=>{
+    el.onclick = ()=>{
+      const r = findReport(el.dataset.editReport);
+      if(!canEditReport(r)) return;
+      state.reportDraft = JSON.parse(JSON.stringify(r));
+      rerenderReportsView();
+    };
+  });
+  document.querySelectorAll('[data-clone-report]').forEach(el=>{
+    el.onclick = ()=>{
+      const r = findReport(el.dataset.cloneReport);
+      if(!r) return;
+      /* A clone belongs to whoever made it, so someone can take a copy of a
+         colleague's report and change it without touching theirs. */
+      const copy = JSON.parse(JSON.stringify(r));
+      copy.id = uid();
+      copy.owner = state.currentUser;
+      copy.createdAt = Date.now();
+      copy.name = (r.name || 'Untitled report') + ' (copy)';
+      state.reportDraft = copy;
+      rerenderReportsView();
+    };
+  });
+  document.querySelectorAll('[data-del-report]').forEach(el=>{
+    el.onclick = ()=> deleteReport(el.dataset.delReport);
+  });
+  document.querySelectorAll('[data-new-report-of]').forEach(el=>{
+    el.onclick = ()=>{ state.reportDraft = newReportDraft(el.dataset.newReportOf); rerenderReportsView(); };
+  });
+  document.querySelectorAll('[data-edit-rtype]').forEach(el=>{
+    el.onclick = ()=> openReportTypeModal(el.dataset.editRtype);
+  });
+  document.querySelectorAll('[data-del-rtype]').forEach(el=>{
+    el.onclick = ()=> deleteReportType(el.dataset.delRtype);
+  });
+  document.querySelectorAll('[data-rep-group]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const label = btn.dataset.repGroup;
+      state.reportCollapsed = { ...state.reportCollapsed, [label]: !state.reportCollapsed[label] };
+      rerenderReportsView();
+    };
+  });
+
+  const backBtn = document.getElementById('repBackBtn');
+  if(backBtn) backBtn.onclick = ()=>{ state.activeReportId = null; rerenderReportsView(); };
+  const exportBtn = document.getElementById('repExportBtn');
+  if(exportBtn) exportBtn.onclick = ()=> exportReport(findReport(state.activeReportId));
+  const editBtn = document.getElementById('repEditBtn');
+  if(editBtn) editBtn.onclick = ()=>{
+    const r = findReport(state.activeReportId);
+    if(!canEditReport(r)) return;
+    state.reportDraft = JSON.parse(JSON.stringify(r));
+    rerenderReportsView();
+  };
+
+  wireReportBuilder();
+}
+
+/* The builder edits state.reportDraft in place. Typing only refreshes the
+   preview -- a full redraw would steal focus mid-word -- while anything that
+   changes which controls exist redraws the whole page. */
+function wireReportBuilder(){
+  const d = state.reportDraft;
+  if(!d) return;
+
+  const nameEl = document.getElementById('rep_name');
+  if(nameEl) nameEl.oninput = ()=>{ d.name = nameEl.value; };
+  const descEl = document.getElementById('rep_desc');
+  if(descEl) descEl.oninput = ()=>{ d.description = descEl.value; };
+
+  const typeEl = document.getElementById('rep_type');
+  if(typeEl) typeEl.onchange = ()=>{
+    d.typeKey = typeEl.value;
+    /* Columns, filters, grouping and sorting all name columns of the old
+       type, so they cannot survive the switch. */
+    d.columns = reportColumnsFor(findReportType(d.typeKey)).slice(0, 6).map(c=>c.key);
+    d.filters = [];
+    d.groupBy = '';
+    d.sortCol = '';
+    d.summarize = { fn:'count', col:'' };
+    rerenderReportsView();
+  };
+
+  document.querySelectorAll('[data-rep-col]').forEach(cb=>{
+    cb.onchange = ()=>{
+      const key = cb.dataset.repCol;
+      /* Kept in the report type's own field order so ticking a column back
+         on puts it where it belongs rather than at the end. */
+      const order = reportColumnsFor(findReportType(d.typeKey)).map(c=>c.key);
+      d.columns = cb.checked
+        ? order.filter(k=>k===key || (d.columns||[]).includes(k))
+        : (d.columns||[]).filter(k=>k!==key);
+      refreshReportPreview();
+    };
+  });
+
+  const rangeEl = document.getElementById('rep_range');
+  if(rangeEl) rangeEl.onchange = ()=>{ d.dateRange = rangeEl.value; refreshReportPreview(); };
+
+  const addFilterBtn = document.getElementById('repAddFilterBtn');
+  if(addFilterBtn) addFilterBtn.onclick = ()=>{
+    const cols = reportColumnsFor(findReportType(d.typeKey));
+    if(!cols.length) return;
+    d.filters = (d.filters||[]).concat([{ col: cols[0].key, op:'contains', value:'' }]);
+    rerenderReportsView();
+  };
+  document.querySelectorAll('[data-rep-filter-col]').forEach(sel=>{
+    sel.onchange = ()=>{ d.filters[Number(sel.dataset.repFilterCol)].col = sel.value; refreshReportPreview(); };
+  });
+  document.querySelectorAll('[data-rep-filter-op]').forEach(sel=>{
+    sel.onchange = ()=>{ d.filters[Number(sel.dataset.repFilterOp)].op = sel.value; rerenderReportsView(); };
+  });
+  document.querySelectorAll('[data-rep-filter-val]').forEach(inp=>{
+    inp.oninput = ()=>{ d.filters[Number(inp.dataset.repFilterVal)].value = inp.value; refreshReportPreview(); };
+  });
+  document.querySelectorAll('[data-rep-filter-del]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const i = Number(btn.dataset.repFilterDel);
+      d.filters = (d.filters||[]).filter((_,j)=>j!==i);
+      rerenderReportsView();
+    };
+  });
+
+  const groupEl = document.getElementById('rep_group');
+  if(groupEl) groupEl.onchange = ()=>{ d.groupBy = groupEl.value; refreshReportPreview(); };
+  const fnEl = document.getElementById('rep_fn');
+  if(fnEl) fnEl.onchange = ()=>{
+    d.summarize = { fn: fnEl.value, col: fnEl.value==='count' ? '' : (d.summarize.col || '') };
+    rerenderReportsView();
+  };
+  const sumColEl = document.getElementById('rep_sumcol');
+  if(sumColEl) sumColEl.onchange = ()=>{ d.summarize.col = sumColEl.value; refreshReportPreview(); };
+  const chartEl = document.getElementById('rep_chart');
+  if(chartEl) chartEl.onchange = ()=>{ d.chart = chartEl.value; rerenderReportsView(); };
+  const sortColEl = document.getElementById('rep_sortcol');
+  if(sortColEl) sortColEl.onchange = ()=>{ d.sortCol = sortColEl.value; refreshReportPreview(); };
+  const sortDirEl = document.getElementById('rep_sortdir');
+  if(sortDirEl) sortDirEl.onchange = ()=>{ d.sortDir = sortDirEl.value; refreshReportPreview(); };
+
+  const saveBtn = document.getElementById('repSaveBtn');
+  if(saveBtn) saveBtn.onclick = saveReportDraft;
+  const cancelBtn = document.getElementById('repCancelBtn');
+  if(cancelBtn) cancelBtn.onclick = ()=>{ state.reportDraft = null; rerenderReportsView(); };
 }
 
 /* ---------- Modal / forms ---------- */
@@ -8909,6 +10089,19 @@ function openModal(table, id){
     html = `<h2 class="display">${isEdit?'Edit':'Add'} team member</h2>
       <div class="field"><label>Name</label><input id="f_name" value="${item?esc(item.name):''}"></div>
       <div class="field"><label>Email</label><input id="f_email" type="email" value="${item?esc(item.email||''):''}" placeholder="name@siddhayogaweb.com"></div>`;
+  }
+  /* Record Type sits directly under the modal heading, ahead of the object's
+     own fields, so it reads as "what kind of record is this" before the
+     details. Only objects that actually have an active record type get the
+     picker -- everyone else's form is untouched. */
+  if(SETUP_ENTITIES.includes(table) && activeRecordTypes(table).length){
+    const currentRt = isEdit ? recordTypeIdOf(table, id) : defaultRecordTypeId(table);
+    const rtField = `<div class="field"><label>Record Type</label><select id="f_recordType">
+        <option value="">\u2014 none \u2014</option>
+        ${activeRecordTypes(table).map(rt=>`<option value="${rt.id}" ${currentRt===rt.id?'selected':''}>${esc(rt.label)}</option>`).join('')}
+      </select></div>`;
+    const afterHeading = html.indexOf('</h2>');
+    if(afterHeading !== -1) html = html.slice(0, afterHeading+5) + rtField + html.slice(afterHeading+5);
   }
   html += `<div class="modal-actions">
       <button class="btn secondary" id="cancelBtn">Cancel</button>
@@ -9383,6 +10576,11 @@ function openQuickActionsCustomizeModal(){
 async function saveModal(table, id){
   const isEdit = !!id;
   let obj = isEdit ? state[table].find(x=>x.id===id) : { id: uid(), createdAt: Date.now(), owner: state.viewingAs };
+  /* Read before any early return closes over a stale DOM. null means the
+     form had no Record Type picker at all, which must not be confused with
+     the picker being set to "none". */
+  const rtSelect = document.getElementById('f_recordType');
+  const pickedRecordType = rtSelect ? rtSelect.value : null;
   const prevOrderStatus = (table==='orders' && isEdit) ? obj.status : null;
   let sendOrderConfirmationRequested = false;
   const readCompany = ()=>{
@@ -9504,6 +10702,7 @@ async function saveModal(table, id){
   if(!isEdit) state[table].push(obj);
   const wasNew = !isEdit;
   const savedObj = obj;
+  if(pickedRecordType !== null) await assignRecordType(table, obj.id, pickedRecordType);
   if(table==='deals') await checkBigDealAlert(savedObj);
   closeModal();
   render();
@@ -9547,6 +10746,14 @@ document.getElementById('topbarGuideBtn').onclick = ()=> startObjectWalkthrough(
    is a named destination, so it navigates directly; only "Open Advanced Setup"
    — the general trip into the backend — still asks for confirmation. */
 const QS_GROUPS = [
+  { label:'Personalize', rows:[
+    { section:'objects', title:'Record Types', desc:'Name the different flavours of an object — pick the object, then Record Types.',
+      tint:'var(--umber-soft)', ink:'var(--umber)',
+      icon:`<path d="M12 3.2 20.8 7.7 12 12.2 3.2 7.7z"/><path d="M3.2 12 12 16.5l8.8-4.5"/>` },
+    { section:'objects', title:'Compact Layouts', desc:'Choose the columns each list shows at a glance — pick the object, then Compact Layout.',
+      tint:'var(--sage-soft)', ink:'var(--sage)',
+      icon:`<rect x="3.4" y="4.6" width="17.2" height="14.8" rx="2.4"/><path d="M3.4 9.4h17.2M9.2 9.4v10"/>` },
+  ]},
   { label:'Customization', rows:[
     { tab:'required', title:'Required Fields', desc:'Choose which fields must be filled in before a record saves.',
       tint:'var(--olive-soft)', ink:'var(--olive)',
@@ -9590,7 +10797,7 @@ function renderQuickSettings(){
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13.4 4.4h6.2v6.2"/><path d="M19.6 4.4 11 13"/><path d="M18 14.4v4.1a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 18.5V7.5A1.5 1.5 0 0 1 5.5 6h4.1"/></svg>
   </button>` + QS_GROUPS.filter(g=>!g.gate || g.gate()).map(g=>`<div class="qs-group">
     <div class="qs-group-label">${esc(g.label)}</div>
-    ${g.rows.map(r=>`<button type="button" class="qs-row" ${r.view?`data-qs-view="${r.view}" data-qs-admin-tab="${r.adminTab||''}"`:`data-qs-tab="${r.tab}"`}>
+    ${g.rows.map(r=>`<button type="button" class="qs-row" ${r.view?`data-qs-view="${r.view}" data-qs-admin-tab="${r.adminTab||''}"`:(r.section?`data-qs-section="${r.section}"`:`data-qs-tab="${r.tab}"`)}>
       <span class="qs-ico" style="--qs-tint:${r.tint};--qs-ink:${r.ink};"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${r.icon}</svg></span>
       <span style="min-width:0;">
         <span class="qs-row-title" style="display:block;">${esc(r.title)}</span>
@@ -9610,6 +10817,16 @@ function openQuickSettings(){
       closeQuickSettings();
       if(btn.dataset.qsAdminTab) state.adminTab = btn.dataset.qsAdminTab;
       if(state.view !== btn.dataset.qsView){ state.returnView = state.view; state.view = btn.dataset.qsView; }
+      render();
+    };
+  });
+  document.querySelectorAll('[data-qs-section]').forEach(btn=>{
+    btn.onclick = ()=>{
+      closeQuickSettings();
+      state.setupSection = btn.dataset.qsSection;
+      state.omSection = 'objects';
+      state.omObject = null;
+      if(state.view !== 'setup'){ state.returnView = state.view; state.view = 'setup'; }
       render();
     };
   });
@@ -9636,7 +10853,9 @@ function openQuickSettings(){
     if(state.view==='setup') return;
     openConfirmModal({
       title:'Enter Setup?',
-      message:"You're about to open the backend of the CRM — roles, validation rules, automation and sharing rules live here, and changes affect the whole team.",
+      message: canEditGlobalSetup()
+        ? "You're about to open the backend of the CRM — roles, validation rules, automation and sharing rules live here, and changes affect the whole team."
+        : "You're about to open the backend of the CRM. You can set up record types and compact layouts; the admin settings are there to read, but only Ariel or David can change them.",
       confirmLabel:'Continue',
       cancelLabel:'Go back',
       onConfirm: ()=>{ state.returnView = state.view; state.view='setup'; render(); },
