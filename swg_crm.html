@@ -9,92 +9,102 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
   :root{
-    --cream:#F2EEE3;
-    --parchment:#EAE3D2;
+    /* The palette keeps the old warm cast but drops the mud: every accent is a
+       ripe version of what it was -- marigold, emerald, coral, sunflower,
+       terracotta, lime, tomato -- on a brighter cream with lighter borders.
+       Saturation carries the mood; the layout stays as plain as it was.
+       Each accent is dark enough to read as text on its own soft tint and
+       under white button text, so nothing got cheerful at legibility's cost. */
+    --cream:#FBF7EF;
+    --parchment:#F3ECDC;
     --surface:#FFFFFF;
-    --ink:#23211B;
-    --ink-soft:#736C5B;
-    --border:#DACEB2;
-    --amber:#A8703C;
-    --amber-soft:#EADFC8;
-    --sage:#55654A;
-    --sage-soft:#E1E6D5;
-    --clay:#9C5B48;
-    --clay-soft:#F0DDD5;
-    --ochre:#AC8029;
-    --ochre-soft:#F1E3C4;
-    --umber:#6F4A30;
-    --umber-soft:#E4D6C8;
-    --olive:#6C7A42;
-    --olive-soft:#E4E8D3;
-    --rust:#A6472B;
-    --rust-soft:#F0DBD2;
-    --ink-fixed:#23211B;
-    --setup-blue:#2F6FED;
-    --setup-blue-soft:#E3EBFD;
+    --ink:#221F1A;
+    --ink-soft:#6E6759;
+    --border:#E9E0CB;
+    --amber:#C4670F;
+    --amber-soft:#FFE7C6;
+    --sage:#16805A;
+    --sage-soft:#D2F3E2;
+    --clay:#C7422C;
+    --clay-soft:#FFDFD6;
+    --ochre:#B58205;
+    --ochre-soft:#FFF0C0;
+    --umber:#9E5326;
+    --umber-soft:#FBE1CE;
+    --olive:#568611;
+    --olive-soft:#E9F7CA;
+    --rust:#C53418;
+    --rust-soft:#FFDCD0;
+    --ink-fixed:#221F1A;
+    --setup-blue:#2563EB;
+    --setup-blue-soft:#DEEAFF;
     /* Revenue stream identity: Essential Oils reads blue, Siddha Yoga reads green,
        so the two businesses stay distinguishable in every finance chart. */
-    --rev-oils:#31648F;
-    --rev-oils-soft:#D9E4EE;
-    --rev-yoga:#43855A;
-    --rev-yoga-soft:#DAEADF;
-    --rev-other:#8A7A5C;
+    --rev-oils:#1B74C0;
+    --rev-oils-soft:#D9E8F9;
+    --rev-yoga:#16805A;
+    --rev-yoga-soft:#D2F3E2;
+    --rev-other:#8C8474;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --cream:#191712;
-      --parchment:#211E17;
-      --surface:#26231C;
-      --ink:#ECE6D6;
-      --ink-soft:#A69C87;
-      --border:#3B3628;
-      --amber:#CB9A61;
-      --amber-soft:#3A2E1E;
-      --sage:#93A67F;
-      --sage-soft:#28301F;
-      --clay:#C88E76;
-      --clay-soft:#382520;
-      --ochre:#D9A84B;
-      --ochre-soft:#3A2E17;
-      --umber:#B08A63;
-      --umber-soft:#332619;
-      --olive:#A6B27E;
-      --olive-soft:#2C321F;
-      --rust:#D2795A;
-      --rust-soft:#3A2119;
-      --rev-oils:#6FA3D6;
-      --rev-oils-soft:#1E2C3A;
-      --rev-yoga:#7FC79A;
-      --rev-yoga-soft:#1E2E23;
-      --rev-other:#B8A87E;
+      --cream:#17161B;
+      --parchment:#1E1D23;
+      --surface:#24232A;
+      --ink:#F1EDE4;
+      --ink-soft:#A7A294;
+      --border:#35343D;
+      --amber:#F79E3E;
+      --amber-soft:#3B2A16;
+      --sage:#3FD39A;
+      --sage-soft:#12332A;
+      --clay:#FF8A6B;
+      --clay-soft:#3A211C;
+      --ochre:#FFC64A;
+      --ochre-soft:#3A2D14;
+      --umber:#E9A06C;
+      --umber-soft:#362619;
+      --olive:#A8DD55;
+      --olive-soft:#253114;
+      --rust:#FF7E5C;
+      --rust-soft:#3B1F18;
+      --setup-blue:#74A4FF;
+      --setup-blue-soft:#1B2740;
+      --rev-oils:#6CB6F7;
+      --rev-oils-soft:#14283C;
+      --rev-yoga:#4FD6A2;
+      --rev-yoga-soft:#12312A;
+      --rev-other:#C7BA92;
     }
   }
   :root[data-theme="dark"]{
-    --cream:#191712;
-    --parchment:#211E17;
-    --surface:#26231C;
-    --ink:#ECE6D6;
-    --ink-soft:#A69C87;
-    --border:#3B3628;
-    --amber:#CB9A61;
-    --amber-soft:#3A2E1E;
-    --sage:#93A67F;
-    --sage-soft:#28301F;
-    --clay:#C88E76;
-    --clay-soft:#382520;
-    --ochre:#D9A84B;
-    --ochre-soft:#3A2E17;
-    --umber:#B08A63;
-    --umber-soft:#332619;
-    --olive:#A6B27E;
-    --olive-soft:#2C321F;
-    --rust:#D2795A;
-    --rust-soft:#3A2119;
-    --rev-oils:#6FA3D6;
-    --rev-oils-soft:#1E2C3A;
-    --rev-yoga:#7FC79A;
-    --rev-yoga-soft:#1E2E23;
-    --rev-other:#B8A87E;
+    --cream:#17161B;
+    --parchment:#1E1D23;
+    --surface:#24232A;
+    --ink:#F1EDE4;
+    --ink-soft:#A7A294;
+    --border:#35343D;
+    --amber:#F79E3E;
+    --amber-soft:#3B2A16;
+    --sage:#3FD39A;
+    --sage-soft:#12332A;
+    --clay:#FF8A6B;
+    --clay-soft:#3A211C;
+    --ochre:#FFC64A;
+    --ochre-soft:#3A2D14;
+    --umber:#E9A06C;
+    --umber-soft:#362619;
+    --olive:#A8DD55;
+    --olive-soft:#253114;
+    --rust:#FF7E5C;
+    --rust-soft:#3B1F18;
+    --setup-blue:#74A4FF;
+    --setup-blue-soft:#1B2740;
+    --rev-oils:#6CB6F7;
+    --rev-oils-soft:#14283C;
+    --rev-yoga:#4FD6A2;
+    --rev-yoga-soft:#12312A;
+    --rev-other:#C7BA92;
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--cream);color:var(--ink);font-family:'Work Sans',sans-serif;font-size:14px;transition:background .15s,color .15s;}
@@ -1502,7 +1512,7 @@ function isAdmin(){ return state.currentUser === FULL_ADMIN || CO_ADMINS.include
 function canDeleteUsers(){ return state.currentUser === FULL_ADMIN; }
 function canSeeLeads(){ return !LEAD_HIDDEN_FOR.includes(state.viewingAs); }
 function teamNames(){ return state.team.map(t=>t.name); }
-const AVATAR_COLORS = ['#6F4A30','#A8703C','#4C7A6B','#3E5C8A','#8A4B5C','#6B5B95','#B4682F','#2E6F5E'];
+const AVATAR_COLORS = ['#D9600F','#128A5E','#2E6FD6','#C2385F','#7A4AD1','#0D857F','#B8791A','#3F8A1D'];
 function avatarInitials(name){
   const parts = String(name||'').trim().split(/\s+/);
   return ((parts[0]?.[0]||'') + (parts[1]?.[0]||'')).toUpperCase() || '?';
@@ -1528,6 +1538,11 @@ function roleFor(name){
   return 'Sales Rep';
 }
 function canAccessSetup(){ return isAdmin() || roleFor(state.currentUser)==='Manager'; }
+/* Administration hands out access itself, so it is narrower than Setup: only
+   the two admins, Ariel and David. A Manager can open Setup and still never
+   sees this -- the sidebar link is hidden, the Quick Settings rows are gone,
+   and the view redirects if anyone lands on it another way. */
+function canAccessAdministration(){ return isAdmin(); }
 function canEditGlobalSetup(){ return isAdmin(); }
 function isArielOrDaniel(){ return state.currentUser===FULL_ADMIN || state.currentUser==='Daniel'; }
 function canEditRoles(){ return isArielOrDaniel(); }
@@ -1882,7 +1897,7 @@ function setActiveNav(){
 function navLinkHidden(entity){
   if((entity==='invoices' || entity==='payments' || entity==='finance') && !isPrivileged()) return true;
   if(entity==='team' && !isAdmin()) return true;
-  if(entity==='administration' && !canAccessSetup()) return true;
+  if(entity==='administration' && !canAccessAdministration()) return true;
   if(entity==='leads' && !canSeeLeads()) return true;
   if(SETUP_ENTITIES.includes(entity) && isObjectHidden(entity) && !personaIsAdmin()) return true;
   return false;
@@ -1913,7 +1928,7 @@ function render(){
   if(state.view==='payments' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='finance' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='team' && !isAdmin()) state.view = 'dashboard';
-  if(state.view==='administration' && !canAccessSetup()) state.view = 'dashboard';
+  if(state.view==='administration' && !canAccessAdministration()) state.view = 'dashboard';
   if(state.view==='setup' && !canAccessSetup()) state.view = 'dashboard';
   if(state.view==='leads' && !canSeeLeads()) state.view = 'dashboard';
   if(SETUP_ENTITIES.includes(state.view) && isObjectHidden(state.view) && !personaIsAdmin()) state.view = 'dashboard';
@@ -9543,7 +9558,7 @@ const QS_GROUPS = [
       tint:'var(--setup-blue-soft)', ink:'var(--setup-blue)',
       icon:`<path d="M2.5 12S5.9 5.8 12 5.8 21.5 12 21.5 12 18.1 18.2 12 18.2 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.9"/>` },
   ]},
-  { label:'Access', rows:[
+  { label:'Access', gate:canAccessAdministration, rows:[
     { view:'administration', adminTab:'users', title:'Users', desc:'Add, edit or remove the people with a CRM seat.',
       tint:'var(--sage-soft)', ink:'var(--sage)',
       icon:`<circle cx="12" cy="8" r="3.6"/><path d="M4.6 20c.7-3.8 3.6-6 7.4-6s6.7 2.2 7.4 6"/>` },
@@ -9573,7 +9588,7 @@ const QS_GROUPS = [
 function renderQuickSettings(){
   return `<button type="button" class="qs-advanced" id="qsAdvancedBtn">Open Advanced Setup
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13.4 4.4h6.2v6.2"/><path d="M19.6 4.4 11 13"/><path d="M18 14.4v4.1a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 18.5V7.5A1.5 1.5 0 0 1 5.5 6h4.1"/></svg>
-  </button>` + QS_GROUPS.map(g=>`<div class="qs-group">
+  </button>` + QS_GROUPS.filter(g=>!g.gate || g.gate()).map(g=>`<div class="qs-group">
     <div class="qs-group-label">${esc(g.label)}</div>
     ${g.rows.map(r=>`<button type="button" class="qs-row" ${r.view?`data-qs-view="${r.view}" data-qs-admin-tab="${r.adminTab||''}"`:`data-qs-tab="${r.tab}"`}>
       <span class="qs-ico" style="--qs-tint:${r.tint};--qs-ink:${r.ink};"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${r.icon}</svg></span>
