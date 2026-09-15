@@ -125,6 +125,28 @@
   .setup-gear:hover{background:var(--setup-blue-soft);color:var(--setup-blue);}
   .setup-gear.active{background:var(--setup-blue);color:#fff;}
   .setup-gear svg{width:19px;height:19px;display:block;}
+
+  /* Collapsed sidebar is an icon rail, not a hidden panel: every row keeps
+     its icon and stays clickable, only the words go. Nothing here is
+     display:none'd on the nav itself, so the same markup serves both
+     states and no view has to know which one it's in. */
+  /* Sized with flex-basis, not width: the sidebar is a flex item of #app,
+     where the main-axis size comes from the basis -- setting width alone
+     leaves it stuck at the expanded 208px. */
+  .sidebar{flex-basis:208px;transition:flex-basis .16s ease;}
+  .sidebar.collapsed{flex-basis:58px;width:58px;padding-left:9px;padding-right:9px;overflow-x:hidden;}
+  .sidebar.collapsed .brand,
+  .sidebar.collapsed .nav-group-label,
+  .sidebar.collapsed .nav-label,
+  .sidebar.collapsed .sidebar-foot{display:none;}
+  .sidebar.collapsed .brand-row{flex-direction:column;gap:4px;justify-content:center;margin-bottom:14px;}
+  .sidebar.collapsed .navlink{justify-content:center;gap:0;padding-left:0;padding-right:0;}
+  /* The two hairlines that separate Search and Import/Export from the
+     object list would otherwise sit at full row width in a 58px rail. */
+  .sidebar.collapsed .navlink-search{padding-bottom:9px;margin-bottom:6px;}
+  .sidebar.collapsed .navlink-util{padding-top:9px;margin-top:6px;}
+  .sidebar-toggle-chevron{transition:transform .16s ease;transform-origin:14px 12px;}
+  .sidebar.collapsed .sidebar-toggle-chevron{transform:rotate(180deg);}
   .setup-back-btn{display:flex;align-items:center;gap:6px;padding:8px 14px 8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;flex-shrink:0;}
   .setup-back-btn:hover{border-color:var(--setup-blue);color:var(--setup-blue);}
   .setup-back-btn svg{width:15px;height:15px;}
@@ -1241,35 +1263,38 @@
   <aside class="sidebar">
     <div class="brand-row">
       <div class="brand display">SWG</div>
+      <button type="button" id="sidebarToggleBtn" class="setup-gear sidebar-toggle" title="Collapse sidebar" aria-label="Collapse sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9.5 4v16"/><path class="sidebar-toggle-chevron" d="M15.5 9.5 13 12l2.5 2.5"/></svg>
+      </button>
       <button type="button" id="setupGearBtn" class="setup-gear" title="Setup" style="display:none;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a1.9 1.9 0 1 1-2.7 2.7l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5v.2a1.9 1.9 0 0 1-3.8 0V21a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a1.9 1.9 0 1 1-2.7-2.7l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a1.9 1.9 0 0 1 0-3.8h.2a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a1.9 1.9 0 1 1 2.7-2.7l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a1.9 1.9 0 0 1 3.8 0v.2a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a1.9 1.9 0 1 1 2.7 2.7l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1h.2a1.9 1.9 0 0 1 0 3.8H21a1.6 1.6 0 0 0-1.5 1Z"/></svg>
       </button>
     </div>
-    <div class="navlink navlink-search" data-view="search"><span class="nav-ico"></span>Search</div>
+    <div class="navlink navlink-search" data-view="search"><span class="nav-ico"></span><span class="nav-label">Search</span></div>
     <div class="nav-group-label" data-nav-group="workspace">Workspace</div>
-    <div class="navlink" data-view="home" data-nav-group="workspace"><span class="nav-ico"></span>Home</div>
-    <div class="navlink active" data-view="dashboard" data-nav-group="workspace"><span class="nav-ico"></span>Dashboard</div>
-    <div class="navlink" data-view="reports" data-nav-group="workspace"><span class="nav-ico"></span>Reports</div>
+    <div class="navlink" data-view="home" data-nav-group="workspace"><span class="nav-ico"></span><span class="nav-label">Home</span></div>
+    <div class="navlink active" data-view="dashboard" data-nav-group="workspace"><span class="nav-ico"></span><span class="nav-label">Dashboard</span></div>
+    <div class="navlink" data-view="reports" data-nav-group="workspace"><span class="nav-ico"></span><span class="nav-label">Reports</span></div>
     <div class="nav-group-label" data-nav-group="records">Records</div>
-    <div class="navlink" data-view="contacts" data-nav-group="records"><span class="nav-ico"></span>Contacts</div>
-    <div class="navlink" data-view="leads" data-nav-group="records"><span class="nav-ico"></span>Leads</div>
-    <div class="navlink" data-view="customers" data-nav-group="records"><span class="nav-ico"></span>Customers</div>
-    <div class="navlink" data-view="distributors" data-nav-group="records"><span class="nav-ico"></span>Distributors</div>
-    <div class="navlink" data-view="suppliers" data-nav-group="records"><span class="nav-ico"></span>Suppliers</div>
-    <div class="navlink" data-view="deals" data-nav-group="records"><span class="nav-ico"></span>Deals</div>
-    <div class="navlink" data-view="orders" data-nav-group="records"><span class="nav-ico"></span>Orders</div>
+    <div class="navlink" data-view="contacts" data-nav-group="records"><span class="nav-ico"></span><span class="nav-label">Contacts</span></div>
+    <div class="navlink" data-view="leads" data-nav-group="records"><span class="nav-ico"></span><span class="nav-label">Leads</span></div>
+    <div class="navlink" data-view="customers" data-nav-group="records"><span class="nav-ico"></span><span class="nav-label">Customers</span></div>
+    <div class="navlink" data-view="distributors" data-nav-group="records"><span class="nav-ico"></span><span class="nav-label">Distributors</span></div>
+    <div class="navlink" data-view="suppliers" data-nav-group="records"><span class="nav-ico"></span><span class="nav-label">Suppliers</span></div>
+    <div class="navlink" data-view="deals" data-nav-group="records"><span class="nav-ico"></span><span class="nav-label">Deals</span></div>
+    <div class="navlink" data-view="orders" data-nav-group="records"><span class="nav-ico"></span><span class="nav-label">Orders</span></div>
     <div class="nav-group-label" data-nav-group="operations">Operations</div>
-    <div class="navlink" data-view="tasks" data-nav-group="operations"><span class="nav-ico"></span>Tasks</div>
-    <div class="navlink" data-view="invoices" data-nav-group="operations"><span class="nav-ico"></span>Invoices</div>
-    <div class="navlink" data-view="payments" data-nav-group="operations"><span class="nav-ico"></span>Payments</div>
-    <div class="navlink" data-view="finance" data-nav-group="operations"><span class="nav-ico"></span>Finance</div>
+    <div class="navlink" data-view="tasks" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Tasks</span></div>
+    <div class="navlink" data-view="invoices" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Invoices</span></div>
+    <div class="navlink" data-view="payments" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Payments</span></div>
+    <div class="navlink" data-view="finance" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Finance</span></div>
     <div class="nav-group-label" data-nav-group="support">Support</div>
-    <div class="navlink" data-view="emails" data-nav-group="support"><span class="nav-ico"></span>Emails</div>
-    <div class="navlink" data-view="tickets" data-nav-group="support"><span class="nav-ico"></span>Tickets</div>
+    <div class="navlink" data-view="emails" data-nav-group="support"><span class="nav-ico"></span><span class="nav-label">Emails</span></div>
+    <div class="navlink" data-view="tickets" data-nav-group="support"><span class="nav-ico"></span><span class="nav-label">Tickets</span></div>
     <div class="nav-group-label" data-nav-group="admin">Admin</div>
-    <div class="navlink" data-view="team" data-nav-group="admin"><span class="nav-ico"></span>Team</div>
-    <div class="navlink" data-view="administration" data-nav-group="admin"><span class="nav-ico"></span>Administration</div>
-    <div class="navlink navlink-util" data-view="rickroll" data-nav-group="admin"><span class="nav-ico"></span>Import / Export</div>
+    <div class="navlink" data-view="team" data-nav-group="admin"><span class="nav-ico"></span><span class="nav-label">Team</span></div>
+    <div class="navlink" data-view="administration" data-nav-group="admin"><span class="nav-ico"></span><span class="nav-label">Administration</span></div>
+    <div class="navlink navlink-util" data-view="rickroll" data-nav-group="admin"><span class="nav-ico"></span><span class="nav-label">Import / Export</span></div>
     <div class="sidebar-foot">
       <div class="theme-toggle" id="themeToggle">
         <button type="button" data-theme-choice="system" title="Match system">Auto</button>
@@ -3200,6 +3225,37 @@ function loadThemePref(){
   try{ pref = localStorage.getItem('crm_theme_pref') || 'system'; }catch(e){}
   applyThemePref(pref);
 }
+
+/* Sidebar collapse. Kept in localStorage next to the theme and chart
+   prefs rather than in the settings table: that table is shared, and one
+   person folding their sidebar shouldn't fold it for the whole team.
+   Titles are copied from each row's own label so a collapsed icon is
+   still identifiable on hover, and can't drift from the visible text. */
+function applySidebarCollapsed(collapsed){
+  const bar = document.querySelector('.sidebar');
+  if(!bar) return;
+  bar.classList.toggle('collapsed', collapsed);
+  const btn = document.getElementById('sidebarToggleBtn');
+  if(btn){
+    const label = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+    btn.title = label;
+    btn.setAttribute('aria-label', label);
+  }
+  document.querySelectorAll('.sidebar .navlink').forEach(link=>{
+    const text = (link.querySelector('.nav-label')||{}).textContent;
+    if(text) link.title = collapsed ? text.trim() : '';
+  });
+}
+function loadSidebarCollapsed(){
+  let collapsed = false;
+  try{ collapsed = localStorage.getItem('crm_sidebar_collapsed') === '1'; }catch(e){}
+  applySidebarCollapsed(collapsed);
+}
+document.getElementById('sidebarToggleBtn').onclick = ()=>{
+  const collapsed = !document.querySelector('.sidebar').classList.contains('collapsed');
+  try{ localStorage.setItem('crm_sidebar_collapsed', collapsed ? '1' : '0'); }catch(e){}
+  applySidebarCollapsed(collapsed);
+};
 document.querySelectorAll('#themeToggle button').forEach(b=>{
   b.onclick = ()=>{
     const pref = b.dataset.themeChoice;
@@ -11368,6 +11424,7 @@ async function boot(){
     document.getElementById('app').style.display = 'flex';
     updateIdentityUI();
     loadThemePref();
+    loadSidebarCollapsed();
     render();
   }, 2000);
 }
