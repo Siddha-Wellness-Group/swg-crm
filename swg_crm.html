@@ -2940,6 +2940,15 @@ const FC_CARD_ICONS = {
 function fcCardIcon(key){
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${FC_CARD_ICONS[key]||''}</svg>`;
 }
+/* A rising line with an arrowhead, not the plain chevron trendArrow() draws.
+   Deliberately only here: on the Overview stat cards that chevron sits inline
+   at 11px next to its text, where a three-segment zigzag turns to mush, while
+   this one stands alone at 18px with room to read as a trend. */
+function fcTrendIcon(up){
+  const line = up ? 'M22 7 13.5 15.5 8.5 10.5 2 17' : 'M22 17 13.5 8.5 8.5 13.5 2 7';
+  const head = up ? 'M16 7h6v6' : 'M16 17h6v-6';
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${line}"/><path d="${head}"/></svg>`;
+}
 function fcSnapshotPending(range){
   const days = Math.round(fcDateRangeMs(range)/86400000);
   const dated = (state.metricSnapshots||[]).filter(s=>s.snapshotDate).map(s=>s.snapshotDate).sort();
@@ -3336,7 +3345,7 @@ function renderFulfillmentCommandCenter(dash){
       return `<div class="fc-metric ${m.tint}" title="${esc(d ? d.title : m.caption)}">
         <div class="fc-metric-top">
           <span class="fc-metric-ico">${fcCardIcon(m.icon)}</span>
-          ${d && d.up!==null ? `<span class="fc-metric-trend ${dir}">${trendArrow(d.up)}</span>` : ''}
+          ${d && d.up!==null ? `<span class="fc-metric-trend ${dir}">${fcTrendIcon(d.up)}</span>` : ''}
         </div>
         <span class="fc-metric-label">${esc(m.label)}</span>
         <span class="fc-metric-num">${m.value}</span>
