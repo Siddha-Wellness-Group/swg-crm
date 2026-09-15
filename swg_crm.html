@@ -843,6 +843,7 @@
   .fc-metric-delta svg{width:9px;height:9px;flex:none;}
   .fc-metric-delta.up{color:var(--sage);}
   .fc-metric-delta.down{color:var(--rust);}
+  .fc-metric-delta.flat{color:var(--ink-soft);}
   .fc-metric.acc-amber .fc-metric-num{color:var(--amber);}
   .fc-metric.acc-rust .fc-metric-num{color:var(--rust);}
   .fc-metric.acc-sage .fc-metric-num{color:var(--sage);}
@@ -1393,7 +1394,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, companySettings:{}, companyNavOpen:true, setupTab:'automation', setupSection:'home', omObject:null, omTab:'details', omSection:'objects', omFilter:'', recordTypes:[], recordTypeAssignments:{}, compactLayouts:{}, reports:[], reportTypes:[], reportsTab:'reports', activeReportId:null, reportDraft:null, reportCollapsed:{}, pageLayouts:[], recordPages:[], relationships:[], profiles:[], permissionSets:[], permissionSetGroups:[], publicGroups:[], emailTemplates:[], adminTab:'profiles', adminReturnView:'dashboard', flowExplorer:false, flowWizard:null, emailTemplateFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0, ioEntity:null, ioMode:null, ioReturnView:null };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, companySettings:{}, companyNavOpen:true, setupTab:'automation', setupSection:'home', omObject:null, omTab:'details', omSection:'objects', omFilter:'', recordTypes:[], recordTypeAssignments:{}, compactLayouts:{}, reports:[], reportTypes:[], reportsTab:'reports', activeReportId:null, reportDraft:null, reportCollapsed:{}, pageLayouts:[], recordPages:[], relationships:[], profiles:[], permissionSets:[], permissionSetGroups:[], publicGroups:[], emailTemplates:[], adminTab:'profiles', adminReturnView:'dashboard', flowExplorer:false, flowWizard:null, emailTemplateFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], metricSnapshots:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0, ioEntity:null, ioMode:null, ioReturnView:null };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -1720,6 +1721,9 @@ const FIELD_MAP = {
   shippingAddress:'shipping_address', externalOrderNumber:'external_order_number',
   trackingNumber:'tracking_number', carrierName:'carrier_name', trackingUrl:'tracking_url',
   ticketNumber:'ticket_number', externalId:'external_id', assignedTo:'assigned_to',
+  snapshotDate:'snapshot_date', toFulfill:'to_fulfill',
+  attnWaitingFulfillment:'attn_waiting_fulfillment', attnMissingAddress:'attn_missing_address',
+  attnShippedStale:'attn_shipped_stale', attnOpenTickets:'attn_open_tickets',
 };
 const FIELD_MAP_REV = Object.fromEntries(Object.entries(FIELD_MAP).map(([a,b])=>[b,a]));
 /* Columns Postgres types as `date`. An empty date input yields '', which
@@ -1856,16 +1860,18 @@ async function loadSettings(){
 }
 
 async function loadAll(){
-  const [c,d,o,cu,su,ta,inv,le,di,pa,,,,,oe] = await Promise.all([
+  const [c,d,o,cu,su,ta,inv,le,di,pa,,,,,oe,ms] = await Promise.all([
     loadTable('contacts'), loadTable('deals'), loadTable('orders'),
     loadTable('customers'), loadTable('suppliers'), loadTable('tasks'), loadTable('invoices'),
     loadTable('leads'), loadTable('distributors'), loadTable('payments'), loadFxRates(),
-    loadEmailLog(), loadTickets(), loadSettings(), loadTable('order_events')
+    loadEmailLog(), loadTickets(), loadSettings(), loadTable('order_events'),
+    loadTable('metric_snapshots')
   ]);
   state.contacts = c; state.deals = d; state.orders = o;
   state.customers = cu; state.suppliers = su; state.tasks = ta; state.invoices = inv;
   state.leads = le; state.distributors = di; state.payments = pa;
   state.orderEvents = oe;
+  state.metricSnapshots = ms;
   state.loaded = true;
 }
 
@@ -2798,12 +2804,75 @@ function fcRangePhrases(range){
 function fcDelta(current, previous, phrases, fmt){
   const f = fmt || (n=>n);
   if(!current && !previous) return null;
-  if(!previous) return {text:'new', up:true, title:`${f(current)} ${phrases.now}, none ${phrases.prev}`};
+  if(!previous) return {text:'new', up:true, good:true, title:`${f(current)} ${phrases.now}, none ${phrases.prev}`};
   const pct = Math.round(((current-previous)/previous)*100);
   return {
     text: `${pct>=0?'+':''}${pct}%`,
     up: pct>=0,
+    /* For these three, growth is the good direction, so colour follows the
+       arrow. The snapshot metrics below are the ones where it does not. */
+    good: pct>=0,
     title: `${f(current)} ${phrases.now} vs ${f(previous)} ${phrases.prev}`,
+  };
+}
+/* ---- Trends for the metrics that describe right now ------------------
+   To fulfill, Shipped and Attention are counts of the current state, so
+   there is nothing in orders or customers to recompute last week's value
+   from. They read instead from metric_snapshots, the nightly log added in
+   20260915120000_metric_snapshots.sql, and show no trend at all until that
+   log reaches back far enough -- a range with no measured day behind it
+   gets a plain number, never an estimate. */
+function fcLocalDateKey(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+/* The newest snapshot at least `days` old -- not the one dated exactly that
+   day. If a nightly run was missed, comparing against the nearest older day
+   we did measure is more useful than dropping the trend, and honest as long
+   as the tooltip names the day (which fcSnapshotWhen does). */
+function fcSnapshotBefore(days){
+  const cutoff = new Date();
+  cutoff.setHours(0,0,0,0);
+  cutoff.setDate(cutoff.getDate() - days);
+  const key = fcLocalDateKey(cutoff);
+  let best = null;
+  (state.metricSnapshots||[]).forEach(s=>{
+    if(!s.snapshotDate || s.snapshotDate > key) return;
+    if(!best || s.snapshotDate > best.snapshotDate) best = s;
+  });
+  return best;
+}
+/* "yesterday" / "Sep 8 (7 days ago)" -- the day actually compared against,
+   named rather than implied, since it is not always exactly N days back. */
+function fcSnapshotWhen(dateKey){
+  const then = new Date(dateKey+'T00:00:00');
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const days = Math.round((today - then)/86400000);
+  if(days <= 1) return 'yesterday';
+  return `${then.toLocaleDateString('en-US',{month:'short',day:'numeric'})} (${days} days ago)`;
+}
+/* goodWhenDown flips the colour without flipping the arrow: a growing
+   backlog still points up, but it is red, because more orders waiting is
+   not an improvement. */
+function fcSnapshotDelta(field, current, range, goodWhenDown){
+  const days = Math.round(fcDateRangeMs(range)/86400000);
+  const snap = fcSnapshotBefore(days);
+  if(!snap) return null;
+  const previous = Number(snap[field]);
+  if(!Number.isFinite(previous)) return null;
+  const when = fcSnapshotWhen(snap.snapshotDate);
+  /* up:null means no direction at all -- the strip skips the arrow and
+     uses the muted colour, since an arrow beside "flat" reads as movement. */
+  if(current === previous) return {text:'flat', up:null, title:`${current} now, unchanged from ${when}`};
+  const up = current > previous;
+  const pct = previous ? Math.round(((current-previous)/previous)*100) : null;
+  return {
+    /* No percentage off a base of zero -- "+3" says the useful thing and
+       an infinite percentage says nothing. */
+    text: pct===null ? `+${current}` : `${up?'+':''}${pct}%`,
+    up,
+    good: goodWhenDown ? !up : up,
+    title: `${current} now, ${previous} ${when}`,
   };
 }
 function fcCustomerStatus(customer){
@@ -3131,11 +3200,11 @@ function renderFulfillmentCommandCenter(dash){
   const revenue = newOrders.filter(o=>o.status!=='Cancelled').reduce((s,o)=>s+toUSD(o.amount, orderCurrency(o)), 0);
 
   /* The window immediately before the selected one, same length, so the
-     comparison is like-for-like whichever range is picked. Only the three
-     metrics that are genuinely counted over a period can be compared this
-     way -- to fulfill / shipped / attention are snapshots of right now,
-     and there's no record of what they were a week ago, so they get a
-     plain number rather than an invented trend. */
+     comparison is like-for-like whichever range is picked. This works only
+     for the three metrics genuinely counted over a period -- to fulfill /
+     shipped / attention describe right now, and get their trend from the
+     nightly metric_snapshots log instead (fcSnapshotDelta), because the
+     current rows cannot say what those counts were a week ago. */
   const prevFrom = since - windowMs;
   const inPrev = ts => ts >= prevFrom && ts < since;
   const prevCustomers = state.customers.filter(c=>inPrev(c.createdAt||0)).length;
@@ -3154,9 +3223,9 @@ function renderFulfillmentCommandCenter(dash){
   const metrics = [
     ['New customers', newCustomers.length, '', fcDelta(newCustomers.length, prevCustomers, phrases)],
     ['New orders', newOrders.length, '', fcDelta(newOrders.length, prevOrdersList.length, phrases)],
-    ['To fulfill', pending.length, pending.length ? 'acc-amber' : '', null],
-    ['Shipped', shipped.length, '', null],
-    ['Attention', attnCount, attnCount ? 'acc-rust' : 'acc-sage', null],
+    ['To fulfill', pending.length, pending.length ? 'acc-amber' : '', fcSnapshotDelta('toFulfill', pending.length, range, true)],
+    ['Shipped', shipped.length, '', fcSnapshotDelta('shipped', shipped.length, range)],
+    ['Attention', attnCount, attnCount ? 'acc-rust' : 'acc-sage', fcSnapshotDelta('attention', attnCount, range, true)],
     ['Revenue', cpMoney(revenue), '', fcDelta(revenue, prevRevenue, phrases, cpMoney)],
   ];
 
@@ -3179,7 +3248,7 @@ function renderFulfillmentCommandCenter(dash){
         <span class="fc-text-link" id="dashDeleteBtn" data-dash-id="${dash.id}">Delete</span>
       </div>
     </div>
-    <div class="fc-metrics">${metrics.map(([l,v,acc,delta])=>`<div class="fc-metric ${acc}"${delta?` title="${esc(delta.title)}"`:''}><span class="fc-metric-num">${v}</span><span class="fc-metric-label">${esc(l)}</span>${delta?`<span class="fc-metric-delta ${delta.up?'up':'down'}">${trendArrow(delta.up)}${esc(delta.text)}</span>`:''}</div>`).join('')}</div>
+    <div class="fc-metrics">${metrics.map(([l,v,acc,delta])=>`<div class="fc-metric ${acc}"${delta?` title="${esc(delta.title)}"`:''}><span class="fc-metric-num">${v}</span><span class="fc-metric-label">${esc(l)}</span>${delta?`<span class="fc-metric-delta ${delta.up===null?'flat':(delta.good?'up':'down')}">${delta.up===null?'':trendArrow(delta.up)}${esc(delta.text)}</span>`:''}</div>`).join('')}</div>
     ${renderFcFilterBar()}
     <div id="fcCustomerTableSection">${renderFcCustomerTableSection()}</div>
     <div id="fcKanbanSection" style="margin-top:22px;">${renderFcKanbanSection()}</div>
