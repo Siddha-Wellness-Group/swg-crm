@@ -837,6 +837,12 @@
   .fc-metric:last-child{border-right:none;}
   .fc-metric-num{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;}
   .fc-metric-label{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.5px;}
+  /* Trend sits after the label, small enough that the strip stays one row.
+     The arrow is the same trendArrow() the Overview stat cards use. */
+  .fc-metric-delta{display:inline-flex;align-items:center;gap:2px;font-size:10.5px;font-weight:600;white-space:nowrap;}
+  .fc-metric-delta svg{width:9px;height:9px;flex:none;}
+  .fc-metric-delta.up{color:var(--sage);}
+  .fc-metric-delta.down{color:var(--rust);}
   .fc-metric.acc-amber .fc-metric-num{color:var(--amber);}
   .fc-metric.acc-rust .fc-metric-num{color:var(--rust);}
   .fc-metric.acc-sage .fc-metric-num{color:var(--sage);}
@@ -2777,6 +2783,29 @@ function fcDateRangeMs(range){
   if(range==='30d') return 30*day;
   return 7*day;
 }
+/* Phrased per range so the tooltip reads naturally ("0 today vs 1
+   yesterday") instead of a generic noun slotted into a sentence. */
+function fcRangePhrases(range){
+  if(range==='today') return {now:'today', prev:'yesterday'};
+  if(range==='30d') return {now:'this month', prev:'the month before'};
+  return {now:'this week', prev:'the week before'};
+}
+/* Period-over-period change for the metrics strip. Deliberately not
+   pctDelta(): that one writes a full sentence ("+12% vs last week") sized
+   for the Overview stat cards, while the strip has room for a percent and
+   nothing else -- the sentence moves to the title instead. Returns null
+   when both periods are empty, since "0% vs 0" is noise, not a trend. */
+function fcDelta(current, previous, phrases, fmt){
+  const f = fmt || (n=>n);
+  if(!current && !previous) return null;
+  if(!previous) return {text:'new', up:true, title:`${f(current)} ${phrases.now}, none ${phrases.prev}`};
+  const pct = Math.round(((current-previous)/previous)*100);
+  return {
+    text: `${pct>=0?'+':''}${pct}%`,
+    up: pct>=0,
+    title: `${f(current)} ${phrases.now} vs ${f(previous)} ${phrases.prev}`,
+  };
+}
 function fcCustomerStatus(customer){
   return customerOrders(customer).some(o=>o.status!=='Cancelled') ? 'Active' : 'New';
 }
@@ -3093,12 +3122,25 @@ function renderFcAttentionPanel(){
 }
 function renderFulfillmentCommandCenter(dash){
   const range = state.fcFilters.dateRange || '7d';
-  const since = Date.now() - fcDateRangeMs(range);
+  const windowMs = fcDateRangeMs(range);
+  const since = Date.now() - windowMs;
   const newCustomers = state.customers.filter(c=>(c.createdAt||0) >= since);
   const newOrders = state.orders.filter(o=>(o.createdAt||0) >= since);
   const pending = state.orders.filter(o=>o.status==='Pending');
   const shipped = state.orders.filter(o=>o.status==='Shipped');
   const revenue = newOrders.filter(o=>o.status!=='Cancelled').reduce((s,o)=>s+toUSD(o.amount, orderCurrency(o)), 0);
+
+  /* The window immediately before the selected one, same length, so the
+     comparison is like-for-like whichever range is picked. Only the three
+     metrics that are genuinely counted over a period can be compared this
+     way -- to fulfill / shipped / attention are snapshots of right now,
+     and there's no record of what they were a week ago, so they get a
+     plain number rather than an invented trend. */
+  const prevFrom = since - windowMs;
+  const inPrev = ts => ts >= prevFrom && ts < since;
+  const prevCustomers = state.customers.filter(c=>inPrev(c.createdAt||0)).length;
+  const prevOrdersList = state.orders.filter(o=>inPrev(o.createdAt||0));
+  const prevRevenue = prevOrdersList.filter(o=>o.status!=='Cancelled').reduce((s,o)=>s+toUSD(o.amount, orderCurrency(o)), 0);
   const attn = requiresAttention();
   const attnCount = attn.waitingFulfillment.length + attn.missingAddress.length + attn.shippedStale.length + attn.openTicketCustomers.length;
 
@@ -3108,13 +3150,14 @@ function renderFulfillmentCommandCenter(dash){
   // below; Attention surfaces the same requiresAttention() total the
   // panel at the bottom lists in full, so the two stay in sync by
   // construction rather than two separately-maintained counts.
+  const phrases = fcRangePhrases(range);
   const metrics = [
-    ['New customers', newCustomers.length, ''],
-    ['New orders', newOrders.length, ''],
-    ['To fulfill', pending.length, pending.length ? 'acc-amber' : ''],
-    ['Shipped', shipped.length, ''],
-    ['Attention', attnCount, attnCount ? 'acc-rust' : 'acc-sage'],
-    ['Revenue', cpMoney(revenue), ''],
+    ['New customers', newCustomers.length, '', fcDelta(newCustomers.length, prevCustomers, phrases)],
+    ['New orders', newOrders.length, '', fcDelta(newOrders.length, prevOrdersList.length, phrases)],
+    ['To fulfill', pending.length, pending.length ? 'acc-amber' : '', null],
+    ['Shipped', shipped.length, '', null],
+    ['Attention', attnCount, attnCount ? 'acc-rust' : 'acc-sage', null],
+    ['Revenue', cpMoney(revenue), '', fcDelta(revenue, prevRevenue, phrases, cpMoney)],
   ];
 
   return `
@@ -3136,7 +3179,7 @@ function renderFulfillmentCommandCenter(dash){
         <span class="fc-text-link" id="dashDeleteBtn" data-dash-id="${dash.id}">Delete</span>
       </div>
     </div>
-    <div class="fc-metrics">${metrics.map(([l,v,acc])=>`<div class="fc-metric ${acc}"><span class="fc-metric-num">${v}</span><span class="fc-metric-label">${esc(l)}</span></div>`).join('')}</div>
+    <div class="fc-metrics">${metrics.map(([l,v,acc,delta])=>`<div class="fc-metric ${acc}"${delta?` title="${esc(delta.title)}"`:''}><span class="fc-metric-num">${v}</span><span class="fc-metric-label">${esc(l)}</span>${delta?`<span class="fc-metric-delta ${delta.up?'up':'down'}">${trendArrow(delta.up)}${esc(delta.text)}</span>`:''}</div>`).join('')}</div>
     ${renderFcFilterBar()}
     <div id="fcCustomerTableSection">${renderFcCustomerTableSection()}</div>
     <div id="fcKanbanSection" style="margin-top:22px;">${renderFcKanbanSection()}</div>
