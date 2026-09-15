@@ -114,15 +114,17 @@
 
   /* Sidebar */
   .sidebar{width:208px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:22px 14px;flex-shrink:0;overflow-y:auto;}
-  .brand{font-size:19px;font-weight:600;letter-spacing:0.3px;margin-bottom:2px;}
+  .brand{font-size:27px;font-weight:600;letter-spacing:0.6px;line-height:1.1;margin-bottom:2px;}
   .brand-sub{font-size:10.5px;color:var(--ink-soft);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:28px;}
   .brand-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;}
   .brand-row .brand{margin-bottom:0;}
-  /* Salesforce's Setup control is a plain solid gear glyph, not a boxed button */
-  .setup-gear{width:30px;height:30px;border-radius:6px;border:none;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--setup-blue);flex-shrink:0;padding:0;transition:background .14s;}
-  .setup-gear:hover{background:var(--setup-blue-soft);}
+  /* Setup sits next to the wordmark, so it reads as a quiet tool rather
+     than a coloured badge: the same line weight and muted ink as the nav
+     icons below it, picking up colour only on hover/when active. */
+  .setup-gear{width:30px;height:30px;border-radius:7px;border:none;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);flex-shrink:0;padding:0;transition:background .14s,color .14s;}
+  .setup-gear:hover{background:var(--setup-blue-soft);color:var(--setup-blue);}
   .setup-gear.active{background:var(--setup-blue);color:#fff;}
-  .setup-gear svg{width:21px;height:21px;display:block;}
+  .setup-gear svg{width:19px;height:19px;display:block;}
   .setup-back-btn{display:flex;align-items:center;gap:6px;padding:8px 14px 8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;flex-shrink:0;}
   .setup-back-btn:hover{border-color:var(--setup-blue);color:var(--setup-blue);}
   .setup-back-btn svg{width:15px;height:15px;}
@@ -1240,7 +1242,7 @@
     <div class="brand-row">
       <div class="brand display">SWG</div>
       <button type="button" id="setupGearBtn" class="setup-gear" title="Setup" style="display:none;">
-        <svg viewBox="0 0 52 52" fill="currentColor"><path d="M48.5 20.7h-3.3a1.9 1.9 0 0 1-1.7-1.2 1.8 1.8 0 0 1 .3-2.1l2.4-2.3a1.6 1.6 0 0 0 0-2.3l-3.2-3.2a1.6 1.6 0 0 0-2.3 0l-2.3 2.4a1.8 1.8 0 0 1-2.1.3 1.9 1.9 0 0 1-1.2-1.7V7.3a1.6 1.6 0 0 0-1.6-1.6h-4.6a1.6 1.6 0 0 0-1.6 1.6v3.3a1.9 1.9 0 0 1-1.2 1.7 1.8 1.8 0 0 1-2.1-.3l-2.3-2.4a1.6 1.6 0 0 0-2.3 0l-3.2 3.2a1.6 1.6 0 0 0 0 2.3l2.4 2.3a1.8 1.8 0 0 1 .3 2.1 1.9 1.9 0 0 1-1.7 1.2H3.5a1.6 1.6 0 0 0-1.6 1.6v4.6a1.6 1.6 0 0 0 1.6 1.6h3.3a1.9 1.9 0 0 1 1.7 1.2 1.8 1.8 0 0 1-.3 2.1l-2.4 2.3a1.6 1.6 0 0 0 0 2.3l3.2 3.2a1.6 1.6 0 0 0 2.3 0l2.3-2.4a1.8 1.8 0 0 1 2.1-.3 1.9 1.9 0 0 1 1.2 1.7v3.3a1.6 1.6 0 0 0 1.6 1.6h4.6a1.6 1.6 0 0 0 1.6-1.6v-3.3a1.9 1.9 0 0 1 1.2-1.7 1.8 1.8 0 0 1 2.1.3l2.3 2.4a1.6 1.6 0 0 0 2.3 0l3.2-3.2a1.6 1.6 0 0 0 0-2.3l-2.4-2.3a1.8 1.8 0 0 1-.3-2.1 1.9 1.9 0 0 1 1.7-1.2h3.3a1.6 1.6 0 0 0 1.6-1.6v-4.6a1.6 1.6 0 0 0-1.6-1.6ZM26 34.4A8.4 8.4 0 1 1 34.4 26 8.4 8.4 0 0 1 26 34.4Z"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a1.9 1.9 0 1 1-2.7 2.7l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5v.2a1.9 1.9 0 0 1-3.8 0V21a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a1.9 1.9 0 1 1-2.7-2.7l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a1.9 1.9 0 0 1 0-3.8h.2a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a1.9 1.9 0 1 1 2.7-2.7l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a1.9 1.9 0 0 1 3.8 0v.2a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a1.9 1.9 0 1 1 2.7 2.7l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1h.2a1.9 1.9 0 0 1 0 3.8H21a1.6 1.6 0 0 0-1.5 1Z"/></svg>
       </button>
     </div>
     <div class="navlink navlink-search" data-view="search"><span class="nav-ico"></span>Search</div>
