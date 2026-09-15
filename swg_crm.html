@@ -212,14 +212,20 @@
      (Pipeline value, Open deals, Won value -- all genuinely Deals-module
      metrics) moves to teal with it, so the module stays one colour
      everywhere it appears; Suppliers' badge moves to rose the same way.
-     Contacts has no other coloured spot to carry along -- the Overview
-     donut's own Contacts segment is a separate, deliberately untouched
-     system (see chartSegments). Home, Leads and Customers keep green. */
+     Home, Leads and Customers keep green.
+
+     Contacts and Distributors then swapped -- Contacts took orange
+     (amber), Distributors took the magenta minted for Contacts above, on
+     Ariel's call, not for a structural reason. Distributors' entity-type
+     badge (badge.distributor) moved with it, same as Suppliers' did when
+     it got rose. Contacts has no equivalent badge to carry along -- the
+     Overview donut's own Contacts segment is a separate, deliberately
+     untouched system (see chartSegments). */
   .navlink[data-view="home"],.navlink[data-view="leads"],.navlink[data-view="customers"]{--nav-accent:var(--sage);--nav-accent-soft:var(--sage-soft);}
-  .navlink[data-view="contacts"]{--nav-accent:var(--magenta);--nav-accent-soft:var(--magenta-soft);}
+  .navlink[data-view="contacts"]{--nav-accent:var(--amber);--nav-accent-soft:var(--amber-soft);}
   .navlink[data-view="orders"]{--nav-accent:var(--violet);--nav-accent-soft:var(--violet-soft);}
   .navlink[data-view="deals"]{--nav-accent:var(--teal);--nav-accent-soft:var(--teal-soft);}
-  .navlink[data-view="distributors"]{--nav-accent:var(--amber);--nav-accent-soft:var(--amber-soft);}
+  .navlink[data-view="distributors"]{--nav-accent:var(--magenta);--nav-accent-soft:var(--magenta-soft);}
   .navlink[data-view="suppliers"]{--nav-accent:var(--rose);--nav-accent-soft:var(--rose-soft);}
   .navlink[data-view="emails"]{--nav-accent:var(--umber);--nav-accent-soft:var(--umber-soft);}
   .navlink[data-view="tickets"]{--nav-accent:var(--clay);--nav-accent-soft:var(--clay-soft);}
@@ -319,7 +325,7 @@
      that would break if a status badge were repainted to brand a section
      instead. */
   .badge.supplier{background:var(--rose-soft);color:var(--rose);}
-  .badge.distributor{background:var(--amber-soft);color:var(--amber);}
+  .badge.distributor{background:var(--magenta-soft);color:var(--magenta);}
   .badge.customer{background:var(--sage-soft);color:var(--sage);}
   .badge.marketing{background:var(--umber-soft);color:var(--umber);}
   .badge.pending{background:var(--amber-soft);color:var(--amber);}
@@ -1383,7 +1389,6 @@
     <div class="nav-group-label" data-nav-group="workspace">Workspace</div>
     <div class="navlink" data-view="home" data-nav-group="workspace"><span class="nav-ico"></span><span class="nav-label">Home</span></div>
     <div class="navlink active" data-view="dashboard" data-nav-group="workspace"><span class="nav-ico"></span><span class="nav-label">Dashboard</span></div>
-    <div class="navlink" data-view="reports" data-nav-group="workspace"><span class="nav-ico"></span><span class="nav-label">Reports</span></div>
     <div class="nav-group-label" data-nav-group="records">Records</div>
     <div class="navlink" data-view="contacts" data-nav-group="records"><span class="nav-ico"></span><span class="nav-label">Contacts</span></div>
     <div class="navlink" data-view="leads" data-nav-group="records"><span class="nav-ico"></span><span class="nav-label">Leads</span></div>
@@ -1397,6 +1402,7 @@
     <div class="navlink" data-view="invoices" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Invoices</span></div>
     <div class="navlink" data-view="payments" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Payments</span></div>
     <div class="navlink" data-view="finance" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Finance</span></div>
+    <div class="navlink" data-view="reports" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Reports</span></div>
     <div class="nav-group-label" data-nav-group="support">Support</div>
     <div class="navlink" data-view="emails" data-nav-group="support"><span class="nav-ico"></span><span class="nav-label">Emails</span></div>
     <div class="navlink" data-view="tickets" data-nav-group="support"><span class="nav-ico"></span><span class="nav-label">Tickets</span></div>
