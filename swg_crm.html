@@ -117,6 +117,7 @@
   .brand{font-size:27px;font-weight:600;letter-spacing:0.6px;line-height:1.1;margin-bottom:2px;}
   .brand-sub{font-size:10.5px;color:var(--ink-soft);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:28px;}
   .brand-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;}
+  .brand-actions{display:flex;align-items:center;gap:1px;flex-shrink:0;}
   .brand-row .brand{margin-bottom:0;}
   /* Setup sits next to the wordmark, so it reads as a quiet tool rather
      than a coloured badge: the same line weight and muted ink as the nav
@@ -140,6 +141,7 @@
   .sidebar.collapsed .nav-label,
   .sidebar.collapsed .sidebar-foot{display:none;}
   .sidebar.collapsed .brand-row{flex-direction:column;gap:4px;justify-content:center;margin-bottom:14px;}
+  .sidebar.collapsed .brand-actions{flex-direction:column;gap:2px;}
   .sidebar.collapsed .navlink{justify-content:center;gap:0;padding-left:0;padding-right:0;}
   /* The two hairlines that separate Search and Import/Export from the
      object list would otherwise sit at full row width in a 58px rail. */
@@ -519,9 +521,16 @@
   .schema-legend{display:flex;gap:20px;margin-top:14px;font-size:11.5px;color:var(--ink-soft);flex-wrap:wrap;}
   .schema-legend-line{display:inline-block;width:24px;height:0;border-top:2px solid var(--setup-blue);margin-right:6px;vertical-align:middle;}
   .schema-legend-line.dashed{border-top:1.5px dashed var(--ink-soft);}
-  .theme-toggle{display:flex;gap:2px;background:var(--cream);border:1px solid var(--border);border-radius:7px;padding:2px;margin-bottom:12px;}
-  .theme-toggle button{flex:1;padding:5px 0;border:none;border-radius:5px;background:none;color:var(--ink-soft);font-family:inherit;font-size:11px;font-weight:500;cursor:pointer;}
-  .theme-toggle button.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,0.08);}
+  /* One button cycling system -> light -> dark, rather than three always
+     showing. Only the icon for the current mode is rendered; the title
+     announces what the next press does, so the state is never implied by
+     the icon alone. */
+  .theme-cycle{position:relative;}
+  .theme-cycle .theme-ico{display:none;width:19px;height:19px;}
+  .theme-cycle[data-theme-mode="system"] .theme-ico-system,
+  .theme-cycle[data-theme-mode="light"] .theme-ico-light,
+  .theme-cycle[data-theme-mode="dark"] .theme-ico-dark{display:block;animation:theme-ico-in .18s ease;}
+  @keyframes theme-ico-in{from{opacity:0;transform:rotate(-35deg) scale(.7);}to{opacity:1;transform:none;}}
 
   /* Dashboard hello + donut */
   .hello{margin-bottom:22px;}
@@ -1263,12 +1272,19 @@
   <aside class="sidebar">
     <div class="brand-row">
       <div class="brand display">SWG</div>
+      <div class="brand-actions">
       <button type="button" id="sidebarToggleBtn" class="setup-gear sidebar-toggle" title="Collapse sidebar" aria-label="Collapse sidebar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9.5 4v16"/><path class="sidebar-toggle-chevron" d="M15.5 9.5 13 12l2.5 2.5"/></svg>
+      </button>
+      <button type="button" id="themeToggleBtn" class="setup-gear theme-cycle" title="Theme" aria-label="Theme">
+        <svg class="theme-ico theme-ico-system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.4" width="18" height="12.4" rx="2"/><path d="M9 20.4h6M12 16.8v3.6"/></svg>
+        <svg class="theme-ico theme-ico-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.6v2.2M12 19.2v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.6 12h2.2M19.2 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg>
+        <svg class="theme-ico theme-ico-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.6 8.6 0 0 1 9.8 3.5a8.6 8.6 0 1 0 10.7 10.7Z"/></svg>
       </button>
       <button type="button" id="setupGearBtn" class="setup-gear" title="Setup" style="display:none;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a1.9 1.9 0 1 1-2.7 2.7l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5v.2a1.9 1.9 0 0 1-3.8 0V21a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a1.9 1.9 0 1 1-2.7-2.7l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a1.9 1.9 0 0 1 0-3.8h.2a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a1.9 1.9 0 1 1 2.7-2.7l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a1.9 1.9 0 0 1 3.8 0v.2a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a1.9 1.9 0 1 1 2.7 2.7l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1h.2a1.9 1.9 0 0 1 0 3.8H21a1.6 1.6 0 0 0-1.5 1Z"/></svg>
       </button>
+      </div>
     </div>
     <div class="navlink navlink-search" data-view="search"><span class="nav-ico"></span><span class="nav-label">Search</span></div>
     <div class="nav-group-label" data-nav-group="workspace">Workspace</div>
@@ -1296,11 +1312,6 @@
     <div class="navlink" data-view="administration" data-nav-group="admin"><span class="nav-ico"></span><span class="nav-label">Administration</span></div>
     <div class="navlink navlink-util" data-view="rickroll" data-nav-group="admin"><span class="nav-ico"></span><span class="nav-label">Import / Export</span></div>
     <div class="sidebar-foot">
-      <div class="theme-toggle" id="themeToggle">
-        <button type="button" data-theme-choice="system" title="Match system">Auto</button>
-        <button type="button" data-theme-choice="light" title="Light theme">Light</button>
-        <button type="button" data-theme-choice="dark" title="Dark theme">Dark</button>
-      </div>
       <div id="identityAdmin" style="display:none;">
         <div class="foot-label">Viewing as</div>
         <select id="viewingAs"></select>
@@ -3212,13 +3223,20 @@ function loadChartPref(){
 function saveChartPref(type){
   try{ localStorage.setItem('crm_chart_pref', type); }catch(e){}
 }
+const THEME_CYCLE = ['system','light','dark'];
+const THEME_LABELS = {system:'Auto', light:'Light', dark:'Dark'};
 function applyThemePref(pref){
   const root = document.documentElement;
   if(pref==='light' || pref==='dark') root.dataset.theme = pref;
   else delete root.dataset.theme;
-  document.querySelectorAll('#themeToggle button').forEach(b=>{
-    b.classList.toggle('active', b.dataset.themeChoice===pref);
-  });
+  const btn = document.getElementById('themeToggleBtn');
+  if(btn){
+    btn.dataset.themeMode = pref;
+    const next = THEME_CYCLE[(THEME_CYCLE.indexOf(pref)+1) % THEME_CYCLE.length];
+    const label = `Theme: ${THEME_LABELS[pref]} — switch to ${THEME_LABELS[next]}`;
+    btn.title = label;
+    btn.setAttribute('aria-label', label);
+  }
 }
 function loadThemePref(){
   let pref = 'system';
@@ -3256,13 +3274,12 @@ document.getElementById('sidebarToggleBtn').onclick = ()=>{
   try{ localStorage.setItem('crm_sidebar_collapsed', collapsed ? '1' : '0'); }catch(e){}
   applySidebarCollapsed(collapsed);
 };
-document.querySelectorAll('#themeToggle button').forEach(b=>{
-  b.onclick = ()=>{
-    const pref = b.dataset.themeChoice;
-    try{ localStorage.setItem('crm_theme_pref', pref); }catch(e){}
-    applyThemePref(pref);
-  };
-});
+document.getElementById('themeToggleBtn').onclick = ()=>{
+  const current = document.getElementById('themeToggleBtn').dataset.themeMode || 'system';
+  const next = THEME_CYCLE[(THEME_CYCLE.indexOf(current)+1) % THEME_CYCLE.length];
+  try{ localStorage.setItem('crm_theme_pref', next); }catch(e){}
+  applyThemePref(next);
+};
 
 function revenueByMonth(){
   const months = [];
