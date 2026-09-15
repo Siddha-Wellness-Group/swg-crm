@@ -832,18 +832,33 @@
      dot-divided bar. Counts stay real (no new figures, same six values
      as before), just presented at a scale that stops competing with the
      actual customer/order data below it. */
-  .fc-metrics{display:flex;flex-wrap:wrap;border:1px solid var(--border);border-radius:8px;background:var(--surface);margin-bottom:18px;}
-  .fc-metric{display:flex;align-items:baseline;gap:6px;padding:10px 18px;border-right:1px solid var(--border);min-width:118px;}
-  .fc-metric:last-child{border-right:none;}
-  .fc-metric-num{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;}
-  .fc-metric-label{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.5px;}
-  /* Trend sits after the label, small enough that the strip stays one row.
-     The arrow is the same trendArrow() the Overview stat cards use. */
-  .fc-metric-delta{display:inline-flex;align-items:center;gap:2px;font-size:10.5px;font-weight:600;white-space:nowrap;}
-  .fc-metric-delta svg{width:9px;height:9px;flex:none;}
-  .fc-metric-delta.up{color:var(--sage);}
-  .fc-metric-delta.down{color:var(--rust);}
-  .fc-metric-delta.flat{color:var(--ink-soft);}
+  /* One card per metric instead of one dense strip. The strip could only
+     fit a number and a percentage, which meant the sentence explaining the
+     percentage lived in a hover title -- invisible on a screen someone
+     scans for ten seconds each morning. A card has room to state the
+     verdict and the figures behind it in the open. */
+  .fc-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px;}
+  .fc-metric{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px 13px;}
+  .fc-metric-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;min-height:20px;}
+  .fc-metric-label{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.6px;font-weight:600;}
+  .fc-metric-num{font-family:'Fraunces',serif;font-size:30px;font-weight:600;line-height:1.15;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:3px;}
+  /* The trend badge sits opposite the label, tinted rather than plain
+     coloured text, so it reads at a glance without competing with the
+     number for weight. */
+  .fc-metric-delta{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;white-space:nowrap;border-radius:999px;padding:3px 8px;border:1px solid transparent;}
+  .fc-metric-delta svg{width:10px;height:10px;flex:none;}
+  .fc-metric-delta.up{color:var(--sage);background:var(--sage-soft);border-color:var(--sage-soft);}
+  .fc-metric-delta.down{color:var(--rust);background:var(--rust-soft);border-color:var(--rust-soft);}
+  .fc-metric-delta.flat{color:var(--ink-soft);background:var(--parchment);border-color:var(--border);}
+  /* Footer: the verdict on one line, the numbers it rests on underneath.
+     Colour matches the badge so a red card is red all the way down. */
+  .fc-metric-foot{margin-top:11px;padding-top:9px;border-top:1px solid var(--border);}
+  .fc-metric-note{display:flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;line-height:1.35;}
+  .fc-metric-note svg{width:11px;height:11px;flex:none;}
+  .fc-metric-note.up{color:var(--sage);}
+  .fc-metric-note.down{color:var(--rust);}
+  .fc-metric-note.flat{color:var(--ink-soft);}
+  .fc-metric-sub{font-size:11px;color:var(--ink-soft);margin-top:3px;line-height:1.45;}
   .fc-metric.acc-amber .fc-metric-num{color:var(--amber);}
   .fc-metric.acc-rust .fc-metric-num{color:var(--rust);}
   .fc-metric.acc-sage .fc-metric-num{color:var(--sage);}
@@ -989,12 +1004,12 @@
   .fc-timeline-item:last-child{border-left-color:transparent;padding-bottom:0;}
   .fc-timeline-dot{position:absolute;left:-5px;top:1px;width:8px;height:8px;border-radius:50%;background:var(--amber);border:2px solid var(--surface);}
 
-  @media (max-width:900px){
-    .fc-metric{min-width:33%;}
+  @media (max-width:1200px){
+    .fc-metrics{grid-template-columns:repeat(2,minmax(0,1fr));}
   }
   @media (max-width:640px){
     .fc-drawer{width:100%;max-width:100%;}
-    .fc-metric{min-width:50%;}
+    .fc-metrics{grid-template-columns:minmax(0,1fr);}
   }
   .donut-wrap{display:flex;align-items:center;gap:34px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-bottom:24px;flex-wrap:wrap;}
   .donut{width:220px;height:220px;border-radius:50%;flex-shrink:0;position:relative;}
@@ -2804,7 +2819,7 @@ function fcRangePhrases(range){
 function fcDelta(current, previous, phrases, fmt){
   const f = fmt || (n=>n);
   if(!current && !previous) return null;
-  if(!previous) return {text:'new', up:true, good:true, title:`${f(current)} ${phrases.now}, none ${phrases.prev}`};
+  if(!previous) return {text:'new', up:true, good:true, note:`Nothing ${phrases.prev}`, title:`${f(current)} ${phrases.now}, none ${phrases.prev}`};
   const pct = Math.round(((current-previous)/previous)*100);
   return {
     text: `${pct>=0?'+':''}${pct}%`,
@@ -2812,6 +2827,9 @@ function fcDelta(current, previous, phrases, fmt){
     /* For these three, growth is the good direction, so colour follows the
        arrow. The snapshot metrics below are the ones where it does not. */
     good: pct>=0,
+    /* The card shows a verdict line above the raw numbers, so each delta
+       carries both: `note` reads as a sentence, `title` stays the figures. */
+    note: `${pct>=0?'Up':'Down'} from ${phrases.prev}`,
     title: `${f(current)} ${phrases.now} vs ${f(previous)} ${phrases.prev}`,
   };
 }
@@ -2863,17 +2881,35 @@ function fcSnapshotDelta(field, current, range, goodWhenDown){
   const when = fcSnapshotWhen(snap.snapshotDate);
   /* up:null means no direction at all -- the strip skips the arrow and
      uses the muted colour, since an arrow beside "flat" reads as movement. */
-  if(current === previous) return {text:'flat', up:null, title:`${current} now, unchanged from ${when}`};
+  if(current === previous) return {text:'flat', up:null, note:`Unchanged since ${when}`, title:`${current} now, unchanged from ${when}`};
   const up = current > previous;
   const pct = previous ? Math.round(((current-previous)/previous)*100) : null;
+  /* "Growing"/"Shrinking" for a backlog, "Up"/"Down" for a plain count --
+     a queue that grew has not improved, and the word should say so. */
+  const note = pct===null ? `Up from none ${when}`
+    : goodWhenDown ? (up ? `Growing since ${when}` : `Shrinking since ${when}`)
+    : (up ? `Up since ${when}` : `Down since ${when}`);
   return {
     /* No percentage off a base of zero -- "+3" says the useful thing and
        an infinite percentage says nothing. */
     text: pct===null ? `+${current}` : `${up?'+':''}${pct}%`,
     up,
     good: goodWhenDown ? !up : up,
+    note,
     title: `${current} now, ${previous} ${when}`,
   };
+}
+/* Why a state metric has no trend yet, in one line, so the empty space
+   reads as "not measured yet" rather than "nothing happened". The date is
+   real: the oldest day in the log plus the window length is the first day
+   this range can be answered honestly. */
+function fcSnapshotPending(range){
+  const days = Math.round(fcDateRangeMs(range)/86400000);
+  const dated = (state.metricSnapshots||[]).filter(s=>s.snapshotDate).map(s=>s.snapshotDate).sort();
+  if(!dated.length) return 'Daily log starts tonight';
+  const from = new Date(dated[0]+'T00:00:00');
+  from.setDate(from.getDate() + days);
+  return `Trend from ${from.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
 }
 function fcCustomerStatus(customer){
   return customerOrders(customer).some(o=>o.status!=='Cancelled') ? 'Active' : 'New';
@@ -3195,24 +3231,20 @@ function renderFulfillmentCommandCenter(dash){
   const since = Date.now() - windowMs;
   const newCustomers = state.customers.filter(c=>(c.createdAt||0) >= since);
   const newOrders = state.orders.filter(o=>(o.createdAt||0) >= since);
-  const pending = state.orders.filter(o=>o.status==='Pending');
   const shipped = state.orders.filter(o=>o.status==='Shipped');
   const revenue = newOrders.filter(o=>o.status!=='Cancelled').reduce((s,o)=>s+toUSD(o.amount, orderCurrency(o)), 0);
 
   /* The window immediately before the selected one, same length, so the
      comparison is like-for-like whichever range is picked. This works only
-     for the three metrics genuinely counted over a period -- to fulfill /
-     shipped / attention describe right now, and get their trend from the
-     nightly metric_snapshots log instead (fcSnapshotDelta), because the
-     current rows cannot say what those counts were a week ago. */
+     for metrics genuinely counted over a period -- Shipped describes right
+     now, so it gets its trend from the nightly metric_snapshots log instead
+     (fcSnapshotDelta), because the current rows cannot say what that count
+     was a week ago. */
   const prevFrom = since - windowMs;
   const inPrev = ts => ts >= prevFrom && ts < since;
   const prevCustomers = state.customers.filter(c=>inPrev(c.createdAt||0)).length;
   const prevOrdersList = state.orders.filter(o=>inPrev(o.createdAt||0));
   const prevRevenue = prevOrdersList.filter(o=>o.status!=='Cancelled').reduce((s,o)=>s+toUSD(o.amount, orderCurrency(o)), 0);
-  const attn = requiresAttention();
-  const attnCount = attn.waitingFulfillment.length + attn.missingAddress.length + attn.shippedStale.length + attn.openTicketCustomers.length;
-
   // Compact metrics strip -- same six real numbers the six large cards
   // showed before, just not one per giant card. "Delivered" isn't lost,
   // it's still the Delivered column's own count in Fulfillment overview
@@ -3220,13 +3252,24 @@ function renderFulfillmentCommandCenter(dash){
   // panel at the bottom lists in full, so the two stay in sync by
   // construction rather than two separately-maintained counts.
   const phrases = fcRangePhrases(range);
+  /* `caption` says what the number counts, `blank` covers the case where
+     there is honestly no trend to show -- an empty footer would read as a
+     missing feature rather than as "we have not measured that yet". */
+  const noTrend = `Nothing ${phrases.now} or ${phrases.prev}`;
+  const pending_ = fcSnapshotPending(range);
   const metrics = [
-    ['New customers', newCustomers.length, '', fcDelta(newCustomers.length, prevCustomers, phrases)],
-    ['New orders', newOrders.length, '', fcDelta(newOrders.length, prevOrdersList.length, phrases)],
-    ['To fulfill', pending.length, pending.length ? 'acc-amber' : '', fcSnapshotDelta('toFulfill', pending.length, range, true)],
-    ['Shipped', shipped.length, '', fcSnapshotDelta('shipped', shipped.length, range)],
-    ['Attention', attnCount, attnCount ? 'acc-rust' : 'acc-sage', fcSnapshotDelta('attention', attnCount, range, true)],
-    ['Revenue', cpMoney(revenue), '', fcDelta(revenue, prevRevenue, phrases, cpMoney)],
+    {label:'New customers', value:newCustomers.length, acc:'',
+     delta:fcDelta(newCustomers.length, prevCustomers, phrases),
+     caption:`Customer records created ${phrases.now}`, blank:noTrend},
+    {label:'New orders', value:newOrders.length, acc:'',
+     delta:fcDelta(newOrders.length, prevOrdersList.length, phrases),
+     caption:`Orders placed ${phrases.now}`, blank:noTrend},
+    {label:'Shipped', value:shipped.length, acc:'',
+     delta:fcSnapshotDelta('shipped', shipped.length, range),
+     caption:'Shipped, not yet marked delivered', blank:pending_},
+    {label:'Revenue', value:cpMoney(revenue), acc:'',
+     delta:fcDelta(revenue, prevRevenue, phrases, cpMoney),
+     caption:`Order value ${phrases.now}, cancelled excluded`, blank:noTrend},
   ];
 
   return `
@@ -3248,7 +3291,22 @@ function renderFulfillmentCommandCenter(dash){
         <span class="fc-text-link" id="dashDeleteBtn" data-dash-id="${dash.id}">Delete</span>
       </div>
     </div>
-    <div class="fc-metrics">${metrics.map(([l,v,acc,delta])=>`<div class="fc-metric ${acc}"${delta?` title="${esc(delta.title)}"`:''}><span class="fc-metric-num">${v}</span><span class="fc-metric-label">${esc(l)}</span>${delta?`<span class="fc-metric-delta ${delta.up===null?'flat':(delta.good?'up':'down')}">${delta.up===null?'':trendArrow(delta.up)}${esc(delta.text)}</span>`:''}</div>`).join('')}</div>
+    <div class="fc-metrics">${metrics.map(m=>{
+      const d = m.delta;
+      const dir = !d ? 'flat' : (d.up===null ? 'flat' : (d.good ? 'up' : 'down'));
+      const arrow = d && d.up!==null ? trendArrow(d.up) : '';
+      return `<div class="fc-metric ${m.acc}" title="${esc(m.caption)}">
+        <div class="fc-metric-top">
+          <span class="fc-metric-label">${esc(m.label)}</span>
+          ${d?`<span class="fc-metric-delta ${dir}">${arrow}${esc(d.text)}</span>`:''}
+        </div>
+        <span class="fc-metric-num">${m.value}</span>
+        <div class="fc-metric-foot">
+          <div class="fc-metric-note ${dir}">${arrow}${esc(d ? d.note : m.blank)}</div>
+          <div class="fc-metric-sub">${esc(d ? d.title : m.caption)}</div>
+        </div>
+      </div>`;
+    }).join('')}</div>
     ${renderFcFilterBar()}
     <div id="fcCustomerTableSection">${renderFcCustomerTableSection()}</div>
     <div id="fcKanbanSection" style="margin-top:22px;">${renderFcKanbanSection()}</div>
