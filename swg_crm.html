@@ -175,10 +175,9 @@
   .sidebar.collapsed .brand-row{flex-direction:column;gap:4px;justify-content:center;margin-bottom:14px;}
   .sidebar.collapsed .brand-actions{flex-direction:column;gap:2px;}
   .sidebar.collapsed .navlink{justify-content:center;gap:0;padding-left:0;padding-right:0;}
-  /* The two hairlines that separate Search and Import/Export from the
-     object list would otherwise sit at full row width in a 58px rail. */
+  /* The hairline that separates Search from the object list would
+     otherwise sit at full row width in a 58px rail. */
   .sidebar.collapsed .navlink-search{padding-bottom:9px;margin-bottom:6px;}
-  .sidebar.collapsed .navlink-util{padding-top:9px;margin-top:6px;}
   .sidebar-toggle-chevron{transition:transform .16s ease;transform-origin:14px 12px;}
   .sidebar.collapsed .sidebar-toggle-chevron{transform:rotate(180deg);}
   .setup-back-btn{display:flex;align-items:center;gap:6px;padding:8px 14px 8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;flex-shrink:0;}
@@ -189,48 +188,49 @@
      a per-view rule for the dot and another for the active background. */
   .navlink{--nav-accent:var(--ink-fixed);--nav-accent-soft:var(--cream);
     position:relative;display:flex;align-items:center;gap:10px;padding:8px 10px 8px 11px;border-radius:8px;color:var(--ink-soft);cursor:pointer;margin-bottom:1px;font-size:13.5px;font-weight:500;transition:background .14s,color .14s;}
-  /* Regrouped by concept, not by whatever used to share a colour:
-     people (green/--sage) -- home, leads, customers;
-     orders (purple/--violet) -- orders;
-     shipping (orange/--amber) -- distributors;
-     money (blue/--setup-blue) -- finance, invoices, payments, reports.
-     Emails and Tickets had no home in any of the four -- each keeps the
-     token its old sibling left behind (umber, clay) rather than being
-     forced into a bucket it doesn't belong to. Tasks is the same case,
-     unchanged on olive. See the palette comment in :root for why blue/
-     green/purple/orange specifically: Ariel's reference image.
+  /* Nav accents, current state (evolved over several rounds with Ariel --
+     see git log for the reasoning behind each individual hue if you need
+     the history; this comment describes where things ended up, not how
+     they got there, so it doesn't grow another paragraph every round):
 
-     Deals, Suppliers and Contacts each started out sharing a colour with
-     a different object in the same concept bucket (Orders' purple,
-     Distributors' orange, and the people group's green) -- fine as
-     branding, but Ariel wanted every section visually distinct rather
-     than grouped. Each gets its own hue, picked to fill a real gap on the
-     hue wheel rather than sit next to a colour already in use: teal
-     (~180deg, between olive's ~90deg and sage's ~157deg), rose (~330deg,
-     between violet's ~262deg and clay's ~9deg), magenta (~300deg,
-     between violet and rose). Every OTHER place Deals used violet
-     (Pipeline value, Open deals, Won value -- all genuinely Deals-module
-     metrics) moves to teal with it, so the module stays one colour
-     everywhere it appears; Suppliers' badge moves to rose the same way.
-     Home, Leads and Customers keep green.
+     Home stands alone on black/--ink-fixed -- deliberately the odd one
+     out, not part of any coloured group, since it's the entry point
+     rather than a data section.
+     People (green/--sage): Leads, Customers.
+     Orders (purple/--violet): Orders.
+     Deals (teal/--teal): Deals -- plus every genuinely Deals-module
+       metric elsewhere (Pipeline value, Open deals, Won value), so the
+       module reads as one colour wherever it shows up, not just in nav.
+     Shipping (orange/--amber): Contacts.
+     Suppliers (rose/--rose): Suppliers, and its entity-type badge.
+     Distributors (magenta/--magenta): Distributors, and its entity-type
+       badge. Contacts and Distributors swapped colours from where the
+       concept mapping first put them, on Ariel's call.
+     Operations (blue/--setup-blue): Tasks, Finance, Reports, Invoices,
+       Payments -- one colour for the whole Operations nav group, Tasks
+       included even though it isn't a money concept, because Ariel
+       wanted the group visually unified rather than Tasks standing out
+       as the one non-blue item in it. Every other Tasks metric (the
+       Overview stat card, the widget-picker card, Home's mini-stat)
+       moves with it for the same one-module-one-colour reason as Deals.
+     Support (red/--rust): Emails, Tickets -- both on Ariel's call, no
+       concept-bucket reasoning behind it.
 
-     Contacts and Distributors then swapped -- Contacts took orange
-     (amber), Distributors took the magenta minted for Contacts above, on
-     Ariel's call, not for a structural reason. Distributors' entity-type
-     badge (badge.distributor) moved with it, same as Suppliers' did when
-     it got rose. Contacts has no equivalent badge to carry along -- the
-     Overview donut's own Contacts segment is a separate, deliberately
-     untouched system (see chartSegments). */
-  .navlink[data-view="home"],.navlink[data-view="leads"],.navlink[data-view="customers"]{--nav-accent:var(--sage);--nav-accent-soft:var(--sage-soft);}
+     Status/state badges (Pending/Shipped/Delivered/Cancelled, Paid/
+     Unpaid/Overdue, lead stages, task Open/Done) are a different system
+     entirely and never draw from this -- see the comment at badge.supplier
+     for why. Same for the Overview donut/bar chart and the Finance/Email
+     KPI rows, which need every colour mutually distinct on one screen and
+     stay on their original, wider palette. */
+  .navlink[data-view="home"]{--nav-accent:var(--ink-fixed);--nav-accent-soft:var(--cream);}
+  .navlink[data-view="leads"],.navlink[data-view="customers"]{--nav-accent:var(--sage);--nav-accent-soft:var(--sage-soft);}
   .navlink[data-view="contacts"]{--nav-accent:var(--amber);--nav-accent-soft:var(--amber-soft);}
   .navlink[data-view="orders"]{--nav-accent:var(--violet);--nav-accent-soft:var(--violet-soft);}
   .navlink[data-view="deals"]{--nav-accent:var(--teal);--nav-accent-soft:var(--teal-soft);}
   .navlink[data-view="distributors"]{--nav-accent:var(--magenta);--nav-accent-soft:var(--magenta-soft);}
   .navlink[data-view="suppliers"]{--nav-accent:var(--rose);--nav-accent-soft:var(--rose-soft);}
-  .navlink[data-view="emails"]{--nav-accent:var(--umber);--nav-accent-soft:var(--umber-soft);}
-  .navlink[data-view="tickets"]{--nav-accent:var(--clay);--nav-accent-soft:var(--clay-soft);}
-  .navlink[data-view="tasks"]{--nav-accent:var(--olive);--nav-accent-soft:var(--olive-soft);}
-  .navlink[data-view="finance"],.navlink[data-view="reports"],.navlink[data-view="invoices"],.navlink[data-view="payments"]{--nav-accent:var(--setup-blue);--nav-accent-soft:var(--setup-blue-soft);}
+  .navlink[data-view="emails"],.navlink[data-view="tickets"]{--nav-accent:var(--rust);--nav-accent-soft:var(--rust-soft);}
+  .navlink[data-view="tasks"],.navlink[data-view="finance"],.navlink[data-view="reports"],.navlink[data-view="invoices"],.navlink[data-view="payments"]{--nav-accent:var(--setup-blue);--nav-accent-soft:var(--setup-blue-soft);}
   .navlink .nav-ico{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);transition:color .14s;}
   .navlink .nav-ico svg{width:100%;height:100%;display:block;}
   .navlink:hover{background:var(--nav-accent-soft);color:var(--ink);}
@@ -243,7 +243,6 @@
      are tools that act on the whole ledger rather than another place to
      browse, so a hairline keeps them from reading as "one more object". */
   .navlink-search{margin-bottom:8px;padding-bottom:11px;border-bottom:1px solid var(--border);}
-  .navlink-util{margin-top:8px;padding-top:11px;border-top:1px solid var(--border);}
   .navlink.hidden-role{display:none;}
   .nav-group-label{font-size:9.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1.1px;padding:0 11px;margin:16px 0 5px;opacity:.75;}
   .nav-group-label:first-of-type{margin-top:0;}
@@ -1409,7 +1408,6 @@
     <div class="nav-group-label" data-nav-group="admin">Admin</div>
     <div class="navlink" data-view="team" data-nav-group="admin"><span class="nav-ico"></span><span class="nav-label">Team</span></div>
     <div class="navlink" data-view="administration" data-nav-group="admin"><span class="nav-ico"></span><span class="nav-label">Administration</span></div>
-    <div class="navlink navlink-util" data-view="rickroll" data-nav-group="admin"><span class="nav-ico"></span><span class="nav-label">Import / Export</span></div>
     <div class="sidebar-foot">
       <div id="identityAdmin" style="display:none;">
         <div class="foot-label">Viewing as</div>
@@ -1637,11 +1635,20 @@ function paintNavIcons(){
     if(slot && !slot.innerHTML) slot.innerHTML = navIconSVG(el.dataset.view);
   });
 }
+/* Drives the topbar's title dot and each page's primary button (both read
+   var(--accent), set from here per render -- see the setProperty call
+   below). Was never updated when the sidebar nav accents were reworked
+   this session, so it silently kept showing the pre-recolour palette on
+   every page's dot and "+ Add" button while the sidebar itself had
+   already moved on -- caught while making this round of changes. Kept in
+   sync with the .navlink rules above by hand; there being two places that
+   both need to agree is the real cost of not deriving one from the other,
+   noted here so the next colour change remembers to touch both. */
 const ACCENTS = {
-  dashboard:'var(--ink-fixed)', home:'var(--amber)', contacts:'var(--amber)', leads:'var(--ochre)', customers:'var(--sage)',
-  distributors:'var(--umber)', suppliers:'var(--clay)', deals:'var(--ochre)', orders:'var(--umber)',
-  tasks:'var(--olive)', invoices:'var(--rust)', payments:'var(--rust)', team:'var(--ink)', finance:'var(--sage)',
-  emails:'var(--umber)', tickets:'var(--clay)', search:'var(--ink)', rickroll:'var(--ink)',
+  dashboard:'var(--ink-fixed)', home:'var(--ink-fixed)', contacts:'var(--amber)', leads:'var(--sage)', customers:'var(--sage)',
+  distributors:'var(--magenta)', suppliers:'var(--rose)', deals:'var(--teal)', orders:'var(--violet)',
+  tasks:'var(--setup-blue)', invoices:'var(--setup-blue)', payments:'var(--setup-blue)', team:'var(--ink)', finance:'var(--setup-blue)',
+  emails:'var(--rust)', tickets:'var(--rust)', search:'var(--ink)', rickroll:'var(--ink)',
   reports:'var(--setup-blue)', administration:'var(--setup-blue)'
 };
 const CONTINENTS = ['Africa','Asia','Europe','North America','South America','Oceania','Middle East'];
@@ -2692,7 +2699,7 @@ function renderHome(){
       <div class="sub2">Here's your personal snapshot.</div>
     </div>
     <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px;">
-      <div class="stat-card amber"><div class="num mono">${openTasks.length}</div><div class="lbl">Your open tasks</div></div>
+      <div class="stat-card blue"><div class="num mono">${openTasks.length}</div><div class="lbl">Your open tasks</div></div>
       <div class="stat-card teal"><div class="num mono">${myDeals.length}</div><div class="lbl">Your active deals</div></div>
       <div class="stat-card teal"><div class="num mono">${myDeals.reduce((s,d)=>s+(Number(d.value)||0),0).toLocaleString()}</div><div class="lbl">Your pipeline value</div></div>
     </div>
@@ -2792,7 +2799,7 @@ const WIDGET_DEFS = [
   {key:'kpi_customers', label:'Customers', priv:false, render:()=>widgetKPI('Customers', state.customers.length, 'sage')},
   {key:'kpi_leads', label:'Leads', priv:false, render:()=>canSeeLeads() ? widgetKPI('Leads', state.leads.length, 'sage') : ''},
   {key:'kpi_deals', label:'Open deals', priv:false, render:()=>widgetKPI('Open deals', state.deals.filter(d=>d.stage!=='Won'&&d.stage!=='Lost').length, 'teal')},
-  {key:'kpi_tasks', label:'Open tasks', priv:false, render:()=>widgetKPI('Open tasks', state.tasks.filter(t=>t.status!=='Done').length, 'olive')},
+  {key:'kpi_tasks', label:'Open tasks', priv:false, render:()=>widgetKPI('Open tasks', state.tasks.filter(t=>t.status!=='Done').length, 'blue')},
   {key:'kpi_suppliers', label:'Suppliers', priv:false, render:()=>widgetKPI('Suppliers', state.suppliers.length, 'rose')},
   {key:'kpi_distributors', label:'Distributors', priv:false, render:()=>widgetKPI('Distributors', state.distributors.length, 'amber')},
   {key:'kpi_won', label:'Won value', priv:false, render:()=>{ const v = state.deals.filter(d=>d.stage==='Won').reduce((s,d)=>s+(Number(d.value)||0),0); return widgetKPI('Won value', v.toLocaleString(), 'teal'); }},
@@ -3479,7 +3486,7 @@ function renderOverviewDashboard(priv){
   let secondary = `
     <div class="stat-card teal"><div class="num mono">${openValue.toLocaleString()}</div><div class="lbl">Pipeline value</div>${deltaHTML(pipelineDelta.text,pipelineDelta.up)}</div>
     <div class="stat-card sage"><div class="num mono">${state.customers.length}</div><div class="lbl">Customers</div>${deltaHTML(customerDelta.text,customerDelta.up)}</div>
-    <div class="stat-card olive"><div class="num mono">${openTasks.length}</div><div class="lbl">Open tasks</div>${deltaHTML(taskDelta.text,taskDelta.up)}</div>`;
+    <div class="stat-card blue"><div class="num mono">${openTasks.length}</div><div class="lbl">Open tasks</div>${deltaHTML(taskDelta.text,taskDelta.up)}</div>`;
   if(priv) secondary += `<div class="stat-card blue"><div class="num mono">${unpaidValue.toLocaleString()}</div><div class="lbl">Unpaid invoices</div>${deltaHTML(invoiceDelta.text,invoiceDelta.up)}</div>`;
 
   return `
@@ -11220,13 +11227,6 @@ async function saveModal(table, id){
 /* ---------- Init ---------- */
 document.querySelectorAll('.navlink').forEach(el=>{
   el.onclick = ()=>{
-    // Reaching Import / Export from the sidebar means "all data, start
-    // from the top" -- any scope left over from a list's own button, or
-    // a half-finished direction choice, belongs to that visit, not this
-    // one. (The in-progress mapping wizard is left alone deliberately:
-    // importTables surviving a stray nav click is the difference between
-    // a recoverable detour and losing the mapping.)
-    if(el.dataset.view==='rickroll'){ state.ioEntity = null; state.ioMode = null; state.ioReturnView = null; }
     state.view = el.dataset.view;
     render();
   };
