@@ -47,6 +47,13 @@
     --teal-soft:#D4F3F0;
     --rose:#BE185D;
     --rose-soft:#FCE4EF;
+    /* Contacts was the fourth item bundled into the people/green group
+       (home, contacts, leads, customers) -- same treatment as Deals and
+       Suppliers below: pulled out to its own hue so it's not confused
+       with Customers at a glance. ~300deg sits in the real gap between
+       violet (~262deg) and rose (~330deg), nothing else nearby. */
+    --magenta:#A21CAF;
+    --magenta-soft:#FBE5FC;
     /* Revenue stream identity: Essential Oils reads blue, Siddha Yoga reads green,
        so the two businesses stay distinguishable in every finance chart. */
     --rev-oils:#1B74C0;
@@ -85,6 +92,8 @@
       --teal-soft:#12332F;
       --rose:#F778AC;
       --rose-soft:#3A1B2A;
+      --magenta:#E879F9;
+      --magenta-soft:#3B1240;
       --rev-oils:#6CB6F7;
       --rev-oils-soft:#14283C;
       --rev-yoga:#4FD6A2;
@@ -121,6 +130,8 @@
     --teal-soft:#12332F;
     --rose:#F778AC;
     --rose-soft:#3A1B2A;
+    --magenta:#E879F9;
+    --magenta-soft:#3B1240;
     --rev-oils:#6CB6F7;
     --rev-oils-soft:#14283C;
     --rev-yoga:#4FD6A2;
@@ -179,7 +190,7 @@
   .navlink{--nav-accent:var(--ink-fixed);--nav-accent-soft:var(--cream);
     position:relative;display:flex;align-items:center;gap:10px;padding:8px 10px 8px 11px;border-radius:8px;color:var(--ink-soft);cursor:pointer;margin-bottom:1px;font-size:13.5px;font-weight:500;transition:background .14s,color .14s;}
   /* Regrouped by concept, not by whatever used to share a colour:
-     people (green/--sage) -- home, contacts, leads, customers;
+     people (green/--sage) -- home, leads, customers;
      orders (purple/--violet) -- orders;
      shipping (orange/--amber) -- distributors;
      money (blue/--setup-blue) -- finance, invoices, payments, reports.
@@ -189,18 +200,23 @@
      unchanged on olive. See the palette comment in :root for why blue/
      green/purple/orange specifically: Ariel's reference image.
 
-     Deals and Suppliers started out sharing Orders' purple and
-     Distributors' orange (same concept bucket, deliberately) but Ariel
-     wanted every section visually distinct, not just concept-grouped --
-     so they get their own hues, teal and rose, picked to fill real gaps
-     on the hue wheel rather than sit next to a colour already in use
-     (teal ~180deg sits between olive's ~90deg and sage's ~157deg; rose
-     ~330deg sits between violet's ~262deg and clay's ~9deg). Every OTHER
-     place Deals used violet (Pipeline value, Open deals, Won value --
-     all genuinely Deals-module metrics) moves to teal with it, so the
-     module stays one colour everywhere it appears; Suppliers' badge
-     moves to rose the same way, Distributors keeps orange alone now. */
-  .navlink[data-view="home"],.navlink[data-view="contacts"],.navlink[data-view="leads"],.navlink[data-view="customers"]{--nav-accent:var(--sage);--nav-accent-soft:var(--sage-soft);}
+     Deals, Suppliers and Contacts each started out sharing a colour with
+     a different object in the same concept bucket (Orders' purple,
+     Distributors' orange, and the people group's green) -- fine as
+     branding, but Ariel wanted every section visually distinct rather
+     than grouped. Each gets its own hue, picked to fill a real gap on the
+     hue wheel rather than sit next to a colour already in use: teal
+     (~180deg, between olive's ~90deg and sage's ~157deg), rose (~330deg,
+     between violet's ~262deg and clay's ~9deg), magenta (~300deg,
+     between violet and rose). Every OTHER place Deals used violet
+     (Pipeline value, Open deals, Won value -- all genuinely Deals-module
+     metrics) moves to teal with it, so the module stays one colour
+     everywhere it appears; Suppliers' badge moves to rose the same way.
+     Contacts has no other coloured spot to carry along -- the Overview
+     donut's own Contacts segment is a separate, deliberately untouched
+     system (see chartSegments). Home, Leads and Customers keep green. */
+  .navlink[data-view="home"],.navlink[data-view="leads"],.navlink[data-view="customers"]{--nav-accent:var(--sage);--nav-accent-soft:var(--sage-soft);}
+  .navlink[data-view="contacts"]{--nav-accent:var(--magenta);--nav-accent-soft:var(--magenta-soft);}
   .navlink[data-view="orders"]{--nav-accent:var(--violet);--nav-accent-soft:var(--violet-soft);}
   .navlink[data-view="deals"]{--nav-accent:var(--teal);--nav-accent-soft:var(--teal-soft);}
   .navlink[data-view="distributors"]{--nav-accent:var(--amber);--nav-accent-soft:var(--amber-soft);}
