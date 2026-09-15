@@ -147,6 +147,11 @@
   .navlink.active .nav-ico{color:var(--nav-accent);}
   /* Left rail marks the active row without a second background colour. */
   .navlink.active::before{content:'';position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:var(--nav-accent);}
+  /* Search sits above the record list and Import/Export below it -- both
+     are tools that act on the whole ledger rather than another place to
+     browse, so a hairline keeps them from reading as "one more object". */
+  .navlink-search{margin-bottom:8px;padding-bottom:11px;border-bottom:1px solid var(--border);}
+  .navlink-util{margin-top:8px;padding-top:11px;border-top:1px solid var(--border);}
   .navlink.hidden-role{display:none;}
   .nav-group-label{font-size:9.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1.1px;padding:0 11px;margin:16px 0 5px;opacity:.75;}
   .nav-group-label:first-of-type{margin-top:0;}
@@ -913,6 +918,19 @@
   .fc-kanban-select-wrap::after{content:'';position:absolute;right:8px;top:50%;width:4px;height:4px;border-right:1.2px solid var(--ink-soft);border-bottom:1.2px solid var(--ink-soft);transform:translateY(-60%) rotate(45deg);pointer-events:none;}
   .fc-kanban .fc-card-open{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--ink-soft);cursor:pointer;font-size:12px;flex:none;}
   .fc-kanban .fc-card-open:hover{background:var(--cream);color:var(--ink);}
+  /* Inline "mark shipped" tracking form -- appears on a card only while
+     it's Shipped but still missing tracking/carrier, so Hook 2 (the
+     shipping-confirmation email) can be queued right from the board
+     instead of requiring a detour into the full order-edit modal. Once
+     saved, the form is replaced by a plain read-only line (.fc-ship-done)
+     so there's no way to re-click and queue a second email. */
+  .fc-kanban .fc-ship-form{margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);display:flex;flex-direction:column;gap:5px;}
+  .fc-kanban .fc-ship-input{font-family:inherit;font-size:11px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--ink);width:100%;box-sizing:border-box;}
+  .fc-kanban .fc-ship-save{font-family:inherit;font-size:11px;padding:5px 8px;border-radius:6px;border:1px solid var(--amber);background:var(--amber-soft);color:var(--amber);cursor:pointer;font-weight:500;}
+  .fc-kanban .fc-ship-save:hover{background:var(--amber);color:#fff;}
+  .fc-kanban .fc-ship-done{margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);font-size:10.5px;color:var(--sage);}
+  .fc-kanban .fc-carrier-select,
+  .fc-kanban .fc-carrier-other{font-family:inherit;font-size:11px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--ink);width:100%;box-sizing:border-box;}
 
   /* Requires-attention panel (phase 3) and order timeline (phase 2) */
   .fc-attn-panel{display:flex;flex-direction:column;gap:1px;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
@@ -1025,7 +1043,7 @@
   .demo-banner{background:var(--ochre-soft);border:1px solid var(--ochre);border-radius:9px;padding:11px 15px;margin-bottom:18px;font-size:12.5px;line-height:1.5;color:var(--ink);}
   .demo-banner strong{color:var(--umber);}
   @media print{
-    .sidebar,.topnav,#addBtn,.fin-export,.toast{display:none !important;}
+    .sidebar,#addBtn,.fin-export,.toast{display:none !important;}
     #app{display:block !important;}
     #mainArea{overflow:visible !important;}
     #mainArea>div{overflow:visible !important;padding:0 !important;}
@@ -1092,29 +1110,6 @@
   .dpipe-step.current .dpipe-label{color:var(--ink);font-weight:600;}
 
   /* Top navbar */
-  .topnav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:var(--ink-fixed);padding:0 22px;height:46px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,0.08);}
-  .topnav-group{display:flex;align-items:center;gap:2px;height:100%;}
-  .topnav-group-right{justify-content:flex-end;gap:10px;}
-  .topnav-center{display:flex;justify-content:center;}
-  .topnav-btn{display:flex;align-items:center;gap:7px;padding:0 12px;height:100%;font-family:'Work Sans',sans-serif;font-size:12.5px;font-weight:500;letter-spacing:0.1px;color:rgba(255,255,255,0.66);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:background .15s,color .15s,border-color .15s;white-space:nowrap;}
-  .topnav-btn svg{width:15px;height:15px;flex-shrink:0;opacity:0.85;}
-  .topnav-btn:hover{background:rgba(255,255,255,0.06);color:#fff;}
-  .topnav-btn.tnav-active{color:#fff;border-bottom-color:var(--setup-blue);background:rgba(255,255,255,0.04);}
-  .topnav-qa{display:flex;align-items:center;gap:2px;}
-  .topnav-qa-scroll{overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;max-width:340px;}
-  .topnav-qa-scroll::-webkit-scrollbar{display:none;}
-  .qa-scroll-btn{background:none;border:none;color:rgba(255,255,255,0.55);cursor:pointer;padding:0 3px;font-size:16px;line-height:1;flex-shrink:0;}
-  .qa-scroll-btn:hover{color:#fff;}
-  .qa-btn{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;font-family:'Work Sans',sans-serif;font-size:12px;font-weight:500;color:rgba(255,255,255,0.72);background:rgba(255,255,255,0.06);border:none;cursor:pointer;white-space:nowrap;}
-  .qa-btn:hover{background:rgba(255,255,255,0.14);color:#fff;}
-  .qa-btn svg{width:13px;height:13px;flex-shrink:0;}
-  .qa-add-btn{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;border:1px dashed rgba(255,255,255,0.3);background:none;color:rgba(255,255,255,0.55);cursor:pointer;flex-shrink:0;}
-  .qa-add-btn:hover{color:#fff;border-color:rgba(255,255,255,0.6);}
-  .qa-add-btn svg{width:13px;height:13px;}
-  .qa-picker-list{display:flex;flex-direction:column;gap:2px;margin:8px 0 4px;}
-  .qa-picker-opt{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;}
-  .qa-picker-opt:hover{background:var(--cream);}
-  .qa-picker-opt input{width:auto;}
 
   /* Search screen */
   .search-bar-wrap{display:flex;gap:10px;margin-bottom:20px;}
@@ -1163,6 +1158,27 @@
   /* Import / Export */
   .io-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   .io-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px 24px;max-width:100%;overflow-x:auto;}
+
+  /* Scope line -- says, before anything else, whose data this screen is
+     about. Arriving here from the Contacts list and from the sidebar are
+     two different jobs, and the chip is what tells them apart. */
+  .io-scope{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+  .io-scope-chip{font-size:12px;font-weight:500;color:var(--ink);background:var(--amber-soft);border:1px solid var(--amber);padding:4px 12px;border-radius:20px;}
+  .io-scope-count{font-size:11.5px;color:var(--ink-soft);}
+  .io-scope-change{font-size:11.5px;color:var(--amber);cursor:pointer;text-decoration:underline;}
+  .io-back{background:none;border:none;font-family:inherit;font-size:12px;color:var(--ink-soft);cursor:pointer;padding:0 0 12px;}
+  .io-back:hover{color:var(--ink);}
+
+  /* Direction picker -- two equal-weight choices, neither pre-selected,
+     because importing and exporting are not variations of one action and
+     picking the wrong one has very different consequences. */
+  .io-choice{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:760px;}
+  .io-choice-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px;text-align:left;font-family:inherit;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px 24px;cursor:pointer;transition:border-color .12s,transform .12s;}
+  .io-choice-card:hover{border-color:var(--amber);transform:translateY(-1px);}
+  .io-choice-icon{width:34px;height:34px;border-radius:50%;background:var(--amber-soft);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:17px;line-height:1;}
+  .io-choice-title{font-family:'Fraunces',serif;font-size:17px;font-weight:600;color:var(--ink);}
+  .io-choice-desc{font-size:12.5px;color:var(--ink-soft);line-height:1.55;}
+  @media (max-width:820px){ .io-choice{grid-template-columns:1fr;} }
   .io-card h3{margin:0 0 4px;font-size:15px;font-weight:500;}
   .io-card p{color:var(--ink-soft);font-size:12.5px;margin:0 0 16px;line-height:1.5;}
   .io-dropzone{border:1px dashed var(--border);border-radius:8px;padding:20px;text-align:center;color:var(--ink-soft);font-size:12.5px;margin-top:12px;}
@@ -1227,6 +1243,7 @@
         <svg viewBox="0 0 52 52" fill="currentColor"><path d="M48.5 20.7h-3.3a1.9 1.9 0 0 1-1.7-1.2 1.8 1.8 0 0 1 .3-2.1l2.4-2.3a1.6 1.6 0 0 0 0-2.3l-3.2-3.2a1.6 1.6 0 0 0-2.3 0l-2.3 2.4a1.8 1.8 0 0 1-2.1.3 1.9 1.9 0 0 1-1.2-1.7V7.3a1.6 1.6 0 0 0-1.6-1.6h-4.6a1.6 1.6 0 0 0-1.6 1.6v3.3a1.9 1.9 0 0 1-1.2 1.7 1.8 1.8 0 0 1-2.1-.3l-2.3-2.4a1.6 1.6 0 0 0-2.3 0l-3.2 3.2a1.6 1.6 0 0 0 0 2.3l2.4 2.3a1.8 1.8 0 0 1 .3 2.1 1.9 1.9 0 0 1-1.7 1.2H3.5a1.6 1.6 0 0 0-1.6 1.6v4.6a1.6 1.6 0 0 0 1.6 1.6h3.3a1.9 1.9 0 0 1 1.7 1.2 1.8 1.8 0 0 1-.3 2.1l-2.4 2.3a1.6 1.6 0 0 0 0 2.3l3.2 3.2a1.6 1.6 0 0 0 2.3 0l2.3-2.4a1.8 1.8 0 0 1 2.1-.3 1.9 1.9 0 0 1 1.2 1.7v3.3a1.6 1.6 0 0 0 1.6 1.6h4.6a1.6 1.6 0 0 0 1.6-1.6v-3.3a1.9 1.9 0 0 1 1.2-1.7 1.8 1.8 0 0 1 2.1.3l2.3 2.4a1.6 1.6 0 0 0 2.3 0l3.2-3.2a1.6 1.6 0 0 0 0-2.3l-2.4-2.3a1.8 1.8 0 0 1-.3-2.1 1.9 1.9 0 0 1 1.7-1.2h3.3a1.6 1.6 0 0 0 1.6-1.6v-4.6a1.6 1.6 0 0 0-1.6-1.6ZM26 34.4A8.4 8.4 0 1 1 34.4 26 8.4 8.4 0 0 1 26 34.4Z"/></svg>
       </button>
     </div>
+    <div class="navlink navlink-search" data-view="search"><span class="nav-ico"></span>Search</div>
     <div class="nav-group-label" data-nav-group="workspace">Workspace</div>
     <div class="navlink" data-view="home" data-nav-group="workspace"><span class="nav-ico"></span>Home</div>
     <div class="navlink active" data-view="dashboard" data-nav-group="workspace"><span class="nav-ico"></span>Dashboard</div>
@@ -1238,6 +1255,7 @@
     <div class="navlink" data-view="distributors" data-nav-group="records"><span class="nav-ico"></span>Distributors</div>
     <div class="navlink" data-view="suppliers" data-nav-group="records"><span class="nav-ico"></span>Suppliers</div>
     <div class="navlink" data-view="deals" data-nav-group="records"><span class="nav-ico"></span>Deals</div>
+    <div class="navlink" data-view="orders" data-nav-group="records"><span class="nav-ico"></span>Orders</div>
     <div class="nav-group-label" data-nav-group="operations">Operations</div>
     <div class="navlink" data-view="tasks" data-nav-group="operations"><span class="nav-ico"></span>Tasks</div>
     <div class="navlink" data-view="invoices" data-nav-group="operations"><span class="nav-ico"></span>Invoices</div>
@@ -1249,6 +1267,7 @@
     <div class="nav-group-label" data-nav-group="admin">Admin</div>
     <div class="navlink" data-view="team" data-nav-group="admin"><span class="nav-ico"></span>Team</div>
     <div class="navlink" data-view="administration" data-nav-group="admin"><span class="nav-ico"></span>Administration</div>
+    <div class="navlink navlink-util" data-view="rickroll" data-nav-group="admin"><span class="nav-ico"></span>Import / Export</div>
     <div class="sidebar-foot">
       <div class="theme-toggle" id="themeToggle">
         <button type="button" data-theme-choice="system" title="Match system">Auto</button>
@@ -1269,22 +1288,6 @@
     </div>
   </aside>
   <main id="mainArea" style="display:flex;flex-direction:column;flex:1;min-width:0;overflow:hidden;">
-    <nav class="topnav">
-      <div class="topnav-group">
-        <button class="topnav-btn" id="tn-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9.5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V10"/></svg>Home</button>
-        <button class="topnav-btn" id="tn-dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.3"/><rect x="14" y="3" width="7" height="5" rx="1.3"/><rect x="14" y="12" width="7" height="9" rx="1.3"/><rect x="3" y="16" width="7" height="5" rx="1.3"/></svg>Dashboard</button>
-        <button class="topnav-btn" id="tn-contacts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="9" r="2.4"/><path d="M15.8 14.2c2.7.4 4.7 2.7 4.7 5.4"/></svg>Contacts</button>
-        <button class="topnav-btn" id="tn-export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 19h16"/></svg>Import / Export</button>
-      </div>
-      <div class="topnav-center">
-        <button class="topnav-btn" id="tn-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.3-4.3"/></svg>Search</button>
-      </div>
-      <div class="topnav-group topnav-group-right">
-        <button type="button" class="qa-scroll-btn" id="qaScrollLeft" title="Scroll quick actions left" style="display:none;">‹</button>
-        <div class="topnav-qa-scroll" id="topnavQaScroll"><div class="topnav-qa" id="topnavQa"></div></div>
-        <button type="button" class="qa-scroll-btn" id="qaScrollRight" title="Scroll quick actions right" style="display:none;">›</button>
-      </div>
-    </nav>
     <div style="flex:1;min-width:0;overflow-y:auto;overflow-x:hidden;padding:28px 34px;">
       <div class="topbar">
         <div style="display:flex;align-items:center;gap:14px;">
@@ -1296,6 +1299,7 @@
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
           <button type="button" class="setup-back-btn" id="topbarGuideBtn" title="Take a guided walkthrough of this page" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.3 9a2.7 2.7 0 1 1 3.9 2.4c-.9.5-1.2 1-1.2 2"/><circle cx="12" cy="16.6" r=".3" fill="currentColor"/></svg>Guide</button>
+          <button type="button" class="btn secondary" id="ioBtn" style="display:none;">Import / Export</button>
           <button class="btn" id="addBtn" style="display:none;">+ Add</button>
         </div>
       </div>
@@ -1345,7 +1349,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], quickActionPrefs:{}, guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, companySettings:{}, companyNavOpen:true, setupTab:'automation', setupSection:'home', omObject:null, omTab:'details', omSection:'objects', omFilter:'', recordTypes:[], recordTypeAssignments:{}, compactLayouts:{}, reports:[], reportTypes:[], reportsTab:'reports', activeReportId:null, reportDraft:null, reportCollapsed:{}, pageLayouts:[], recordPages:[], relationships:[], profiles:[], permissionSets:[], permissionSetGroups:[], publicGroups:[], emailTemplates:[], adminTab:'profiles', adminReturnView:'dashboard', flowExplorer:false, flowWizard:null, emailTemplateFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0 };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, companySettings:{}, companyNavOpen:true, setupTab:'automation', setupSection:'home', omObject:null, omTab:'details', omSection:'objects', omFilter:'', recordTypes:[], recordTypeAssignments:{}, compactLayouts:{}, reports:[], reportTypes:[], reportsTab:'reports', activeReportId:null, reportDraft:null, reportCollapsed:{}, pageLayouts:[], recordPages:[], relationships:[], profiles:[], permissionSets:[], permissionSetGroups:[], publicGroups:[], emailTemplates:[], adminTab:'profiles', adminReturnView:'dashboard', flowExplorer:false, flowWizard:null, emailTemplateFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0, ioEntity:null, ioMode:null, ioReturnView:null };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -1391,6 +1395,40 @@ const LEAD_SOURCES = ['Instagram','TikTok','Referral','Ad','Other'];
 const LEAD_HIDDEN_FOR = ['Kfir','David'];
 const OSTATUS = ['Pending','Shipped','Delivered','Cancelled'];
 const OSTATUS_NEW = ['Pending','Shipped','Delivered']; // no Cancelled on creation
+
+/* Real carriers this business actually ships with -- starts with just
+   Israel Post, since that's the one confirmed for the current (Israel-only)
+   MVP. "Other" stays as an escape hatch for anything not yet on this list
+   (and for old orders whose carrierName predates this list existing) rather
+   than locking data entry to only these names. Add to this array as more
+   carriers get onboarded -- every call site below already renders/reads
+   whatever's in it, nothing else needs to change. */
+const CARRIERS = ['דואר ישראל'];
+function renderCarrierField(idPrefix, currentValue){
+  const isOther = !!currentValue && !CARRIERS.includes(currentValue);
+  return `<select id="${idPrefix}_sel" class="fc-carrier-select" data-carrier-other-id="${idPrefix}_other">
+      ${CARRIERS.map(c=>`<option value="${esc(c)}" ${currentValue===c?'selected':''}>${esc(c)}</option>`).join('')}
+      <option value="__other__" ${isOther?'selected':''}>Other…</option>
+    </select>
+    <input type="text" class="fc-carrier-other" id="${idPrefix}_other" placeholder="Carrier name" value="${esc(isOther?currentValue:'')}" style="margin-top:6px;${isOther?'':'display:none;'}">`;
+}
+function readCarrierField(idPrefix){
+  const sel = document.getElementById(idPrefix+'_sel');
+  if(!sel) return '';
+  if(sel.value==='__other__'){
+    const other = document.getElementById(idPrefix+'_other');
+    return other ? other.value.trim() : '';
+  }
+  return sel.value;
+}
+function wireCarrierSelects(){
+  document.querySelectorAll('.fc-carrier-select').forEach(sel=>{
+    sel.onchange = ()=>{
+      const other = document.getElementById(sel.dataset.carrierOtherId);
+      if(other) other.style.display = sel.value==='__other__' ? '' : 'none';
+    };
+  });
+}
 const TSTATUS = ['Open','Done'];
 const TSTATUS_NEW = ['Open']; // no Done on creation
 const ISTATUS = ['Unpaid','Paid','Overdue'];
@@ -1402,16 +1440,6 @@ const PAYEE_TYPES = [
   {key:'other', label:'External payee — Other'},
 ];
 const PSTATUS = ['Pending','Paid'];
-const QUICK_ACTION_LIBRARY = [
-  {key:'new_contact', label:'New Contact', view:'contacts', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="9" r="2.4"/><path d="M15.8 14.2c2.7.4 4.7 2.7 4.7 5.4"/></svg>'},
-  {key:'new_lead', label:'New Lead', view:'leads', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>'},
-  {key:'new_deal', label:'New Deal', view:'deals', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h6l2-3 4 6 2-3h4"/></svg>'},
-  {key:'new_task', label:'New Task', view:'tasks', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11.5 11 13.5 15.5 9"/><rect x="3.5" y="4" width="17" height="16" rx="2.3"/></svg>'},
-  {key:'new_invoice', label:'New Invoice', view:'invoices', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M9 10h6M9 14h6M9 18h3"/></svg>'},
-  {key:'new_payment', label:'New Payment', view:'payments', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>'},
-  {key:'go_search', label:'Search', view:null, icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.3-4.3"/></svg>'},
-];
-const QUICK_ACTION_MAX = 3;
 function payeeSelectHTML(type, item){
   const selected = item ? item.payee : '';
   if(type==='team') return `<select id="f_payeeSel">${teamNames().map(n=>`<option ${selected===n?'selected':''}>${esc(n)}</option>`).join('')}</select>`;
@@ -1721,7 +1749,6 @@ const KEYS = {
   guideDismissed: 'guideDismissed',
   dependentFields: 'dependentFields',
   sharingRules: 'sharingRules',
-  quickActionPrefs: 'quickActionPrefs',
   bigDealAlert: 'bigDealAlert',
   bigDealAlerts: 'bigDealAlerts',
   schemaLayout: 'schemaLayout',
@@ -1747,7 +1774,7 @@ const KEYS = {
 const SETTING_DEFAULTS = {
   validationRules: [], dashboards: [], automations: [], flows: [],
   guideEntries: [], guideDismissed: {}, dependentFields: [],
-  sharingRules: {}, quickActionPrefs: {}, bigDealAlerts: [],
+  sharingRules: {}, bigDealAlerts: [],
   bigDealAlert: { enabled:false, threshold:10000, currency:'USD' },
   schemaLayout: {}, objectVisibility: {}, fieldVisibility: {},
   recordTypes: [], pageLayouts: [], recordPages: [], relationships: [],
@@ -1986,7 +2013,6 @@ function updateNavVisibility(){
       .some(link=>!link.classList.contains('hidden-role'));
     label.classList.toggle('hidden-role', !anyVisible);
   });
-  renderTopnavQuickActions();
 }
 
 function render(){
@@ -2001,7 +2027,6 @@ function render(){
   const isSetupPage = state.view==='setup';
   const isSubPage = isSetupPage || state.view==='customerProfile';
   document.querySelector('.sidebar').style.display = isSubPage ? 'none' : 'flex';
-  document.querySelector('.topnav').style.display = isSubPage ? 'none' : 'grid';
   document.getElementById('setupBackBtn').style.display = isSubPage ? 'flex' : 'none';
   updateNavVisibility();
   populateViewingAsOptions();
@@ -2042,15 +2067,14 @@ function render(){
   const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets','setup','reports','customerProfile','administration'];
   addBtn.style.display = noAdd.includes(state.view) ? 'none' : 'inline-block';
   addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
+  // Import / Export lives on every list the engine actually supports
+  // (EXPORT_SHEETS is the single source of truth for that), so the button
+  // appears exactly where it can do something and nowhere else.
+  const ioBtn = document.getElementById('ioBtn');
+  ioBtn.style.display = EXPORT_SHEETS.some(s=>s.key===state.view) ? 'inline-block' : 'none';
   const guideBtn = document.getElementById('topbarGuideBtn');
   guideBtn.style.display = state.guideEntries.some(g=>g.linkEntity===state.view) ? 'flex' : 'none';
 
-  // topnav active highlights
-  document.getElementById('tn-dashboard').classList.toggle('tnav-active', state.view==='dashboard');
-  document.getElementById('tn-home').classList.toggle('tnav-active', state.view==='home');
-  document.getElementById('tn-contacts').classList.toggle('tnav-active', state.view==='contacts');
-  document.getElementById('tn-search').classList.toggle('tnav-active', state.view==='search');
-  document.getElementById('tn-export').classList.toggle('tnav-active', state.view==='rickroll');
 
   const c = document.getElementById('content');
   if(state.view==='dashboard') c.innerHTML = renderDashboard();
@@ -2128,7 +2152,11 @@ function guessEntityForTable(name, headers){
 }
 function buildImportTables(raw){
   return raw.map(t=>{
-    const entityKey = guessEntityForTable(t.name, t.headers);
+    // The file's own content wins -- a sheet that clearly is Deals stays
+    // Deals even if you happened to open this from Contacts. The scope
+    // only fills in for a file the guesser couldn't place at all, which
+    // is exactly the case where knowing which list you came from helps.
+    const entityKey = guessEntityForTable(t.name, t.headers) || state.ioEntity || '';
     const fieldMap = {};
     if(entityKey){
       const sheetDef = EXPORT_SHEETS.find(s=>s.key===entityKey);
@@ -2211,10 +2239,16 @@ async function parsePdfFile(file){
 
 let importTables = [];
 
+/* When this screen was opened from a specific list (the Import / Export
+   button in that list's header), only that entity starts ticked --
+   arriving from Contacts and being handed every sheet pre-selected is
+   how people accidentally export the whole ledger. Opened from the
+   sidebar with no scope, everything stays ticked as before. */
 function renderExportChecklist(){
+  const scoped = state.ioEntity;
   return `<div class="export-check-actions"><span data-export-all="1">Select all</span><span data-export-none="1">Select none</span></div>
   <div class="export-check-list">
-    ${EXPORT_SHEETS.map(s=>`<label class="export-check-row"><input type="checkbox" data-export-key="${s.key}" checked> ${esc(s.label)} <span class="mono" style="color:var(--ink-soft);font-size:11px;">(${(state[s.key]||[]).length})</span></label>`).join('')}
+    ${EXPORT_SHEETS.map(s=>`<label class="export-check-row"><input type="checkbox" data-export-key="${s.key}" ${!scoped || scoped===s.key ? 'checked' : ''}> ${esc(s.label)} <span class="mono" style="color:var(--ink-soft);font-size:11px;">(${(state[s.key]||[]).length})</span></label>`).join('')}
   </div>`;
 }
 
@@ -2258,8 +2292,55 @@ function renderImportMapping(){
   </div>`;
 }
 
+/* Import / Export is now a two-step screen: pick a direction, then do the
+   thing -- rather than both panels side by side competing for attention.
+   It's reached either from the sidebar (no scope, everything available)
+   or from a list's own header button (scoped to that entity), and the
+   scope chip below makes which one you're in unmistakable, because
+   "export" and "export just Contacts" are very different actions to
+   confuse. Mid-import (importTables populated) the mapping wizard owns
+   the screen outright -- going back to a direction picker while a file
+   is half-mapped would just lose the mapping. */
 function renderImportExport(){
-  return `<div class="io-grid">
+  const sheet = state.ioEntity ? EXPORT_SHEETS.find(s=>s.key===state.ioEntity) : null;
+  const scopeLabel = sheet ? sheet.label : 'All data';
+  const scopeCount = sheet ? (state[sheet.key]||[]).length : EXPORT_SHEETS.reduce((n,s)=>n+(state[s.key]||[]).length, 0);
+  const scopeChip = `<div class="io-scope">
+    <span class="io-scope-chip">${esc(scopeLabel)}</span>
+    <span class="io-scope-count mono">${scopeCount} record${scopeCount===1?'':'s'}</span>
+    ${sheet ? `<span class="io-scope-change" id="ioScopeAll">Use all data instead</span>` : ''}
+  </div>`;
+
+  if(importTables.length) return scopeChip + renderImportMapping();
+
+  /* One back control, whose job depends on the step: inside a panel it
+     steps back to the direction picker, and on the picker itself it
+     leaves for the list you came from -- so there's never a dead end,
+     and never two competing "back"s on screen at once. Arriving from
+     the sidebar there's nothing to return to, so it isn't drawn. */
+  const returnSheet = state.ioReturnView ? EXPORT_SHEETS.find(s=>s.key===state.ioReturnView) : null;
+
+  if(!state.ioMode){
+    return `${scopeChip}
+    ${returnSheet ? `<button type="button" class="io-back" id="ioReturnBtn">&larr; Back to ${esc(returnSheet.label)}</button>` : ''}
+    <div class="io-choice">
+      <button type="button" class="io-choice-card" data-io-mode="import">
+        <span class="io-choice-icon">&darr;</span>
+        <span class="io-choice-title">Import</span>
+        <span class="io-choice-desc">Bring records in from Excel, CSV, a Google Sheet or a PDF. You map the columns and review everything before a single record is written.</span>
+      </button>
+      <button type="button" class="io-choice-card" data-io-mode="export">
+        <span class="io-choice-icon">&uarr;</span>
+        <span class="io-choice-title">Export</span>
+        <span class="io-choice-desc">Download ${sheet ? esc(sheet.label.toLowerCase()) : 'any part of the ledger'} as Excel, CSV or PDF — to share, back up, or work on in a spreadsheet.</span>
+      </button>
+    </div>`;
+  }
+
+  const back = `<button type="button" class="io-back" id="ioBackBtn">&larr; Import or export</button>`;
+
+  if(state.ioMode==='export'){
+    return `${scopeChip}${back}
     <div class="io-card">
       <h3 class="display">Export</h3>
       <p>Choose what to include and a format, then download.</p>
@@ -2271,35 +2352,36 @@ function renderImportExport(){
       </select></div>
       <button class="btn" id="ioExportBtn">Export</button>
       <div class="io-status" id="ioExportStatus"></div>
+    </div>`;
+  }
+
+  return `${scopeChip}${back}
+  <div class="io-card">
+    <h3 class="display">Import data</h3>
+    <p>Bring records in from a file, a Google Sheet, or a PDF. You'll map columns to CRM fields before anything is added.</p>
+    <div class="io-source-tabs">
+      <button type="button" class="io-source-tab active" data-io-source="file">Excel / CSV</button>
+      <button type="button" class="io-source-tab" data-io-source="gsheet">Google Sheet</button>
+      <button type="button" class="io-source-tab" data-io-source="pdf">PDF</button>
     </div>
-    <div class="io-card">
-      <h3 class="display">Import data</h3>
-      <p>Bring records in from a file, a Google Sheet, or a PDF. You'll map columns to CRM fields before anything is added.</p>
-      <div class="io-source-tabs">
-        <button type="button" class="io-source-tab active" data-io-source="file">Excel / CSV</button>
-        <button type="button" class="io-source-tab" data-io-source="gsheet">Google Sheet</button>
-        <button type="button" class="io-source-tab" data-io-source="pdf">PDF</button>
-      </div>
-      <div class="io-source-pane active" id="ioPane-file">
-        <input type="file" id="ioImportFile" accept=".xlsx,.xls,.csv" style="display:none;">
-        <button class="btn secondary" id="ioImportBtn">Choose file…</button>
-        <div class="io-dropzone" id="ioFileName">No file selected</div>
-      </div>
-      <div class="io-source-pane" id="ioPane-gsheet">
-        <div class="field"><label>Google Sheet link</label><input id="ioGsheetUrl" placeholder="https://docs.google.com/spreadsheets/d/…"></div>
-        <div class="shared-note">The sheet must be shared as "Anyone with the link can view".</div>
-        <button class="btn secondary" id="ioGsheetBtn" style="margin-top:8px;">Fetch sheet</button>
-      </div>
-      <div class="io-source-pane" id="ioPane-pdf">
-        <input type="file" id="ioImportPdf" accept=".pdf" style="display:none;">
-        <button class="btn secondary" id="ioImportPdfBtn">Choose PDF…</button>
-        <div class="io-dropzone" id="ioPdfName">No file selected</div>
-        <div class="shared-note">Best-effort: works well for simple tables with clear columns, and may need manual cleanup for complex layouts.</div>
-      </div>
-      <div class="io-status" id="ioImportStatus"></div>
+    <div class="io-source-pane active" id="ioPane-file">
+      <input type="file" id="ioImportFile" accept=".xlsx,.xls,.csv" style="display:none;">
+      <button class="btn secondary" id="ioImportBtn">Choose file…</button>
+      <div class="io-dropzone" id="ioFileName">No file selected</div>
     </div>
-  </div>
-  ${renderImportMapping()}`;
+    <div class="io-source-pane" id="ioPane-gsheet">
+      <div class="field"><label>Google Sheet link</label><input id="ioGsheetUrl" placeholder="https://docs.google.com/spreadsheets/d/…"></div>
+      <div class="shared-note">The sheet must be shared as "Anyone with the link can view".</div>
+      <button class="btn secondary" id="ioGsheetBtn" style="margin-top:8px;">Fetch sheet</button>
+    </div>
+    <div class="io-source-pane" id="ioPane-pdf">
+      <input type="file" id="ioImportPdf" accept=".pdf" style="display:none;">
+      <button class="btn secondary" id="ioImportPdfBtn">Choose PDF…</button>
+      <div class="io-dropzone" id="ioPdfName">No file selected</div>
+      <div class="shared-note">Best-effort: works well for simple tables with clear columns, and may need manual cleanup for complex layouts.</div>
+    </div>
+    <div class="io-status" id="ioImportStatus"></div>
+  </div>`;
 }
 
 function exportRowsForSheet(sheet){
@@ -2372,6 +2454,37 @@ function exportPDF(selectedKeys){
   window.print();
 }
 
+/* Duplicate detection for an imported row, beyond a bare id match --
+   an external file (a legacy CRM export, a spreadsheet someone's kept by
+   hand) essentially never carries this app's own id_ format, so id-only
+   matching against it silently created a full duplicate for every row,
+   every time, even when the same person/deal already existed. Contacts
+   and customers get matched by email (case-insensitive) -- the same
+   convention the storefront webhook already uses to attach a new order
+   to an existing customer rather than making a second one. Deals get
+   matched by contact + title, since a deal has no email of its own.
+   Every other entity keeps the original id-only behavior; a duplicate
+   supplier/task/invoice is a much lower-stakes mistake than a duplicate
+   person, so this doesn't guess for those. */
+function findExistingRecordForImport(entityKey, obj, list, importedId){
+  if(importedId){
+    const byId = list.findIndex(x=>x.id===importedId);
+    if(byId>=0) return byId;
+  }
+  if((entityKey==='contacts' || entityKey==='customers') && obj.email){
+    const email = obj.email.trim().toLowerCase();
+    if(email){
+      const byEmail = list.findIndex(x=>(x.email||'').trim().toLowerCase()===email);
+      if(byEmail>=0) return byEmail;
+    }
+  }
+  if(entityKey==='deals' && obj.contactId && obj.title){
+    const title = obj.title.trim().toLowerCase();
+    const byDeal = list.findIndex(x=>x.contactId===obj.contactId && (x.title||'').trim().toLowerCase()===title);
+    if(byDeal>=0) return byDeal;
+  }
+  return -1;
+}
 async function runImport(){
   let added=0, updated=0;
   const touched = new Set();
@@ -2387,11 +2500,19 @@ async function runImport(){
         const h = t.fieldMap[f];
         obj[f] = coerceFieldValue(f, h ? row[h] : '');
       });
-      obj.id = idHeader && row[idHeader] ? String(row[idHeader]) : uid();
-      obj.createdAt = createdHeader && row[createdHeader] ? (new Date(row[createdHeader]).getTime()||Date.now()) : Date.now();
-      const idx = list.findIndex(x=>x.id===obj.id);
-      if(idx>=0){ list[idx] = {...list[idx], ...obj}; updated++; }
-      else { list.push(obj); added++; }
+      const importedId = idHeader && row[idHeader] ? String(row[idHeader]) : null;
+      const existingIdx = findExistingRecordForImport(t.entityKey, obj, list, importedId);
+      if(existingIdx>=0){
+        obj.id = list[existingIdx].id;
+        obj.createdAt = list[existingIdx].createdAt;
+        list[existingIdx] = {...list[existingIdx], ...obj};
+        updated++;
+      } else {
+        obj.id = importedId || uid();
+        obj.createdAt = createdHeader && row[createdHeader] ? (new Date(row[createdHeader]).getTime()||Date.now()) : Date.now();
+        list.push(obj);
+        added++;
+      }
     });
     touched.add(t.entityKey);
   });
@@ -2875,6 +2996,8 @@ function renderFcKanbanSection(){
         <div class="kcol-head"><span>${stage}</span><span>${items.length}</span></div>
         ${items.map(o=>{
           const summary = cpOrderSummary(o);
+          const needsTracking = o.status==='Shipped' && (!o.trackingNumber || !o.carrierName);
+          const hasTracking = o.status==='Shipped' && o.trackingNumber && o.carrierName;
           return `<div class="kcard">
             <div class="kcard-top">
               <span class="ledger-no mono">${esc(orderDisplayNumber(o))}</span>
@@ -2889,6 +3012,13 @@ function renderFcKanbanSection(){
               </span>
               <span class="fc-card-open" data-fc-open-order="${o.id}" title="Open order">&rarr;</span>
             </div>
+            ${needsTracking ? `
+            <div class="fc-ship-form">
+              <input type="text" class="fc-ship-input" id="fcTrack_${o.id}" placeholder="Tracking number" value="${esc(o.trackingNumber||'')}">
+              ${renderCarrierField('fcCarrier_'+o.id, o.carrierName||'')}
+              <button type="button" class="fc-ship-save" data-fc-save-tracking="${o.id}">Save &amp; notify customer</button>
+            </div>` : ''}
+            ${hasTracking ? `<div class="fc-ship-done">&#10003; ${esc(o.carrierName)} &middot; ${esc(o.trackingNumber)}</div>` : ''}
           </div>`;
         }).join('') || ''}
       </div>`;
@@ -8615,6 +8745,29 @@ async function setOrderFulfillmentStatus(orderId, newStatus){
   await dbUpdate('orders', order);
   await checkOrderStatusChange(order, prevStatus);
 }
+/* Fills in tracking/carrier for an order that's already Shipped (from the
+   kanban's inline form) and queues Hook 2 -- the same shipping-email path
+   checkOrderStatusChange already uses, just invoked with prevStatus=null.
+   That's a deliberate, safe reuse of its own guard: `prevStatus===order.status`
+   is false (null !== 'Shipped') so it proceeds to the email-queueing branch,
+   while `prevStatus!==null` is false so it correctly skips logging a second
+   order_events row -- no fake "status changed" event for a status that
+   didn't actually change here, just the tracking info. The card only shows
+   this form while trackingNumber/carrierName are still missing, so this
+   can't be clicked twice into sending a duplicate email. */
+async function saveOrderTrackingAndNotify(orderId){
+  const order = state.orders.find(o=>o.id===orderId);
+  if(!order) return;
+  const trackInput = document.getElementById(`fcTrack_${orderId}`);
+  const tracking = trackInput ? trackInput.value.trim() : '';
+  const carrier = readCarrierField(`fcCarrier_${orderId}`);
+  if(!tracking || !carrier){ toast('Enter both a tracking number and a carrier before notifying the customer.'); return; }
+  order.trackingNumber = tracking;
+  order.carrierName = carrier;
+  render();
+  await dbUpdate('orders', order);
+  await checkOrderStatusChange(order, null);
+}
 /* All Customer & Fulfillment Command Center wiring, consolidated here so
    the search box's targeted update (below) can re-run just this after
    swapping the table/kanban sub-trees' innerHTML, instead of either
@@ -8680,6 +8833,10 @@ function wireFulfillmentCommandCenter(){
   document.querySelectorAll('[data-fc-order-stage]').forEach(el=>{
     el.onchange = ()=>{ setOrderFulfillmentStatus(el.dataset.fcOrderStage, el.value); };
   });
+  document.querySelectorAll('[data-fc-save-tracking]').forEach(el=>{
+    el.onclick = ()=>{ saveOrderTrackingAndNotify(el.dataset.fcSaveTracking); };
+  });
+  wireCarrierSelects();
 
   // Requires Attention -- each item opens the relevant drawer directly.
   document.querySelectorAll('[data-fc-attn-order]').forEach(el=>{
@@ -8919,6 +9076,20 @@ function attachContentHandlers(){
   const finDemoBtn = document.getElementById('finDemoBtn');
   // Deliberately not persisted: every page load starts on real figures.
   if(finDemoBtn) finDemoBtn.onclick = ()=>{ state.financeDemo = !state.financeDemo; render(); };
+  // Import / Export direction picker + scope controls.
+  document.querySelectorAll('[data-io-mode]').forEach(el=>{
+    el.onclick = ()=>{ state.ioMode = el.dataset.ioMode; render(); };
+  });
+  const ioBackBtn = document.getElementById('ioBackBtn');
+  if(ioBackBtn) ioBackBtn.onclick = ()=>{ state.ioMode = null; render(); };
+  const ioReturnBtn = document.getElementById('ioReturnBtn');
+  if(ioReturnBtn) ioReturnBtn.onclick = ()=>{
+    state.view = state.ioReturnView;
+    state.ioEntity = null; state.ioMode = null; state.ioReturnView = null;
+    render();
+  };
+  const ioScopeAll = document.getElementById('ioScopeAll');
+  if(ioScopeAll) ioScopeAll.onclick = ()=>{ state.ioEntity = null; render(); };
   document.querySelectorAll('[data-export-all]').forEach(el=>{
     el.onclick = ()=>document.querySelectorAll('[data-export-key]').forEach(cb=>cb.checked=true);
   });
@@ -9992,7 +10163,7 @@ function openModal(table, id){
       </div>`}
       <div id="f_shipWrap" style="${shipWrapStyle}">
         <div class="field"><label>Tracking number</label><input id="f_tracking" value="${item?esc(item.trackingNumber||''):''}"></div>
-        <div class="field"><label>Carrier</label><input id="f_carrier" value="${item?esc(item.carrierName||''):''}" placeholder="e.g. Israel Post"></div>
+        <div class="field"><label>Carrier</label>${renderCarrierField('f_carrier', item?(item.carrierName||''):'')}</div>
         <div class="field"><label>Tracking URL</label><input id="f_trackingUrl" value="${item?esc(item.trackingUrl||''):''}" placeholder="https://..."></div>
         <div class="shared-note">${contact && contact.email ? `Shipping email will be sent to ${esc(contact.email)} once tracking number and carrier are filled in.` : 'This contact has no email on file, so no shipping email can be sent.'}</div>
       </div>`;
@@ -10186,6 +10357,7 @@ function openModal(table, id){
         if(wrap) wrap.style.display = e.target.value==='Shipped' ? 'block' : 'none';
       };
     }
+    wireCarrierSelects();
   }
   if(table==='customers'){
     const kindSel = document.getElementById('f_kind');
@@ -10286,7 +10458,8 @@ function resolveTourTarget(step){
   if(step.target === 'nav') el = firstVisibleEl(`.navlink[data-view="${ek}"]`);
   else if(step.target === 'add') el = firstVisibleEl('#addBtn');
   else if(step.target === 'guide') el = firstVisibleEl('#topbarGuideBtn');
-  else if(step.target === 'search') el = firstVisibleEl('#tn-search');
+  // Search moved from the (now removed) top bar into the sidebar.
+  else if(step.target === 'search') el = firstVisibleEl('.navlink[data-view="search"]');
   else if(step.target === 'list') el = firstVisibleEl('#content table', '#content .pipeline', '#content');
   return el || document.querySelector('.topbar') || document.getElementById('content');
 }
@@ -10513,66 +10686,6 @@ function startAddRecord(entityKey){
   }
 }
 
-/* ---------- Customizable quick actions ---------- */
-function renderTopnavQuickActions(){
-  const wrap = document.getElementById('topnavQa');
-  if(!wrap) return;
-  const keys = state.quickActionPrefs[state.currentUser] || [];
-  wrap.innerHTML = keys.map(k=>{
-    const qa = QUICK_ACTION_LIBRARY.find(q=>q.key===k);
-    return qa ? `<button type="button" class="qa-btn" data-qa="${qa.key}" title="${esc(qa.label)}">${qa.icon}<span>${esc(qa.label)}</span></button>` : '';
-  }).join('') + `<button type="button" class="qa-add-btn" id="qaAddBtn" title="Customize your quick actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>`;
-  wrap.querySelectorAll('[data-qa]').forEach(btn=>{
-    btn.onclick = ()=>{
-      const qa = QUICK_ACTION_LIBRARY.find(q=>q.key===btn.dataset.qa);
-      if(!qa) return;
-      if(qa.view===null){ state.view = 'search'; render(); return; }
-      startAddRecord(qa.view);
-    };
-  });
-  document.getElementById('qaAddBtn').onclick = openQuickActionsCustomizeModal;
-  updateQaScrollArrows();
-}
-function updateQaScrollArrows(){
-  const scroller = document.getElementById('topnavQaScroll');
-  const leftBtn = document.getElementById('qaScrollLeft');
-  const rightBtn = document.getElementById('qaScrollRight');
-  if(!scroller || !leftBtn || !rightBtn) return;
-  const keys = state.quickActionPrefs[state.currentUser] || [];
-  const overflowing = scroller.scrollWidth > scroller.clientWidth + 2;
-  const show = overflowing || keys.length >= 2;
-  leftBtn.style.display = show ? 'block' : 'none';
-  rightBtn.style.display = show ? 'block' : 'none';
-}
-function openQuickActionsCustomizeModal(){
-  const current = state.quickActionPrefs[state.currentUser] || [];
-  document.getElementById('modalBody').innerHTML = `<h2 class="display">Your quick actions</h2>
-    <p style="color:var(--ink-soft);font-size:12.5px;line-height:1.5;margin:0 0 4px;">Pick up to ${QUICK_ACTION_MAX} shortcuts to keep in your top bar. Only you see this — everyone can set their own.</p>
-    <div class="qa-picker-list">
-      ${QUICK_ACTION_LIBRARY.map(qa=>`<label class="qa-picker-opt"><input type="checkbox" value="${qa.key}" ${current.includes(qa.key)?'checked':''}>${qa.icon}<span>${esc(qa.label)}</span></label>`).join('')}
-    </div>
-    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="qa_saveBtn">Save</button></div>`;
-  document.getElementById('overlay').classList.add('show');
-  document.getElementById('cancelBtn').onclick = closeModal;
-  const boxes = Array.from(document.querySelectorAll('.qa-picker-list input'));
-  boxes.forEach(cb=>{
-    cb.onchange = ()=>{
-      const checked = boxes.filter(b=>b.checked);
-      if(checked.length > QUICK_ACTION_MAX){
-        cb.checked = false;
-        toast(`You can pick up to ${QUICK_ACTION_MAX} quick actions.`);
-      }
-    };
-  });
-  document.getElementById('qa_saveBtn').onclick = async ()=>{
-    state.quickActionPrefs[state.currentUser] = boxes.filter(b=>b.checked).map(b=>b.value);
-    await saveKey(KEYS.quickActionPrefs, state.quickActionPrefs);
-    closeModal();
-    renderTopnavQuickActions();
-    toast('Quick actions updated.');
-  };
-}
-
 async function saveModal(table, id){
   const isEdit = !!id;
   let obj = isEdit ? state[table].find(x=>x.id===id) : { id: uid(), createdAt: Date.now(), owner: state.viewingAs };
@@ -10612,7 +10725,7 @@ async function saveModal(table, id){
     obj.currencies = msRead('f_curr_order');
     obj.status = document.getElementById('f_status').value;
     obj.trackingNumber = document.getElementById('f_tracking').value.trim();
-    obj.carrierName = document.getElementById('f_carrier').value.trim();
+    obj.carrierName = readCarrierField('f_carrier');
     obj.trackingUrl = document.getElementById('f_trackingUrl').value.trim();
     const confirmBox = document.getElementById('f_sendConfirm');
     sendOrderConfirmationRequested = !!(confirmBox && confirmBox.checked);
@@ -10729,17 +10842,18 @@ async function saveModal(table, id){
 
 /* ---------- Init ---------- */
 document.querySelectorAll('.navlink').forEach(el=>{
-  el.onclick = ()=>{ state.view = el.dataset.view; render(); };
+  el.onclick = ()=>{
+    // Reaching Import / Export from the sidebar means "all data, start
+    // from the top" -- any scope left over from a list's own button, or
+    // a half-finished direction choice, belongs to that visit, not this
+    // one. (The in-progress mapping wizard is left alone deliberately:
+    // importTables surviving a stray nav click is the difference between
+    // a recoverable detour and losing the mapping.)
+    if(el.dataset.view==='rickroll'){ state.ioEntity = null; state.ioMode = null; state.ioReturnView = null; }
+    state.view = el.dataset.view;
+    render();
+  };
 });
-// Topnav buttons
-document.getElementById('tn-dashboard').onclick = ()=>{ state.view='dashboard'; render(); };
-document.getElementById('tn-home').onclick = ()=>{ state.view='home'; render(); };
-document.getElementById('tn-contacts').onclick = ()=>{ state.view='contacts'; render(); };
-document.getElementById('tn-export').onclick = ()=>{ state.view='rickroll'; render(); };
-document.getElementById('tn-search').onclick = ()=>{ state.view='search'; render(); };
-document.getElementById('qaScrollLeft').onclick = ()=>{ document.getElementById('topnavQaScroll').scrollBy({left:-120, behavior:'smooth'}); };
-document.getElementById('qaScrollRight').onclick = ()=>{ document.getElementById('topnavQaScroll').scrollBy({left:120, behavior:'smooth'}); };
-window.addEventListener('resize', updateQaScrollArrows);
 document.getElementById('topbarGuideBtn').onclick = ()=> startObjectWalkthrough(state.view);
 /* ---------- Quick Settings flyout ----------
    The gear opens this rather than jumping straight into the backend. Each row
@@ -10887,6 +11001,18 @@ document.addEventListener('keydown', (e)=>{
 document.getElementById('addBtn').onclick = ()=>{
   const addable = ['contacts','leads','customers','distributors','suppliers','deals','tasks','invoices','payments','team'];
   if(addable.includes(state.view)) startAddRecord(state.view);
+};
+/* Same Import / Export screen, entered pre-scoped to the list you were
+   just looking at. One implementation, many doors -- the alternative
+   (an import wizard per list) would multiply the places real data can
+   be overwritten for no added capability. */
+document.getElementById('ioBtn').onclick = ()=>{
+  if(!EXPORT_SHEETS.some(s=>s.key===state.view)) return;
+  state.ioEntity = state.view;
+  state.ioReturnView = state.view;
+  state.ioMode = null;
+  state.view = 'rickroll';
+  render();
 };
 document.getElementById('overlay').onclick = (e)=>{ if(e.target.id==='overlay') closeModal(); };
 document.getElementById('emlPrevOverlay').onclick = (e)=>{ if(e.target.id==='emlPrevOverlay') closeEmailPreview(); };
