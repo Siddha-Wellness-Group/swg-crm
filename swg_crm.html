@@ -832,36 +832,32 @@
      dot-divided bar. Counts stay real (no new figures, same six values
      as before), just presented at a scale that stops competing with the
      actual customer/order data below it. */
-  /* One card per metric instead of one dense strip. The strip could only
-     fit a number and a percentage, which meant the sentence explaining the
-     percentage lived in a hover title -- invisible on a screen someone
-     scans for ten seconds each morning. A card has room to state the
-     verdict and the figures behind it in the open. */
+  /* Card shape follows the reference Ariel supplied: a tinted icon tile and
+     a bare trend arrow on the top row, then label, figure, and one line of
+     change. The earlier two-line footer said more but read as a paragraph;
+     the figures behind the percentage moved to the card's tooltip. */
   .fc-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px;}
-  .fc-metric{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px 13px;}
-  .fc-metric-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;min-height:20px;}
-  .fc-metric-label{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.6px;font-weight:600;}
-  .fc-metric-num{font-family:'Fraunces',serif;font-size:30px;font-weight:600;line-height:1.15;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:3px;}
-  /* The trend badge sits opposite the label, tinted rather than plain
-     coloured text, so it reads at a glance without competing with the
-     number for weight. */
-  .fc-metric-delta{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;white-space:nowrap;border-radius:999px;padding:3px 8px;border:1px solid transparent;}
-  .fc-metric-delta svg{width:10px;height:10px;flex:none;}
-  .fc-metric-delta.up{color:var(--sage);background:var(--sage-soft);border-color:var(--sage-soft);}
-  .fc-metric-delta.down{color:var(--rust);background:var(--rust-soft);border-color:var(--rust-soft);}
-  .fc-metric-delta.flat{color:var(--ink-soft);background:var(--parchment);border-color:var(--border);}
-  /* Footer: the verdict on one line, the numbers it rests on underneath.
-     Colour matches the badge so a red card is red all the way down. */
-  .fc-metric-foot{margin-top:11px;padding-top:9px;border-top:1px solid var(--border);}
-  .fc-metric-note{display:flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;line-height:1.35;}
-  .fc-metric-note svg{width:11px;height:11px;flex:none;}
+  .fc-metric{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px 17px;}
+  .fc-metric-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;min-height:38px;}
+  .fc-metric-ico{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;flex:none;}
+  .fc-metric-ico svg{width:19px;height:19px;}
+  .fc-metric-trend{display:inline-flex;}
+  .fc-metric-trend svg{width:18px;height:18px;}
+  .fc-metric-trend.up{color:var(--sage);}
+  .fc-metric-trend.down{color:var(--rust);}
+  .fc-metric-label{font-size:12.5px;color:var(--ink-soft);}
+  .fc-metric-num{font-family:'Fraunces',serif;font-size:29px;font-weight:600;line-height:1.15;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:2px;}
+  .fc-metric-note{font-size:12px;font-weight:600;margin-top:7px;line-height:1.4;}
   .fc-metric-note.up{color:var(--sage);}
   .fc-metric-note.down{color:var(--rust);}
   .fc-metric-note.flat{color:var(--ink-soft);}
-  .fc-metric-sub{font-size:11px;color:var(--ink-soft);margin-top:3px;line-height:1.45;}
-  .fc-metric.acc-amber .fc-metric-num{color:var(--amber);}
-  .fc-metric.acc-rust .fc-metric-num{color:var(--rust);}
-  .fc-metric.acc-sage .fc-metric-num{color:var(--sage);}
+  /* One tint per card, drawn from the palette the sidebar already uses to
+     colour-code sections, so the row stays scannable without four identical
+     tiles or four shouting ones. */
+  .fc-metric.ic-amber .fc-metric-ico{background:var(--amber-soft);color:var(--amber);}
+  .fc-metric.ic-ochre .fc-metric-ico{background:var(--ochre-soft);color:var(--ochre);}
+  .fc-metric.ic-umber .fc-metric-ico{background:var(--umber-soft);color:var(--umber);}
+  .fc-metric.ic-sage .fc-metric-ico{background:var(--sage-soft);color:var(--sage);}
 
   /* Filter bar -- pill-shaped compact controls instead of boxy native
      selects. The <select>/<input> elements underneath are untouched
@@ -2819,19 +2815,52 @@ function fcRangePhrases(range){
 function fcDelta(current, previous, phrases, fmt){
   const f = fmt || (n=>n);
   if(!current && !previous) return null;
-  if(!previous) return {text:'new', up:true, good:true, note:`Nothing ${phrases.prev}`, title:`${f(current)} ${phrases.now}, none ${phrases.prev}`};
+  if(!previous) return {up:true, good:true, line:`None ${phrases.prev}`, title:`${f(current)} ${phrases.now}, none ${phrases.prev}`};
   const pct = Math.round(((current-previous)/previous)*100);
   return {
-    text: `${pct>=0?'+':''}${pct}%`,
     up: pct>=0,
-    /* For these three, growth is the good direction, so colour follows the
-       arrow. The snapshot metrics below are the ones where it does not. */
+    /* Growth is the good direction for these, so colour follows the arrow.
+       The snapshot metrics below are the ones where it does not. */
     good: pct>=0,
-    /* The card shows a verdict line above the raw numbers, so each delta
-       carries both: `note` reads as a sentence, `title` stays the figures. */
-    note: `${pct>=0?'Up':'Down'} from ${phrases.prev}`,
+    /* `line` is the whole sentence the card prints; `title` keeps the two
+       figures behind it for the tooltip. */
+    line: `${pct>=0?'+':''}${pct}% from ${phrases.prev}`,
     title: `${f(current)} ${phrases.now} vs ${f(previous)} ${phrases.prev}`,
   };
+}
+/* Revenue is reported per calendar month whatever the range picker says --
+   it is the figure the business actually tracks on a monthly cycle, and a
+   "last 7 days" total invites comparison against a monthly target it is not
+   measuring. Month-to-date against the same stretch of last month, so a
+   half-finished September is never judged against a whole August. */
+function fcMonthlyRevenue(){
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  const prevStart = new Date(now.getFullYear(), now.getMonth()-1, 1).getTime();
+  /* Clamped so a long month cannot run the comparison window past the point
+     the current month started -- February against a 31-day January. */
+  const prevEnd = Math.min(prevStart + (Date.now() - monthStart), monthStart);
+  const sum = (from, to) => state.orders
+    .filter(o=>o.status!=='Cancelled' && (o.createdAt||0) >= from && (o.createdAt||0) < to)
+    .reduce((acc,o)=>acc + toUSD(o.amount, orderCurrency(o)), 0);
+  const span = (from, to) => {
+    const d = t => new Date(t).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    return `${d(from)}–${d(to-1)}`;
+  };
+  return {
+    current: sum(monthStart, Infinity),
+    previous: sum(prevStart, prevEnd),
+    thisSpan: span(monthStart, Date.now()+1),
+    prevSpan: span(prevStart, prevEnd),
+  };
+}
+function fcMonthDelta(m, fmt){
+  const f = fmt || (n=>n);
+  if(!m.current && !m.previous) return null;
+  const detail = `${m.thisSpan}: ${f(m.current)} vs ${m.prevSpan}: ${f(m.previous)}`;
+  if(!m.previous) return {up:true, good:true, line:'No sales last month', title:detail};
+  const pct = Math.round(((m.current-m.previous)/m.previous)*100);
+  return {up:pct>=0, good:pct>=0, line:`${pct>=0?'+':''}${pct}% from last month`, title:detail};
 }
 /* ---- Trends for the metrics that describe right now ------------------
    To fulfill, Shipped and Attention are counts of the current state, so
@@ -2881,21 +2910,16 @@ function fcSnapshotDelta(field, current, range, goodWhenDown){
   const when = fcSnapshotWhen(snap.snapshotDate);
   /* up:null means no direction at all -- the strip skips the arrow and
      uses the muted colour, since an arrow beside "flat" reads as movement. */
-  if(current === previous) return {text:'flat', up:null, note:`Unchanged since ${when}`, title:`${current} now, unchanged from ${when}`};
+  if(current === previous) return {up:null, line:`Unchanged since ${when}`, title:`${current} now, unchanged from ${when}`};
   const up = current > previous;
   const pct = previous ? Math.round(((current-previous)/previous)*100) : null;
-  /* "Growing"/"Shrinking" for a backlog, "Up"/"Down" for a plain count --
-     a queue that grew has not improved, and the word should say so. */
-  const note = pct===null ? `Up from none ${when}`
-    : goodWhenDown ? (up ? `Growing since ${when}` : `Shrinking since ${when}`)
-    : (up ? `Up since ${when}` : `Down since ${when}`);
+  /* No percentage off a base of zero -- "+3" says the useful thing and an
+     infinite percentage says nothing. */
+  const line = pct===null ? `Up ${current} since ${when}` : `${up?'+':''}${pct}% since ${when}`;
   return {
-    /* No percentage off a base of zero -- "+3" says the useful thing and
-       an infinite percentage says nothing. */
-    text: pct===null ? `+${current}` : `${up?'+':''}${pct}%`,
     up,
     good: goodWhenDown ? !up : up,
-    note,
+    line,
     title: `${current} now, ${previous} ${when}`,
   };
 }
@@ -2903,6 +2927,19 @@ function fcSnapshotDelta(field, current, range, goodWhenDown){
    reads as "not measured yet" rather than "nothing happened". The date is
    real: the oldest day in the log plus the window length is the first day
    this range can be answered honestly. */
+/* Three of these come straight from the nav set, so the same concept wears
+   the same glyph wherever it appears in the app -- a shipped order gets the
+   van it has in the sidebar. Money is the exception: the nav's finance icon
+   is a bar chart, which reads as "reports", so sales gets a currency mark. */
+const FC_CARD_ICONS = {
+  customers: NAV_ICONS.customers,
+  orders: NAV_ICONS.orders,
+  shipped: NAV_ICONS.distributors,
+  sales: `<path d="M12 3.4v17.2"/><path d="M16.3 7.4c-.8-1.4-2.4-2.1-4.3-2.1-2.4 0-4.4 1.3-4.4 3.4 0 2.2 1.9 3 4.4 3.6 2.6.6 4.6 1.4 4.6 3.6 0 2.1-2 3.5-4.6 3.5-2 0-3.8-.8-4.6-2.3"/>`,
+};
+function fcCardIcon(key){
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${FC_CARD_ICONS[key]||''}</svg>`;
+}
 function fcSnapshotPending(range){
   const days = Math.round(fcDateRangeMs(range)/86400000);
   const dated = (state.metricSnapshots||[]).filter(s=>s.snapshotDate).map(s=>s.snapshotDate).sort();
@@ -3252,24 +3289,26 @@ function renderFulfillmentCommandCenter(dash){
   // panel at the bottom lists in full, so the two stay in sync by
   // construction rather than two separately-maintained counts.
   const phrases = fcRangePhrases(range);
-  /* `caption` says what the number counts, `blank` covers the case where
-     there is honestly no trend to show -- an empty footer would read as a
-     missing feature rather than as "we have not measured that yet". */
+  const monthly = fcMonthlyRevenue();
+  /* `caption` says what the number counts and is the card's tooltip when no
+     trend exists; `blank` is what the trend line says instead, because an
+     empty line reads as a broken feature rather than an unmeasured one. */
   const noTrend = `Nothing ${phrases.now} or ${phrases.prev}`;
   const pending_ = fcSnapshotPending(range);
   const metrics = [
-    {label:'New customers', value:newCustomers.length, acc:'',
+    {icon:'customers', tint:'ic-amber', label:'New customers', value:newCustomers.length,
      delta:fcDelta(newCustomers.length, prevCustomers, phrases),
      caption:`Customer records created ${phrases.now}`, blank:noTrend},
-    {label:'New orders', value:newOrders.length, acc:'',
+    {icon:'orders', tint:'ic-ochre', label:'New orders', value:newOrders.length,
      delta:fcDelta(newOrders.length, prevOrdersList.length, phrases),
      caption:`Orders placed ${phrases.now}`, blank:noTrend},
-    {label:'Shipped', value:shipped.length, acc:'',
+    {icon:'shipped', tint:'ic-umber', label:'Shipped', value:shipped.length,
      delta:fcSnapshotDelta('shipped', shipped.length, range),
      caption:'Shipped, not yet marked delivered', blank:pending_},
-    {label:'Revenue', value:cpMoney(revenue), acc:'',
-     delta:fcDelta(revenue, prevRevenue, phrases, cpMoney),
-     caption:`Order value ${phrases.now}, cancelled excluded`, blank:noTrend},
+    /* Deliberately not range-scoped -- see fcMonthlyRevenue. */
+    {icon:'sales', tint:'ic-sage', label:'Total sales', value:cpMoney(monthly.current),
+     delta:fcMonthDelta(monthly, cpMoney),
+     caption:`This month to date, cancelled orders excluded`, blank:'No sales yet'},
   ];
 
   return `
@@ -3294,17 +3333,14 @@ function renderFulfillmentCommandCenter(dash){
     <div class="fc-metrics">${metrics.map(m=>{
       const d = m.delta;
       const dir = !d ? 'flat' : (d.up===null ? 'flat' : (d.good ? 'up' : 'down'));
-      const arrow = d && d.up!==null ? trendArrow(d.up) : '';
-      return `<div class="fc-metric ${m.acc}" title="${esc(m.caption)}">
+      return `<div class="fc-metric ${m.tint}" title="${esc(d ? d.title : m.caption)}">
         <div class="fc-metric-top">
-          <span class="fc-metric-label">${esc(m.label)}</span>
-          ${d?`<span class="fc-metric-delta ${dir}">${arrow}${esc(d.text)}</span>`:''}
+          <span class="fc-metric-ico">${fcCardIcon(m.icon)}</span>
+          ${d && d.up!==null ? `<span class="fc-metric-trend ${dir}">${trendArrow(d.up)}</span>` : ''}
         </div>
+        <span class="fc-metric-label">${esc(m.label)}</span>
         <span class="fc-metric-num">${m.value}</span>
-        <div class="fc-metric-foot">
-          <div class="fc-metric-note ${dir}">${arrow}${esc(d ? d.note : m.blank)}</div>
-          <div class="fc-metric-sub">${esc(d ? d.title : m.caption)}</div>
-        </div>
+        <span class="fc-metric-note ${dir}">${esc(d ? d.line : m.blank)}</span>
       </div>`;
     }).join('')}</div>
     ${renderFcFilterBar()}
