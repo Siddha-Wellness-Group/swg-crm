@@ -43,6 +43,10 @@
        the amber/sage/blue already in rotation elsewhere on the page. */
     --violet:#7C3AED;
     --violet-soft:#EDE4FF;
+    --teal:#0F766E;
+    --teal-soft:#D4F3F0;
+    --rose:#BE185D;
+    --rose-soft:#FCE4EF;
     /* Revenue stream identity: Essential Oils reads blue, Siddha Yoga reads green,
        so the two businesses stay distinguishable in every finance chart. */
     --rev-oils:#1B74C0;
@@ -77,6 +81,10 @@
       --setup-blue-soft:#1B2740;
       --violet:#B794F6;
       --violet-soft:#2B2140;
+      --teal:#3FD7CC;
+      --teal-soft:#12332F;
+      --rose:#F778AC;
+      --rose-soft:#3A1B2A;
       --rev-oils:#6CB6F7;
       --rev-oils-soft:#14283C;
       --rev-yoga:#4FD6A2;
@@ -109,6 +117,10 @@
     --setup-blue-soft:#1B2740;
     --violet:#B794F6;
     --violet-soft:#2B2140;
+    --teal:#3FD7CC;
+    --teal-soft:#12332F;
+    --rose:#F778AC;
+    --rose-soft:#3A1B2A;
     --rev-oils:#6CB6F7;
     --rev-oils-soft:#14283C;
     --rev-yoga:#4FD6A2;
@@ -168,17 +180,31 @@
     position:relative;display:flex;align-items:center;gap:10px;padding:8px 10px 8px 11px;border-radius:8px;color:var(--ink-soft);cursor:pointer;margin-bottom:1px;font-size:13.5px;font-weight:500;transition:background .14s,color .14s;}
   /* Regrouped by concept, not by whatever used to share a colour:
      people (green/--sage) -- home, contacts, leads, customers;
-     orders (purple/--violet) -- deals, orders;
-     shipping (orange/--amber) -- distributors, suppliers;
+     orders (purple/--violet) -- orders;
+     shipping (orange/--amber) -- distributors;
      money (blue/--setup-blue) -- finance, invoices, payments, reports.
      Emails and Tickets had no home in any of the four -- each keeps the
      token its old sibling left behind (umber, clay) rather than being
      forced into a bucket it doesn't belong to. Tasks is the same case,
      unchanged on olive. See the palette comment in :root for why blue/
-     green/purple/orange specifically: Ariel's reference image. */
+     green/purple/orange specifically: Ariel's reference image.
+
+     Deals and Suppliers started out sharing Orders' purple and
+     Distributors' orange (same concept bucket, deliberately) but Ariel
+     wanted every section visually distinct, not just concept-grouped --
+     so they get their own hues, teal and rose, picked to fill real gaps
+     on the hue wheel rather than sit next to a colour already in use
+     (teal ~180deg sits between olive's ~90deg and sage's ~157deg; rose
+     ~330deg sits between violet's ~262deg and clay's ~9deg). Every OTHER
+     place Deals used violet (Pipeline value, Open deals, Won value --
+     all genuinely Deals-module metrics) moves to teal with it, so the
+     module stays one colour everywhere it appears; Suppliers' badge
+     moves to rose the same way, Distributors keeps orange alone now. */
   .navlink[data-view="home"],.navlink[data-view="contacts"],.navlink[data-view="leads"],.navlink[data-view="customers"]{--nav-accent:var(--sage);--nav-accent-soft:var(--sage-soft);}
-  .navlink[data-view="deals"],.navlink[data-view="orders"]{--nav-accent:var(--violet);--nav-accent-soft:var(--violet-soft);}
-  .navlink[data-view="distributors"],.navlink[data-view="suppliers"]{--nav-accent:var(--amber);--nav-accent-soft:var(--amber-soft);}
+  .navlink[data-view="orders"]{--nav-accent:var(--violet);--nav-accent-soft:var(--violet-soft);}
+  .navlink[data-view="deals"]{--nav-accent:var(--teal);--nav-accent-soft:var(--teal-soft);}
+  .navlink[data-view="distributors"]{--nav-accent:var(--amber);--nav-accent-soft:var(--amber-soft);}
+  .navlink[data-view="suppliers"]{--nav-accent:var(--rose);--nav-accent-soft:var(--rose-soft);}
   .navlink[data-view="emails"]{--nav-accent:var(--umber);--nav-accent-soft:var(--umber-soft);}
   .navlink[data-view="tickets"]{--nav-accent:var(--clay);--nav-accent-soft:var(--clay-soft);}
   .navlink[data-view="tasks"]{--nav-accent:var(--olive);--nav-accent-soft:var(--olive-soft);}
@@ -246,6 +272,8 @@
   .stat-card.rust .num{color:var(--rust);}
   .stat-card.violet .num{color:var(--violet);}
   .stat-card.blue .num{color:var(--setup-blue);}
+  .stat-card.teal .num{color:var(--teal);}
+  .stat-card.rose .num{color:var(--rose);}
 
   .section-title{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin:26px 0 10px;}
 
@@ -274,7 +302,7 @@
      "bad" and green meaning "good" consistently across every entity, and
      that would break if a status badge were repainted to brand a section
      instead. */
-  .badge.supplier{background:var(--amber-soft);color:var(--amber);}
+  .badge.supplier{background:var(--rose-soft);color:var(--rose);}
   .badge.distributor{background:var(--amber-soft);color:var(--amber);}
   .badge.customer{background:var(--sage-soft);color:var(--sage);}
   .badge.marketing{background:var(--umber-soft);color:var(--umber);}
@@ -2643,8 +2671,8 @@ function renderHome(){
     </div>
     <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px;">
       <div class="stat-card amber"><div class="num mono">${openTasks.length}</div><div class="lbl">Your open tasks</div></div>
-      <div class="stat-card violet"><div class="num mono">${myDeals.length}</div><div class="lbl">Your active deals</div></div>
-      <div class="stat-card violet"><div class="num mono">${myDeals.reduce((s,d)=>s+(Number(d.value)||0),0).toLocaleString()}</div><div class="lbl">Your pipeline value</div></div>
+      <div class="stat-card teal"><div class="num mono">${myDeals.length}</div><div class="lbl">Your active deals</div></div>
+      <div class="stat-card teal"><div class="num mono">${myDeals.reduce((s,d)=>s+(Number(d.value)||0),0).toLocaleString()}</div><div class="lbl">Your pipeline value</div></div>
     </div>
     ${openTasks.length ? `
       <div class="section-title">Your open tasks</div>
@@ -2738,14 +2766,14 @@ function widgetKPI(label, value, colorClass){
    Open deals, say) reading the same colour is the point, not a collision;
    it says "these both come from Deals" the way the nav accent already does. */
 const WIDGET_DEFS = [
-  {key:'kpi_pipeline', label:'Pipeline value', priv:false, render:()=>{ const v=state.deals.filter(d=>d.stage!=='Won'&&d.stage!=='Lost').reduce((s,d)=>s+(Number(d.value)||0),0); return widgetKPI('Pipeline value', v.toLocaleString(), 'violet'); }},
+  {key:'kpi_pipeline', label:'Pipeline value', priv:false, render:()=>{ const v=state.deals.filter(d=>d.stage!=='Won'&&d.stage!=='Lost').reduce((s,d)=>s+(Number(d.value)||0),0); return widgetKPI('Pipeline value', v.toLocaleString(), 'teal'); }},
   {key:'kpi_customers', label:'Customers', priv:false, render:()=>widgetKPI('Customers', state.customers.length, 'sage')},
   {key:'kpi_leads', label:'Leads', priv:false, render:()=>canSeeLeads() ? widgetKPI('Leads', state.leads.length, 'sage') : ''},
-  {key:'kpi_deals', label:'Open deals', priv:false, render:()=>widgetKPI('Open deals', state.deals.filter(d=>d.stage!=='Won'&&d.stage!=='Lost').length, 'violet')},
+  {key:'kpi_deals', label:'Open deals', priv:false, render:()=>widgetKPI('Open deals', state.deals.filter(d=>d.stage!=='Won'&&d.stage!=='Lost').length, 'teal')},
   {key:'kpi_tasks', label:'Open tasks', priv:false, render:()=>widgetKPI('Open tasks', state.tasks.filter(t=>t.status!=='Done').length, 'olive')},
-  {key:'kpi_suppliers', label:'Suppliers', priv:false, render:()=>widgetKPI('Suppliers', state.suppliers.length, 'amber')},
+  {key:'kpi_suppliers', label:'Suppliers', priv:false, render:()=>widgetKPI('Suppliers', state.suppliers.length, 'rose')},
   {key:'kpi_distributors', label:'Distributors', priv:false, render:()=>widgetKPI('Distributors', state.distributors.length, 'amber')},
-  {key:'kpi_won', label:'Won value', priv:false, render:()=>{ const v = state.deals.filter(d=>d.stage==='Won').reduce((s,d)=>s+(Number(d.value)||0),0); return widgetKPI('Won value', v.toLocaleString(), 'violet'); }},
+  {key:'kpi_won', label:'Won value', priv:false, render:()=>{ const v = state.deals.filter(d=>d.stage==='Won').reduce((s,d)=>s+(Number(d.value)||0),0); return widgetKPI('Won value', v.toLocaleString(), 'teal'); }},
   {key:'kpi_invoices', label:'Unpaid invoices', priv:true, render:()=>{ const v=state.invoices.filter(i=>i.status!=='Paid').reduce((s,i)=>s+(Number(i.amount)||0),0); return widgetKPI('Unpaid invoices', v.toLocaleString(), 'blue'); }},
   {key:'kpi_payments', label:'Pending payments', priv:true, render:()=>{ const v=state.payments.filter(p=>p.status!=='Paid').reduce((s,p)=>s+(Number(p.amount)||0),0); return widgetKPI('Pending payments', v.toLocaleString(), 'blue'); }},
   {key:'chart_breakdown', label:'Ledger breakdown chart', priv:false, wide:true, render:(priv)=>renderChart(priv)},
@@ -3427,7 +3455,7 @@ function renderOverviewDashboard(priv){
   const invoiceDelta = overdueInvoices>0 ? {text:`${overdueInvoices} overdue`, up:false} : {text:'all current', up:true};
 
   let secondary = `
-    <div class="stat-card violet"><div class="num mono">${openValue.toLocaleString()}</div><div class="lbl">Pipeline value</div>${deltaHTML(pipelineDelta.text,pipelineDelta.up)}</div>
+    <div class="stat-card teal"><div class="num mono">${openValue.toLocaleString()}</div><div class="lbl">Pipeline value</div>${deltaHTML(pipelineDelta.text,pipelineDelta.up)}</div>
     <div class="stat-card sage"><div class="num mono">${state.customers.length}</div><div class="lbl">Customers</div>${deltaHTML(customerDelta.text,customerDelta.up)}</div>
     <div class="stat-card olive"><div class="num mono">${openTasks.length}</div><div class="lbl">Open tasks</div>${deltaHTML(taskDelta.text,taskDelta.up)}</div>`;
   if(priv) secondary += `<div class="stat-card blue"><div class="num mono">${unpaidValue.toLocaleString()}</div><div class="lbl">Unpaid invoices</div>${deltaHTML(invoiceDelta.text,invoiceDelta.up)}</div>`;
