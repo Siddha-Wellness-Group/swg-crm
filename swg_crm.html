@@ -38,6 +38,11 @@
     --ink-fixed:#221F1A;
     --setup-blue:#2563EB;
     --setup-blue-soft:#DEEAFF;
+    /* Purple has no other home in this palette -- added for the Command
+       Center's metric-card icons, which needed a fourth hue distinct from
+       the amber/sage/blue already in rotation elsewhere on the page. */
+    --violet:#7C3AED;
+    --violet-soft:#EDE4FF;
     /* Revenue stream identity: Essential Oils reads blue, Siddha Yoga reads green,
        so the two businesses stay distinguishable in every finance chart. */
     --rev-oils:#1B74C0;
@@ -70,6 +75,8 @@
       --rust-soft:#3B1F18;
       --setup-blue:#74A4FF;
       --setup-blue-soft:#1B2740;
+      --violet:#B794F6;
+      --violet-soft:#2B2140;
       --rev-oils:#6CB6F7;
       --rev-oils-soft:#14283C;
       --rev-yoga:#4FD6A2;
@@ -100,6 +107,8 @@
     --rust-soft:#3B1F18;
     --setup-blue:#74A4FF;
     --setup-blue-soft:#1B2740;
+    --violet:#B794F6;
+    --violet-soft:#2B2140;
     --rev-oils:#6CB6F7;
     --rev-oils-soft:#14283C;
     --rev-yoga:#4FD6A2;
@@ -851,13 +860,15 @@
   .fc-metric-note.up{color:var(--sage);}
   .fc-metric-note.down{color:var(--rust);}
   .fc-metric-note.flat{color:var(--ink-soft);}
-  /* One tint per card, drawn from the palette the sidebar already uses to
-     colour-code sections, so the row stays scannable without four identical
-     tiles or four shouting ones. */
-  .fc-metric.ic-amber .fc-metric-ico{background:var(--amber-soft);color:var(--amber);}
-  .fc-metric.ic-ochre .fc-metric-ico{background:var(--ochre-soft);color:var(--ochre);}
-  .fc-metric.ic-umber .fc-metric-ico{background:var(--umber-soft);color:var(--umber);}
+  /* Blue/green/purple/orange, matching the reference Ariel sent exactly --
+     one tint per card, picked by icon rather than by metric (his call: the
+     colours matter, which metric gets which doesn't). Blue and violet exist
+     only for this row; green and orange reuse --sage/--amber from the rest
+     of the app rather than adding two more tokens that would duplicate them. */
+  .fc-metric.ic-blue .fc-metric-ico{background:var(--setup-blue-soft);color:var(--setup-blue);}
   .fc-metric.ic-sage .fc-metric-ico{background:var(--sage-soft);color:var(--sage);}
+  .fc-metric.ic-violet .fc-metric-ico{background:var(--violet-soft);color:var(--violet);}
+  .fc-metric.ic-amber .fc-metric-ico{background:var(--amber-soft);color:var(--amber);}
 
   /* Filter bar -- pill-shaped compact controls instead of boxy native
      selects. The <select>/<input> elements underneath are untouched
@@ -3305,17 +3316,17 @@ function renderFulfillmentCommandCenter(dash){
   const noTrend = `Nothing ${phrases.now} or ${phrases.prev}`;
   const pending_ = fcSnapshotPending(range);
   const metrics = [
-    {icon:'customers', tint:'ic-amber', label:'New customers', value:newCustomers.length,
+    {icon:'customers', tint:'ic-sage', label:'New customers', value:newCustomers.length,
      delta:fcDelta(newCustomers.length, prevCustomers, phrases),
      caption:`Customer records created ${phrases.now}`, blank:noTrend},
-    {icon:'orders', tint:'ic-ochre', label:'New orders', value:newOrders.length,
+    {icon:'orders', tint:'ic-violet', label:'New orders', value:newOrders.length,
      delta:fcDelta(newOrders.length, prevOrdersList.length, phrases),
      caption:`Orders placed ${phrases.now}`, blank:noTrend},
-    {icon:'shipped', tint:'ic-umber', label:'Shipped', value:shipped.length,
+    {icon:'shipped', tint:'ic-amber', label:'Shipped', value:shipped.length,
      delta:fcSnapshotDelta('shipped', shipped.length, range),
      caption:'Shipped, not yet marked delivered', blank:pending_},
     /* Deliberately not range-scoped -- see fcMonthlyRevenue. */
-    {icon:'sales', tint:'ic-sage', label:'Total sales', value:cpMoney(monthly.current),
+    {icon:'sales', tint:'ic-blue', label:'Total sales', value:cpMoney(monthly.current),
      delta:fcMonthDelta(monthly, cpMoney),
      caption:`This month to date, cancelled orders excluded`, blank:'No sales yet'},
   ];
