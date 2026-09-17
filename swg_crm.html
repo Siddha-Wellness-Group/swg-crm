@@ -38,6 +38,22 @@
     --ink-fixed:#221F1A;
     --setup-blue:#2563EB;
     --setup-blue-soft:#DEEAFF;
+    /* Purple has no other home in this palette -- added for the Command
+       Center's metric-card icons, which needed a fourth hue distinct from
+       the amber/sage/blue already in rotation elsewhere on the page. */
+    --violet:#7C3AED;
+    --violet-soft:#EDE4FF;
+    --teal:#0F766E;
+    --teal-soft:#D4F3F0;
+    --rose:#BE185D;
+    --rose-soft:#FCE4EF;
+    /* Contacts was the fourth item bundled into the people/green group
+       (home, contacts, leads, customers) -- same treatment as Deals and
+       Suppliers below: pulled out to its own hue so it's not confused
+       with Customers at a glance. ~300deg sits in the real gap between
+       violet (~262deg) and rose (~330deg), nothing else nearby. */
+    --magenta:#A21CAF;
+    --magenta-soft:#FBE5FC;
     /* Revenue stream identity: Essential Oils reads blue, Siddha Yoga reads green,
        so the two businesses stay distinguishable in every finance chart. */
     --rev-oils:#1B74C0;
@@ -70,6 +86,14 @@
       --rust-soft:#3B1F18;
       --setup-blue:#74A4FF;
       --setup-blue-soft:#1B2740;
+      --violet:#B794F6;
+      --violet-soft:#2B2140;
+      --teal:#3FD7CC;
+      --teal-soft:#12332F;
+      --rose:#F778AC;
+      --rose-soft:#3A1B2A;
+      --magenta:#E879F9;
+      --magenta-soft:#3B1240;
       --rev-oils:#6CB6F7;
       --rev-oils-soft:#14283C;
       --rev-yoga:#4FD6A2;
@@ -100,6 +124,14 @@
     --rust-soft:#3B1F18;
     --setup-blue:#74A4FF;
     --setup-blue-soft:#1B2740;
+    --violet:#B794F6;
+    --violet-soft:#2B2140;
+    --teal:#3FD7CC;
+    --teal-soft:#12332F;
+    --rose:#F778AC;
+    --rose-soft:#3A1B2A;
+    --magenta:#E879F9;
+    --magenta-soft:#3B1240;
     --rev-oils:#6CB6F7;
     --rev-oils-soft:#14283C;
     --rev-yoga:#4FD6A2;
@@ -143,10 +175,9 @@
   .sidebar.collapsed .brand-row{flex-direction:column;gap:4px;justify-content:center;margin-bottom:14px;}
   .sidebar.collapsed .brand-actions{flex-direction:column;gap:2px;}
   .sidebar.collapsed .navlink{justify-content:center;gap:0;padding-left:0;padding-right:0;}
-  /* The two hairlines that separate Search and Import/Export from the
-     object list would otherwise sit at full row width in a 58px rail. */
+  /* The hairline that separates Search from the object list would
+     otherwise sit at full row width in a 58px rail. */
   .sidebar.collapsed .navlink-search{padding-bottom:9px;margin-bottom:6px;}
-  .sidebar.collapsed .navlink-util{padding-top:9px;margin-top:6px;}
   .sidebar-toggle-chevron{transition:transform .16s ease;transform-origin:14px 12px;}
   .sidebar.collapsed .sidebar-toggle-chevron{transform:rotate(180deg);}
   .setup-back-btn{display:flex;align-items:center;gap:6px;padding:8px 14px 8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;flex-shrink:0;}
@@ -157,14 +188,49 @@
      a per-view rule for the dot and another for the active background. */
   .navlink{--nav-accent:var(--ink-fixed);--nav-accent-soft:var(--cream);
     position:relative;display:flex;align-items:center;gap:10px;padding:8px 10px 8px 11px;border-radius:8px;color:var(--ink-soft);cursor:pointer;margin-bottom:1px;font-size:13.5px;font-weight:500;transition:background .14s,color .14s;}
-  .navlink[data-view="home"],.navlink[data-view="contacts"]{--nav-accent:var(--amber);--nav-accent-soft:var(--amber-soft);}
-  .navlink[data-view="leads"],.navlink[data-view="deals"]{--nav-accent:var(--ochre);--nav-accent-soft:var(--ochre-soft);}
-  .navlink[data-view="customers"],.navlink[data-view="finance"]{--nav-accent:var(--sage);--nav-accent-soft:var(--sage-soft);}
-  .navlink[data-view="distributors"],.navlink[data-view="orders"],.navlink[data-view="emails"]{--nav-accent:var(--umber);--nav-accent-soft:var(--umber-soft);}
-  .navlink[data-view="suppliers"],.navlink[data-view="tickets"]{--nav-accent:var(--clay);--nav-accent-soft:var(--clay-soft);}
-  .navlink[data-view="tasks"]{--nav-accent:var(--olive);--nav-accent-soft:var(--olive-soft);}
-  .navlink[data-view="reports"]{--nav-accent:var(--setup-blue);--nav-accent-soft:var(--setup-blue-soft);}
-  .navlink[data-view="invoices"],.navlink[data-view="payments"]{--nav-accent:var(--rust);--nav-accent-soft:var(--rust-soft);}
+  /* Nav accents, current state (evolved over several rounds with Ariel --
+     see git log for the reasoning behind each individual hue if you need
+     the history; this comment describes where things ended up, not how
+     they got there, so it doesn't grow another paragraph every round):
+
+     Home stands alone on black/--ink-fixed -- deliberately the odd one
+     out, not part of any coloured group, since it's the entry point
+     rather than a data section.
+     People (green/--sage): Leads, Customers.
+     Orders (purple/--violet): Orders.
+     Deals (teal/--teal): Deals -- plus every genuinely Deals-module
+       metric elsewhere (Pipeline value, Open deals, Won value), so the
+       module reads as one colour wherever it shows up, not just in nav.
+     Shipping (orange/--amber): Contacts.
+     Suppliers (rose/--rose): Suppliers, and its entity-type badge.
+     Distributors (magenta/--magenta): Distributors, and its entity-type
+       badge. Contacts and Distributors swapped colours from where the
+       concept mapping first put them, on Ariel's call.
+     Operations (blue/--setup-blue): Tasks, Finance, Reports, Invoices,
+       Payments -- one colour for the whole Operations nav group, Tasks
+       included even though it isn't a money concept, because Ariel
+       wanted the group visually unified rather than Tasks standing out
+       as the one non-blue item in it. Every other Tasks metric (the
+       Overview stat card, the widget-picker card, Home's mini-stat)
+       moves with it for the same one-module-one-colour reason as Deals.
+     Support (red/--rust): Emails, Tickets -- both on Ariel's call, no
+       concept-bucket reasoning behind it.
+
+     Status/state badges (Pending/Shipped/Delivered/Cancelled, Paid/
+     Unpaid/Overdue, lead stages, task Open/Done) are a different system
+     entirely and never draw from this -- see the comment at badge.supplier
+     for why. Same for the Overview donut/bar chart and the Finance/Email
+     KPI rows, which need every colour mutually distinct on one screen and
+     stay on their original, wider palette. */
+  .navlink[data-view="home"]{--nav-accent:var(--ink-fixed);--nav-accent-soft:var(--cream);}
+  .navlink[data-view="leads"],.navlink[data-view="customers"]{--nav-accent:var(--sage);--nav-accent-soft:var(--sage-soft);}
+  .navlink[data-view="contacts"]{--nav-accent:var(--amber);--nav-accent-soft:var(--amber-soft);}
+  .navlink[data-view="orders"]{--nav-accent:var(--violet);--nav-accent-soft:var(--violet-soft);}
+  .navlink[data-view="deals"]{--nav-accent:var(--teal);--nav-accent-soft:var(--teal-soft);}
+  .navlink[data-view="distributors"]{--nav-accent:var(--magenta);--nav-accent-soft:var(--magenta-soft);}
+  .navlink[data-view="suppliers"]{--nav-accent:var(--rose);--nav-accent-soft:var(--rose-soft);}
+  .navlink[data-view="emails"],.navlink[data-view="tickets"]{--nav-accent:var(--rust);--nav-accent-soft:var(--rust-soft);}
+  .navlink[data-view="tasks"],.navlink[data-view="finance"],.navlink[data-view="reports"],.navlink[data-view="invoices"],.navlink[data-view="payments"]{--nav-accent:var(--setup-blue);--nav-accent-soft:var(--setup-blue-soft);}
   .navlink .nav-ico{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);transition:color .14s;}
   .navlink .nav-ico svg{width:100%;height:100%;display:block;}
   .navlink:hover{background:var(--nav-accent-soft);color:var(--ink);}
@@ -177,7 +243,6 @@
      are tools that act on the whole ledger rather than another place to
      browse, so a hairline keeps them from reading as "one more object". */
   .navlink-search{margin-bottom:8px;padding-bottom:11px;border-bottom:1px solid var(--border);}
-  .navlink-util{margin-top:8px;padding-top:11px;border-top:1px solid var(--border);}
   .navlink.hidden-role{display:none;}
   .nav-group-label{font-size:9.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1.1px;padding:0 11px;margin:16px 0 5px;opacity:.75;}
   .nav-group-label:first-of-type{margin-top:0;}
@@ -226,6 +291,10 @@
   .stat-card.umber .num{color:var(--umber);}
   .stat-card.olive .num{color:var(--olive);}
   .stat-card.rust .num{color:var(--rust);}
+  .stat-card.violet .num{color:var(--violet);}
+  .stat-card.blue .num{color:var(--setup-blue);}
+  .stat-card.teal .num{color:var(--teal);}
+  .stat-card.rose .num{color:var(--rose);}
 
   .section-title{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin:26px 0 10px;}
 
@@ -245,8 +314,17 @@
   .row-actions span:hover{color:var(--ink);}
 
   .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;}
-  .badge.supplier{background:var(--clay-soft);color:var(--clay);}
-  .badge.distributor{background:var(--ochre-soft);color:var(--ochre);}
+  /* supplier/distributor are entity-type tags, not workflow state, so they
+     follow the nav's shipping bucket (orange). customer already matched
+     the people bucket (green) and needed no change. Every OTHER badge
+     below is a status/state indicator (paid, overdue, cancelled, lead
+     stage...) and stays on its semantic colour deliberately: a team
+     scanning this table for what needs attention relies on red meaning
+     "bad" and green meaning "good" consistently across every entity, and
+     that would break if a status badge were repainted to brand a section
+     instead. */
+  .badge.supplier{background:var(--rose-soft);color:var(--rose);}
+  .badge.distributor{background:var(--magenta-soft);color:var(--magenta);}
   .badge.customer{background:var(--sage-soft);color:var(--sage);}
   .badge.marketing{background:var(--umber-soft);color:var(--umber);}
   .badge.pending{background:var(--amber-soft);color:var(--amber);}
@@ -832,21 +910,34 @@
      dot-divided bar. Counts stay real (no new figures, same six values
      as before), just presented at a scale that stops competing with the
      actual customer/order data below it. */
-  .fc-metrics{display:flex;flex-wrap:wrap;border:1px solid var(--border);border-radius:8px;background:var(--surface);margin-bottom:18px;}
-  .fc-metric{display:flex;align-items:baseline;gap:6px;padding:10px 18px;border-right:1px solid var(--border);min-width:118px;}
-  .fc-metric:last-child{border-right:none;}
-  .fc-metric-num{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;}
-  .fc-metric-label{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.5px;}
-  /* Trend sits after the label, small enough that the strip stays one row.
-     The arrow is the same trendArrow() the Overview stat cards use. */
-  .fc-metric-delta{display:inline-flex;align-items:center;gap:2px;font-size:10.5px;font-weight:600;white-space:nowrap;}
-  .fc-metric-delta svg{width:9px;height:9px;flex:none;}
-  .fc-metric-delta.up{color:var(--sage);}
-  .fc-metric-delta.down{color:var(--rust);}
-  .fc-metric-delta.flat{color:var(--ink-soft);}
-  .fc-metric.acc-amber .fc-metric-num{color:var(--amber);}
-  .fc-metric.acc-rust .fc-metric-num{color:var(--rust);}
-  .fc-metric.acc-sage .fc-metric-num{color:var(--sage);}
+  /* Card shape follows the reference Ariel supplied: a tinted icon tile and
+     a bare trend arrow on the top row, then label, figure, and one line of
+     change. The earlier two-line footer said more but read as a paragraph;
+     the figures behind the percentage moved to the card's tooltip. */
+  .fc-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px;}
+  .fc-metric{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px 17px;}
+  .fc-metric-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;min-height:38px;}
+  .fc-metric-ico{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;flex:none;}
+  .fc-metric-ico svg{width:19px;height:19px;}
+  .fc-metric-trend{display:inline-flex;}
+  .fc-metric-trend svg{width:18px;height:18px;}
+  .fc-metric-trend.up{color:var(--sage);}
+  .fc-metric-trend.down{color:var(--rust);}
+  .fc-metric-label{font-size:12.5px;color:var(--ink-soft);}
+  .fc-metric-num{font-family:'Fraunces',serif;font-size:29px;font-weight:600;line-height:1.15;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:2px;}
+  .fc-metric-note{font-size:12px;font-weight:600;margin-top:7px;line-height:1.4;}
+  .fc-metric-note.up{color:var(--sage);}
+  .fc-metric-note.down{color:var(--rust);}
+  .fc-metric-note.flat{color:var(--ink-soft);}
+  /* Blue/green/purple/orange, matching the reference Ariel sent exactly --
+     one tint per card, picked by icon rather than by metric (his call: the
+     colours matter, which metric gets which doesn't). Blue and violet exist
+     only for this row; green and orange reuse --sage/--amber from the rest
+     of the app rather than adding two more tokens that would duplicate them. */
+  .fc-metric.ic-blue .fc-metric-ico{background:var(--setup-blue-soft);color:var(--setup-blue);}
+  .fc-metric.ic-sage .fc-metric-ico{background:var(--sage-soft);color:var(--sage);}
+  .fc-metric.ic-violet .fc-metric-ico{background:var(--violet-soft);color:var(--violet);}
+  .fc-metric.ic-amber .fc-metric-ico{background:var(--amber-soft);color:var(--amber);}
 
   /* Filter bar -- pill-shaped compact controls instead of boxy native
      selects. The <select>/<input> elements underneath are untouched
@@ -989,12 +1080,12 @@
   .fc-timeline-item:last-child{border-left-color:transparent;padding-bottom:0;}
   .fc-timeline-dot{position:absolute;left:-5px;top:1px;width:8px;height:8px;border-radius:50%;background:var(--amber);border:2px solid var(--surface);}
 
-  @media (max-width:900px){
-    .fc-metric{min-width:33%;}
+  @media (max-width:1200px){
+    .fc-metrics{grid-template-columns:repeat(2,minmax(0,1fr));}
   }
   @media (max-width:640px){
     .fc-drawer{width:100%;max-width:100%;}
-    .fc-metric{min-width:50%;}
+    .fc-metrics{grid-template-columns:minmax(0,1fr);}
   }
   .donut-wrap{display:flex;align-items:center;gap:34px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-bottom:24px;flex-wrap:wrap;}
   .donut{width:220px;height:220px;border-radius:50%;flex-shrink:0;position:relative;}
@@ -1297,7 +1388,6 @@
     <div class="nav-group-label" data-nav-group="workspace">Workspace</div>
     <div class="navlink" data-view="home" data-nav-group="workspace"><span class="nav-ico"></span><span class="nav-label">Home</span></div>
     <div class="navlink active" data-view="dashboard" data-nav-group="workspace"><span class="nav-ico"></span><span class="nav-label">Dashboard</span></div>
-    <div class="navlink" data-view="reports" data-nav-group="workspace"><span class="nav-ico"></span><span class="nav-label">Reports</span></div>
     <div class="nav-group-label" data-nav-group="records">Records</div>
     <div class="navlink" data-view="contacts" data-nav-group="records"><span class="nav-ico"></span><span class="nav-label">Contacts</span></div>
     <div class="navlink" data-view="leads" data-nav-group="records"><span class="nav-ico"></span><span class="nav-label">Leads</span></div>
@@ -1311,13 +1401,13 @@
     <div class="navlink" data-view="invoices" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Invoices</span></div>
     <div class="navlink" data-view="payments" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Payments</span></div>
     <div class="navlink" data-view="finance" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Finance</span></div>
+    <div class="navlink" data-view="reports" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Reports</span></div>
     <div class="nav-group-label" data-nav-group="support">Support</div>
     <div class="navlink" data-view="emails" data-nav-group="support"><span class="nav-ico"></span><span class="nav-label">Emails</span></div>
     <div class="navlink" data-view="tickets" data-nav-group="support"><span class="nav-ico"></span><span class="nav-label">Tickets</span></div>
     <div class="nav-group-label" data-nav-group="admin">Admin</div>
     <div class="navlink" data-view="team" data-nav-group="admin"><span class="nav-ico"></span><span class="nav-label">Team</span></div>
     <div class="navlink" data-view="administration" data-nav-group="admin"><span class="nav-ico"></span><span class="nav-label">Administration</span></div>
-    <div class="navlink navlink-util" data-view="rickroll" data-nav-group="admin"><span class="nav-ico"></span><span class="nav-label">Import / Export</span></div>
     <div class="sidebar-foot">
       <div id="identityAdmin" style="display:none;">
         <div class="foot-label">Viewing as</div>
@@ -1545,11 +1635,20 @@ function paintNavIcons(){
     if(slot && !slot.innerHTML) slot.innerHTML = navIconSVG(el.dataset.view);
   });
 }
+/* Drives the topbar's title dot and each page's primary button (both read
+   var(--accent), set from here per render -- see the setProperty call
+   below). Was never updated when the sidebar nav accents were reworked
+   this session, so it silently kept showing the pre-recolour palette on
+   every page's dot and "+ Add" button while the sidebar itself had
+   already moved on -- caught while making this round of changes. Kept in
+   sync with the .navlink rules above by hand; there being two places that
+   both need to agree is the real cost of not deriving one from the other,
+   noted here so the next colour change remembers to touch both. */
 const ACCENTS = {
-  dashboard:'var(--ink-fixed)', home:'var(--amber)', contacts:'var(--amber)', leads:'var(--ochre)', customers:'var(--sage)',
-  distributors:'var(--umber)', suppliers:'var(--clay)', deals:'var(--ochre)', orders:'var(--umber)',
-  tasks:'var(--olive)', invoices:'var(--rust)', payments:'var(--rust)', team:'var(--ink)', finance:'var(--sage)',
-  emails:'var(--umber)', tickets:'var(--clay)', search:'var(--ink)', rickroll:'var(--ink)',
+  dashboard:'var(--ink-fixed)', home:'var(--ink-fixed)', contacts:'var(--amber)', leads:'var(--sage)', customers:'var(--sage)',
+  distributors:'var(--magenta)', suppliers:'var(--rose)', deals:'var(--teal)', orders:'var(--violet)',
+  tasks:'var(--setup-blue)', invoices:'var(--setup-blue)', payments:'var(--setup-blue)', team:'var(--ink)', finance:'var(--setup-blue)',
+  emails:'var(--rust)', tickets:'var(--rust)', search:'var(--ink)', rickroll:'var(--ink)',
   reports:'var(--setup-blue)', administration:'var(--setup-blue)'
 };
 const CONTINENTS = ['Africa','Asia','Europe','North America','South America','Oceania','Middle East'];
@@ -2600,9 +2699,9 @@ function renderHome(){
       <div class="sub2">Here's your personal snapshot.</div>
     </div>
     <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px;">
-      <div class="stat-card amber"><div class="num mono">${openTasks.length}</div><div class="lbl">Your open tasks</div></div>
-      <div class="stat-card sage"><div class="num mono">${myDeals.length}</div><div class="lbl">Your active deals</div></div>
-      <div class="stat-card ochre"><div class="num mono">${myDeals.reduce((s,d)=>s+(Number(d.value)||0),0).toLocaleString()}</div><div class="lbl">Your pipeline value</div></div>
+      <div class="stat-card blue"><div class="num mono">${openTasks.length}</div><div class="lbl">Your open tasks</div></div>
+      <div class="stat-card teal"><div class="num mono">${myDeals.length}</div><div class="lbl">Your active deals</div></div>
+      <div class="stat-card teal"><div class="num mono">${myDeals.reduce((s,d)=>s+(Number(d.value)||0),0).toLocaleString()}</div><div class="lbl">Your pipeline value</div></div>
     </div>
     ${openTasks.length ? `
       <div class="section-title">Your open tasks</div>
@@ -2689,17 +2788,23 @@ function renderDashboard(){
 function widgetKPI(label, value, colorClass){
   return `<div class="stat-card ${colorClass}"><div class="num mono">${value}</div><div class="lbl">${esc(label)}</div></div>`;
 }
+/* Colours here follow the same four-bucket regrouping as the nav (people/
+   orders/shipping/money) rather than the individual palette values these
+   widgets used before -- a user can add any combination to a custom
+   dashboard, so two widgets from the same real-world section (Pipeline +
+   Open deals, say) reading the same colour is the point, not a collision;
+   it says "these both come from Deals" the way the nav accent already does. */
 const WIDGET_DEFS = [
-  {key:'kpi_pipeline', label:'Pipeline value', priv:false, render:()=>{ const v=state.deals.filter(d=>d.stage!=='Won'&&d.stage!=='Lost').reduce((s,d)=>s+(Number(d.value)||0),0); return widgetKPI('Pipeline value', v.toLocaleString(), 'ochre'); }},
+  {key:'kpi_pipeline', label:'Pipeline value', priv:false, render:()=>{ const v=state.deals.filter(d=>d.stage!=='Won'&&d.stage!=='Lost').reduce((s,d)=>s+(Number(d.value)||0),0); return widgetKPI('Pipeline value', v.toLocaleString(), 'teal'); }},
   {key:'kpi_customers', label:'Customers', priv:false, render:()=>widgetKPI('Customers', state.customers.length, 'sage')},
-  {key:'kpi_leads', label:'Leads', priv:false, render:()=>canSeeLeads() ? widgetKPI('Leads', state.leads.length, 'ochre') : ''},
-  {key:'kpi_deals', label:'Open deals', priv:false, render:()=>widgetKPI('Open deals', state.deals.filter(d=>d.stage!=='Won'&&d.stage!=='Lost').length, 'ochre')},
-  {key:'kpi_tasks', label:'Open tasks', priv:false, render:()=>widgetKPI('Open tasks', state.tasks.filter(t=>t.status!=='Done').length, 'olive')},
-  {key:'kpi_suppliers', label:'Suppliers', priv:false, render:()=>widgetKPI('Suppliers', state.suppliers.length, 'clay')},
-  {key:'kpi_distributors', label:'Distributors', priv:false, render:()=>widgetKPI('Distributors', state.distributors.length, 'umber')},
-  {key:'kpi_won', label:'Won value', priv:false, render:()=>{ const v = state.deals.filter(d=>d.stage==='Won').reduce((s,d)=>s+(Number(d.value)||0),0); return widgetKPI('Won value', v.toLocaleString(), 'sage'); }},
-  {key:'kpi_invoices', label:'Unpaid invoices', priv:true, render:()=>{ const v=state.invoices.filter(i=>i.status!=='Paid').reduce((s,i)=>s+(Number(i.amount)||0),0); return widgetKPI('Unpaid invoices', v.toLocaleString(), 'rust'); }},
-  {key:'kpi_payments', label:'Pending payments', priv:true, render:()=>{ const v=state.payments.filter(p=>p.status!=='Paid').reduce((s,p)=>s+(Number(p.amount)||0),0); return widgetKPI('Pending payments', v.toLocaleString(), 'clay'); }},
+  {key:'kpi_leads', label:'Leads', priv:false, render:()=>canSeeLeads() ? widgetKPI('Leads', state.leads.length, 'sage') : ''},
+  {key:'kpi_deals', label:'Open deals', priv:false, render:()=>widgetKPI('Open deals', state.deals.filter(d=>d.stage!=='Won'&&d.stage!=='Lost').length, 'teal')},
+  {key:'kpi_tasks', label:'Open tasks', priv:false, render:()=>widgetKPI('Open tasks', state.tasks.filter(t=>t.status!=='Done').length, 'blue')},
+  {key:'kpi_suppliers', label:'Suppliers', priv:false, render:()=>widgetKPI('Suppliers', state.suppliers.length, 'rose')},
+  {key:'kpi_distributors', label:'Distributors', priv:false, render:()=>widgetKPI('Distributors', state.distributors.length, 'amber')},
+  {key:'kpi_won', label:'Won value', priv:false, render:()=>{ const v = state.deals.filter(d=>d.stage==='Won').reduce((s,d)=>s+(Number(d.value)||0),0); return widgetKPI('Won value', v.toLocaleString(), 'teal'); }},
+  {key:'kpi_invoices', label:'Unpaid invoices', priv:true, render:()=>{ const v=state.invoices.filter(i=>i.status!=='Paid').reduce((s,i)=>s+(Number(i.amount)||0),0); return widgetKPI('Unpaid invoices', v.toLocaleString(), 'blue'); }},
+  {key:'kpi_payments', label:'Pending payments', priv:true, render:()=>{ const v=state.payments.filter(p=>p.status!=='Paid').reduce((s,p)=>s+(Number(p.amount)||0),0); return widgetKPI('Pending payments', v.toLocaleString(), 'blue'); }},
   {key:'chart_breakdown', label:'Ledger breakdown chart', priv:false, wide:true, render:(priv)=>renderChart(priv)},
   {key:'chart_revenue', label:'Revenue trend', priv:true, wide:true, render:()=>`<div class="donut-wrap">${renderRevenueChart()}</div>`},
   {key:'list_recent', label:'Recent activity', priv:false, wide:true, render:()=>`<div class="section-title">Recent activity</div>${renderRecent()}`},
@@ -2804,16 +2909,52 @@ function fcRangePhrases(range){
 function fcDelta(current, previous, phrases, fmt){
   const f = fmt || (n=>n);
   if(!current && !previous) return null;
-  if(!previous) return {text:'new', up:true, good:true, title:`${f(current)} ${phrases.now}, none ${phrases.prev}`};
+  if(!previous) return {up:true, good:true, line:`None ${phrases.prev}`, title:`${f(current)} ${phrases.now}, none ${phrases.prev}`};
   const pct = Math.round(((current-previous)/previous)*100);
   return {
-    text: `${pct>=0?'+':''}${pct}%`,
     up: pct>=0,
-    /* For these three, growth is the good direction, so colour follows the
-       arrow. The snapshot metrics below are the ones where it does not. */
+    /* Growth is the good direction for these, so colour follows the arrow.
+       The snapshot metrics below are the ones where it does not. */
     good: pct>=0,
+    /* `line` is the whole sentence the card prints; `title` keeps the two
+       figures behind it for the tooltip. */
+    line: `${pct>=0?'+':''}${pct}% from ${phrases.prev}`,
     title: `${f(current)} ${phrases.now} vs ${f(previous)} ${phrases.prev}`,
   };
+}
+/* Revenue is reported per calendar month whatever the range picker says --
+   it is the figure the business actually tracks on a monthly cycle, and a
+   "last 7 days" total invites comparison against a monthly target it is not
+   measuring. Month-to-date against the same stretch of last month, so a
+   half-finished September is never judged against a whole August. */
+function fcMonthlyRevenue(){
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  const prevStart = new Date(now.getFullYear(), now.getMonth()-1, 1).getTime();
+  /* Clamped so a long month cannot run the comparison window past the point
+     the current month started -- February against a 31-day January. */
+  const prevEnd = Math.min(prevStart + (Date.now() - monthStart), monthStart);
+  const sum = (from, to) => state.orders
+    .filter(o=>o.status!=='Cancelled' && (o.createdAt||0) >= from && (o.createdAt||0) < to)
+    .reduce((acc,o)=>acc + toUSD(o.amount, orderCurrency(o)), 0);
+  const span = (from, to) => {
+    const d = t => new Date(t).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    return `${d(from)}–${d(to-1)}`;
+  };
+  return {
+    current: sum(monthStart, Infinity),
+    previous: sum(prevStart, prevEnd),
+    thisSpan: span(monthStart, Date.now()+1),
+    prevSpan: span(prevStart, prevEnd),
+  };
+}
+function fcMonthDelta(m, fmt){
+  const f = fmt || (n=>n);
+  if(!m.current && !m.previous) return null;
+  const detail = `${m.thisSpan}: ${f(m.current)} vs ${m.prevSpan}: ${f(m.previous)}`;
+  if(!m.previous) return {up:true, good:true, line:'No sales last month', title:detail};
+  const pct = Math.round(((m.current-m.previous)/m.previous)*100);
+  return {up:pct>=0, good:pct>=0, line:`${pct>=0?'+':''}${pct}% from last month`, title:detail};
 }
 /* ---- Trends for the metrics that describe right now ------------------
    To fulfill, Shipped and Attention are counts of the current state, so
@@ -2863,17 +3004,52 @@ function fcSnapshotDelta(field, current, range, goodWhenDown){
   const when = fcSnapshotWhen(snap.snapshotDate);
   /* up:null means no direction at all -- the strip skips the arrow and
      uses the muted colour, since an arrow beside "flat" reads as movement. */
-  if(current === previous) return {text:'flat', up:null, title:`${current} now, unchanged from ${when}`};
+  if(current === previous) return {up:null, line:`Unchanged since ${when}`, title:`${current} now, unchanged from ${when}`};
   const up = current > previous;
   const pct = previous ? Math.round(((current-previous)/previous)*100) : null;
+  /* No percentage off a base of zero -- "+3" says the useful thing and an
+     infinite percentage says nothing. */
+  const line = pct===null ? `Up ${current} since ${when}` : `${up?'+':''}${pct}% since ${when}`;
   return {
-    /* No percentage off a base of zero -- "+3" says the useful thing and
-       an infinite percentage says nothing. */
-    text: pct===null ? `+${current}` : `${up?'+':''}${pct}%`,
     up,
     good: goodWhenDown ? !up : up,
+    line,
     title: `${current} now, ${previous} ${when}`,
   };
+}
+/* Why a state metric has no trend yet, in one line, so the empty space
+   reads as "not measured yet" rather than "nothing happened". The date is
+   real: the oldest day in the log plus the window length is the first day
+   this range can be answered honestly. */
+/* Three of these come straight from the nav set, so the same concept wears
+   the same glyph wherever it appears in the app -- a shipped order gets the
+   van it has in the sidebar. Money is the exception: the nav's finance icon
+   is a bar chart, which reads as "reports", so sales gets a currency mark. */
+const FC_CARD_ICONS = {
+  customers: NAV_ICONS.customers,
+  orders: NAV_ICONS.orders,
+  shipped: NAV_ICONS.distributors,
+  sales: `<path d="M12 3.4v17.2"/><path d="M16.3 7.4c-.8-1.4-2.4-2.1-4.3-2.1-2.4 0-4.4 1.3-4.4 3.4 0 2.2 1.9 3 4.4 3.6 2.6.6 4.6 1.4 4.6 3.6 0 2.1-2 3.5-4.6 3.5-2 0-3.8-.8-4.6-2.3"/>`,
+};
+function fcCardIcon(key){
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${FC_CARD_ICONS[key]||''}</svg>`;
+}
+/* A rising line with an arrowhead, not the plain chevron trendArrow() draws.
+   Deliberately only here: on the Overview stat cards that chevron sits inline
+   at 11px next to its text, where a three-segment zigzag turns to mush, while
+   this one stands alone at 18px with room to read as a trend. */
+function fcTrendIcon(up){
+  const line = up ? 'M22 7 13.5 15.5 8.5 10.5 2 17' : 'M22 17 13.5 8.5 8.5 13.5 2 7';
+  const head = up ? 'M16 7h6v6' : 'M16 17h6v-6';
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${line}"/><path d="${head}"/></svg>`;
+}
+function fcSnapshotPending(range){
+  const days = Math.round(fcDateRangeMs(range)/86400000);
+  const dated = (state.metricSnapshots||[]).filter(s=>s.snapshotDate).map(s=>s.snapshotDate).sort();
+  if(!dated.length) return 'Daily log starts tonight';
+  const from = new Date(dated[0]+'T00:00:00');
+  from.setDate(from.getDate() + days);
+  return `Trend from ${from.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
 }
 function fcCustomerStatus(customer){
   return customerOrders(customer).some(o=>o.status!=='Cancelled') ? 'Active' : 'New';
@@ -2907,9 +3083,9 @@ function renderFcDrawerOverview(cust, stats){
   return `
     <div class="section-title" style="margin-top:0;">Customer summary</div>
     <div class="stat-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:18px;">
-      ${widgetKPI('Total orders', stats.totalOrders, 'sage')}
-      ${widgetKPI('Total spent', stats.totalOrders ? cpMoney(stats.totalSpent) : '—', 'ochre')}
-      ${widgetKPI('Avg order value', stats.totalOrders ? cpMoney(stats.aov) : '—', 'umber')}
+      ${widgetKPI('Total orders', stats.totalOrders, 'violet')}
+      ${widgetKPI('Total spent', stats.totalOrders ? cpMoney(stats.totalSpent) : '—', 'blue')}
+      ${widgetKPI('Avg order value', stats.totalOrders ? cpMoney(stats.aov) : '—', 'blue')}
       ${widgetKPI('Last order', stats.lastOrder ? cpRelative(stats.lastOrder.createdAt) : '—', 'clay')}
     </div>
     <div style="display:flex;gap:8px;">
@@ -3195,24 +3371,20 @@ function renderFulfillmentCommandCenter(dash){
   const since = Date.now() - windowMs;
   const newCustomers = state.customers.filter(c=>(c.createdAt||0) >= since);
   const newOrders = state.orders.filter(o=>(o.createdAt||0) >= since);
-  const pending = state.orders.filter(o=>o.status==='Pending');
   const shipped = state.orders.filter(o=>o.status==='Shipped');
   const revenue = newOrders.filter(o=>o.status!=='Cancelled').reduce((s,o)=>s+toUSD(o.amount, orderCurrency(o)), 0);
 
   /* The window immediately before the selected one, same length, so the
      comparison is like-for-like whichever range is picked. This works only
-     for the three metrics genuinely counted over a period -- to fulfill /
-     shipped / attention describe right now, and get their trend from the
-     nightly metric_snapshots log instead (fcSnapshotDelta), because the
-     current rows cannot say what those counts were a week ago. */
+     for metrics genuinely counted over a period -- Shipped describes right
+     now, so it gets its trend from the nightly metric_snapshots log instead
+     (fcSnapshotDelta), because the current rows cannot say what that count
+     was a week ago. */
   const prevFrom = since - windowMs;
   const inPrev = ts => ts >= prevFrom && ts < since;
   const prevCustomers = state.customers.filter(c=>inPrev(c.createdAt||0)).length;
   const prevOrdersList = state.orders.filter(o=>inPrev(o.createdAt||0));
   const prevRevenue = prevOrdersList.filter(o=>o.status!=='Cancelled').reduce((s,o)=>s+toUSD(o.amount, orderCurrency(o)), 0);
-  const attn = requiresAttention();
-  const attnCount = attn.waitingFulfillment.length + attn.missingAddress.length + attn.shippedStale.length + attn.openTicketCustomers.length;
-
   // Compact metrics strip -- same six real numbers the six large cards
   // showed before, just not one per giant card. "Delivered" isn't lost,
   // it's still the Delivered column's own count in Fulfillment overview
@@ -3220,13 +3392,26 @@ function renderFulfillmentCommandCenter(dash){
   // panel at the bottom lists in full, so the two stay in sync by
   // construction rather than two separately-maintained counts.
   const phrases = fcRangePhrases(range);
+  const monthly = fcMonthlyRevenue();
+  /* `caption` says what the number counts and is the card's tooltip when no
+     trend exists; `blank` is what the trend line says instead, because an
+     empty line reads as a broken feature rather than an unmeasured one. */
+  const noTrend = `Nothing ${phrases.now} or ${phrases.prev}`;
+  const pending_ = fcSnapshotPending(range);
   const metrics = [
-    ['New customers', newCustomers.length, '', fcDelta(newCustomers.length, prevCustomers, phrases)],
-    ['New orders', newOrders.length, '', fcDelta(newOrders.length, prevOrdersList.length, phrases)],
-    ['To fulfill', pending.length, pending.length ? 'acc-amber' : '', fcSnapshotDelta('toFulfill', pending.length, range, true)],
-    ['Shipped', shipped.length, '', fcSnapshotDelta('shipped', shipped.length, range)],
-    ['Attention', attnCount, attnCount ? 'acc-rust' : 'acc-sage', fcSnapshotDelta('attention', attnCount, range, true)],
-    ['Revenue', cpMoney(revenue), '', fcDelta(revenue, prevRevenue, phrases, cpMoney)],
+    {icon:'customers', tint:'ic-sage', label:'New customers', value:newCustomers.length,
+     delta:fcDelta(newCustomers.length, prevCustomers, phrases),
+     caption:`Customer records created ${phrases.now}`, blank:noTrend},
+    {icon:'orders', tint:'ic-violet', label:'New orders', value:newOrders.length,
+     delta:fcDelta(newOrders.length, prevOrdersList.length, phrases),
+     caption:`Orders placed ${phrases.now}`, blank:noTrend},
+    {icon:'shipped', tint:'ic-amber', label:'Shipped', value:shipped.length,
+     delta:fcSnapshotDelta('shipped', shipped.length, range),
+     caption:'Shipped, not yet marked delivered', blank:pending_},
+    /* Deliberately not range-scoped -- see fcMonthlyRevenue. */
+    {icon:'sales', tint:'ic-blue', label:'Total sales', value:cpMoney(monthly.current),
+     delta:fcMonthDelta(monthly, cpMoney),
+     caption:`This month to date, cancelled orders excluded`, blank:'No sales yet'},
   ];
 
   return `
@@ -3248,7 +3433,19 @@ function renderFulfillmentCommandCenter(dash){
         <span class="fc-text-link" id="dashDeleteBtn" data-dash-id="${dash.id}">Delete</span>
       </div>
     </div>
-    <div class="fc-metrics">${metrics.map(([l,v,acc,delta])=>`<div class="fc-metric ${acc}"${delta?` title="${esc(delta.title)}"`:''}><span class="fc-metric-num">${v}</span><span class="fc-metric-label">${esc(l)}</span>${delta?`<span class="fc-metric-delta ${delta.up===null?'flat':(delta.good?'up':'down')}">${delta.up===null?'':trendArrow(delta.up)}${esc(delta.text)}</span>`:''}</div>`).join('')}</div>
+    <div class="fc-metrics">${metrics.map(m=>{
+      const d = m.delta;
+      const dir = !d ? 'flat' : (d.up===null ? 'flat' : (d.good ? 'up' : 'down'));
+      return `<div class="fc-metric ${m.tint}" title="${esc(d ? d.title : m.caption)}">
+        <div class="fc-metric-top">
+          <span class="fc-metric-ico">${fcCardIcon(m.icon)}</span>
+          ${d && d.up!==null ? `<span class="fc-metric-trend ${dir}">${fcTrendIcon(d.up)}</span>` : ''}
+        </div>
+        <span class="fc-metric-label">${esc(m.label)}</span>
+        <span class="fc-metric-num">${m.value}</span>
+        <span class="fc-metric-note ${dir}">${esc(d ? d.line : m.blank)}</span>
+      </div>`;
+    }).join('')}</div>
     ${renderFcFilterBar()}
     <div id="fcCustomerTableSection">${renderFcCustomerTableSection()}</div>
     <div id="fcKanbanSection" style="margin-top:22px;">${renderFcKanbanSection()}</div>
@@ -3287,10 +3484,10 @@ function renderOverviewDashboard(priv){
   const invoiceDelta = overdueInvoices>0 ? {text:`${overdueInvoices} overdue`, up:false} : {text:'all current', up:true};
 
   let secondary = `
-    <div class="stat-card ochre"><div class="num mono">${openValue.toLocaleString()}</div><div class="lbl">Pipeline value</div>${deltaHTML(pipelineDelta.text,pipelineDelta.up)}</div>
+    <div class="stat-card teal"><div class="num mono">${openValue.toLocaleString()}</div><div class="lbl">Pipeline value</div>${deltaHTML(pipelineDelta.text,pipelineDelta.up)}</div>
     <div class="stat-card sage"><div class="num mono">${state.customers.length}</div><div class="lbl">Customers</div>${deltaHTML(customerDelta.text,customerDelta.up)}</div>
-    <div class="stat-card olive"><div class="num mono">${openTasks.length}</div><div class="lbl">Open tasks</div>${deltaHTML(taskDelta.text,taskDelta.up)}</div>`;
-  if(priv) secondary += `<div class="stat-card rust"><div class="num mono">${unpaidValue.toLocaleString()}</div><div class="lbl">Unpaid invoices</div>${deltaHTML(invoiceDelta.text,invoiceDelta.up)}</div>`;
+    <div class="stat-card blue"><div class="num mono">${openTasks.length}</div><div class="lbl">Open tasks</div>${deltaHTML(taskDelta.text,taskDelta.up)}</div>`;
+  if(priv) secondary += `<div class="stat-card blue"><div class="num mono">${unpaidValue.toLocaleString()}</div><div class="lbl">Unpaid invoices</div>${deltaHTML(invoiceDelta.text,invoiceDelta.up)}</div>`;
 
   return `
     ${renderChart(priv)}
@@ -11030,13 +11227,6 @@ async function saveModal(table, id){
 /* ---------- Init ---------- */
 document.querySelectorAll('.navlink').forEach(el=>{
   el.onclick = ()=>{
-    // Reaching Import / Export from the sidebar means "all data, start
-    // from the top" -- any scope left over from a list's own button, or
-    // a half-finished direction choice, belongs to that visit, not this
-    // one. (The in-progress mapping wizard is left alone deliberately:
-    // importTables surviving a stray nav click is the difference between
-    // a recoverable detour and losing the mapping.)
-    if(el.dataset.view==='rickroll'){ state.ioEntity = null; state.ioMode = null; state.ioReturnView = null; }
     state.view = el.dataset.view;
     render();
   };
