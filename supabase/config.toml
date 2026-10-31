@@ -14,3 +14,9 @@ verify_jwt = true
 # header, not a JWT.
 [functions.storefront-contact]
 verify_jwt = false
+
+# The CRM's in-app assistant. Called from the browser with the publishable
+# key, which is not a JWT, so gateway verification is off; the function
+# checks AGENT_ALLOWED_ORIGINS itself and only ever returns model output.
+[functions.support-agent]
+verify_jwt = false

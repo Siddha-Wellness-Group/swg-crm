@@ -1342,6 +1342,124 @@
   .badge.working{background:var(--umber-soft);color:var(--umber);}
   .badge.converted{background:var(--sage-soft);color:var(--sage);}
   .badge.disqualified{background:var(--clay-soft);color:var(--clay);}
+
+  /* ================================================================
+     Lead record page, departments, access control, support agent.
+     Built on the main theme tokens (not the .cp-page fixed palette) so
+     everything follows light/dark mode.
+     ================================================================ */
+  .btn.sm{padding:6px 12px;font-size:12px;}
+  .lead-link{color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px dashed var(--border);cursor:pointer;}
+  .lead-link:hover{color:var(--accent, var(--amber));border-bottom-color:currentColor;}
+
+  .lp-page{display:flex;flex-direction:column;gap:16px;}
+  .lp-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;}
+  .lp-empty{text-align:center;color:var(--ink-soft);font-size:13px;padding:34px 16px;}
+  .lp-card-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-soft);margin-bottom:12px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .lp-hint{font-size:11px;font-weight:400;text-transform:none;letter-spacing:0;}
+  .lp-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;}
+  .lp-identity{display:flex;gap:14px;align-items:flex-start;min-width:0;}
+  .lp-name{font-size:21px;font-weight:700;color:var(--ink);line-height:1.25;word-break:break-word;}
+  .lp-meta{font-size:12.5px;color:var(--ink-soft);margin-top:4px;}
+  .lp-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;}
+  .lp-status{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;color:var(--sc);background:color-mix(in srgb, var(--sc) 14%, transparent);}
+  .lp-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .lp-del{color:var(--clay);border-color:color-mix(in srgb, var(--clay) 40%, var(--border));}
+
+  .lp-pipe{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;}
+  .lp-step{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;padding:0 0 4px;cursor:default;min-width:0;}
+  .lp-step[data-lead-stage]{cursor:pointer;}
+  .lp-step[data-lead-stage]:hover .lp-step-bar{background:color-mix(in srgb, var(--sc) 55%, var(--border));}
+  .lp-step:focus-visible{outline:2px solid var(--sc);outline-offset:3px;border-radius:6px;}
+  .lp-step-bar{height:10px;border-radius:6px;background:var(--border);transition:background .15s;}
+  .lp-step.reached .lp-step-bar{background:var(--sc);}
+  .lp-step.current .lp-step-bar{box-shadow:0 0 0 3px color-mix(in srgb, var(--sc) 25%, transparent);}
+  .lp-step-label{font-size:13px;font-weight:600;color:var(--ink-soft);margin-top:6px;}
+  .lp-step.reached .lp-step-label{color:var(--ink);}
+  .lp-step.current .lp-step-label{color:var(--sc);}
+  .lp-step-meta{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink);}
+  .lp-step-date{font-size:11px;color:var(--ink-soft);min-height:14px;}
+
+  .lp-grid{display:grid;grid-template-columns:1fr;gap:16px;align-items:start;}
+  .lp-grid > div{display:flex;flex-direction:column;gap:16px;}
+  @media (min-width:960px){ .lp-grid{grid-template-columns:minmax(0,2fr) minmax(260px,1fr);} }
+  .lp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;}
+  .lp-stat{border:1px solid var(--border);border-radius:9px;padding:9px 12px;background:var(--cream);}
+  .lp-stat .v{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--ink);}
+  .lp-stat .l{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+  .lp-bar{display:flex;gap:2px;height:14px;border-radius:7px;overflow:hidden;margin-top:16px;background:var(--border);}
+  .lp-bar span{display:block;min-width:4px;}
+  .lp-bar-key{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:11.5px;color:var(--ink-soft);}
+  .lp-bar-key i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;}
+  .lp-timeline{list-style:none;margin:0;padding:0 0 0 4px;}
+  .lp-timeline li{position:relative;padding:0 0 14px 20px;border-left:2px solid var(--border);}
+  .lp-timeline li:last-child{border-left-color:transparent;padding-bottom:0;}
+  .lp-timeline li::before{content:'';position:absolute;left:-7px;top:2px;width:12px;height:12px;border-radius:50%;background:var(--sc);box-shadow:0 0 0 3px var(--surface);}
+  .lp-tl-head{font-size:13px;color:var(--ink);}
+  .lp-tl-head span{color:var(--ink-soft);font-size:12px;}
+  .lp-tl-meta{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .lp-tl-note{font-size:11.5px;color:var(--ink-soft);font-style:italic;margin-top:3px;}
+  .lp-info{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:0;font-size:13px;}
+  .lp-info dt{color:var(--ink-soft);}
+  .lp-info dd{margin:0;color:var(--ink);word-break:break-word;}
+  .lp-info a{color:var(--ink);}
+  .lp-notes{font-size:13px;line-height:1.6;white-space:pre-wrap;color:var(--ink);}
+
+  .dept-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:2px 10px;border-radius:12px;color:var(--dc);background:color-mix(in srgb, var(--dc) 13%, transparent);}
+  .dept-chip::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--dc);}
+  .dept-chip.none{--dc:var(--ink-soft);}
+  .dept-tools{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;border:1px dashed var(--border);border-radius:10px;padding:12px 14px;margin:14px 0 10px;}
+  .dept-toggle{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--ink);}
+  .dept-colors{display:flex;gap:8px;flex-wrap:wrap;}
+  .dept-colors label{cursor:pointer;}
+  .dept-colors input{position:absolute;opacity:0;pointer-events:none;}
+  .dept-colors span{display:block;width:24px;height:24px;border-radius:50%;border:2px solid transparent;box-shadow:0 0 0 1px var(--border);}
+  .dept-colors input:checked + span{border-color:var(--surface);box-shadow:0 0 0 2px var(--ink);}
+  .dept-colors input:focus-visible + span{box-shadow:0 0 0 2px var(--setup-blue);}
+
+  .ac-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:6px 0 14px;}
+  .ac-step{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--border);border-radius:10px;padding:12px 14px;background:var(--surface);}
+  .ac-step .btn{margin-top:8px;}
+  .ac-step-n{flex-shrink:0;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--cream);border:1px solid var(--border);color:var(--ink-soft);}
+  .ac-step.done .ac-step-n{background:var(--sage);border-color:var(--sage);color:#fff;}
+  .ac-who{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;}
+  .ac-who select{font-family:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--ink);}
+  .ac-grid td.ac-yes{color:var(--sage);font-weight:700;text-align:center;}
+  .ac-grid td.ac-no{color:var(--ink-soft);text-align:center;}
+
+  .agent-fab{position:fixed;right:20px;bottom:20px;z-index:900;width:52px;height:52px;border-radius:50%;border:none;cursor:pointer;
+    background:var(--ink);color:var(--surface);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,0,0,.22);transition:transform .15s;}
+  .agent-fab:hover{transform:translateY(-2px);}
+  .agent-fab:focus-visible{outline:3px solid var(--setup-blue);outline-offset:3px;}
+  .agent-fab svg{width:24px;height:24px;}
+  .agent-fab.open{transform:rotate(15deg);}
+  .agent-panel{position:fixed;right:20px;bottom:84px;z-index:900;width:370px;max-width:calc(100vw - 32px);height:min(560px, calc(100vh - 120px));
+    display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.24);overflow:hidden;}
+  .agent-panel[hidden]{display:none;}
+  .agent-head{display:flex;align-items:center;gap:6px;padding:12px 12px 12px 16px;border-bottom:1px solid var(--border);}
+  .agent-head > div{flex:1;min-width:0;}
+  .agent-title{font-weight:700;font-size:14px;color:var(--ink);}
+  .agent-sub{font-size:11.5px;color:var(--ink-soft);}
+  .agent-x{border:none;background:none;color:var(--ink-soft);font-size:15px;cursor:pointer;width:30px;height:30px;border-radius:6px;}
+  .agent-x:hover{background:var(--cream);color:var(--ink);}
+  .agent-log{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;}
+  .agent-msg{max-width:88%;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.5;word-wrap:break-word;}
+  .agent-msg.bot{background:var(--cream);color:var(--ink);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px;}
+  .agent-msg.user{background:var(--ink);color:var(--surface);align-self:flex-end;border-bottom-right-radius:4px;}
+  .agent-msg.err{background:var(--clay-soft);color:var(--clay);align-self:flex-start;}
+  .agent-tool{font-size:11.5px;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;align-self:flex-start;}
+  .agent-confirm{border:1px solid var(--setup-blue);background:var(--setup-blue-soft);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:12.5px;}
+  .agent-confirm-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px;}
+  .agent-confirm-done{font-size:11.5px;color:var(--ink-soft);margin-top:6px;}
+  .agent-typing{display:flex;gap:4px;padding:6px 2px;}
+  .agent-typing span{width:6px;height:6px;border-radius:50%;background:var(--ink-soft);animation:agent-dot 1s infinite ease-in-out;}
+  .agent-typing span:nth-child(2){animation-delay:.15s;} .agent-typing span:nth-child(3){animation-delay:.3s;}
+  @keyframes agent-dot{0%,80%,100%{opacity:.25;transform:translateY(0);}40%{opacity:1;transform:translateY(-3px);}}
+  .agent-form{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border);}
+  .agent-form input{flex:1;min-width:0;font-family:inherit;font-size:13px;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--cream);color:var(--ink);}
+  .agent-form input:focus{outline:2px solid var(--setup-blue);outline-offset:0;}
+  @media (max-width:520px){ .agent-panel{right:16px;left:16px;width:auto;bottom:80px;} .agent-fab{right:16px;bottom:16px;} }
+  @media (prefers-reduced-motion:reduce){ .agent-fab,.agent-typing span{transition:none;animation:none;} }
 </style>
 </head>
 <body>
@@ -1484,7 +1602,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, companySettings:{}, companyNavOpen:true, setupTab:'automation', setupSection:'home', omObject:null, omTab:'details', omSection:'objects', omFilter:'', recordTypes:[], recordTypeAssignments:{}, compactLayouts:{}, reports:[], reportTypes:[], reportsTab:'reports', activeReportId:null, reportDraft:null, reportCollapsed:{}, pageLayouts:[], recordPages:[], relationships:[], profiles:[], permissionSets:[], permissionSetGroups:[], publicGroups:[], emailTemplates:[], adminTab:'profiles', adminReturnView:'dashboard', flowExplorer:false, flowWizard:null, emailTemplateFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], metricSnapshots:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0, ioEntity:null, ioMode:null, ioReturnView:null };
+let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, companySettings:{}, companyNavOpen:true, setupTab:'automation', setupSection:'home', omObject:null, omTab:'details', omSection:'objects', omFilter:'', recordTypes:[], recordTypeAssignments:{}, compactLayouts:{}, reports:[], reportTypes:[], reportsTab:'reports', activeReportId:null, reportDraft:null, reportCollapsed:{}, pageLayouts:[], recordPages:[], relationships:[], profiles:[], permissionSets:[], permissionSetGroups:[], publicGroups:[], emailTemplates:[], adminTab:'profiles', adminReturnView:'dashboard', flowExplorer:false, flowWizard:null, emailTemplateFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, profileLeadId:null, departments:[], accessPolicy:{enforce:false, strictDepartments:false}, accessCheckUser:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], metricSnapshots:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0, ioEntity:null, ioMode:null, ioReturnView:null };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -1706,10 +1824,14 @@ const CITIES_BY_COUNTRY = {
 const PRIVILEGED = ['Ariel','Daniel'];
 const FULL_ADMIN = 'Ariel';
 const CO_ADMINS = ['David'];
-function isPrivileged(){ return PRIVILEGED.includes(state.viewingAs); }
+function isPrivileged(){ return PRIVILEGED.includes(state.viewingAs) || systemPermGranted('viewFinance'); }
 function isAdmin(){ return state.currentUser === FULL_ADMIN || CO_ADMINS.includes(state.currentUser); }
 function canDeleteUsers(){ return state.currentUser === FULL_ADMIN; }
-function canSeeLeads(){ return !LEAD_HIDDEN_FOR.includes(state.viewingAs); }
+function canSeeLeads(){
+  // Once profiles are enforced, the profile decides -- not this hardcoded list.
+  if(policyAppliesTo(state.viewingAs)) return canObject('leads','read');
+  return !LEAD_HIDDEN_FOR.includes(state.viewingAs);
+}
 function teamNames(){ return state.team.map(t=>t.name); }
 const AVATAR_COLORS = ['#D9600F','#128A5E','#2E6FD6','#C2385F','#7A4AD1','#0D857F','#B8791A','#3F8A1D'];
 function avatarInitials(name){
@@ -1756,7 +1878,7 @@ function roleFor(name){
    path checks its own can* helper, so a non-admin who reaches an admin pane
    -- by deep link, by Quick Settings, or by leaving a stale draft behind --
    still cannot save anything. */
-function canAccessSetup(){ return !!state.currentUser; }
+function canAccessSetup(){ return !!state.currentUser && (!policyAppliesTo(state.currentUser) || systemPermGranted('setup', state.currentUser)); }
 /* Administration hands out access itself, so it is narrower than Setup: only
    the two admins, Ariel and David. A Manager can open Setup and still never
    sees this -- the sidebar link is hidden, the Quick Settings rows are gone,
@@ -1823,6 +1945,7 @@ const FIELD_MAP = {
   snapshotDate:'snapshot_date', toFulfill:'to_fulfill',
   attnWaitingFulfillment:'attn_waiting_fulfillment', attnMissingAddress:'attn_missing_address',
   attnShippedStale:'attn_shipped_stale', attnOpenTickets:'attn_open_tickets',
+  stageHistory:'stage_history',
 };
 const FIELD_MAP_REV = Object.fromEntries(Object.entries(FIELD_MAP).map(([a,b])=>[b,a]));
 /* Columns Postgres types as `date`. An empty date input yields '', which
@@ -1848,22 +1971,50 @@ async function loadTable(table){
   if(error){ console.error('load failed', table, error); return []; }
   return (data||[]).map(fromRow);
 }
+/* A column the app knows about but the database hasn't been migrated to
+   yet (e.g. department / stage_history before 20261031120000 is applied)
+   makes PostgREST reject the whole write with PGRST204 -- and since these
+   helpers only log, the record would silently never save. Instead the
+   unknown column is dropped, remembered, and the write retried, so the
+   app keeps working on an un-migrated database and simply stores less. */
+const MISSING_COLUMNS = {};
+function stripMissing(table, row){
+  const miss = MISSING_COLUMNS[table];
+  if(!miss) return row;
+  const out = {...row}; miss.forEach(c=>{ delete out[c]; }); return out;
+}
+async function writeWithColumnFallback(table, rows, send){
+  let payload = rows.map(r=>stripMissing(table, r));
+  for(let attempt=0; attempt<6; attempt++){
+    const { error } = await send(payload);
+    if(!error) return null;
+    const m = error.code==='PGRST204' && /'([^']+)' column/.exec(error.message||'');
+    if(!m) return error;
+    (MISSING_COLUMNS[table] = MISSING_COLUMNS[table] || new Set()).add(m[1]);
+    console.warn(`column ${table}.${m[1]} is missing -- run the latest Supabase migration. Saving without it.`);
+    payload = payload.map(r=>stripMissing(table, r));
+  }
+  return { message:'too many missing columns' };
+}
 async function dbInsert(table, obj){
-  const { error } = await sb.from(table).insert(toRow(obj));
+  stampDepartment(table, obj);
+  const error = await writeWithColumnFallback(table, [toRow(obj)], rows=>sb.from(table).insert(rows[0]));
   if(error) console.error('insert failed', table, error);
 }
 async function dbInsertMany(table, objs){
   if(!objs.length) return;
-  const { error } = await sb.from(table).insert(objs.map(toRow));
+  objs.forEach(o=>stampDepartment(table, o));
+  const error = await writeWithColumnFallback(table, objs.map(toRow), rows=>sb.from(table).insert(rows));
   if(error) console.error('bulk insert failed', table, error);
 }
 async function dbUpsertMany(table, objs){
   if(!objs.length) return;
-  const { error } = await sb.from(table).upsert(objs.map(toRow), { onConflict:'id' });
+  objs.forEach(o=>stampDepartment(table, o));
+  const error = await writeWithColumnFallback(table, objs.map(toRow), rows=>sb.from(table).upsert(rows, { onConflict:'id' }));
   if(error) console.error('bulk upsert failed', table, error);
 }
 async function dbUpdate(table, obj){
-  const { error } = await sb.from(table).update(toRow(obj)).eq('id', obj.id);
+  const error = await writeWithColumnFallback(table, [toRow(obj)], rows=>sb.from(table).update(rows[0]).eq('id', obj.id));
   if(error) console.error('update failed', table, error);
 }
 async function dbDelete(table, id){
@@ -1915,6 +2066,8 @@ const KEYS = {
   publicGroups: 'publicGroups',
   emailTemplates: 'emailTemplates',
   companySettings: 'companySettings',
+  departments: 'departments',
+  accessPolicy: 'accessPolicy',
 };
 
 /* Which slice of state each key holds, so a reload can restore them. */
@@ -1930,6 +2083,7 @@ const SETTING_DEFAULTS = {
   companySettings: {},
   recordTypeAssignments: {}, compactLayouts: {},
   reports: [], reportTypes: [],
+  departments: [], accessPolicy: { enforce:false, strictDepartments:false },
 };
 
 /* Saves one settings key. Errors are logged rather than thrown: a failed
@@ -1971,6 +2125,7 @@ async function loadAll(){
   state.leads = le; state.distributors = di; state.payments = pa;
   state.orderEvents = oe;
   state.metricSnapshots = ms;
+  applyHardScope();
   state.loaded = true;
 }
 
@@ -2141,6 +2296,7 @@ function navLinkHidden(entity){
   if(entity==='team' && !isAdmin()) return true;
   if(entity==='administration' && !canAccessAdministration()) return true;
   if(entity==='leads' && !canSeeLeads()) return true;
+  if(SETUP_ENTITIES.includes(entity) && !canObject(entity, 'read')) return true;
   if(SETUP_ENTITIES.includes(entity) && isObjectHidden(entity) && !personaIsAdmin()) return true;
   return false;
 }
@@ -2173,8 +2329,10 @@ function render(){
   if(state.view==='setup' && !canAccessSetup()) state.view = 'dashboard';
   if(state.view==='leads' && !canSeeLeads()) state.view = 'dashboard';
   if(SETUP_ENTITIES.includes(state.view) && isObjectHidden(state.view) && !personaIsAdmin()) state.view = 'dashboard';
+  if(SETUP_ENTITIES.includes(state.view) && !canObject(state.view, 'read')) state.view = 'dashboard';
+  if(state.view==='leadProfile' && !canSeeLeads()) state.view = 'dashboard';
   const isSetupPage = state.view==='setup';
-  const isSubPage = isSetupPage || state.view==='customerProfile';
+  const isSubPage = isSetupPage || state.view==='customerProfile' || state.view==='leadProfile';
   document.querySelector('.sidebar').style.display = isSubPage ? 'none' : 'flex';
   document.getElementById('setupBackBtn').style.display = isSubPage ? 'flex' : 'none';
   updateNavVisibility();
@@ -2200,12 +2358,17 @@ function render(){
     setup:['Setup','Validation rules, automation, sharing and the Object Manager'],
     administration:['Administration','Profiles, roles, permission sets and public groups'],
     customerProfile:['Customer',''],
+    leadProfile:['Lead',''],
     search:['Search','Find anything across all tabs'],
     rickroll:['Import / Export','Move data in and out of the ledger']};
   if(state.view==='customerProfile'){
     const cpc = state.customers.find(x=>x.id===state.profileCustomerId);
     document.getElementById('pageTitle').innerHTML = `<span class="accent-dot"></span>${esc(cpc?cpc.name:'Customer')}`;
     document.getElementById('pageSub').textContent = 'Customer profile';
+  } else if(state.view==='leadProfile'){
+    const lpl = state.leads.find(x=>x.id===state.profileLeadId);
+    document.getElementById('pageTitle').innerHTML = `<span class="accent-dot"></span>${esc(lpl?lpl.name:'Lead')}`;
+    document.getElementById('pageSub').textContent = 'Lead record · pipeline & lifespan';
   } else {
     document.getElementById('pageTitle').innerHTML = `<span class="accent-dot"></span>${titleMap[state.view]?titleMap[state.view][0]:state.view}`;
     document.getElementById('pageSub').textContent = titleMap[state.view]?titleMap[state.view][1]:'';
@@ -2213,14 +2376,15 @@ function render(){
   document.getElementById('mainArea').style.setProperty('--accent', ACCENTS[state.view] || 'var(--amber)');
   const addLabels = {contacts:'contact', leads:'lead', customers:'customer', distributors:'distributor', suppliers:'supplier', deals:'deal', tasks:'task', invoices:'invoice', payments:'payment', team:'team member'};
   const addBtn = document.getElementById('addBtn');
-  const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets','setup','reports','customerProfile','administration'];
-  addBtn.style.display = noAdd.includes(state.view) ? 'none' : 'inline-block';
+  const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets','setup','reports','customerProfile','leadProfile','administration'];
+  addBtn.style.display = (noAdd.includes(state.view) || (SETUP_ENTITIES.includes(state.view) && !canObject(state.view, 'create'))) ? 'none' : 'inline-block';
   addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
   // Import / Export lives on every list the engine actually supports
   // (EXPORT_SHEETS is the single source of truth for that), so the button
   // appears exactly where it can do something and nowhere else.
   const ioBtn = document.getElementById('ioBtn');
-  ioBtn.style.display = EXPORT_SHEETS.some(s=>s.key===state.view) ? 'inline-block' : 'none';
+  const ioAllowed = !policyAppliesTo(state.viewingAs) || systemPermGranted('exportData') || systemPermGranted('importData');
+  ioBtn.style.display = (ioAllowed && EXPORT_SHEETS.some(s=>s.key===state.view)) ? 'inline-block' : 'none';
   const guideBtn = document.getElementById('topbarGuideBtn');
   guideBtn.style.display = state.guideEntries.some(g=>g.linkEntity===state.view) ? 'flex' : 'none';
 
@@ -2232,6 +2396,7 @@ function render(){
   if(state.view==='leads') c.innerHTML = renderLeads();
   if(state.view==='customers') c.innerHTML = renderCustomers();
   if(state.view==='customerProfile') c.innerHTML = renderCustomerProfile();
+  if(state.view==='leadProfile') c.innerHTML = renderLeadProfile();
   if(state.view==='distributors') c.innerHTML = renderDistributors();
   if(state.view==='suppliers') c.innerHTML = renderSuppliers();
   if(state.view==='deals') c.innerHTML = renderDeals();
@@ -2253,6 +2418,7 @@ function render(){
     applyCompactLayoutToTable(state.view);
   }
   attachContentHandlers();
+  syncAgent();
 }
 
 const EXPORT_SHEETS = [
@@ -3799,14 +3965,14 @@ function renderLeads(){
   ${visible.map((l,i)=>`
     <tr>
       <td class="mono ledger-no">${String(i+1).padStart(3,'0')}</td>
-      <td data-field-col="name">${esc(l.name)}</td>
+      <td data-field-col="name"><a href="#" class="lead-link" data-lead-profile="${l.id}" title="Open ${esc(l.name)}'s record">${esc(l.name)}</a></td>
       <td data-field-col="kind"><span class="badge ${(l.kind||'Individual').toLowerCase()}">${l.kind||'Individual'}</span></td>
       <td data-field-col="company">${esc(l.company||'—')}</td>
       <td data-field-col="source" style="font-size:12px;color:var(--ink-soft);">${esc(l.source||((l.sources&&l.sources.join(', '))||'—'))}</td>
       <td style="font-size:12px;">${esc(l.email||'')}${l.email&&l.phone?' · ':''}${esc(l.phone||'')}</td>
       <td data-field-col="status"><span class="badge ${(l.status||'New').toLowerCase()}">${l.status||'New'}</span></td>
       <td data-field-col="owner" style="font-size:12px;color:var(--ink-soft);">${esc(l.owner||'—')}</td>
-      <td class="row-actions"><span data-edit="leads:${l.id}">edit</span><span data-del="leads:${l.id}">delete</span></td>
+      <td class="row-actions"><span data-lead-profile="${l.id}">open</span>${canObject('leads','edit')?`<span data-edit="leads:${l.id}">edit</span>`:''}${canObject('leads','del')?`<span data-del="leads:${l.id}">delete</span>`:''}</td>
     </tr>`).join('')}
   </tbody></table>`;
 }
@@ -5385,6 +5551,8 @@ const ADMIN_TABS = [
   {key:'permsetgroups', label:'Permission Set Groups', blurb:'Several permission sets, assigned as one.'},
   {key:'roles', label:'Roles', blurb:'Where someone sits in the hierarchy.'},
   {key:'publicgroups', label:'Public Groups', blurb:'A named list of people, for sharing and alerts.'},
+  {key:'departments', label:'Departments', blurb:'Teams whose records stay private to them.'},
+  {key:'access', label:'Access Control', blurb:'Switch profiles on, and check who can do what.'},
 ];
 const OBJECT_PERMS = [
   {key:'read', label:'Read'},
@@ -5443,6 +5611,8 @@ function renderAdministrationBody(tab){
   if(tab==='permsetgroups') return renderPermissionSetGroups();
   if(tab==='roles') return renderAdminRoles();
   if(tab==='publicgroups') return renderPublicGroups();
+  if(tab==='departments') return renderAdminDepartments();
+  if(tab==='access') return renderAdminAccess();
   return renderProfiles();
 }
 
@@ -5505,8 +5675,9 @@ function renderProfiles(){
       </div>
       <div class="adm-chips">${(pf.systemPerms||[]).map(k=>`<span class="adm-chip on">${esc(permLabel(k))}</span>`).join('') || `<span class="adm-chip">No system permissions</span>`}</div>
     </div>`).join('') : `<div class="om-empty">No profiles yet. Create one — "Sales Rep" and "Support" are good first two.</div>`}
-    <div class="readonly-note" style="margin-top:14px;">Heads up: profiles and permission sets are recorded here and visible to the team,
-      but the app's own screens still gate on the built-in Admin / Manager roles. Treat these as the access plan until that switch is made.</div>
+    <div class="readonly-note" style="margin-top:14px;">${accessPolicy().enforce
+      ? '🔒 Enforcement is <strong>on</strong>: every screen, button and save follows these profiles. Ariel and David are never restricted.'
+      : 'Enforcement is off — these profiles are a plan until you switch them on under <strong>Access Control</strong>.'}</div>
   </div>`;
 }
 
@@ -5847,6 +6018,7 @@ function wireAdministration(){
   document.querySelectorAll('.setup-cancel-btn').forEach(btn=>{
     btn.onclick = ()=>{ setupDraft = null; renderAdministrationView(); };
   });
+  wireAdminAccessAndDepartments();
 }
 
 /* ---------- Setup: roles, validation rules, automation, sharing ---------- */
@@ -6171,6 +6343,9 @@ async function runFlows(entityKey, obj, event){
 function personaIsAdmin(){ return state.viewingAs===FULL_ADMIN || CO_ADMINS.includes(state.viewingAs); }
 function visibleRecords(entityKey, list){
   if(personaIsAdmin()) return list;
+  list = list.filter(r=>recordInScope(entityKey, r));
+  if(!canObject(entityKey, 'read')) return [];
+  if(canViewAll(entityKey)) return list;
   const mode = state.sharingRules[entityKey] || 'everyone';
   if(mode==='everyone') return list;
   if(mode==='owner_and_admins' && roleFor(state.viewingAs)==='Manager') return list;
@@ -9367,6 +9542,7 @@ function attachContentHandlers(){
   // wireFulfillmentCommandCenter) can re-run just this wiring without
   // touching the rest of attachContentHandlers.
   wireFulfillmentCommandCenter();
+  wireLeadExtras();
 
   document.querySelectorAll('[data-edit]').forEach(el=>{
     el.onclick = (e)=>{
@@ -9413,6 +9589,7 @@ function attachContentHandlers(){
     el.onclick = async ()=>{
       const [table,id] = el.dataset.del.split(':');
       if(table==='team' && !canDeleteUsers()) return alert('Only Ariel can delete team members.');
+      if(table!=='team' && !assertCan(table, 'del')) return;
       if(!confirm('Delete this entry?')) return;
       state[table] = state[table].filter(x=>x.id!==id);
       render();
@@ -10502,6 +10679,7 @@ function wireReportBuilder(){
 /* ---------- Modal / forms ---------- */
 function openModal(table, id){
   const isEdit = !!id;
+  if(table!=='team' && !assertCan(table, isEdit ? 'edit' : 'create')) return;
   const item = isEdit ? state[table].find(x=>x.id===id) : null;
   let html = '';
   if(table==='contacts'){
@@ -11079,6 +11257,8 @@ async function saveModal(table, id){
   const rtSelect = document.getElementById('f_recordType');
   const pickedRecordType = rtSelect ? rtSelect.value : null;
   const prevOrderStatus = (table==='orders' && isEdit) ? obj.status : null;
+  const prevLeadStatus = (table==='leads' && isEdit) ? (obj.status||'New') : null;
+  if(table!=='team' && !assertCan(table, isEdit ? 'edit' : 'create')) return;
   let sendOrderConfirmationRequested = false;
   const readCompany = ()=>{
     const kind = document.getElementById('f_kind') ? document.getElementById('f_kind').value : 'Company';
@@ -11153,6 +11333,7 @@ async function saveModal(table, id){
     obj.email = document.getElementById('f_email').value.trim();
     obj.phone = document.getElementById('f_phone').value.trim();
     obj.notes = document.getElementById('f_notes').value.trim();
+    recordLeadStatus(obj, obj.status, prevLeadStatus);
   } else if(table==='tasks'){
     obj.title = document.getElementById('f_title').value.trim();
     obj.dueDate = document.getElementById('f_dueDate').value;
@@ -11260,6 +11441,12 @@ const QS_GROUPS = [
     { view:'administration', adminTab:'users', title:'Users', desc:'Add, edit or remove the people with a CRM seat.',
       tint:'var(--sage-soft)', ink:'var(--sage)',
       icon:`<circle cx="12" cy="8" r="3.6"/><path d="M4.6 20c.7-3.8 3.6-6 7.4-6s6.7 2.2 7.4 6"/>` },
+    { view:'administration', adminTab:'access', title:'Access Control', desc:'Turn profiles on and check what each person can do.',
+      tint:'var(--rust-soft)', ink:'var(--rust)',
+      icon:`<rect x="4.6" y="10.4" width="14.8" height="10" rx="2.2"/><path d="M8 10.4V7.6a4 4 0 0 1 8 0v2.8"/>` },
+    { view:'administration', adminTab:'departments', title:'Departments', desc:'Split the company so each team only sees its own records.',
+      tint:'var(--violet-soft)', ink:'var(--violet)',
+      icon:`<rect x="3.4" y="4" width="7.2" height="7.2" rx="1.6"/><rect x="13.4" y="4" width="7.2" height="7.2" rx="1.6"/><rect x="3.4" y="13" width="7.2" height="7.2" rx="1.6"/><rect x="13.4" y="13" width="7.2" height="7.2" rx="1.6"/>` },
     { view:'administration', adminTab:'profiles', title:'Profiles & Permission Sets', desc:'Who can open what, in one place.',
       tint:'var(--setup-blue-soft)', ink:'var(--setup-blue)',
       icon:`<path d="M12 3.2 20 6.6v5.1c0 4.4-3.3 7.9-8 9.1-4.7-1.2-8-4.7-8-9.1V6.6z"/><path d="M9.2 11.9l2 2 3.6-3.8"/>` },
@@ -11708,6 +11895,925 @@ function showContactFollowup(contact){
   document.getElementById('fuGo').onclick = ()=>{ closeModal(); state.view=tabView; render(); };
 }
 
+/* ================================================================
+   ACCESS ENGINE -- departments, enforced profiles, one place to ask
+   "may this person do this?"
+
+   Before this, profiles and permission sets were an access *plan*: they
+   were stored and shown, but every screen still gated on hardcoded names.
+   Everything below turns them into the rules the app actually follows,
+   behind one switch (Administration -> Access Control) so an org can set
+   them up, check them with the Access Check, and only then turn them on.
+
+   Three layers, applied in this order:
+     1. Department  -- which records exist for you at all. A user only
+                       ever sees their own department's records (plus
+                       unassigned ones, unless Strict mode is on).
+     2. Object perms-- Read / Create / Edit / Delete / View All / Modify All
+                       from the user's profile + permission sets + groups.
+     3. Sharing     -- the existing per-object sharing rules (owner-only
+                       etc.), which View All / Modify All reach past.
+
+   Ariel and David (FULL_ADMIN / CO_ADMINS) are never restricted: they are
+   the break-glass accounts that can always get back in to fix a profile.
+
+   Honest limit: this is enforced in the app. The database still accepts
+   the shared publishable key, so true server-side isolation needs
+   Supabase Auth + row-level security per department -- the migration
+   20261031120000 adds the department columns that policy will key on.
+   ================================================================ */
+const DEPT_SCOPED = ['contacts','leads','customers','distributors','suppliers','deals','orders','tasks','invoices','payments'];
+const DEPT_COLORS = ['#2563EB','#16805A','#C4670F','#7C3AED','#BE185D','#0F766E','#B58205','#C7422C'];
+const ACCESS_POLICY_DEFAULT = { enforce:false, strictDepartments:false };
+
+function accessPolicy(){ return { ...ACCESS_POLICY_DEFAULT, ...(state.accessPolicy||{}) }; }
+function nameIsAdmin(name){ return name===FULL_ADMIN || CO_ADMINS.includes(name); }
+function departmentsOn(){ return (state.departments||[]).length > 0; }
+function departmentOf(name){ return (state.departments||[]).find(d=>(d.members||[]).includes(name)) || null; }
+function departmentById(id){ return (state.departments||[]).find(d=>d.id===id) || null; }
+function departmentLabel(id){ const d = departmentById(id); return d ? d.name : (id ? 'Removed department' : 'Unassigned'); }
+function departmentChip(id){
+  const d = departmentById(id);
+  if(!d) return `<span class="dept-chip none">${esc(id ? 'Removed department' : 'Unassigned')}</span>`;
+  return `<span class="dept-chip" style="--dc:${esc(d.color||DEPT_COLORS[0])};">${esc(d.name)}</span>`;
+}
+
+function profileOf(name){ return (state.profiles||[]).find(p=>(p.members||[]).includes(name)) || null; }
+function permSetsOf(name){
+  const ids = new Set((state.permissionSets||[]).filter(ps=>(ps.members||[]).includes(name)).map(ps=>ps.id));
+  (state.permissionSetGroups||[]).filter(g=>(g.members||[]).includes(name)).forEach(g=>(g.setIds||[]).forEach(id=>ids.add(id)));
+  return (state.permissionSets||[]).filter(ps=>ids.has(ps.id));
+}
+/* Everything one person is granted, and where each grant came from -- the
+   Access Check screen prints the sources so "why can Omri delete deals?"
+   has an answer on screen instead of a hunt through four tabs. */
+function effectiveAccess(name){
+  const objects = {}; const sources = {};
+  SETUP_ENTITIES.forEach(e=>{ objects[e] = {}; });
+  const system = new Set();
+  const profile = profileOf(name);
+  const sets = permSetsOf(name);
+  const grant = (label, src)=>{
+    if(!src) return;
+    SETUP_ENTITIES.forEach(e=>{
+      const p = (src.objectPerms||{})[e] || {};
+      OBJECT_PERMS.forEach(op=>{
+        if(!p[op.key]) return;
+        objects[e][op.key] = true;
+        (sources[e+':'+op.key] = sources[e+':'+op.key] || []).push(label);
+      });
+    });
+    (src.systemPerms||[]).forEach(k=>{ system.add(k); (sources['sys:'+k] = sources['sys:'+k] || []).push(label); });
+  };
+  if(profile) grant('Profile: '+profile.name, profile);
+  sets.forEach(ps=>grant('Set: '+ps.name, ps));
+  return { profile, sets, objects, system, sources, department: departmentOf(name) };
+}
+function policyAppliesTo(name){ return accessPolicy().enforce && !!name && !nameIsAdmin(name); }
+
+/* The one question every screen asks. op is read | create | edit | del. */
+function canObject(entity, op, name){
+  name = name || state.viewingAs;
+  if(!policyAppliesTo(name)) return true;
+  if(!SETUP_ENTITIES.includes(entity)) return true;
+  const a = effectiveAccess(name).objects[entity] || {};
+  if(a.modifyAll) return true;
+  if(op==='read') return !!(a.read || a.viewAll);
+  if(op==='edit' || op==='del') return !!a[op] && !!(a.read || a.viewAll);
+  return !!a[op];
+}
+function systemPermGranted(key, name){
+  name = name || state.viewingAs;
+  return policyAppliesTo(name) && effectiveAccess(name).system.has(key);
+}
+function canViewAll(entity, name){
+  name = name || state.viewingAs;
+  if(nameIsAdmin(name)) return true;
+  const a = effectiveAccess(name).objects[entity] || {};
+  return !!(a.viewAll || a.modifyAll);
+}
+const OP_WORDS = { read:'open', create:'create', edit:'edit', del:'delete' };
+/* Guard for every write path. Returns false (and says why) instead of
+   throwing, so a blocked click never abandons a half-finished handler. */
+function assertCan(entity, op){
+  if(canObject(entity, op)) return true;
+  toast(`🔒 Your access doesn't let you ${OP_WORDS[op]||op} ${objectLabel(entity).toLowerCase()}. Ask an admin.`);
+  return false;
+}
+
+/* Layer 1 -- departments. */
+function recordInScope(entity, rec, name){
+  name = name || state.viewingAs;
+  if(!DEPT_SCOPED.includes(entity)) return true;
+  if(nameIsAdmin(name) || !departmentsOn()) return true;
+  if(SETUP_ENTITIES.includes(entity) && canViewAll(entity, name)) return true;
+  if(!rec.department) return !accessPolicy().strictDepartments;
+  const mine = departmentOf(name);
+  return !!mine && rec.department === mine.id;
+}
+
+/* Called once after loadAll for a real (non-admin) sign-in: records that are
+   outside this person's department, or on an object they cannot read, are
+   dropped from memory entirely -- not just hidden from one list -- so the
+   search box, dashboards and reports cannot surface them either. */
+function applyHardScope(){
+  const me = state.currentUser;
+  if(!me || nameIsAdmin(me)) return;
+  DEPT_SCOPED.forEach(entity=>{
+    if(!Array.isArray(state[entity])) return;
+    if(SETUP_ENTITIES.includes(entity) && !canObject(entity, 'read', me)){ state[entity] = []; return; }
+    state[entity] = state[entity].filter(r=>recordInScope(entity, r, me));
+  });
+}
+
+/* Stamped onto every new record at the single insert chokepoint, so
+   records made by automations, flows, imports and the agent land in the
+   creator's department too -- not only ones typed into a form. */
+function stampDepartment(table, obj){
+  if(!DEPT_SCOPED.includes(table) || !obj || obj.department !== undefined) return;
+  const d = departmentOf(state.viewingAs) || departmentOf(state.currentUser);
+  obj.department = d ? d.id : null;
+}
+
+/* ---------- Administration: Departments ---------- */
+function renderAdminDepartments(){
+  const canEdit = canEditAdministration();
+  const depts = state.departments || [];
+  const noDept = state.team.filter(t=>!nameIsAdmin(t.name) && !departmentOf(t.name)).map(t=>t.name);
+  const unassignedCount = DEPT_SCOPED.reduce((n,e)=>n + (state[e]||[]).filter(r=>!r.department).length, 0);
+  const pol = accessPolicy();
+  return `<div class="io-card">
+    <h3 class="om-pane-title">Departments</h3>
+    <p class="om-pane-lead">Split the company into departments. Everyone in a department shares that
+      department's records, and nobody sees another department's leads, deals, orders or customers.
+      New records automatically belong to the department of the person who made them.</p>
+    ${canEdit ? `<div class="om-pane-actions">
+        <button type="button" class="btn" id="admNewDept">+ New Department</button>
+        ${depts.length ? '' : `<button type="button" class="btn secondary" id="admDeptStarter">Add starter departments</button>`}
+      </div>` : `<div class="readonly-note">👁 View only — only an admin can change departments.</div>`}
+    ${depts.length ? depts.map(d=>{
+      const counts = DEPT_SCOPED.reduce((n,e)=>n + (state[e]||[]).filter(r=>r.department===d.id).length, 0);
+      return `<div class="adm-card">
+        <div class="adm-card-head">
+          <div style="min-width:0;">
+            <div class="adm-name">${departmentChip(d.id)}</div>
+            <div class="adm-sub">${esc(d.description||'No description')}</div>
+            <div class="adm-sub">${counts} record${counts===1?'':'s'} · Members: ${(d.members||[]).length ? esc(d.members.join(', ')) : 'nobody yet'}</div>
+          </div>
+          ${canEdit ? `<div class="row-actions"><span data-edit-dept="${d.id}">edit</span><span data-del-dept="${d.id}">delete</span></div>` : ''}
+        </div>
+      </div>`;
+    }).join('') : `<div class="om-empty">No departments yet — until you add one, everyone sees everything (today's behaviour).</div>`}
+    ${depts.length ? `
+      ${noDept.length ? `<div class="readonly-note">⚠ Not in any department: <strong>${esc(noDept.join(', '))}</strong>. They only see unassigned records${pol.strictDepartments?' — and with Strict mode on, nothing at all':''}.</div>` : ''}
+      <div class="dept-tools">
+        <div>
+          <div class="adm-name" style="font-size:13px;">Existing records</div>
+          <div class="adm-sub">${unassignedCount} record${unassignedCount===1?'':'s'} have no department yet. Unassigned records stay visible to everyone until you assign them${pol.strictDepartments?' (Strict mode hides them from non-admins)':''}.</div>
+        </div>
+        ${canEdit ? `<button type="button" class="btn secondary" id="admDeptStamp" ${unassignedCount?'':'disabled'}>Assign by owner's department</button>` : ''}
+      </div>
+      <label class="dept-toggle"><input type="checkbox" id="admDeptStrict" ${pol.strictDepartments?'checked':''} ${canEdit?'':'disabled'}>
+        <span><strong>Strict mode</strong> — hide unassigned records from everyone except admins.</span></label>` : ''}
+  </div>`;
+}
+
+function openDepartmentModal(id){
+  if(!canEditAdministration()) return;
+  const editing = id ? state.departments.find(d=>d.id===id) : null;
+  const taken = new Map();
+  state.departments.forEach(d=>{ if(!editing || d.id!==editing.id) (d.members||[]).forEach(m=>taken.set(m, d.name)); });
+  const color = editing ? (editing.color||DEPT_COLORS[0]) : DEPT_COLORS[state.departments.length % DEPT_COLORS.length];
+  document.getElementById('modalBody').innerHTML = `<h2 class="display">${editing?'Edit':'New'} department</h2>
+    <div class="field"><label>Name</label><input id="dp_name" value="${esc(editing?editing.name:'')}" placeholder="e.g. Sales"></div>
+    <div class="field"><label>Description</label><input id="dp_desc" value="${esc(editing?(editing.description||''):'')}" placeholder="What does this team own?"></div>
+    <div class="field"><label>Colour</label><div class="dept-colors">${DEPT_COLORS.map(c=>`<label><input type="radio" name="dp_color" value="${c}" ${c===color?'checked':''}><span style="background:${c};"></span></label>`).join('')}</div></div>
+    <div class="field"><label>Members</label>
+      <div style="display:flex;flex-wrap:wrap;gap:9px 16px;">
+        ${teamNames().map(n=>`<label style="font-size:12.5px;display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" data-dp-member="${esc(n)}" ${editing && (editing.members||[]).includes(n)?'checked':''}>${esc(n)}${taken.has(n)?` <span style="color:var(--ink-soft);font-size:11px;">(in ${esc(taken.get(n))})</span>`:''}</label>`).join('')}
+      </div>
+      <div style="font-size:11.5px;color:var(--ink-soft);margin-top:7px;">A person belongs to one department. Ticking someone already in another department moves them here.</div>
+    </div>
+    <div class="modal-actions"><button class="btn secondary" id="cancelBtn">Cancel</button><button class="btn" id="dp_saveBtn">Save department</button></div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+  document.getElementById('dp_saveBtn').onclick = async ()=>{
+    const name = document.getElementById('dp_name').value.trim();
+    if(!name) return alert('Give the department a name.');
+    if(state.departments.some(d=>d.name.toLowerCase()===name.toLowerCase() && (!editing || d.id!==editing.id))) return alert('There is already a department with that name.');
+    const members = Array.from(document.querySelectorAll('[data-dp-member]:checked')).map(cb=>cb.dataset.dpMember);
+    // One department per person: pull them out of wherever they were.
+    state.departments.forEach(d=>{ if(!editing || d.id!==editing.id) d.members = (d.members||[]).filter(m=>!members.includes(m)); });
+    const payload = { name, description: document.getElementById('dp_desc').value.trim(),
+      color: (document.querySelector('input[name="dp_color"]:checked')||{}).value || DEPT_COLORS[0], members };
+    if(editing) Object.assign(editing, payload);
+    else state.departments.push({ id: uid(), createdAt: Date.now(), ...payload });
+    await saveKey(KEYS.departments, state.departments);
+    closeModal(); toast(`${name} saved.`); renderAdministrationView();
+  };
+}
+
+const STARTER_DEPARTMENTS = [
+  { name:'Sales', description:'Leads, deals and distributor relationships.' },
+  { name:'Marketing', description:'Campaigns, lead sources and outreach.' },
+  { name:'Operations', description:'Orders, fulfilment and suppliers.' },
+  { name:'Finance', description:'Invoices, payments and reconciliation.' },
+];
+
+/* ---------- Administration: Access Control ---------- */
+const STARTER_PROFILES = (()=>{
+  const all = (ops)=>{ const m={}; SETUP_ENTITIES.forEach(e=>{ m[e]={}; ops.forEach(o=>{ m[e][o]=true; }); }); return m; };
+  const only = (map)=>{ const m={}; SETUP_ENTITIES.forEach(e=>{ m[e]={}; (map[e]||[]).forEach(o=>{ m[e][o]=true; }); }); return m; };
+  const RCE = ['read','create','edit'];
+  return [
+    { name:'Manager', role:'Manager', description:'Runs a team: full access to records, no admin settings.',
+      objectPerms: all(['read','create','edit','del','viewAll']), systemPerms:['setup','exportData','importData','manageFlows','sendEmail'] },
+    { name:'Sales Rep', role:'Sales Rep', description:'Works leads and deals through to an order.',
+      objectPerms: only({contacts:RCE, leads:RCE, customers:RCE, distributors:['read'], deals:RCE, tasks:[...RCE,'del']}), systemPerms:['setup','sendEmail'] },
+    { name:'Marketing', role:'Marketing', description:'Owns lead generation and contact lists.',
+      objectPerms: only({contacts:RCE, leads:[...RCE,'del'], customers:['read'], tasks:[...RCE,'del']}), systemPerms:['setup','exportData','sendEmail'] },
+    { name:'Support', role:'Support', description:'Helps existing customers; read-mostly.',
+      objectPerms: only({contacts:['read','edit'], customers:['read','edit'], deals:['read'], tasks:[...RCE,'del']}), systemPerms:['sendEmail'] },
+    { name:'Read Only', role:null, description:'Can look, cannot change anything.',
+      objectPerms: only(Object.fromEntries(SETUP_ENTITIES.filter(e=>!['invoices','payments'].includes(e)).map(e=>[e,['read']]))), systemPerms:[] },
+  ];
+})();
+
+function accessReadiness(){
+  const people = state.team.filter(t=>!nameIsAdmin(t.name)).map(t=>t.name);
+  const noProfile = people.filter(n=>!profileOf(n));
+  const noRead = people.filter(n=>profileOf(n) && !SETUP_ENTITIES.some(e=>{
+    const a = effectiveAccess(n).objects[e]||{}; return a.read||a.viewAll||a.modifyAll; }));
+  return { people, noProfile, noRead, ready: !noProfile.length };
+}
+
+function renderAdminAccess(){
+  const canEdit = canEditAdministration();
+  const pol = accessPolicy();
+  const r = accessReadiness();
+  const who = state.accessCheckUser && state.team.some(t=>t.name===state.accessCheckUser) ? state.accessCheckUser : (r.people[0] || state.currentUser);
+  const ea = effectiveAccess(who);
+  const isAdm = nameIsAdmin(who);
+  const cell = (e, k)=>{
+    if(isAdm) return `<td class="ac-yes" title="Admin — always allowed">✓</td>`;
+    const on = !!ea.objects[e][k];
+    const src = (ea.sources[e+':'+k]||[]).join(', ');
+    return `<td class="${on?'ac-yes':'ac-no'}" title="${esc(on?src:'Not granted')}">${on?'✓':'—'}</td>`;
+  };
+  return `<div class="io-card">
+    <h3 class="om-pane-title">Access Control</h3>
+    <p class="om-pane-lead">Turn profiles and permission sets from a plan into the rules the app follows.
+      Three steps: give everyone a profile, check what each person will get, then switch enforcement on.</p>
+
+    <div class="ac-steps">
+      <div class="ac-step ${state.profiles.length?'done':''}">
+        <div class="ac-step-n">1</div>
+        <div><div class="adm-name">Profiles exist</div>
+          <div class="adm-sub">${state.profiles.length ? `${state.profiles.length} profile${state.profiles.length===1?'':'s'} defined.` : 'None yet.'}</div>
+          ${canEdit ? `<button type="button" class="btn secondary sm" id="acStarter">${state.profiles.length?'Add missing starter profiles':'Create starter profiles'}</button>` : ''}
+        </div>
+      </div>
+      <div class="ac-step ${r.ready?'done':''}">
+        <div class="ac-step-n">2</div>
+        <div><div class="adm-name">Everyone has a profile</div>
+          <div class="adm-sub">${r.noProfile.length ? `Missing: <strong>${esc(r.noProfile.join(', '))}</strong>` : 'All non-admin users are covered.'}</div>
+          ${canEdit && r.noProfile.length ? `<button type="button" class="btn secondary sm" id="acAutoAssign">Assign by role</button>` : ''}
+        </div>
+      </div>
+      <div class="ac-step ${pol.enforce?'done':''}">
+        <div class="ac-step-n">3</div>
+        <div><div class="adm-name">Enforcement is ${pol.enforce?'<span style="color:var(--sage);">ON</span>':'off'}</div>
+          <div class="adm-sub">${pol.enforce ? 'Screens, buttons and saves now follow each person\'s profile.' : 'Today everyone gets the built-in role behaviour.'}</div>
+          ${canEdit ? `<button type="button" class="btn ${pol.enforce?'secondary':''} sm" id="acToggle" ${!pol.enforce && !r.ready?'disabled title="Give everyone a profile first"':''}>${pol.enforce?'Turn enforcement off':'Turn enforcement on'}</button>` : ''}
+        </div>
+      </div>
+    </div>
+    ${r.noRead.length ? `<div class="readonly-note">⚠ ${esc(r.noRead.join(', '))} ${r.noRead.length===1?'has':'have'} a profile with no Read access on any object — they would see an empty CRM.</div>` : ''}
+
+    <h3 class="om-pane-title" style="margin-top:26px;">Access Check</h3>
+    <p class="om-pane-lead">Pick a person to see exactly what they will be able to do, and which profile or set grants it. Hover a tick for its source.</p>
+    <div class="ac-who">
+      <select id="acWho">${state.team.map(t=>`<option ${t.name===who?'selected':''}>${esc(t.name)}</option>`).join('')}</select>
+      <span>${isAdm ? `<span class="om-pill">Admin — never restricted</span>` : `${ea.profile?`Profile: <strong>${esc(ea.profile.name)}</strong>`:'<span style="color:var(--clay);">No profile</span>'}${ea.sets.length?` · Sets: ${esc(ea.sets.map(s=>s.name).join(', '))}`:''}`}</span>
+      <span>Department: ${isAdm ? 'all' : departmentChip(ea.department ? ea.department.id : '')}</span>
+    </div>
+    <div style="overflow-x:auto;"><table class="perm-grid ac-grid"><thead><tr><th>Object</th>${OBJECT_PERMS.map(p=>`<th>${esc(p.label)}</th>`).join('')}</tr></thead><tbody>
+      ${SETUP_ENTITIES.map(e=>`<tr><td>${esc(objectLabel(e))}</td>${OBJECT_PERMS.map(p=>cell(e,p.key)).join('')}</tr>`).join('')}
+    </tbody></table></div>
+    <div class="adm-chips" style="margin-top:10px;">${SYSTEM_PERMS.map(p=>{
+      const on = isAdm || ea.system.has(p.key);
+      return `<span class="adm-chip ${on?'on':''}" title="${esc(on?(isAdm?'Admin':(ea.sources['sys:'+p.key]||[]).join(', ')):'Not granted')}">${on?'✓':'✕'} ${esc(p.label)}</span>`;
+    }).join('')}</div>
+    ${!pol.enforce && !isAdm ? `<div class="readonly-note" style="margin-top:12px;">Preview — enforcement is off, so ${esc(who)} isn't held to this yet.</div>` : ''}
+  </div>`;
+}
+
+function wireAdminAccessAndDepartments(){
+  const on = (id, fn)=>{ const el = document.getElementById(id); if(el) el.onclick = fn; };
+  on('admNewDept', ()=>openDepartmentModal());
+  on('admDeptStarter', async ()=>{
+    if(!canEditAdministration()) return;
+    STARTER_DEPARTMENTS.forEach((d,i)=>state.departments.push({ id:uid(), createdAt:Date.now(), color:DEPT_COLORS[i], members:[], ...d }));
+    await saveKey(KEYS.departments, state.departments);
+    toast('Four starter departments added — now add people to each.');
+    renderAdministrationView();
+  });
+  document.querySelectorAll('[data-edit-dept]').forEach(el=>{ el.onclick = ()=>openDepartmentModal(el.dataset.editDept); });
+  document.querySelectorAll('[data-del-dept]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!canEditAdministration()) return;
+      const d = departmentById(el.dataset.delDept);
+      if(!d || !confirm(`Delete the ${d.name} department? Its records become unassigned.`)) return;
+      state.departments = state.departments.filter(x=>x.id!==d.id);
+      await saveKey(KEYS.departments, state.departments);
+      const touched = [];
+      DEPT_SCOPED.forEach(e=>(state[e]||[]).forEach(r=>{ if(r.department===d.id){ r.department = null; touched.push([e,r]); } }));
+      renderAdministrationView();
+      for(const [e,r] of touched) await dbUpdate(e, { id:r.id, department:null });
+    };
+  });
+  on('admDeptStamp', async ()=>{
+    if(!canEditAdministration()) return;
+    const todo = [];
+    DEPT_SCOPED.forEach(e=>(state[e]||[]).forEach(r=>{
+      if(r.department) return;
+      const d = departmentOf(r.owner);
+      if(d){ r.department = d.id; todo.push([e,r]); }
+    }));
+    if(!todo.length) return toast('No unassigned record has an owner who is in a department.');
+    if(!confirm(`Assign ${todo.length} record${todo.length===1?'':'s'} to their owner's department?`)) return;
+    renderAdministrationView();
+    for(const [e,r] of todo) await dbUpdate(e, { id:r.id, department:r.department });
+    toast(`${todo.length} record${todo.length===1?'':'s'} assigned.`);
+  });
+  const strict = document.getElementById('admDeptStrict');
+  if(strict) strict.onchange = async ()=>{
+    if(!canEditAdministration()) return;
+    state.accessPolicy = { ...accessPolicy(), strictDepartments: strict.checked };
+    await saveKey(KEYS.accessPolicy, state.accessPolicy);
+    renderAdministrationView();
+  };
+
+  on('acStarter', async ()=>{
+    if(!canEditAdministration()) return;
+    let added = 0;
+    STARTER_PROFILES.forEach(sp=>{
+      if(state.profiles.some(p=>p.name.toLowerCase()===sp.name.toLowerCase())) return;
+      const { role, ...rest } = sp;
+      state.profiles.push({ id:uid(), createdAt:Date.now(), members:[], forRole: role, ...JSON.parse(JSON.stringify(rest)) });
+      added++;
+    });
+    if(!added) return toast('All starter profiles already exist.');
+    await saveKey(KEYS.profiles, state.profiles);
+    toast(`${added} starter profile${added===1?'':'s'} added. Edit them under Profiles.`);
+    renderAdministrationView();
+  });
+  on('acAutoAssign', async ()=>{
+    if(!canEditAdministration()) return;
+    const fallback = state.profiles.find(p=>p.name==='Read Only');
+    let n = 0; const skipped = [];
+    accessReadiness().noProfile.forEach(name=>{
+      const role = roleFor(name);
+      const pf = state.profiles.find(p=>p.forRole===role || p.name===role) || fallback;
+      if(!pf){ skipped.push(name); return; }
+      pf.members = [...(pf.members||[]), name]; n++;
+    });
+    await saveKey(KEYS.profiles, state.profiles);
+    toast(n ? `${n} user${n===1?'':'s'} given a profile matching their role.` : 'No matching profiles — create starter profiles first.');
+    if(skipped.length) alert('No matching profile for: ' + skipped.join(', '));
+    renderAdministrationView();
+  });
+  on('acToggle', async ()=>{
+    if(!canEditAdministration()) return;
+    const pol = accessPolicy();
+    if(!pol.enforce){
+      if(!accessReadiness().ready) return alert('Give every non-admin user a profile first.');
+      if(!confirm('Turn enforcement on? From now on each person can only open, create, edit and delete what their profile and permission sets allow. Ariel and David are never restricted.')) return;
+    }
+    state.accessPolicy = { ...pol, enforce: !pol.enforce };
+    await saveKey(KEYS.accessPolicy, state.accessPolicy);
+    toast(state.accessPolicy.enforce ? 'Enforcement is on.' : 'Enforcement is off.');
+    render();
+  });
+  const whoSel = document.getElementById('acWho');
+  if(whoSel) whoSel.onchange = ()=>{ state.accessCheckUser = whoSel.value; renderAdministrationView(); };
+}
+
+/* ================================================================
+   LEAD RECORD PAGE -- every lead gets its own screen with a visual
+   pipeline and the full lifespan of the lead: when it entered each
+   stage, how long it sat there, and who moved it.
+   ================================================================ */
+const LEAD_PIPELINE = ['New','Qualified','Working','Converted'];
+const LEAD_STAGE_COLORS = { New:'var(--setup-blue)', Qualified:'var(--violet)', Working:'var(--ochre)', Converted:'var(--sage)', Disqualified:'var(--clay)' };
+const LEAD_STALL_DAYS = 14;
+const DAY_MS = 24*3600*1000;
+
+/* stage_history is append-only: [{status, at, by}]. Leads created before
+   tracking existed have none, so we show the one honest fact we have --
+   the lead was created, in its current status -- flagged as such rather
+   than inventing a path it never took. */
+function leadHistory(lead){
+  const h = Array.isArray(lead.stageHistory) ? lead.stageHistory.filter(x=>x && x.status) : [];
+  if(h.length) return h.slice().sort((a,b)=>(a.at||0)-(b.at||0));
+  return [{ status: lead.status||'New', at: lead.createdAt||Date.now(), by: lead.owner||'', synthetic:true }];
+}
+function recordLeadStatus(lead, newStatus, prevStatus){
+  const h = Array.isArray(lead.stageHistory) ? lead.stageHistory.slice() : [];
+  if(!h.length){
+    if(prevStatus && prevStatus!==newStatus) h.push({ status: prevStatus, at: lead.createdAt||Date.now(), by: lead.owner||'', synthetic:true });
+    else if(!prevStatus){ h.push({ status:newStatus, at: lead.createdAt||Date.now(), by: state.currentUser||lead.owner||'' }); lead.stageHistory = h; return; }
+  }
+  if(h.length && h[h.length-1].status===newStatus) return;
+  h.push({ status:newStatus, at:Date.now(), by: state.currentUser||'' });
+  lead.stageHistory = h;
+}
+/* Time spent in each stage, summed across re-entries. */
+function leadStageDurations(lead){
+  const h = leadHistory(lead); const out = {}; const now = Date.now();
+  h.forEach((step,i)=>{
+    const end = i < h.length-1 ? h[i+1].at : now;
+    out[step.status] = (out[step.status]||0) + Math.max(0, end - step.at);
+  });
+  return out;
+}
+function fmtSpan(ms){
+  const d = Math.floor(ms/DAY_MS);
+  if(d >= 1) return d + (d===1?' day':' days');
+  const hrs = Math.floor(ms/3600000);
+  if(hrs >= 1) return hrs + (hrs===1?' hour':' hours');
+  return Math.max(1, Math.floor(ms/60000)) + ' min';
+}
+function fmtDay(ts){ return ts ? new Date(ts).toLocaleDateString(undefined, { day:'numeric', month:'short', year:'numeric' }) : '—'; }
+function leadIsTerminal(status){ return status==='Converted' || status==='Disqualified'; }
+
+function openLeadProfile(id){
+  if(state.view!=='leadProfile') state.returnView = state.view;
+  state.profileLeadId = id;
+  state.view = 'leadProfile';
+  render();
+  window.scrollTo(0,0);
+}
+
+function renderLeadPipeline(lead, canEdit){
+  const status = lead.status || 'New';
+  const disq = status==='Disqualified';
+  const h = leadHistory(lead);
+  const durations = leadStageDurations(lead);
+  const firstEntered = {};
+  h.forEach(s=>{ if(firstEntered[s.status]===undefined) firstEntered[s.status] = s.at; });
+  // Disqualified replaces the step after the last stage the lead reached.
+  const lastReal = disq ? Math.max(0, ...h.filter(s=>LEAD_PIPELINE.includes(s.status)).map(s=>LEAD_PIPELINE.indexOf(s.status))) : -1;
+  const steps = disq ? [...LEAD_PIPELINE.slice(0, lastReal+1), 'Disqualified'] : LEAD_PIPELINE;
+  const curIdx = steps.indexOf(status);
+  return `<div class="lp-pipe" role="list">${steps.map((s,i)=>{
+    const reached = i <= curIdx;
+    const current = i === curIdx;
+    const clickable = canEdit && !current && s!=='Disqualified';
+    const dur = durations[s];
+    return `<button type="button" role="listitem" class="lp-step ${reached?'reached':''} ${current?'current':''}" style="--sc:${LEAD_STAGE_COLORS[s]};"
+        ${clickable?`data-lead-stage="${esc(lead.id)}:${esc(s)}" title="Move to ${esc(s)}"`:'disabled'}>
+      <span class="lp-step-bar"></span>
+      <span class="lp-step-label">${current?'● ':''}${esc(s)}</span>
+      <span class="lp-step-meta">${dur!==undefined ? (current?'for ':'')+fmtSpan(dur) : (reached?'skipped':'—')}</span>
+      <span class="lp-step-date">${firstEntered[s]!==undefined ? fmtDay(firstEntered[s]) : ''}</span>
+    </button>`;
+  }).join('')}</div>`;
+}
+
+function renderLeadLifespan(lead){
+  const h = leadHistory(lead);
+  const now = Date.now();
+  const start = h[0].at || lead.createdAt || now;
+  const end = leadIsTerminal(lead.status) ? h[h.length-1].at : now;
+  const total = Math.max(1, end - start);
+  const segs = h.map((s,i)=>{
+    const segEnd = i < h.length-1 ? h[i+1].at : end;
+    return { status:s.status, ms: Math.max(0, segEnd - s.at) };
+  }).filter(s=>s.ms>0 || h.length===1);
+  const age = now - (lead.createdAt || start);
+  const inStage = now - h[h.length-1].at;
+  const changes = h.filter(s=>!s.synthetic).length - 1;
+  return `<div class="lp-card">
+    <div class="lp-card-title">Lifespan</div>
+    <div class="lp-stats">
+      <div class="lp-stat"><div class="v">${fmtSpan(age)}</div><div class="l">Lead age</div></div>
+      <div class="lp-stat"><div class="v">${leadIsTerminal(lead.status) ? fmtSpan(total) : fmtSpan(inStage)}</div><div class="l">${leadIsTerminal(lead.status) ? 'Time to '+esc(lead.status.toLowerCase()) : 'In '+esc(lead.status||'New')}</div></div>
+      <div class="lp-stat"><div class="v">${Math.max(0, changes)}</div><div class="l">Stage changes</div></div>
+      <div class="lp-stat"><div class="v">${fmtDay(lead.createdAt)}</div><div class="l">Created</div></div>
+    </div>
+    <div class="lp-bar" aria-label="Time spent in each stage">${segs.map(s=>`<span style="flex:${Math.max(s.ms/total, 0.02)};background:${LEAD_STAGE_COLORS[s.status]||'var(--ink-soft)'};" title="${esc(s.status)} · ${fmtSpan(s.ms)}"></span>`).join('')}</div>
+    <div class="lp-bar-key">${Array.from(new Set(segs.map(s=>s.status))).map(s=>`<span><i style="background:${LEAD_STAGE_COLORS[s]||'var(--ink-soft)'};"></i>${esc(s)}</span>`).join('')}</div>
+    <div class="lp-card-title" style="margin-top:20px;">Timeline</div>
+    <ol class="lp-timeline">${h.slice().reverse().map((s,i,arr)=>{
+      const isFirst = i===arr.length-1;
+      return `<li style="--sc:${LEAD_STAGE_COLORS[s.status]||'var(--ink-soft)'};">
+        <div class="lp-tl-head"><strong>${isFirst ? (s.synthetic?'Created as ':'Created as ') : 'Moved to '}${esc(s.status)}</strong>${s.by?` <span>by ${esc(s.by)}</span>`:''}</div>
+        <div class="lp-tl-meta">${new Date(s.at).toLocaleString(undefined,{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+        ${s.synthetic ? `<div class="lp-tl-note">Stage history starts here — this lead predates stage tracking.</div>` : ''}
+      </li>`;
+    }).join('')}</ol>
+  </div>`;
+}
+
+function renderLeadProfile(){
+  const lead = state.leads.find(l=>l.id===state.profileLeadId);
+  if(!lead || !recordInScope('leads', lead) || !visibleRecords('leads',[lead]).length){
+    return `<div class="lp-page"><div class="lp-card lp-empty">This lead no longer exists, or you don't have access to it.
+      <div style="margin-top:12px;"><button type="button" class="btn" data-navigate="leads">Back to Leads</button></div></div></div>`;
+  }
+  const canEdit = canObject('leads','edit');
+  const canDel = canObject('leads','del');
+  const status = lead.status || 'New';
+  const idx = LEAD_PIPELINE.indexOf(status);
+  const next = (idx>=0 && idx<LEAD_PIPELINE.length-1) ? LEAD_PIPELINE[idx+1] : null;
+  const inStage = Date.now() - leadHistory(lead).slice(-1)[0].at;
+  const stalled = !leadIsTerminal(status) && inStage > LEAD_STALL_DAYS*DAY_MS;
+  const src = lead.source || ((lead.sources&&lead.sources.join(', '))||'');
+  const info = [
+    ['Email', lead.email ? `<a href="mailto:${esc(lead.email)}">${esc(lead.email)}</a>` : '—'],
+    ['Phone', lead.phone ? `<a href="tel:${esc(lead.phone)}">${esc(lead.phone)}</a>` : '—'],
+    ['Kind', esc(lead.kind||'Individual')],
+    ['Company', esc(lead.company||'—')],
+    ['Source', esc(src||'—')],
+    ['Owner', esc(lead.owner||'—')],
+    ...(departmentsOn() ? [['Department', departmentChip(lead.department)]] : []),
+    ['Created', fmtDay(lead.createdAt)],
+  ];
+  return `<div class="lp-page">
+    <div class="lp-card lp-header">
+      <div class="lp-identity">
+        ${avatarHTML(lead.name)}
+        <div style="min-width:0;">
+          <div class="lp-name">${esc(lead.name)}</div>
+          <div class="lp-meta">${esc(lead.company || lead.kind || 'Individual')}${src?' · '+esc(src):''}${lead.owner?' · Owner '+esc(lead.owner):''}</div>
+          <div class="lp-badges">
+            <span class="lp-status" style="--sc:${LEAD_STAGE_COLORS[status]||'var(--ink-soft)'};">${esc(status)}</span>
+            ${stalled ? `<span class="lp-status" style="--sc:var(--clay);" title="No stage change for over ${LEAD_STALL_DAYS} days">Stalled ${fmtSpan(inStage)}</span>` : ''}
+            ${departmentsOn() ? departmentChip(lead.department) : ''}
+          </div>
+        </div>
+      </div>
+      <div class="lp-actions">
+        ${canEdit ? `<button type="button" class="btn secondary" data-edit="leads:${esc(lead.id)}">Edit</button>` : ''}
+        ${canEdit && !leadIsTerminal(status) ? `<button type="button" class="btn secondary" data-lead-stage="${esc(lead.id)}:Disqualified">Disqualify</button>` : ''}
+        ${canEdit && status==='Disqualified' ? `<button type="button" class="btn secondary" data-lead-stage="${esc(lead.id)}:Working">Reopen</button>` : ''}
+        ${canEdit && next ? `<button type="button" class="btn" data-lead-stage="${esc(lead.id)}:${esc(next)}">Move to ${esc(next)} →</button>` : ''}
+        ${canDel ? `<button type="button" class="btn secondary lp-del" data-del="leads:${esc(lead.id)}" title="Delete lead">Delete</button>` : ''}
+      </div>
+    </div>
+    <div class="lp-card">
+      <div class="lp-card-title">Pipeline${canEdit?` <span class="lp-hint">Click a stage to move the lead there</span>`:''}</div>
+      ${renderLeadPipeline(lead, canEdit)}
+    </div>
+    <div class="lp-grid">
+      <div>${renderLeadLifespan(lead)}</div>
+      <div>
+        <div class="lp-card"><div class="lp-card-title">Details</div>
+          <dl class="lp-info">${info.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl></div>
+        <div class="lp-card"><div class="lp-card-title">Notes</div>
+          <div class="lp-notes">${lead.notes ? esc(lead.notes) : '<span style="color:var(--ink-soft);">No notes yet.</span>'}</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function setLeadStatus(leadId, status){
+  const lead = state.leads.find(l=>l.id===leadId);
+  if(!lead || !assertCan('leads','edit')) return false;
+  if(!LEAD_STATUS.includes(status)) return false;
+  const prev = lead.status || 'New';
+  if(prev===status) return true;
+  if(status==='Disqualified' && !confirm(`Disqualify ${lead.name}?`)) return false;
+  recordLeadStatus(lead, status, prev);
+  lead.status = status;
+  render();
+  await dbUpdate('leads', lead);
+  toast(`${lead.name} moved to ${status}.`);
+  if(status==='Converted') celebrate();
+  await runFlows('leads', lead, 'updated');
+  return true;
+}
+
+function wireLeadExtras(){
+  document.querySelectorAll('[data-lead-profile]').forEach(el=>{
+    el.onclick = (e)=>{ e.preventDefault(); e.stopPropagation(); openLeadProfile(el.dataset.leadProfile); };
+  });
+  document.querySelectorAll('[data-lead-stage]').forEach(el=>{
+    el.onclick = ()=>{ const [id, s] = el.dataset.leadStage.split(':'); setLeadStatus(id, s); };
+  });
+}
+
+/* ================================================================
+   SUPPORT AGENT -- a small helper in the corner of every screen except
+   Setup. It talks to the `support-agent` Edge Function (Claude), which
+   can only *ask* for actions; the actions themselves run here, through
+   the same permission checks as a click, and anything that changes data
+   waits for the user to approve it. If the function isn't deployed yet
+   the panel falls back to a built-in helper for navigation and search.
+   ================================================================ */
+const agent = { open:false, busy:false, messages:[], log:[], offline:false, pending:null };
+const AGENT_VIEWS = ['dashboard','home','contacts','leads','customers','distributors','suppliers','deals','orders','tasks','invoices','payments','finance','emails','tickets','reports','search'];
+const AGENT_MAX_STEPS = 6;
+
+function agentViewAllowed(view){
+  if(!AGENT_VIEWS.includes(view)) return false;
+  if(['invoices','payments','finance'].includes(view) && !isPrivileged()) return false;
+  if(view==='leads' && !canSeeLeads()) return false;
+  if(SETUP_ENTITIES.includes(view) && (navLinkHidden(view))) return false;
+  return true;
+}
+function agentRecordSummary(entity, r){
+  const base = { entity, id:r.id };
+  if(entity==='leads') return { ...base, name:r.name, status:r.status||'New', source:r.source||'', owner:r.owner, company:r.company||'', created:fmtDay(r.createdAt), daysInStage: Math.floor((Date.now()-leadHistory(r).slice(-1)[0].at)/DAY_MS) };
+  if(entity==='deals') return { ...base, title:r.title, stage:r.stage, value:r.value, currency:(r.currencies||[])[0]||'', owner:r.owner };
+  if(entity==='tasks') return { ...base, title:r.title, status:r.status, due:r.dueDate||'', owner:r.owner };
+  if(entity==='orders') return { ...base, product:r.product, status:r.status, amount:r.amount, owner:r.owner, created:fmtDay(r.createdAt) };
+  return { ...base, name:r.name||r.title||r.product||r.purpose||'', email:r.email||'', company:r.company||'', owner:r.owner||'' };
+}
+function agentSearchable(){
+  return ['contacts','leads','customers','distributors','suppliers','deals','orders','tasks','invoices','payments']
+    .filter(e=>agentViewAllowed(e) && canObject(e,'read'));
+}
+function agentSearch(query, entity){
+  const q = String(query||'').trim().toLowerCase();
+  const entities = entity && agentSearchable().includes(entity) ? [entity] : agentSearchable();
+  const hits = [];
+  entities.forEach(e=>{
+    visibleRecords(e, state[e]||[]).forEach(r=>{
+      const hay = [r.name,r.title,r.company,r.email,r.phone,r.product,r.notes,r.status,r.stage,r.source,r.owner].join(' ').toLowerCase();
+      if(!q || hay.includes(q)) hits.push(agentRecordSummary(e, r));
+    });
+  });
+  return { total: hits.length, results: hits.slice(0, 15) };
+}
+function agentContext(){
+  const counts = {};
+  agentSearchable().forEach(e=>{ counts[e] = visibleRecords(e, state[e]||[]).length; });
+  const ctx = {
+    user: state.viewingAs, role: roleFor(state.viewingAs),
+    department: departmentsOn() ? (departmentOf(state.viewingAs)||{}).name || 'none' : undefined,
+    screen: state.view, today: new Date().toISOString().slice(0,10),
+    company: (state.companySettings && state.companySettings.name) || 'Siddha Wellness Group',
+    visibleRecordCounts: counts,
+    canCreate: SETUP_ENTITIES.filter(e=>canObject(e,'create')),
+    navigableScreens: AGENT_VIEWS.filter(agentViewAllowed),
+    leadStatuses: LEAD_STATUS, taskStatuses: TSTATUS,
+  };
+  if(state.view==='leadProfile'){
+    const l = state.leads.find(x=>x.id===state.profileLeadId);
+    if(l) ctx.openLead = { ...agentRecordSummary('leads', l), history: leadHistory(l).map(s=>({status:s.status, at:fmtDay(s.at), by:s.by})) };
+  }
+  if(state.view==='customerProfile'){
+    const c = state.customers.find(x=>x.id===state.profileCustomerId);
+    if(c) ctx.openCustomer = agentRecordSummary('customers', c);
+  }
+  return ctx;
+}
+
+/* Tools that only read run straight away. Tools that write return a
+   `confirm` description; the panel shows Approve / Decline and the tool
+   only runs on Approve. */
+const AGENT_TOOLS = {
+  navigate: { run: ({ view })=>{
+    if(!agentViewAllowed(view)) return { error:`Screen "${view}" is not available to this user.` };
+    state.view = view; render(); return { ok:true, screen:view };
+  }},
+  search_records: { run: ({ query, entity })=>agentSearch(query, entity) },
+  pipeline_summary: { run: ()=>{
+    const out = {};
+    if(canSeeLeads() && canObject('leads','read')){
+      const leads = visibleRecords('leads', state.leads);
+      out.leadsByStatus = Object.fromEntries(LEAD_STATUS.map(s=>[s, leads.filter(l=>(l.status||'New')===s).length]));
+      out.stalledLeads = leads.filter(l=>!leadIsTerminal(l.status||'New') && Date.now()-leadHistory(l).slice(-1)[0].at > LEAD_STALL_DAYS*DAY_MS).map(l=>agentRecordSummary('leads', l)).slice(0,10);
+    }
+    if(canObject('deals','read')){
+      const deals = visibleRecords('deals', state.deals);
+      out.dealsByStage = Object.fromEntries(STAGES.map(s=>[s, deals.filter(d=>d.stage===s).length]));
+    }
+    if(canObject('tasks','read')){
+      const today = new Date().toISOString().slice(0,10);
+      out.overdueTasks = visibleRecords('tasks', state.tasks).filter(t=>t.status!=='Done' && t.dueDate && t.dueDate < today).map(t=>agentRecordSummary('tasks', t)).slice(0,10);
+    }
+    return out;
+  }},
+  open_lead: { run: ({ lead_id })=>{
+    const l = state.leads.find(x=>x.id===lead_id);
+    if(!l || !canSeeLeads() || !visibleRecords('leads',[l]).length) return { error:'Lead not found or not accessible.' };
+    openLeadProfile(l.id); return { ok:true, opened:l.name };
+  }},
+  update_lead_status: {
+    confirm: ({ lead_id, status })=>{ const l = state.leads.find(x=>x.id===lead_id); return l ? `Move lead “${l.name}” from ${l.status||'New'} to ${status}` : null; },
+    run: async ({ lead_id, status })=>{
+      const l = state.leads.find(x=>x.id===lead_id);
+      if(!l || !visibleRecords('leads',[l]).length) return { error:'Lead not found or not accessible.' };
+      if(!LEAD_STATUS.includes(status)) return { error:`Unknown status. Use one of ${LEAD_STATUS.join(', ')}.` };
+      if(!canObject('leads','edit')) return { error:'This user is not allowed to edit leads.' };
+      const prev = l.status||'New';
+      recordLeadStatus(l, status, prev); l.status = status; render();
+      await dbUpdate('leads', l); await runFlows('leads', l, 'updated');
+      return { ok:true, lead:l.name, from:prev, to:status };
+    }},
+  create_task: {
+    confirm: ({ title, due_date })=>`Create task “${title}”${due_date?` due ${due_date}`:''} for ${state.viewingAs}`,
+    run: async ({ title, due_date, notes })=>{
+      if(!canObject('tasks','create')) return { error:'This user is not allowed to create tasks.' };
+      if(!String(title||'').trim()) return { error:'A task needs a title.' };
+      const t = { id:uid(), createdAt:Date.now(), owner:state.viewingAs, title:String(title).trim(), dueDate: /^\d{4}-\d{2}-\d{2}$/.test(due_date||'') ? due_date : '', status:'Open', linkType:'none', linkId:null, notes: String(notes||'').trim() };
+      const valErr = validateAgainstRules('tasks', t);
+      if(valErr) return { error: valErr };
+      state.tasks.push(t); render();
+      await dbInsert('tasks', t); await runAutomations('tasks', t); await runFlows('tasks', t, 'created');
+      return { ok:true, task_id:t.id, title:t.title };
+    }},
+  create_lead: {
+    confirm: ({ name, source })=>`Add lead “${name}”${source?` from ${source}`:''}`,
+    run: async ({ name, email, phone, company, source, notes })=>{
+      if(!canSeeLeads() || !canObject('leads','create')) return { error:'This user is not allowed to create leads.' };
+      if(!String(name||'').trim()) return { error:'A lead needs a name.' };
+      const l = { id:uid(), createdAt:Date.now(), owner:state.viewingAs, name:String(name).trim(), kind: company?'Company':'Individual',
+        company:String(company||'').trim(), sources:[], source: LEAD_SOURCES.includes(source) ? source : (source?'Other':''), status:'New',
+        email:String(email||'').trim(), phone:String(phone||'').trim(), notes:String(notes||'').trim() };
+      recordLeadStatus(l, 'New', null);
+      const valErr = validateAgainstRules('leads', l);
+      if(valErr) return { error: valErr };
+      state.leads.push(l); render();
+      await dbInsert('leads', l); await runAutomations('leads', l); await runFlows('leads', l, 'created');
+      return { ok:true, lead_id:l.id, name:l.name };
+    }},
+};
+
+function agentVisible(){ return !!state.currentUser && state.view!=='setup'; }
+function ensureAgentDom(){
+  if(document.getElementById('agentFab')) return;
+  const app = document.getElementById('app');
+  if(!app) return;
+  const wrap = document.createElement('div');
+  wrap.id = 'agentRoot';
+  wrap.innerHTML = `
+    <button type="button" class="agent-fab" id="agentFab" aria-label="Open the support assistant" title="Ask the assistant">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l1.6 4.2 4.4 1.7-4.4 1.7L12 15.3l-1.6-4.2L6 9.4l4.4-1.7z"/><path d="M18.5 14.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>
+    </button>
+    <section class="agent-panel" id="agentPanel" aria-label="Support assistant" hidden>
+      <header class="agent-head">
+        <div><div class="agent-title">Assistant</div><div class="agent-sub" id="agentSub">Ask me to find, open or create things</div></div>
+        <button type="button" class="agent-x" id="agentReset" title="New conversation">↺</button>
+        <button type="button" class="agent-x" id="agentClose" aria-label="Close">✕</button>
+      </header>
+      <div class="agent-log" id="agentLog" aria-live="polite"></div>
+      <form class="agent-form" id="agentForm">
+        <input id="agentInput" autocomplete="off" placeholder="e.g. Which leads are stalled?" maxlength="1500">
+        <button type="submit" class="btn" id="agentSend">Send</button>
+      </form>
+    </section>`;
+  app.appendChild(wrap);
+  document.getElementById('agentFab').onclick = ()=>{ agent.open = !agent.open; syncAgent(); if(agent.open) document.getElementById('agentInput').focus(); };
+  document.getElementById('agentClose').onclick = ()=>{ agent.open = false; syncAgent(); };
+  document.getElementById('agentReset').onclick = ()=>{ if(agent.busy) return; agent.messages = []; agent.log = []; agent.pending = null; renderAgentLog(); };
+  document.getElementById('agentForm').onsubmit = (e)=>{ e.preventDefault(); const inp = document.getElementById('agentInput'); const v = inp.value.trim(); if(!v || agent.busy) return; inp.value=''; agentSend(v); };
+}
+function syncAgent(){
+  ensureAgentDom();
+  const root = document.getElementById('agentRoot');
+  if(!root) return;
+  const show = agentVisible();
+  root.style.display = show ? '' : 'none';
+  document.getElementById('agentPanel').hidden = !(show && agent.open);
+  document.getElementById('agentFab').classList.toggle('open', agent.open);
+  if(show && agent.open && !agent.log.length) renderAgentLog();
+}
+function agentLinkify(text){
+  // Escape first, then allow **bold** and line breaks -- nothing else.
+  return esc(text).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+}
+function renderAgentLog(){
+  const log = document.getElementById('agentLog');
+  if(!log) return;
+  const intro = `<div class="agent-msg bot">Hi ${esc(state.viewingAs||'')} 👋 I can find records, summarise your pipeline, open a lead, move a lead's stage, or add a task or lead. I only see what your access allows, and I'll ask before changing anything.</div>`;
+  log.innerHTML = intro + agent.log.map(m=>{
+    if(m.kind==='user') return `<div class="agent-msg user">${esc(m.text)}</div>`;
+    if(m.kind==='bot') return `<div class="agent-msg bot">${agentLinkify(m.text)}</div>`;
+    if(m.kind==='tool') return `<div class="agent-tool">${esc(m.text)}</div>`;
+    if(m.kind==='confirm') return `<div class="agent-confirm"><div>${esc(m.text)}</div>${m.state==='pending'
+      ? `<div class="agent-confirm-actions"><button type="button" class="btn secondary sm" data-agent-decline>Decline</button><button type="button" class="btn sm" data-agent-approve>Approve</button></div>`
+      : `<div class="agent-confirm-done">${m.state==='approved'?'✓ Approved':'✕ Declined'}</div>`}</div>`;
+    if(m.kind==='error') return `<div class="agent-msg err">${esc(m.text)}</div>`;
+    return '';
+  }).join('') + (agent.busy ? `<div class="agent-typing"><span></span><span></span><span></span></div>` : '');
+  log.scrollTop = log.scrollHeight;
+  const ap = log.querySelector('[data-agent-approve]'); if(ap) ap.onclick = ()=>agentResolvePending(true);
+  const dc = log.querySelector('[data-agent-decline]'); if(dc) dc.onclick = ()=>agentResolvePending(false);
+  const sub = document.getElementById('agentSub');
+  if(sub) sub.textContent = agent.offline ? 'Basic mode — AI service not reachable' : 'Ask me to find, open or create things';
+  const send = document.getElementById('agentSend'); if(send) send.disabled = agent.busy || !!agent.pending;
+}
+
+async function agentCallModel(){
+  const { data, error } = await sb.functions.invoke('support-agent', { body: { messages: agent.messages } });
+  if(error) throw error;
+  if(!data || !Array.isArray(data.content)) throw new Error((data && data.error) || 'Empty reply');
+  return data;
+}
+
+async function agentSend(text){
+  agent.log.push({ kind:'user', text });
+  if(agent.offline){ agent.log.push({ kind:'bot', text: agentOfflineReply(text) }); renderAgentLog(); return; }
+  // The context is stored as part of the turn, so history is append-only.
+  agent.messages.push({ role:'user', content: [
+    { type:'text', text },
+    { type:'text', text: `<crm_context>${JSON.stringify(agentContext()).slice(0, 8000)}</crm_context>` },
+  ] });
+  agent.busy = true; renderAgentLog();
+  await agentLoop();
+}
+
+async function agentLoop(){
+  try{
+    for(let step=0; step<AGENT_MAX_STEPS; step++){
+      const reply = await agentCallModel();
+      // The full content goes back on the next turn unchanged (thinking
+      // blocks included) -- the history stays append-only.
+      agent.messages.push({ role:'assistant', content: reply.content });
+      reply.content.filter(b=>b.type==='text' && b.text.trim()).forEach(b=>agent.log.push({ kind:'bot', text:b.text }));
+      if(reply.stop_reason==='refusal'){ agent.log.push({ kind:'error', text:'The assistant declined that request.' }); break; }
+      const calls = reply.content.filter(b=>b.type==='tool_use');
+      if(reply.stop_reason!=='tool_use' || !calls.length) break;
+      const results = [];
+      for(const call of calls){
+        results.push(await agentRunTool(call));
+      }
+      agent.messages.push({ role:'user', content: results });
+      renderAgentLog();
+    }
+  }catch(err){
+    console.error('support agent failed', err);
+    // Roll back the unanswered user turn so a retry starts clean.
+    while(agent.messages.length && agent.messages[agent.messages.length-1].role==='user') agent.messages.pop();
+    agent.offline = true;
+    const lastUser = [...agent.log].reverse().find(m=>m.kind==='user');
+    agent.log.push({ kind:'error', text:'The AI service isn\'t reachable right now, so I switched to basic mode.' });
+    if(lastUser) agent.log.push({ kind:'bot', text: agentOfflineReply(lastUser.text) });
+  }finally{
+    agent.busy = false; renderAgentLog();
+  }
+}
+
+async function agentRunTool(call){
+  const tool = AGENT_TOOLS[call.name];
+  const input = (call.input && typeof call.input==='object') ? call.input : {};
+  if(!tool) return { type:'tool_result', tool_use_id: call.id, content: JSON.stringify({ error:'Unknown tool' }), is_error:true };
+  if(tool.confirm){
+    const desc = tool.confirm(input);
+    if(!desc) return { type:'tool_result', tool_use_id: call.id, content: JSON.stringify({ error:'Record not found.' }), is_error:true };
+    const approved = await new Promise(resolve=>{
+      const entry = { kind:'confirm', text: desc, state:'pending' };
+      agent.log.push(entry);
+      agent.pending = { entry, resolve };
+      agent.busy = false; renderAgentLog();
+    });
+    agent.busy = true; renderAgentLog();
+    if(!approved) return { type:'tool_result', tool_use_id: call.id, content: JSON.stringify({ declined:true, note:'The user declined this action.' }) };
+  }
+  try{
+    const out = await tool.run(input);
+    if(!tool.confirm && call.name!=='search_records' && call.name!=='pipeline_summary') agent.log.push({ kind:'tool', text: out && out.error ? `⚠ ${out.error}` : `→ ${call.name.replace(/_/g,' ')}` });
+    return { type:'tool_result', tool_use_id: call.id, content: JSON.stringify(out||{}), ...(out && out.error ? { is_error:true } : {}) };
+  }catch(e){
+    return { type:'tool_result', tool_use_id: call.id, content: JSON.stringify({ error: String(e && e.message || e) }), is_error:true };
+  }
+}
+function agentResolvePending(ok){
+  if(!agent.pending) return;
+  const { entry, resolve } = agent.pending;
+  entry.state = ok ? 'approved' : 'declined';
+  agent.pending = null;
+  resolve(ok);
+}
+
+/* Basic mode: no AI, just the obvious intents, so the panel is never dead. */
+function agentOfflineReply(text){
+  const t = text.toLowerCase();
+  const go = AGENT_VIEWS.filter(agentViewAllowed).find(v=>new RegExp(`\\b(go to|open|show)\\b.*\\b${v}\\b`).test(t));
+  if(go){ state.view = go; render(); return `Opened ${go}.`; }
+  if(/stall|stuck|pipeline|summary/.test(t)){
+    const s = AGENT_TOOLS.pipeline_summary.run();
+    const parts = [];
+    if(s.leadsByStatus) parts.push('Leads: ' + Object.entries(s.leadsByStatus).map(([k,v])=>`${k} ${v}`).join(', '));
+    if(s.stalledLeads) parts.push(s.stalledLeads.length ? `Stalled (${LEAD_STALL_DAYS}+ days): ` + s.stalledLeads.map(l=>`${l.name} (${l.status}, ${l.daysInStage}d)`).join(', ') : 'No stalled leads.');
+    if(s.dealsByStage) parts.push('Deals: ' + Object.entries(s.dealsByStage).map(([k,v])=>`${k} ${v}`).join(', '));
+    if(s.overdueTasks) parts.push(s.overdueTasks.length ? 'Overdue tasks: ' + s.overdueTasks.map(x=>x.title).join(', ') : 'No overdue tasks.');
+    return parts.join('\n') || 'Nothing to summarise with your current access.';
+  }
+  const m = t.match(/\b(?:find|search|look up|where is)\s+(.+)/);
+  if(m){
+    const r = agentSearch(m[1].replace(/[?.!]+$/,''));
+    if(!r.total) return `No records match “${m[1]}”.`;
+    return `Found ${r.total}: ` + r.results.slice(0,8).map(x=>`${x.name||x.title||x.product} (${objectLabel(x.entity)})`).join(', ');
+  }
+  return 'In basic mode I can: “go to leads”, “find <name>”, or “pipeline summary”. Full AI help comes back once the support-agent service is deployed.';
+}
+
 /* ---------- Auth ---------- */
 function populateViewingAsOptions(){
   const sel = document.getElementById('viewingAs');
@@ -11776,6 +12882,8 @@ document.getElementById('loginPassword').onkeydown = (e)=>{ if(e.key==='Enter') 
 document.getElementById('loginEmail').onkeydown = (e)=>{ if(e.key==='Enter') document.getElementById('loginPassword').focus(); };
 document.getElementById('logoutBtn').onclick = ()=>{
   state.currentUser = null;
+  agent.open = false; agent.messages = []; agent.log = []; agent.pending = null; agent.offline = false;
+  syncAgent();
   state.view = 'dashboard';
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
