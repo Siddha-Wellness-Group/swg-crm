@@ -230,7 +230,7 @@
   .navlink[data-view="distributors"]{--nav-accent:var(--magenta);--nav-accent-soft:var(--magenta-soft);}
   .navlink[data-view="suppliers"]{--nav-accent:var(--rose);--nav-accent-soft:var(--rose-soft);}
   .navlink[data-view="emails"],.navlink[data-view="tickets"]{--nav-accent:var(--rust);--nav-accent-soft:var(--rust-soft);}
-  .navlink[data-view="tasks"],.navlink[data-view="finance"],.navlink[data-view="reports"],.navlink[data-view="invoices"],.navlink[data-view="payments"]{--nav-accent:var(--setup-blue);--nav-accent-soft:var(--setup-blue-soft);}
+  .navlink[data-view="tasks"],.navlink[data-view="finance"],.navlink[data-view="financeDashboard"],.navlink[data-view="reports"],.navlink[data-view="invoices"],.navlink[data-view="payments"]{--nav-accent:var(--setup-blue);--nav-accent-soft:var(--setup-blue-soft);}
   .navlink .nav-ico{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);transition:color .14s;}
   .navlink .nav-ico svg{width:100%;height:100%;display:block;}
   .navlink:hover{background:var(--nav-accent-soft);color:var(--ink);}
@@ -1519,6 +1519,7 @@
     <div class="navlink" data-view="invoices" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Invoices</span></div>
     <div class="navlink" data-view="payments" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Payments</span></div>
     <div class="navlink" data-view="finance" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Finance</span></div>
+    <div class="navlink" data-view="financeDashboard" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Finance Dashboard</span></div>
     <div class="navlink" data-view="reports" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Reports</span></div>
     <div class="nav-group-label" data-nav-group="support">Support</div>
     <div class="navlink" data-view="emails" data-nav-group="support"><span class="nav-ico"></span><span class="nav-label">Emails</span></div>
@@ -1735,6 +1736,7 @@ const NAV_ICONS = {
   tasks:`<path d="M9 4.2H7.2A1.7 1.7 0 0 0 5.5 5.9v13.4a1.7 1.7 0 0 0 1.7 1.7h9.6a1.7 1.7 0 0 0 1.7-1.7V5.9a1.7 1.7 0 0 0-1.7-1.7H15"/><rect x="9" y="2.6" width="6" height="3.4" rx="1.2"/><path d="M8.9 13.4l2.1 2.1 4.1-4.3"/>`,
   invoices:`<path d="M14 3.2H7.4A1.9 1.9 0 0 0 5.5 5.1v13.8a1.9 1.9 0 0 0 1.9 1.9h9.2a1.9 1.9 0 0 0 1.9-1.9V8.2z"/><path d="M13.8 3.3v4.9h4.7"/><path d="M8.8 13h6.4M8.8 16.6h4.3"/>`,
   payments:`<rect x="2.6" y="5.4" width="18.8" height="13.2" rx="2.2"/><path d="M2.6 10.2h18.8"/><path d="M6.4 14.8h3.4"/>`,
+  financeDashboard:`<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>`,
   finance:`<path d="M3.4 20.6h17.2"/><rect x="5.4" y="12" width="3.4" height="6.4" rx="1"/><rect x="10.6" y="7.6" width="3.4" height="10.8" rx="1"/><rect x="15.8" y="10" width="3.4" height="8.4" rx="1"/>`,
   emails:`<rect x="2.8" y="5" width="18.4" height="14" rx="2.2"/><path d="M3.4 6.6 12 13l8.6-6.4"/>`,
   tickets:`<circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="3.4"/><path d="M6 6l3.6 3.6M14.4 14.4 18 18M18 6l-3.6 3.6M9.6 14.4 6 18"/>`,
@@ -1767,7 +1769,7 @@ const ACCENTS = {
   distributors:'var(--magenta)', suppliers:'var(--rose)', deals:'var(--teal)', orders:'var(--violet)',
   tasks:'var(--setup-blue)', invoices:'var(--setup-blue)', payments:'var(--setup-blue)', team:'var(--ink)', finance:'var(--setup-blue)',
   emails:'var(--rust)', tickets:'var(--rust)', search:'var(--ink)', rickroll:'var(--ink)',
-  reports:'var(--setup-blue)', administration:'var(--setup-blue)'
+  reports:'var(--setup-blue)', administration:'var(--setup-blue)', financeDashboard:'var(--setup-blue)'
 };
 const CONTINENTS = ['Africa','Asia','Europe','North America','South America','Oceania','Middle East'];
 const SUBREGIONS = {
@@ -1825,6 +1827,12 @@ const PRIVILEGED = ['Ariel','Daniel'];
 const FULL_ADMIN = 'Ariel';
 const CO_ADMINS = ['David'];
 function isPrivileged(){ return PRIVILEGED.includes(state.viewingAs) || systemPermGranted('viewFinance'); }
+/* Finance Dashboard viewers: the Finance page's two plus David (Ariel's
+   call). Honours the same viewFinance system permission isPrivileged()
+   does, so granting finance access through a profile or permission set
+   opens both finance screens together rather than one of them. */
+const FINANCE_DASHBOARD_VIEWERS = ['Ariel','Daniel','David'];
+function canSeeFinanceDashboard(){ return FINANCE_DASHBOARD_VIEWERS.includes(state.viewingAs) || systemPermGranted('viewFinance'); }
 function isAdmin(){ return state.currentUser === FULL_ADMIN || CO_ADMINS.includes(state.currentUser); }
 function canDeleteUsers(){ return state.currentUser === FULL_ADMIN; }
 function canSeeLeads(){
@@ -1946,6 +1954,7 @@ const FIELD_MAP = {
   attnWaitingFulfillment:'attn_waiting_fulfillment', attnMissingAddress:'attn_missing_address',
   attnShippedStale:'attn_shipped_stale', attnOpenTickets:'attn_open_tickets',
   stageHistory:'stage_history',
+  occurredOn:'occurred_on', categoryId:'category_id', sourceId:'source_id', groupName:'group_name',
 };
 const FIELD_MAP_REV = Object.fromEntries(Object.entries(FIELD_MAP).map(([a,b])=>[b,a]));
 /* Columns Postgres types as `date`. An empty date input yields '', which
@@ -2293,6 +2302,7 @@ function setActiveNav(){
    actually reveal the link again, not just leave a stale class behind. */
 function navLinkHidden(entity){
   if((entity==='invoices' || entity==='payments' || entity==='finance') && !isPrivileged()) return true;
+  if(entity==='financeDashboard' && !canSeeFinanceDashboard()) return true;
   if(entity==='team' && !isAdmin()) return true;
   if(entity==='administration' && !canAccessAdministration()) return true;
   if(entity==='leads' && !canSeeLeads()) return true;
@@ -2306,7 +2316,7 @@ function updateNavVisibility(){
     setupGear.style.display = canAccessSetup() ? 'flex' : 'none';
     setupGear.classList.toggle('active', state.view==='setup');
   }
-  const gatedEntities = Array.from(new Set(['invoices','payments','finance','team','administration', ...SETUP_ENTITIES]));
+  const gatedEntities = Array.from(new Set(['invoices','payments','finance','financeDashboard','team','administration', ...SETUP_ENTITIES]));
   gatedEntities.forEach(entity=>{
     const link = document.querySelector(`.navlink[data-view="${entity}"]`);
     if(link) link.classList.toggle('hidden-role', navLinkHidden(entity));
@@ -2324,6 +2334,7 @@ function render(){
   if(state.view==='invoices' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='payments' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='finance' && !isPrivileged()) state.view = 'dashboard';
+  if(state.view==='financeDashboard' && !canSeeFinanceDashboard()) state.view = 'dashboard';
   if(state.view==='team' && !isAdmin()) state.view = 'dashboard';
   if(state.view==='administration' && !canAccessAdministration()) state.view = 'dashboard';
   if(state.view==='setup' && !canAccessSetup()) state.view = 'dashboard';
@@ -2331,6 +2342,7 @@ function render(){
   if(SETUP_ENTITIES.includes(state.view) && isObjectHidden(state.view) && !personaIsAdmin()) state.view = 'dashboard';
   if(SETUP_ENTITIES.includes(state.view) && !canObject(state.view, 'read')) state.view = 'dashboard';
   if(state.view==='leadProfile' && !canSeeLeads()) state.view = 'dashboard';
+  if(state.view!=='financeDashboard') fdUnmount();
   const isSetupPage = state.view==='setup';
   const isSubPage = isSetupPage || state.view==='customerProfile' || state.view==='leadProfile';
   document.querySelector('.sidebar').style.display = isSubPage ? 'none' : 'flex';
@@ -2351,6 +2363,7 @@ function render(){
     invoices:['Invoices','Billing, linked to orders or standalone'],
     payments:['Payments','Track what SWG owes and pays out'],
     finance:['Finance','Revenue vs. payments, by source and over time'],
+    financeDashboard:['Finance Dashboard','Income, expenses and cash flow in one ledger'],
     team:['Team','Manage who has access to the ledger'],
     emails:['Emails','Automated messages the CRM sends on your behalf'],
     tickets:['Tickets','Customer enquiries from the website and elsewhere'],
@@ -2376,7 +2389,7 @@ function render(){
   document.getElementById('mainArea').style.setProperty('--accent', ACCENTS[state.view] || 'var(--amber)');
   const addLabels = {contacts:'contact', leads:'lead', customers:'customer', distributors:'distributor', suppliers:'supplier', deals:'deal', tasks:'task', invoices:'invoice', payments:'payment', team:'team member'};
   const addBtn = document.getElementById('addBtn');
-  const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets','setup','reports','customerProfile','leadProfile','administration'];
+  const noAdd = ['dashboard','home','search','rickroll','finance','financeDashboard','emails','tickets','setup','reports','customerProfile','leadProfile','administration'];
   addBtn.style.display = (noAdd.includes(state.view) || (SETUP_ENTITIES.includes(state.view) && !canObject(state.view, 'create'))) ? 'none' : 'inline-block';
   addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
   // Import / Export lives on every list the engine actually supports
@@ -2405,6 +2418,7 @@ function render(){
   if(state.view==='invoices') c.innerHTML = renderInvoices();
   if(state.view==='payments') c.innerHTML = renderPayments();
   if(state.view==='finance') c.innerHTML = renderFinance();
+  if(state.view==='financeDashboard') fdMount(c);
   if(state.view==='emails') c.innerHTML = renderEmails();
   if(state.view==='tickets') c.innerHTML = renderTickets();
   if(state.view==='team') c.innerHTML = renderTeam();
@@ -11406,6 +11420,22 @@ async function saveModal(table, id){
   // Outside the wasNew block on purpose: a flow can be triggered by an edit,
   // not just a create, and which one it wants is what its trigger says.
   if(table!=='team') await runFlows(table, savedObj, wasNew ? 'created' : 'updated');
+}
+
+/* ===== Finance Dashboard (React island) =====================================
+   The one screen in this file that renders with React. Everything else is
+   vanilla. The island is confined to #fdRoot inside #content: it is created
+   when the view opens and unmounted -- by the hook near the top of render()
+   -- before any other view overwrites #content, so a detached React tree is
+   never left behind. Every name it adds starts with fd/FD. */
+let fdReactRoot = null;
+function fdUnmount(){
+  if(!fdReactRoot) return;
+  try{ fdReactRoot.unmount(); }catch(e){ console.warn('fd unmount', e); }
+  fdReactRoot = null;
+}
+function fdMount(c){
+  c.innerHTML = `<div id="fdRoot" class="fd-root"><div class="fd-boot">Finance Dashboard</div></div>`;
 }
 
 /* ---------- Init ---------- */
