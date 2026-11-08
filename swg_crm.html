@@ -2830,7 +2830,10 @@ function renderCustomDashboard(dash, priv){
 }
 const DASH_TEMPLATES = [
   {key:'', label:'Blank dashboard — pick your own widgets'},
-  {key:'fulfillment_command_center', label:'Customer & Fulfillment Command Center'},
+  /* The stored `kind` stays fulfillment_command_center -- three live
+     dashboard records already point at it, and renaming the key would
+     orphan every one of them. Only the label people read changes. */
+  {key:'fulfillment_command_center', label:'LYNVAH orders'},
 ];
 function openNewDashboardModal(){
   document.getElementById('modalBody').innerHTML = `<h2 class="display">New dashboard</h2>
@@ -2842,7 +2845,7 @@ function openNewDashboardModal(){
   const nameInput = document.getElementById('f_dashName');
   const templateSelect = document.getElementById('f_dashTemplate');
   templateSelect.onchange = ()=>{
-    if(templateSelect.value==='fulfillment_command_center' && !nameInput.value.trim()) nameInput.value = 'Customer & Fulfillment';
+    if(templateSelect.value==='fulfillment_command_center' && !nameInput.value.trim()) nameInput.value = 'LYNVAH orders';
   };
   document.getElementById('dashCreateBtn').onclick = async ()=>{
     const name = nameInput.value.trim();
@@ -3418,7 +3421,7 @@ function renderFulfillmentCommandCenter(dash){
     <div class="fc-page">
     <div class="fc-head">
       <div>
-        <p class="fc-title">Customer &amp; Fulfillment</p>
+        <p class="fc-title">LYNVAH orders</p>
         <div class="fc-subtitle">Monitor new customers, orders and fulfillment activity.</div>
       </div>
       <div class="fc-head-controls">
