@@ -1460,6 +1460,19 @@
   .agent-form input:focus{outline:2px solid var(--setup-blue);outline-offset:0;}
   @media (max-width:520px){ .agent-panel{right:16px;left:16px;width:auto;bottom:80px;} .agent-fab{right:16px;bottom:16px;} }
   @media (prefers-reduced-motion:reduce){ .agent-fab,.agent-typing span{transition:none;animation:none;} }
+
+  /* ===== Finance Dashboard (React island) ================================
+     Scoped entirely under .fd-root, built on the app's own tokens so light,
+     dark and system all follow automatically. No Tailwind: its preflight
+     reset would restyle the entire CRM, not just this screen. */
+  .fd-root{position:relative;isolation:isolate;min-height:420px;}
+  .fd-boot{display:flex;align-items:center;justify-content:center;gap:10px;min-height:320px;color:var(--ink-soft);font-size:13px;}
+  .fd-spinner{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--setup-blue);animation:fdSpin .8s linear infinite;}
+  @keyframes fdSpin{to{transform:rotate(360deg);}}
+  .fd-fail{max-width:520px;margin:48px auto;padding:26px 28px;border:1px solid var(--border);border-radius:14px;background:var(--surface);text-align:center;}
+  .fd-fail-title{font-family:'Fraunces',serif;font-size:19px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+  .fd-fail-sub{font-size:13px;color:var(--ink-soft);line-height:1.55;margin-bottom:18px;}
+  @media (prefers-reduced-motion: reduce){ .fd-spinner{animation:none;} }
 </style>
 </head>
 <body>
@@ -11428,14 +11441,121 @@ async function saveModal(table, id){
    when the view opens and unmounted -- by the hook near the top of render()
    -- before any other view overwrites #content, so a detached React tree is
    never left behind. Every name it adds starts with fd/FD. */
+/* Libraries, pinned. Loaded on first open of this view only, never at boot,
+   so no other screen pays for them and none can be broken by them. Each
+   integrity hash was computed from the served bytes and matched against the
+   CDN's own published value (cdnjs SHA-512; jsdelivr's hash for htm).
+   React 18.3.1 because React 19 no longer ships a UMD build -- this is the
+   newest React that runs without a bundler. htm gives JSX-like templates
+   without a compile step (~1 KB), instead of Babel-in-the-browser (~3 MB). */
+const FD_LIBS = {
+  react:    { global:'React',    src:'https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js',
+              integrity:'sha512-QVs8Lo43F9lSuBykadDb0oSXDL/BbZ588urWVCRwSIoewQv/Ewg1f84mK3U790bZ0FfhFa1YSQUmIhG+pIRKeg==' },
+  reactDom: { global:'ReactDOM', src:'https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js',
+              integrity:'sha512-6a1107rTlA4gYpgHAqbwLAtxmWipBdJFcq8y5S/aTge3Bp+VAklABm2LO+Kg51vOWR9JMZq1Ovjl5tpluNpTeQ==' },
+  htm:      { global:'htm',      src:'https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.umd.js',
+              integrity:'sha512-SJZI6YKKvXIbCZAHZAilRcE3HMe+Xjf3dsZ612Qeu1L80KhDucjCIuea3ceEvzTu8HjY4sByeKh6Qam1SsMggg==' },
+  gsap:     { global:'gsap',     src:'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js',
+              integrity:'sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg==' },
+};
+const FD_LOAD_TIMEOUT_MS = 15000;
+let fdLibsPromise = null;
+function fdLoadScript(lib){
+  if(window[lib.global]) return Promise.resolve();
+  return new Promise((resolve, reject)=>{
+    const el = document.createElement('script');
+    el.src = lib.src; el.integrity = lib.integrity; el.crossOrigin = 'anonymous';
+    el.onload = ()=> window[lib.global] ? resolve() : reject(new Error(`${lib.global} loaded but did not initialise`));
+    el.onerror = ()=>{ el.remove(); reject(new Error(`Could not load ${lib.global}`)); };
+    document.head.appendChild(el);
+  });
+}
+/* Cached, so reopening the view never injects a second copy; cleared on
+   failure, so Retry genuinely tries again. ReactDOM's UMD build reads
+   window.React as it executes, hence React first; the rest in parallel. */
+function fdLoadLibs(){
+  if(fdLibsPromise) return fdLibsPromise;
+  const all = Promise.all([
+    fdLoadScript(FD_LIBS.react).then(()=>fdLoadScript(FD_LIBS.reactDom)),
+    fdLoadScript(FD_LIBS.htm),
+    fdLoadScript(FD_LIBS.gsap),
+  ]);
+  const timeout = new Promise((_, reject)=>setTimeout(()=>reject(new Error('Timed out loading the interface libraries')), FD_LOAD_TIMEOUT_MS));
+  fdLibsPromise = Promise.race([all, timeout]);
+  fdLibsPromise.catch(()=>{ fdLibsPromise = null; });
+  return fdLibsPromise;
+}
+
 let fdReactRoot = null;
+/* Bumped on every mount and unmount. A load that finishes after the user
+   has already left the view sees a stale token and does nothing, instead
+   of mounting React into a screen that is no longer there. */
+let fdMountToken = 0;
 function fdUnmount(){
+  fdMountToken++;
   if(!fdReactRoot) return;
   try{ fdReactRoot.unmount(); }catch(e){ console.warn('fd unmount', e); }
   fdReactRoot = null;
 }
+/* Called by render() whenever this view is showing -- which, in this app,
+   is on almost any state change anywhere. If the island is already mounted
+   it only receives fresh props, so its own state (tab, filters, open modal,
+   half-typed form) survives a global re-render. */
 function fdMount(c){
-  c.innerHTML = `<div id="fdRoot" class="fd-root"><div class="fd-boot">Finance Dashboard</div></div>`;
+  if(fdReactRoot && document.getElementById('fdRoot')){ fdReactRoot.render(fdElement()); return; }
+  fdUnmount();
+  const token = fdMountToken;
+  c.innerHTML = `<div id="fdRoot" class="fd-root"><div class="fd-boot"><span class="fd-spinner"></span>Loading Finance Dashboard…</div></div>`;
+  fdLoadLibs().then(()=>{
+    const host = document.getElementById('fdRoot');
+    if(token!==fdMountToken || state.view!=='financeDashboard' || !host) return;
+    if(!fdApp) fdDefineApp();
+    host.innerHTML = '';
+    fdReactRoot = ReactDOM.createRoot(host);
+    fdReactRoot.render(fdElement());
+  }).catch(err=>{
+    const host = document.getElementById('fdRoot');
+    if(token!==fdMountToken || !host) return;
+    console.error('Finance Dashboard failed to start', err);
+    host.innerHTML = `<div class="fd-fail">
+        <div class="fd-fail-title">The Finance Dashboard couldn't load its interface</div>
+        <div class="fd-fail-sub">${esc(err.message||String(err))}. Nothing was saved or changed, and the rest of the CRM is unaffected.</div>
+        <button type="button" class="btn" id="fdRetry">Try again</button>
+      </div>`;
+    document.getElementById('fdRetry').onclick = ()=>{ fdUnmount(); render(); };
+  });
+}
+
+/* Components are defined once, after the libraries exist (they need React
+   and htm at definition time). `fdApp` is the root component. */
+let fdApp = null;
+let fdRenderTick = 0;
+function fdElement(){
+  fdRenderTick++;
+  return React.createElement(fdErrorBoundary, null,
+    React.createElement(fdApp, { viewer: state.viewingAs, tick: fdRenderTick }));
+}
+let fdErrorBoundary = null;
+function fdDefineApp(){
+  const h = htm.bind(React.createElement);
+  /* A render error inside the island stops at this boundary: the island
+     shows a contained message and the rest of the CRM keeps running. */
+  fdErrorBoundary = class extends React.Component {
+    constructor(p){ super(p); this.state = { error:null }; }
+    static getDerivedStateFromError(error){ return { error }; }
+    componentDidCatch(error, info){ console.error('Finance Dashboard render error', error, info); }
+    render(){
+      if(!this.state.error) return this.props.children;
+      return h`<div class="fd-fail">
+        <div class="fd-fail-title">Something went wrong in the Finance Dashboard</div>
+        <div class="fd-fail-sub">${String(this.state.error.message||this.state.error)}. Nothing was saved; the rest of the CRM is unaffected.</div>
+        <button type="button" class="btn" onClick=${()=>this.setState({error:null})}>Try again</button>
+      </div>`;
+    }
+  };
+  fdApp = function FinanceDashboard({ viewer }){
+    return h`<div class="fd-boot">React island live — React ${React.version} · viewer ${viewer}</div>`;
+  };
 }
 
 /* ---------- Init ---------- */
