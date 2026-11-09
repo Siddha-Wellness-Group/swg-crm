@@ -1730,6 +1730,409 @@
     .fd-spinner,.fd-skel{animation:none;}
     .fd-tab,.fd-btn{transition:none;}
   }
+  /* =====================================================================
+     GLOBAL GLASS DESIGN SYSTEM
+     One visual language for the whole CRM, taken from the Finance
+     Dashboard: translucent panels with a light edge and a soft shadow,
+     floating over an ambient blue/violet light field.
+
+     Presentation only. Nothing below changes markup, behaviour, data,
+     event wiring or which element is on screen.
+
+     How it works -- read before adding to it:
+     1. Tokens (--g-*) are declared once on :root. Most are written in
+        terms of the palette (--surface, --ink, --setup-blue ...) so they
+        follow light/dark by themselves; the few that can't are re-declared
+        for dark in the same two places the palette uses.
+     2. Inside the app shell and its overlays, the base palette tokens are
+        remapped to glass: --surface becomes translucent, --border a soft
+        hairline, --cream/--parchment light tints, and every *-soft a
+        translucent wash of its own hue. Nearly every component already
+        paints with those tokens, so they all become glass together --
+        including markup built in JS -- without touching each component.
+     3. The opaque originals stay reachable as --g-solid* for the few
+        places that need a solid colour: knock-out rings, native option
+        lists, and the Finance Dashboard's own glass maths.
+     4. Real blur (backdrop-filter) is used only on layers that float over
+        content: modals, drawers, menus, the toast, the sticky save bar.
+        In-flow cards sit on the smooth ambient field, where blur makes no
+        visible difference -- and backdrop-filter would turn every card into
+        a containing block for position:fixed (the customer/order drawers
+        render inside #content) and a stacking context (menus opening out
+        of one card would slide under the next).
+     5. Everything is inside @media screen, so print output is unchanged.
+     ===================================================================== */
+  @media screen{
+  :root{
+    color-scheme:light;
+    /* Opaque originals, captured before the remap in step 2. */
+    --g-solid:var(--surface);
+    --g-solid-cream:var(--cream);
+    --g-solid-parchment:var(--parchment);
+    --g-solid-border:var(--border);
+
+    /* Per-theme knobs (re-declared for dark below). */
+    --g-hl:#ffffff;
+    --g-lift:100%;
+    --g-edge-a:70%;
+    --g-inset-a:80%;
+    --g-soft-mix:15%;
+    --g-base:color-mix(in srgb, var(--parchment) 60%, #EDF1FA);
+    --g-glow-a:24%;
+
+    /* Surfaces */
+    --g-glass:color-mix(in srgb, color-mix(in srgb, var(--surface) var(--g-lift), var(--g-hl)) 52%, transparent);
+    --g-glass-strong:color-mix(in srgb, color-mix(in srgb, var(--surface) var(--g-lift), var(--g-hl)) 84%, transparent);
+    --g-field:color-mix(in srgb, var(--surface) 74%, transparent);
+    --g-tint-1:color-mix(in srgb, var(--ink) 4%, transparent);
+    --g-tint-2:color-mix(in srgb, var(--ink) 6.5%, transparent);
+    --g-line:color-mix(in srgb, var(--ink) 10%, transparent);
+    --g-line-strong:color-mix(in srgb, var(--ink) 17%, transparent);
+    --g-edge:color-mix(in srgb, var(--g-hl) var(--g-edge-a), transparent);
+
+    /* Depth */
+    --g-inset:inset 0 1px 0 color-mix(in srgb, var(--g-hl) var(--g-inset-a), transparent);
+    --g-shadow-0:0 1px 2px rgba(34,31,26,.05), 0 6px 14px -10px rgba(34,31,26,.30);
+    --g-shadow-1:0 1px 2px rgba(34,31,26,.05), 0 14px 34px -20px rgba(34,31,26,.30);
+    --g-shadow-2:0 2px 6px rgba(34,31,26,.06), 0 22px 46px -22px rgba(34,31,26,.40);
+    --g-shadow-3:0 30px 80px -24px rgba(24,22,40,.45);
+    --g-scrim:color-mix(in srgb, #0b0f1c 34%, transparent);
+    --g-glow:0 0 0 1px color-mix(in srgb, var(--setup-blue) 20%, transparent), 0 12px 32px -14px color-mix(in srgb, var(--setup-blue) 45%, transparent);
+
+    /* Blur */
+    --g-blur:18px;
+    --g-blur-strong:28px;
+    --g-blur-scrim:5px;
+    --g-sat:1.35;
+
+    /* Shape, space, motion, type */
+    --g-r-xs:6px; --g-r-sm:10px; --g-r-md:12px; --g-r-lg:16px; --g-r-xl:20px; --g-r-pill:999px;
+    --g-s1:4px; --g-s2:8px; --g-s3:12px; --g-s4:16px; --g-s5:20px; --g-s6:24px;
+    --g-dur:.18s; --g-dur-slow:.28s; --g-ease:cubic-bezier(.2,.7,.2,1);
+    --g-font-display:'Fraunces',serif; --g-font-body:'Work Sans',sans-serif; --g-font-mono:'IBM Plex Mono',monospace;
+
+    /* Ambient light field behind everything */
+    --g-ambient:
+      radial-gradient(60% 50% at 6% 0%, color-mix(in srgb, var(--setup-blue) var(--g-glow-a), transparent), transparent 70%),
+      radial-gradient(50% 46% at 100% 4%, color-mix(in srgb, var(--violet) calc(var(--g-glow-a) * .85), transparent), transparent 70%),
+      radial-gradient(55% 50% at 90% 100%, color-mix(in srgb, var(--teal) calc(var(--g-glow-a) * .5), transparent), transparent 72%),
+      radial-gradient(45% 45% at 0% 100%, color-mix(in srgb, var(--rose) calc(var(--g-glow-a) * .4), transparent), transparent 72%),
+      var(--g-base);
+
+    scrollbar-color:color-mix(in srgb, var(--ink) 24%, transparent) transparent;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme:dark;
+      --g-hl:#cbd5e6; --g-lift:88%; --g-edge-a:15%; --g-inset-a:12%; --g-soft-mix:19%; --g-glow-a:20%;
+      --g-base:color-mix(in srgb, var(--cream) 70%, #060914);
+      --g-shadow-0:0 1px 2px rgba(0,0,0,.30), 0 8px 18px -10px rgba(0,0,0,.60);
+      --g-shadow-1:0 1px 2px rgba(0,0,0,.30), 0 18px 40px -20px rgba(0,0,0,.70);
+      --g-shadow-2:0 2px 8px rgba(0,0,0,.35), 0 26px 52px -22px rgba(0,0,0,.80);
+      --g-shadow-3:0 34px 90px -24px rgba(0,0,0,.80);
+      --g-scrim:color-mix(in srgb, #03050b 55%, transparent);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --g-hl:#cbd5e6; --g-lift:88%; --g-edge-a:15%; --g-inset-a:12%; --g-soft-mix:19%; --g-glow-a:20%;
+    --g-base:color-mix(in srgb, var(--cream) 70%, #060914);
+    --g-shadow-0:0 1px 2px rgba(0,0,0,.30), 0 8px 18px -10px rgba(0,0,0,.60);
+    --g-shadow-1:0 1px 2px rgba(0,0,0,.30), 0 18px 40px -20px rgba(0,0,0,.70);
+    --g-shadow-2:0 2px 8px rgba(0,0,0,.35), 0 26px 52px -22px rgba(0,0,0,.80);
+    --g-shadow-3:0 34px 90px -24px rgba(0,0,0,.80);
+    --g-scrim:color-mix(in srgb, #03050b 55%, transparent);
+  }
+
+  /* --- Step 2: palette remap inside the app shell and its overlays ---- */
+  #app, .overlay, .eml-prev-overlay, .qs-panel{
+    --surface:var(--g-glass);
+    --cream:var(--g-tint-1);
+    --parchment:var(--g-tint-2);
+    --border:var(--g-line);
+    --amber-soft:color-mix(in srgb, var(--amber) var(--g-soft-mix), transparent);
+    --sage-soft:color-mix(in srgb, var(--sage) var(--g-soft-mix), transparent);
+    --clay-soft:color-mix(in srgb, var(--clay) var(--g-soft-mix), transparent);
+    --ochre-soft:color-mix(in srgb, var(--ochre) var(--g-soft-mix), transparent);
+    --umber-soft:color-mix(in srgb, var(--umber) var(--g-soft-mix), transparent);
+    --olive-soft:color-mix(in srgb, var(--olive) var(--g-soft-mix), transparent);
+    --rust-soft:color-mix(in srgb, var(--rust) var(--g-soft-mix), transparent);
+    --setup-blue-soft:color-mix(in srgb, var(--setup-blue) var(--g-soft-mix), transparent);
+    --violet-soft:color-mix(in srgb, var(--violet) var(--g-soft-mix), transparent);
+    --teal-soft:color-mix(in srgb, var(--teal) var(--g-soft-mix), transparent);
+    --rose-soft:color-mix(in srgb, var(--rose) var(--g-soft-mix), transparent);
+    --magenta-soft:color-mix(in srgb, var(--magenta) var(--g-soft-mix), transparent);
+    --rev-oils-soft:color-mix(in srgb, var(--rev-oils) var(--g-soft-mix), transparent);
+    --rev-yoga-soft:color-mix(in srgb, var(--rev-yoga) var(--g-soft-mix), transparent);
+  }
+  /* The Finance Dashboard computes its own glass from an opaque --surface;
+     give it the original back so its look (the benchmark) is unchanged. */
+  .fd-root{--surface:var(--g-solid);}
+  /* Customer 360 had a fixed light palette that stayed white in dark mode;
+     point it at the shared tokens so it follows the theme like every
+     other screen. Its warm accent maps to the palette's amber. */
+  .cp-page{
+    --cp-bg:var(--g-tint-1); --cp-surface:var(--surface); --cp-border:var(--border); --cp-border-soft:var(--g-tint-2);
+    --cp-text:var(--ink); --cp-text-soft:var(--ink-soft); --cp-text-faint:var(--ink-soft);
+    --cp-accent:var(--amber); --cp-accent-soft:var(--amber-soft);
+    --cp-danger:var(--clay); --cp-danger-soft:var(--clay-soft);
+    --cp-good:var(--sage); --cp-good-soft:var(--sage-soft);
+    --cp-radius:var(--g-r-lg); --cp-shadow:var(--g-inset), var(--g-shadow-1);
+  }
+
+  /* --- Ambient field ---------------------------------------------------- */
+  body{background:var(--g-ambient);background-attachment:fixed;}
+  .welcome-screen{background:var(--g-ambient);}
+  *{scrollbar-width:thin;}
+
+  /* --- Navigation: a floating glass rail --------------------------------- */
+  .sidebar{background:var(--g-glass);border:1px solid var(--g-edge);border-radius:var(--g-r-xl);
+    margin:12px 0 12px 12px;box-shadow:var(--g-inset), var(--g-shadow-1);
+    position:sticky;top:12px;align-self:flex-start;height:calc(100vh - 24px);}
+  .navlink{border-radius:var(--g-r-sm);
+    transition:background var(--g-dur) var(--g-ease), color var(--g-dur) var(--g-ease), box-shadow var(--g-dur) var(--g-ease);}
+  .navlink.active{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--nav-accent) 22%, transparent),
+    0 8px 20px -14px color-mix(in srgb, var(--nav-accent) 80%, transparent);}
+  .navlink.active::before{box-shadow:0 0 10px 1px color-mix(in srgb, var(--nav-accent) 55%, transparent);}
+  .setup-gear{border-radius:var(--g-r-sm);}
+  .setup-nav-item,.setup-nav-group{border-radius:var(--g-r-sm);}
+
+  /* --- Header ------------------------------------------------------------ */
+  .topbar{align-items:center;padding:14px 18px;border-radius:var(--g-r-lg);background:var(--g-glass);
+    border:1px solid var(--g-edge);box-shadow:var(--g-inset), var(--g-shadow-1);}
+  .topbar h1 .accent-dot{box-shadow:0 0 12px 1px color-mix(in srgb, var(--accent, var(--ink)) 55%, transparent);}
+
+  /* --- Cards and panels -------------------------------------------------- */
+  :is(.panel,.stat-card,.team-card,.tkt-card,.eml-card,.donut-wrap,.fc-metric,.om-head-card,.om-shell,
+      .fte-head,.fte-card,.adm-head,.adm-card,.tpl-card,.lp-card,.io-card,.io-choice-card,.cp-card,
+      .rep-stat,.ac-step,.search-hit,.fte-opt,.fd-fail){
+    border-color:var(--g-edge);box-shadow:var(--g-inset), var(--g-shadow-1);
+    transition:box-shadow var(--g-dur) var(--g-ease), border-color var(--g-dur) var(--g-ease), transform var(--g-dur) var(--g-ease);}
+  :is(.panel,.donut-wrap,.fc-metric,.om-head-card,.om-shell,.fte-head,.adm-head,.lp-card,.io-card,
+      .io-choice-card,.stat-card,.team-card,.tkt-card,.eml-card,.fte-card,.adm-card,.tpl-card,.fd-fail){border-radius:var(--g-r-lg);}
+  :is(.rep-stat,.ac-step,.search-hit,.fte-opt,.lay-section,.lp-stat,.cp-stat){border-radius:var(--g-r-md);}
+  .lay-section-head{border-radius:var(--g-r-md) var(--g-r-md) 0 0;}
+  :is(.panel,.stat-card,.team-card,.tkt-card,.eml-card,.donut-wrap,.fc-metric,.om-head-card,
+      .fte-head,.fte-card,.adm-head,.adm-card,.tpl-card,.lp-card,.io-card,.cp-card,.rep-stat,.ac-step):hover{
+    box-shadow:var(--g-inset), var(--g-shadow-2);}
+  /* Tiles that are themselves one click lift and catch the light. */
+  :is(.io-choice-card,.search-hit,.fte-opt,.tpl-card):hover{transform:translateY(-2px);
+    box-shadow:var(--g-inset), var(--g-shadow-2), var(--g-glow);}
+  /* Borderless sections nested inside a pane stay flat. */
+  .om-pane .io-card,.om-pane .io-card:hover{box-shadow:none;}
+  .empty{border-radius:var(--g-r-lg);}
+  .tpl-preview{border-radius:var(--g-r-md);box-shadow:var(--g-shadow-0);}
+
+  /* --- Kanban ------------------------------------------------------------ */
+  .kcol,.fc-kanban .kcol{border-radius:var(--g-r-md);box-shadow:var(--g-inset);}
+  .kcard{border-color:var(--g-edge);border-radius:var(--g-r-md);box-shadow:var(--g-inset), var(--g-shadow-0);
+    transition:box-shadow var(--g-dur) var(--g-ease), border-color var(--g-dur) var(--g-ease);}
+  .kcard:hover{box-shadow:var(--g-inset), var(--g-shadow-2);}
+
+  /* --- Tables ------------------------------------------------------------ */
+  table,.fc-page table{border-color:var(--g-edge);border-radius:var(--g-r-md);}
+  td{transition:background-color var(--g-dur) var(--g-ease);}
+  tbody tr:hover > td{background-color:var(--g-tint-1);}
+
+  /* --- Buttons ----------------------------------------------------------- */
+  .btn{border-radius:var(--g-r-sm);
+    background-image:linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 62%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.24), 0 8px 20px -11px color-mix(in srgb, var(--accent, var(--amber)) 80%, transparent);
+    transition:filter var(--g-dur) var(--g-ease), box-shadow var(--g-dur) var(--g-ease), transform var(--g-dur) var(--g-ease), opacity var(--g-dur);}
+  .btn:hover{opacity:1;filter:brightness(1.07) saturate(1.05);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 0 10px 26px -10px color-mix(in srgb, var(--accent, var(--amber)) 95%, transparent);}
+  .btn:active{transform:translateY(1px);}
+  .btn.danger{background-image:linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 62%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.24), 0 8px 20px -11px color-mix(in srgb, var(--clay) 80%, transparent);}
+  .btn.secondary{background:var(--g-glass);border-color:var(--g-line-strong);box-shadow:var(--g-inset);}
+  .btn.secondary:hover{color:var(--ink);filter:none;box-shadow:var(--g-inset), var(--g-glow);}
+  :is(.fc-icon-btn,.eml-btn,.fin-export-btn,.cp-btn,.fc-pager button,.cp-pager button,.setup-back-btn,.qs-advanced,
+      .guide-tool,.fw-chip,.fte-step){box-shadow:var(--g-inset);
+    transition:background var(--g-dur) var(--g-ease), border-color var(--g-dur) var(--g-ease), color var(--g-dur) var(--g-ease), box-shadow var(--g-dur) var(--g-ease);}
+  :is(.fc-icon-btn,.eml-btn,.fin-export-btn,.cp-btn:not(.primary),.fc-pager button:not(:disabled),.cp-pager button:not(:disabled),
+      .setup-back-btn,.qs-advanced,.fw-chip):hover{box-shadow:var(--g-inset), var(--g-glow);}
+  :is(.fc-icon-btn,.eml-btn,.fin-export-btn,.cp-btn,.setup-back-btn){border-radius:var(--g-r-sm);}
+  .cp-btn.primary{box-shadow:inset 0 1px 0 rgba(255,255,255,.24), 0 8px 20px -11px color-mix(in srgb, var(--cp-accent) 80%, transparent);}
+
+  /* --- Chips, tabs, segmented controls ----------------------------------- */
+  :is(.filter-chip,.dash-tab,.fc-tab,.chart-toggle-btn,.io-source-tab){box-shadow:var(--g-inset);
+    transition:background var(--g-dur) var(--g-ease), border-color var(--g-dur) var(--g-ease), color var(--g-dur) var(--g-ease), box-shadow var(--g-dur) var(--g-ease);}
+  :is(.filter-chip,.dash-tab,.fc-tab,.chart-toggle-btn,.io-source-tab):not(.active):not(:disabled):hover{
+    color:var(--ink);border-color:var(--g-line-strong);}
+  :is(.filter-chip,.dash-tab,.fc-tab,.chart-toggle-btn,.io-source-tab).active{
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 6px 16px -8px rgba(0,0,0,.45);}
+  .badge,.cp-badge,.om-pill,.cs-pill{box-shadow:inset 0 0 0 1px color-mix(in srgb, currentColor 16%, transparent);}
+
+  /* --- Forms ------------------------------------------------------------- */
+  :is(.field input,.field select,.field textarea,.search-bar-wrap input,.om-quickfind,.cs-day input[type=time],
+      .ms-trigger,.cp-select,.map-row select,.map-table-head select,.flow-step-row select,.flow-step-row input,
+      .ac-who select,select#viewingAs,.kcard select,.fc-kanban .fc-ship-input,.fc-kanban .fc-carrier-select,
+      .fc-kanban .fc-carrier-other,#tpl_body,#vr_formula){
+    background-color:var(--g-field);border-color:var(--g-line-strong);
+    transition:border-color var(--g-dur) var(--g-ease), box-shadow var(--g-dur) var(--g-ease), background-color var(--g-dur) var(--g-ease);}
+  :is(.field input,.field select,.field textarea,.search-bar-wrap input,.om-quickfind,.ms-trigger,.cp-select,#tpl_body,#vr_formula){
+    border-radius:var(--g-r-sm);}
+  /* Zero-specificity focus ring: any component that already styles its
+     own focus keeps it; everything else gets the same accent ring. */
+  :where(#app, .overlay, .eml-prev-overlay, .qs-panel, .agent-panel) :where(input, select, textarea):focus-visible{
+    outline:none;border-color:color-mix(in srgb, var(--accent, var(--setup-blue)) 65%, transparent);
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--accent, var(--setup-blue)) 24%, transparent);}
+  :where(#app, .overlay, .eml-prev-overlay, .qs-panel, .agent-panel) :where(button, a, [tabindex], .navlink):focus-visible{
+    outline:2px solid color-mix(in srgb, var(--accent, var(--setup-blue)) 70%, transparent);outline-offset:2px;}
+  /* Native option lists are drawn by the OS from these colours; a
+     translucent fill there would come out unreadable. */
+  option,optgroup{background-color:var(--g-solid);color:var(--ink);}
+
+  /* --- Floating layers: real frosted glass ------------------------------- */
+  .overlay,.eml-prev-overlay{background:var(--g-scrim);
+    -webkit-backdrop-filter:blur(var(--g-blur-scrim)) saturate(1.1);backdrop-filter:blur(var(--g-blur-scrim)) saturate(1.1);}
+  .overlay.show,.eml-prev-overlay.show{animation:g-fade var(--g-dur) ease-out;}
+  .modal,.eml-prev-shell{background:var(--g-glass-strong);border:1px solid var(--g-edge);border-radius:var(--g-r-xl);
+    box-shadow:var(--g-inset), var(--g-shadow-3);}
+  .overlay.show .modal,.eml-prev-overlay.show .eml-prev-shell{animation:g-pop var(--g-dur-slow) var(--g-ease);}
+  .fc-drawer-backdrop,.qs-backdrop{background:var(--g-scrim);
+    -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);}
+  .fc-drawer,.qs-panel{background:var(--g-glass-strong);border-left:1px solid var(--g-edge);
+    -webkit-backdrop-filter:blur(var(--g-blur-strong)) saturate(var(--g-sat));backdrop-filter:blur(var(--g-blur-strong)) saturate(var(--g-sat));
+    box-shadow:var(--g-inset);transition:transform var(--g-dur-slow) var(--g-ease), box-shadow var(--g-dur-slow) var(--g-ease);}
+  /* The deep shadow only while open: parked off-screen to the right, it
+     would spill a grey band onto the right edge of every screen. */
+  .fc-drawer.show,.qs-panel.show{box-shadow:var(--g-inset), -26px 0 70px -30px rgba(0,0,0,.5);}
+  .ms-dropdown,.cp-kebab-menu{background:var(--g-glass-strong);border:1px solid var(--g-edge);border-radius:var(--g-r-md);
+    -webkit-backdrop-filter:blur(var(--g-blur)) saturate(var(--g-sat));backdrop-filter:blur(var(--g-blur)) saturate(var(--g-sat));
+    box-shadow:var(--g-inset), var(--g-shadow-3);}
+  .cp-kebab-menu button{color:var(--ink);}
+  .cp-kebab-menu button:hover{background:var(--g-tint-2);}
+  .cp-kebab-menu button.danger{color:var(--clay);}
+  .cp-kebab-menu button.danger:hover{background:var(--clay-soft);}
+  .cp-kebab-btn:hover{background:var(--g-tint-2);}
+  .setup-savebar-top{background-color:var(--g-glass-strong);background-image:linear-gradient(var(--setup-blue-soft), var(--setup-blue-soft));
+    -webkit-backdrop-filter:blur(var(--g-blur)) saturate(var(--g-sat));backdrop-filter:blur(var(--g-blur)) saturate(var(--g-sat));
+    box-shadow:var(--g-shadow-1);}
+  .toast{background:color-mix(in srgb, var(--ink-fixed) 80%, transparent);border:1px solid rgba(255,255,255,.12);border-radius:var(--g-r-md);
+    -webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 18px 40px -14px rgba(0,0,0,.5);}
+  .agent-panel{background:var(--g-glass-strong);border-color:var(--g-edge);border-radius:var(--g-r-xl);
+    -webkit-backdrop-filter:blur(var(--g-blur-strong)) saturate(var(--g-sat));backdrop-filter:blur(var(--g-blur-strong)) saturate(var(--g-sat));
+    box-shadow:var(--g-inset), var(--g-shadow-3);}
+  .agent-head,.agent-form{border-color:var(--g-line);}
+  .agent-msg.bot{background:var(--g-tint-1);border-color:var(--g-line);}
+  .agent-form input{background:var(--g-field);border-color:var(--g-line-strong);}
+  .agent-fab{box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 10px 26px -8px color-mix(in srgb, var(--setup-blue) 55%, transparent);}
+
+  /* --- Charts ------------------------------------------------------------ */
+  :is(.bar-fill,.hbar-fill,.vbar-stack,.split-seg,.om-bar span){box-shadow:inset 0 1px 0 rgba(255,255,255,.26);}
+  /* The donut hole floats over the ring as a frosted lens. */
+  .donut-hole{background:color-mix(in srgb, var(--g-solid) 72%, transparent);
+    -webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);
+    box-shadow:var(--g-inset), 0 8px 22px -12px rgba(0,0,0,.4);}
+
+  /* --- Knock-out rings keep a solid colour (see step 3) ------------------ */
+  .dpipe-dot{background:var(--g-solid);}
+  .dpipe-step.reached .dpipe-dot{background:var(--stepcolor);}
+  .dpipe-step.current .dpipe-dot{box-shadow:0 0 0 2px var(--g-solid), 0 0 0 4px var(--stepcolor);}
+  .lp-timeline li::before{box-shadow:0 0 0 3px var(--g-solid);}
+  .fc-timeline-dot{border-color:var(--g-solid);}
+  .dept-colors input:checked + span{border-color:var(--g-solid);}
+  [fill="var(--surface)"]{fill:var(--g-solid);}
+  [stroke="var(--surface)"]{stroke:var(--g-solid);}
+
+  /* --- Readability fixes the new theme surfaced --------------------------- */
+  /* White text on --ink was unreadable in dark mode, where --ink is light. */
+  .eml-lang button.on{color:var(--g-solid);}
+  /* Hard-coded light pink stayed light in dark mode. */
+  .fw-test-result.err{background:var(--clay-soft);color:var(--clay);}
+
+  /* --- Finance Dashboard: sits on the shared field ----------------------- */
+  /* Its own backdrop duplicated the ambient light now behind every screen. */
+  .fd-backdrop{background:transparent;}
+  .fd-blob{opacity:.3;}
+
+  /* --- Login ------------------------------------------------------------- */
+  /* Always dark, whatever the theme: a near-black field with blue and violet
+     light, and the same glass card and controls as the screens behind it.
+     The tokens are re-declared here so the card, fields and lines below
+     compute from this dark palette rather than the page theme. */
+  .login-screen{color-scheme:dark;
+    --ink:#EEF2FA; --ink-soft:#9AA6BD; --clay:#FF8A6B; --setup-blue:#4F8CFF;
+    --surface:#141A28;
+    --g-hl:#cbd5e6; --g-lift:90%; --g-edge-a:16%; --g-inset-a:12%;
+    --g-glass-strong:color-mix(in srgb, color-mix(in srgb, var(--surface) var(--g-lift), var(--g-hl)) 70%, transparent);
+    --g-field:color-mix(in srgb, #0A0E18 72%, transparent);
+    --g-tint-2:color-mix(in srgb, var(--ink) 7%, transparent);
+    --g-line-strong:color-mix(in srgb, var(--ink) 16%, transparent);
+    --g-edge:color-mix(in srgb, var(--g-hl) var(--g-edge-a), transparent);
+    --g-inset:inset 0 1px 0 color-mix(in srgb, var(--g-hl) var(--g-inset-a), transparent);
+    --g-shadow-3:0 34px 90px -24px rgba(0,0,0,.85);
+    --g-glow:0 0 0 1px rgba(79,140,255,.22), 0 0 46px -6px rgba(47,111,237,.40);
+    background:
+      radial-gradient(30% 28% at 50% 50%, rgba(47,111,237,.22), transparent 72%),
+      radial-gradient(50% 44% at 8% 0%, rgba(47,111,237,.20), transparent 70%),
+      radial-gradient(44% 40% at 100% 100%, rgba(124,58,237,.16), transparent 70%),
+      radial-gradient(40% 36% at 100% 0%, rgba(124,58,237,.08), transparent 70%),
+      #05070D;}
+  .login-wordmark{font-family:var(--g-font-display);color:var(--ink);animation:g-wordmark 3.6s ease-in-out infinite;}
+  @keyframes g-wordmark{
+    0%,100%{text-shadow:0 0 16px color-mix(in srgb, var(--setup-blue) 32%, transparent), 0 0 38px color-mix(in srgb, var(--setup-blue) 16%, transparent);}
+    50%{text-shadow:0 0 26px color-mix(in srgb, var(--setup-blue) 52%, transparent), 0 0 60px color-mix(in srgb, var(--setup-blue) 26%, transparent);}
+  }
+  .login-card{--accent:#2F6FED;width:340px;max-width:calc(100vw - 32px);padding:30px 28px 26px;
+    background:var(--g-glass-strong);border:1px solid var(--g-edge);border-radius:var(--g-r-xl);
+    box-shadow:var(--g-inset), var(--g-glow), var(--g-shadow-3);
+    -webkit-backdrop-filter:blur(var(--g-blur-strong)) saturate(var(--g-sat));backdrop-filter:blur(var(--g-blur-strong)) saturate(var(--g-sat));
+    animation:g-pop var(--g-dur-slow) var(--g-ease) both;}
+  .login-card .field{margin-bottom:16px;}
+  .login-card .field label{color:var(--ink-soft);}
+  .login-card .field input{color:var(--ink);padding:10px 12px;font-size:14px;}
+  .login-card .field input::placeholder{color:color-mix(in srgb, var(--ink-soft) 70%, transparent);}
+  /* ID-weighted: the shared field rule above carries an ID in its :is() list. */
+  #loginScreen .field input:focus{outline:none;border-color:color-mix(in srgb, var(--accent) 65%, transparent);
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 24%, transparent);}
+  .login-card .btn{background-color:var(--accent);
+    background-image:linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 62%);
+    padding:11px 16px;font-size:14px;font-weight:600;border-radius:var(--g-r-sm);}
+  .login-card .btn:focus-visible{outline:2px solid color-mix(in srgb, var(--accent) 70%, transparent);outline-offset:2px;}
+  .login-error{color:var(--clay);background:color-mix(in srgb, var(--clay) 12%, transparent);
+    border-radius:var(--g-r-xs);padding:7px 10px;margin:-4px 0 12px;}
+
+  /* Show / hide password */
+  .login-pass{position:relative;}
+  .login-card .field .login-pass input{padding-right:44px;}
+  #loginPassword::-ms-reveal{display:none;}
+  .login-eye{position:absolute;top:50%;right:5px;transform:translateY(-50%);
+    width:32px;height:32px;display:grid;place-items:center;padding:0;border:0;border-radius:var(--g-r-xs);
+    background:transparent;color:var(--ink-soft);cursor:pointer;
+    transition:color var(--g-dur) var(--g-ease), background-color var(--g-dur) var(--g-ease);}
+  .login-eye:hover{color:var(--ink);background-color:var(--g-tint-2);}
+  .login-eye:focus-visible{outline:2px solid color-mix(in srgb, var(--accent) 70%, transparent);outline-offset:1px;}
+  .login-eye svg{width:18px;height:18px;display:block;}
+  .login-eye .ico-hide{display:none;}
+  .login-eye[aria-pressed="true"] .ico-show{display:none;}
+  .login-eye[aria-pressed="true"] .ico-hide{display:block;}
+
+  /* --- Screen changes ----------------------------------------------------- */
+  /* Opacity only: a transform on #content would make it the containing
+     block for the drawers inside it for the length of the animation. */
+  #content.g-screen-enter{animation:g-fade .24s var(--g-ease);}
+  @keyframes g-fade{from{opacity:0;}to{opacity:1;}}
+  @keyframes g-pop{from{opacity:0;transform:translateY(10px) scale(.985);}to{opacity:1;transform:none;}}
+
+  /* --- Fallbacks ----------------------------------------------------------- */
+  @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+    .modal,.eml-prev-shell,.fc-drawer,.qs-panel,.ms-dropdown,.cp-kebab-menu,.agent-panel,.donut-hole,.login-card{background:var(--g-solid);}
+    .setup-savebar-top{background-color:var(--g-solid);}
+    .toast{background:var(--ink-fixed);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    #content.g-screen-enter,.overlay.show,.eml-prev-overlay.show,.overlay.show .modal,.eml-prev-overlay.show .eml-prev-shell,
+    .login-wordmark,.login-card{animation:none;}
+    .login-eye{transition:none;}
+    .fc-drawer,.qs-panel{transition:none;}
+    :is(.io-choice-card,.search-hit,.fte-opt,.tpl-card):hover,.btn:active{transform:none;}
+    :is(.navlink,.btn,.kcard,td,.panel,.stat-card,.fc-metric,.io-choice-card,.search-hit,.fte-opt,.tpl-card,
+        .filter-chip,.dash-tab,.fc-tab,.chart-toggle-btn,.io-source-tab){transition:none;}
+  }
+  }
 </style>
 </head>
 <body>
@@ -1737,12 +2140,18 @@
   <div class="login-wordmark">SWG</div>
   <div class="login-card">
     <div class="field">
-      <label>Username</label>
+      <label for="loginEmail">Username</label>
       <input id="loginEmail" type="email" placeholder="your username" autocomplete="username">
     </div>
     <div class="field">
-      <label>Password</label>
-      <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password">
+      <label for="loginPassword">Password</label>
+      <div class="login-pass">
+        <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password">
+        <button type="button" class="login-eye" id="loginEye" aria-controls="loginPassword" aria-pressed="false" aria-label="Show password" title="Show password">
+          <svg class="ico-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="ico-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+        </button>
+      </div>
     </div>
     <div class="login-error" id="loginError" style="display:none;">Incorrect username or password.</div>
     <button class="btn" id="loginBtn" style="width:100%;margin-top:6px;">Log in</button>
@@ -14226,6 +14635,68 @@ document.getElementById('logoutBtn').onclick = ()=>{
   document.getElementById('loginError').style.display = 'none';
 };
 
+</script>
+<script>
+/* ---------- Glass design system: screen-change fade ----------
+   Presentation only. render()
+   rewrites the page title on every pass; this watches it and fades
+   #content in when the title actually changes -- a real change of
+   screen -- and not on the frequent same-screen re-renders (typing in a
+   filter, ticking a box). It reads the title and toggles one CSS class
+   on #content; it does not touch state, data or any existing listener. */
+(function glassScreenTransitions(){
+  try{
+    var title = document.getElementById('pageTitle');
+    var content = document.getElementById('content');
+    if(!title || !content || !('MutationObserver' in window)) return;
+    var last = title.textContent;
+    new MutationObserver(function(){
+      var now = title.textContent;
+      if(now === last) return;
+      last = now;
+      content.classList.remove('g-screen-enter');
+      void content.offsetWidth; /* restart the animation if one is running */
+      content.classList.add('g-screen-enter');
+    }).observe(title, {childList:true, characterData:true, subtree:true});
+    content.addEventListener('animationend', function(e){
+      if(e.target === content) content.classList.remove('g-screen-enter');
+    });
+  }catch(_){}
+})();
+
+/* ---------- Login screen: show/hide password ----------
+   The eye button switches the password field between hidden and visible.
+   It only changes the field's type; attemptLogin() and the existing
+   Enter-key and click handlers are untouched. Logging out hides the
+   password again. */
+(function loginPasswordToggle(){
+  try{
+    var input = document.getElementById('loginPassword');
+    var eye = document.getElementById('loginEye');
+    if(!input || !eye) return;
+    var setShown = function(shown){
+      /* Switching the type rebuilds the field and moves the caret to the
+         start; let it rebuild, then put the caret back. */
+      var a = input.selectionStart, b = input.selectionEnd;
+      input.type = shown ? 'text' : 'password';
+      var restore = function(){
+        try{ if(document.activeElement === input && a != null) input.setSelectionRange(a, b); }catch(_){}
+      };
+      void input.offsetWidth;
+      restore();
+      if(window.requestAnimationFrame) requestAnimationFrame(restore);
+      var label = shown ? 'Hide password' : 'Show password';
+      eye.setAttribute('aria-pressed', shown ? 'true' : 'false');
+      eye.setAttribute('aria-label', label);
+      eye.title = label;
+    };
+    /* Keep the caret in the field when the eye is clicked with a mouse. */
+    eye.addEventListener('mousedown', function(e){ e.preventDefault(); });
+    eye.addEventListener('click', function(){ setShown(input.type === 'password'); });
+    var logout = document.getElementById('logoutBtn');
+    if(logout) logout.addEventListener('click', function(){ setShown(false); });
+  }catch(_){}
+})();
 </script>
 </body>
 </html>
