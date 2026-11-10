@@ -230,7 +230,7 @@
   .navlink[data-view="distributors"]{--nav-accent:var(--magenta);--nav-accent-soft:var(--magenta-soft);}
   .navlink[data-view="suppliers"]{--nav-accent:var(--rose);--nav-accent-soft:var(--rose-soft);}
   .navlink[data-view="emails"],.navlink[data-view="tickets"]{--nav-accent:var(--rust);--nav-accent-soft:var(--rust-soft);}
-  .navlink[data-view="tasks"],.navlink[data-view="finance"],.navlink[data-view="reports"],.navlink[data-view="invoices"],.navlink[data-view="payments"]{--nav-accent:var(--setup-blue);--nav-accent-soft:var(--setup-blue-soft);}
+  .navlink[data-view="tasks"],.navlink[data-view="finance"],.navlink[data-view="financeDashboard"],.navlink[data-view="reports"],.navlink[data-view="invoices"],.navlink[data-view="payments"]{--nav-accent:var(--setup-blue);--nav-accent-soft:var(--setup-blue-soft);}
   .navlink .nav-ico{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);transition:color .14s;}
   .navlink .nav-ico svg{width:100%;height:100%;display:block;}
   .navlink:hover{background:var(--nav-accent-soft);color:var(--ink);}
@@ -1460,6 +1460,687 @@
   .agent-form input:focus{outline:2px solid var(--setup-blue);outline-offset:0;}
   @media (max-width:520px){ .agent-panel{right:16px;left:16px;width:auto;bottom:80px;} .agent-fab{right:16px;bottom:16px;} }
   @media (prefers-reduced-motion:reduce){ .agent-fab,.agent-typing span{transition:none;animation:none;} }
+
+  /* ===== Finance Dashboard (React island) ================================
+     Scoped entirely under .fd-root, built on the app's own tokens so light,
+     dark and system all follow automatically. No Tailwind: its preflight
+     reset would restyle the entire CRM, not just this screen. */
+  .fd-root{position:relative;isolation:isolate;min-height:420px;}
+  .fd-boot{display:flex;align-items:center;justify-content:center;gap:10px;min-height:320px;color:var(--ink-soft);font-size:13px;}
+  .fd-spinner{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--setup-blue);animation:fdSpin .8s linear infinite;}
+  @keyframes fdSpin{to{transform:rotate(360deg);}}
+  .fd-fail{max-width:520px;margin:48px auto;padding:26px 28px;border:1px solid var(--border);border-radius:14px;background:var(--surface);text-align:center;}
+  .fd-fail-title{font-family:'Fraunces',serif;font-size:19px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+  .fd-fail-sub{font-size:13px;color:var(--ink-soft);line-height:1.55;margin-bottom:18px;}
+  /* --- Glass system ---------------------------------------------------
+     Variables are set per device by the Appearance panel and live on
+     .fd-app, so every panel below picks them up. Glass needs something
+     behind it to blur: .fd-backdrop is a soft mesh made from the app's own
+     accent tokens, so it follows light/dark with no external image. */
+  .fd-app{--fd-blur:22px;--fd-opacity:.42;--fd-sat:1.25;--fd-edge:.6;--fd-tint:#ffffff;--fd-hl:#ffffff;
+    --fd-accent:var(--setup-blue);--fd-on-accent:#ffffff;
+    position:relative;border-radius:24px;padding:16px;min-height:560px;}
+  :root[data-theme="dark"] .fd-app{--fd-hl:#cbd5e6;--fd-on-accent:#0b1530;}
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .fd-app{--fd-hl:#cbd5e6;--fd-on-accent:#0b1530;} }
+  .fd-backdrop{position:absolute;inset:0;border-radius:24px;overflow:hidden;z-index:0;background:
+      radial-gradient(55% 45% at 8% 4%, color-mix(in srgb,var(--setup-blue) 30%,transparent), transparent 72%),
+      radial-gradient(45% 40% at 94% 10%, color-mix(in srgb,var(--violet) 24%,transparent), transparent 72%),
+      radial-gradient(50% 45% at 80% 98%, color-mix(in srgb,var(--sage) 22%,transparent), transparent 72%),
+      radial-gradient(40% 40% at 4% 92%, color-mix(in srgb,var(--rose) 16%,transparent), transparent 72%),
+      var(--parchment);}
+  .fd-blob{position:absolute;border-radius:50%;filter:blur(46px);opacity:.5;}
+  .fd-blob.b1{width:280px;height:280px;left:22%;top:12%;background:color-mix(in srgb,var(--setup-blue) 55%,transparent);}
+  .fd-blob.b2{width:240px;height:240px;right:12%;top:38%;background:color-mix(in srgb,var(--violet) 45%,transparent);}
+  .fd-blob.b3{width:220px;height:220px;left:38%;bottom:4%;background:color-mix(in srgb,var(--sage) 45%,transparent);}
+  /* The container lives on .fd-layer, not .fd-app: modals sit outside it so
+     position:fixed is measured against the viewport, never the container. */
+  .fd-layer{position:relative;z-index:1;container-type:inline-size;container-name:fd;}
+  .fd-glass{position:relative;
+    background:linear-gradient(color-mix(in srgb,var(--fd-tint) 9%,transparent),color-mix(in srgb,var(--fd-tint) 9%,transparent)),
+               color-mix(in srgb,var(--surface) calc(var(--fd-opacity)*100%),transparent);
+    -webkit-backdrop-filter:blur(var(--fd-blur)) saturate(var(--fd-sat));backdrop-filter:blur(var(--fd-blur)) saturate(var(--fd-sat));
+    border:1px solid color-mix(in srgb,var(--fd-hl) calc(var(--fd-edge)*40%),transparent);
+    box-shadow:inset 0 1px 0 color-mix(in srgb,var(--fd-hl) calc(var(--fd-edge)*90%),transparent),
+               0 18px 44px -26px color-mix(in srgb,var(--ink) 42%,transparent);
+    border-radius:18px;}
+  @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){ .fd-glass{background:var(--surface);} }
+  .fd-ico{flex:none;display:block;}
+  .fd-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .fd-tabs{display:flex;gap:3px;padding:5px;border-radius:999px;}
+  .fd-tab{display:flex;align-items:center;gap:7px;padding:8px 14px;border:0;border-radius:999px;background:none;color:var(--ink-soft);
+    font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .2s,color .2s,box-shadow .2s;}
+  .fd-tab:hover{color:var(--ink);background:color-mix(in srgb,var(--surface) 55%,transparent);}
+  .fd-tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 4px 14px -6px color-mix(in srgb,var(--ink) 38%,transparent);}
+  .fd-actions{display:flex;align-items:center;gap:8px;position:relative;}
+  .fd-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:10px;border:1px solid var(--border);
+    background:color-mix(in srgb,var(--surface) 85%,transparent);color:var(--ink);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;
+    transition:border-color .15s,filter .15s;white-space:nowrap;}
+  .fd-btn:hover:not(:disabled){border-color:var(--fd-accent);}
+  .fd-btn:disabled{opacity:.5;cursor:not-allowed;}
+  .fd-btn.primary{background:var(--fd-accent);border-color:var(--fd-accent);color:var(--fd-on-accent);}
+  .fd-btn.primary:hover:not(:disabled){filter:brightness(1.08);}
+  .fd-btn.danger{background:var(--rust);border-color:var(--rust);color:#fff;}
+  .fd-btn.danger.ghost{background:transparent;color:var(--rust);border-color:color-mix(in srgb,var(--rust) 40%,transparent);}
+  .fd-btn.wide{width:100%;justify-content:center;margin-top:12px;}
+  .fd-icon-btn{width:30px;height:30px;display:inline-grid;place-items:center;border:0;border-radius:8px;background:none;color:var(--ink-soft);cursor:pointer;}
+  .fd-icon-btn:hover:not(:disabled){background:color-mix(in srgb,var(--ink) 8%,transparent);color:var(--ink);}
+  .fd-icon-btn.danger:hover:not(:disabled){color:var(--rust);}
+  .fd-icon-btn:disabled{opacity:.35;cursor:not-allowed;}
+  .fd-link{border:0;background:none;padding:0;color:var(--fd-accent);font:inherit;font-size:12px;font-weight:600;cursor:pointer;}
+  .fd-link:hover{text-decoration:underline;}
+  .fd-root :focus-visible{outline:2px solid var(--fd-accent);outline-offset:2px;}
+  .fd-grow{flex:1;}
+  .fd-mt{margin-top:12px;}
+  .fd-good{color:var(--sage);} .fd-bad{color:var(--rust);} .fd-flat{color:var(--ink-soft);}
+  .fd-sub{display:block;font-size:11px;color:var(--ink-soft);margin-top:2px;}
+  /* KPIs */
+  .fd-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:12px;}
+  .fd-kpi{padding:16px 18px 15px;}
+  .fd-kpi-top{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:600;color:var(--ink-soft);}
+  .fd-kpi-ico{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;}
+  .tone-blue .fd-kpi-ico{background:var(--setup-blue-soft);color:var(--setup-blue);}
+  .tone-green .fd-kpi-ico{background:var(--sage-soft);color:var(--sage);}
+  .tone-red .fd-kpi-ico{background:var(--rust-soft);color:var(--rust);}
+  .fd-kpi-val{font-family:'Fraunces',serif;font-size:28px;font-weight:600;line-height:1.15;margin-top:10px;color:var(--ink);
+    font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .fd-kpi-delta{display:flex;align-items:center;gap:4px;margin-top:6px;font-size:11.5px;font-weight:600;}
+  .fd-kpi-hint{margin-top:6px;font-size:11px;color:var(--ink-soft);}
+  /* Panels and layout */
+  .fd-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:12px;}
+  .fd-grid.even{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .fd-panel{padding:18px;}
+  .fd-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .fd-panel-title{font-size:14px;font-weight:700;color:var(--ink);}
+  .fd-panel-sub{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .fd-head-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .fd-seg{display:inline-flex;gap:2px;padding:3px;border-radius:10px;background:color-mix(in srgb,var(--ink) 7%,transparent);}
+  .fd-seg button{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:5px 10px;border-radius:7px;font:inherit;
+    font-size:11.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;}
+  .fd-seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 2px 6px -2px color-mix(in srgb,var(--ink) 30%,transparent);}
+  .fd-seg.wide{display:flex;margin-bottom:14px;} .fd-seg.wide button{flex:1;justify-content:center;padding:8px;}
+  /* Chart */
+  .fd-legend{display:flex;gap:16px;font-size:11.5px;color:var(--ink-soft);margin-bottom:8px;}
+  .fd-legend span{display:flex;align-items:center;gap:6px;}
+  .fd-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+  .fd-dot.in{background:var(--sage);} .fd-dot.out{background:var(--rust);}
+  .fd-chart-body{display:flex;gap:8px;}
+  .fd-yaxis{display:flex;flex-direction:column;justify-content:space-between;font-size:10px;color:var(--ink-soft);padding:0 0 2px;min-width:38px;text-align:right;}
+  .fd-plot{position:relative;flex:1;min-width:0;cursor:crosshair;}
+  .fd-plot svg{display:block;width:100%;height:220px;overflow:visible;}
+  .fd-grid-line{stroke:var(--ink);stroke-opacity:.1;stroke-dasharray:3 5;vector-effect:non-scaling-stroke;}
+  .fd-line{fill:none;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;}
+  .fd-line.in{stroke:var(--sage);} .fd-line.out{stroke:var(--rust);stroke-opacity:.85;}
+  .fd-hover-line{stroke:var(--ink);stroke-opacity:.25;vector-effect:non-scaling-stroke;}
+  .fd-tip{position:absolute;top:6px;transform:translateX(-50%);padding:9px 11px;border-radius:11px;font-size:11.5px;line-height:1.6;
+    pointer-events:none;white-space:nowrap;z-index:2;}
+  .fd-tip-title{font-weight:700;margin-bottom:2px;color:var(--ink);}
+  .fd-tip strong{margin-left:6px;} .fd-tip-net{border-top:1px solid var(--border);margin-top:3px;padding-top:3px;}
+  .fd-xaxis{position:relative;height:18px;margin:6px 0 0 46px;font-size:10px;color:var(--ink-soft);}
+  .fd-xaxis span{position:absolute;transform:translateX(-50%);white-space:nowrap;}
+  .fd-xaxis span:first-child{transform:none;} .fd-xaxis span:last-child{transform:translateX(-100%);}
+  /* Lists */
+  .fd-recent{display:flex;flex-direction:column;}
+  .fd-rr{display:flex;align-items:center;gap:10px;padding:9px 6px;border:0;border-top:1px solid color-mix(in srgb,var(--border) 70%,transparent);
+    background:none;color:inherit;font:inherit;text-align:left;width:100%;border-radius:8px;}
+  .fd-rr:first-child{border-top:0;}
+  button.fd-rr{cursor:pointer;} button.fd-rr:hover{background:color-mix(in srgb,var(--ink) 5%,transparent);}
+  .fd-rr-ico{width:32px;height:32px;flex:none;border-radius:10px;display:grid;place-items:center;}
+  .fd-rr-ico.income{background:var(--sage-soft);color:var(--sage);} .fd-rr-ico.expense{background:var(--rust-soft);color:var(--rust);}
+  .fd-rr-main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .fd-rr-main strong{font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .fd-rr-main span{font-size:11px;color:var(--ink-soft);margin-top:1px;}
+  .fd-amt{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;font-size:12.5px;}
+  .fd-amt.income{color:var(--sage);} .fd-amt.expense{color:var(--ink);}
+  .fd-bar-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 10px;align-items:center;margin-bottom:11px;font-size:12px;}
+  .fd-bar-label{display:flex;align-items:center;gap:8px;min-width:0;color:var(--ink);}
+  .fd-bar-row strong{font-variant-numeric:tabular-nums;color:var(--ink);} .fd-bar-row strong .fd-sub{display:inline;margin-left:4px;font-weight:600;}
+  .fd-bar-track{grid-column:1/-1;height:7px;border-radius:5px;background:color-mix(in srgb,var(--ink) 8%,transparent);overflow:hidden;}
+  .fd-bar-fill{display:block;height:100%;border-radius:5px;}
+  .fd-swatch{display:inline-block;width:10px;height:10px;border-radius:3px;flex:none;}
+  /* Transactions */
+  .fd-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+  .fd-search{display:flex;align-items:center;gap:7px;height:34px;padding:0 10px;border:1px solid var(--border);border-radius:9px;
+    background:color-mix(in srgb,var(--surface) 80%,transparent);color:var(--ink-soft);flex:1 1 220px;min-width:180px;}
+  .fd-search input{border:0;outline:0;background:none;color:var(--ink);font:inherit;font-size:12.5px;width:100%;min-width:0;}
+  .fd-input,.fd-select{height:34px;padding:0 10px;border:1px solid var(--border);border-radius:9px;
+    background:color-mix(in srgb,var(--surface) 80%,transparent);color:var(--ink);font:inherit;font-size:12.5px;min-width:0;}
+  textarea.fd-input{height:auto;padding:8px 10px;resize:vertical;}
+  .fd-summary{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);margin-bottom:10px;}
+  .fd-summary strong{margin-left:4px;font-variant-numeric:tabular-nums;}
+  .fd-table-wrap{overflow-x:auto;}
+  /* Scoped resets: the app's global table/th rules paint near-black cells
+     in dark mode, which on a glass surface would read as solid blocks. */
+  .fd-root table.fd-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;background:transparent;}
+  .fd-root .fd-table th{background:transparent;color:var(--ink-soft);font-size:10.5px;font-weight:700;text-transform:uppercase;
+    letter-spacing:.5px;text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  .fd-root .fd-table td{background:transparent;color:var(--ink);padding:10px;border-bottom:1px solid color-mix(in srgb,var(--border) 60%,transparent);vertical-align:middle;}
+  .fd-root .fd-table tr:hover td{background:color-mix(in srgb,var(--ink) 4%,transparent);}
+  .fd-root .fd-table.compact td{padding:8px 10px;}
+  .fd-root .fd-table .num{text-align:right;font-variant-numeric:tabular-nums;}
+  .fd-root .fd-table tr.fd-total td{font-weight:700;border-bottom:0;border-top:1px solid var(--border);}
+  .fd-th{display:inline-flex;align-items:center;gap:4px;border:0;background:none;padding:0;font:inherit;color:inherit;
+    text-transform:inherit;letter-spacing:inherit;cursor:pointer;}
+  .fd-desc{font-weight:600;color:var(--ink);}
+  .fd-nowrap{white-space:nowrap;}
+  .fd-chip{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap;
+    background:color-mix(in srgb,var(--c) 15%,transparent);color:color-mix(in srgb,var(--c) 72%,var(--ink));}
+  .fd-src{display:inline-flex;padding:2px 8px;border-radius:6px;font-size:10.5px;font-weight:700;white-space:nowrap;}
+  .fd-src.manual{background:color-mix(in srgb,var(--ink) 8%,transparent);color:var(--ink-soft);}
+  .fd-src.crm{background:var(--setup-blue-soft);color:var(--setup-blue);}
+  .fd-status{font-size:11px;font-weight:600;white-space:nowrap;}
+  .fd-status.cleared{color:var(--sage);} .fd-status.pending{color:var(--amber);}
+  .fd-row-actions,.fd-acts{display:inline-flex;gap:2px;justify-content:flex-end;}
+  .fd-root .fd-table td.fd-row-actions{display:table-cell;text-align:right;white-space:nowrap;}
+  .fd-cards{display:none;}
+  .fd-card{padding:12px 4px;border-top:1px solid color-mix(in srgb,var(--border) 70%,transparent);}
+  .fd-card:first-child{border-top:0;}
+  .fd-card-top{display:flex;justify-content:space-between;gap:10px;}
+  .fd-card-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px;}
+  .fd-pager{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:12px;font-size:12px;color:var(--ink-soft);}
+  /* Categories */
+  .fd-cat-group{margin-bottom:12px;}
+  .fd-cat-group-name{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-soft);margin:4px 0 6px;}
+  .fd-cat{display:flex;align-items:center;gap:10px;padding:8px 6px;border-radius:9px;}
+  .fd-cat:hover{background:color-mix(in srgb,var(--ink) 4%,transparent);}
+  .fd-cat.archived{opacity:.55;}
+  .fd-cat-main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .fd-cat-main strong{font-size:12.5px;color:var(--ink);} .fd-cat-main span{font-size:11px;color:var(--ink-soft);}
+  .fd-footnote{display:flex;gap:8px;align-items:flex-start;font-size:11.5px;color:var(--ink-soft);margin-top:12px;padding:0 4px;}
+  /* Reports */
+  .fd-cmp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+  .fd-cmp .fd-panel-title{margin-bottom:10px;}
+  .fd-cmp-line{display:grid;grid-template-columns:70px 1fr auto;gap:8px;align-items:baseline;font-size:12px;padding:5px 0;
+    border-top:1px solid color-mix(in srgb,var(--border) 60%,transparent);}
+  .fd-cmp-line span:first-child{color:var(--ink-soft);}
+  .fd-cmp-line strong{font-variant-numeric:tabular-nums;color:var(--ink);}
+  .fd-cmp-line span:last-child{font-size:11px;font-weight:600;}
+  .fd-profit{display:flex;gap:6px;height:150px;margin:4px 0 14px;}
+  .fd-profit-col{flex:1;min-width:0;display:flex;flex-direction:column;align-items:stretch;}
+  .fd-profit-up,.fd-profit-down{flex:1;display:flex;}
+  .fd-profit-up{align-items:flex-end;border-bottom:1px solid var(--border);} .fd-profit-down{align-items:flex-start;}
+  .fd-profit-up i,.fd-profit-down i{display:block;width:100%;border-radius:4px;}
+  .fd-profit-up i{background:color-mix(in srgb,var(--sage) 75%,transparent);}
+  .fd-profit-down i{background:color-mix(in srgb,var(--rust) 70%,transparent);}
+  .fd-profit-col span{font-size:9.5px;color:var(--ink-soft);text-align:center;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  /* States */
+  .fd-empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:34px 12px;color:var(--ink-soft);}
+  .fd-chart-empty{min-height:220px;justify-content:center;}
+  .fd-empty-title{font-size:14px;font-weight:700;color:var(--ink);}
+  .fd-empty-sub{font-size:12px;color:var(--ink-soft);}
+  .fd-state{text-align:center;padding:40px 20px;}
+  .fd-state-title{font-family:'Fraunces',serif;font-size:19px;font-weight:600;color:var(--ink);margin-bottom:6px;}
+  .fd-state-sub{font-size:12.5px;color:var(--ink-soft);margin-bottom:16px;}
+  .fd-skel{height:11px;border-radius:6px;margin:8px 0;background:linear-gradient(90deg,color-mix(in srgb,var(--ink) 7%,transparent) 25%,
+    color-mix(in srgb,var(--ink) 13%,transparent) 50%,color-mix(in srgb,var(--ink) 7%,transparent) 75%);background-size:200% 100%;animation:fdShimmer 1.3s linear infinite;}
+  .fd-skel.big{height:26px;} .fd-skel.chart{height:240px;}
+  @keyframes fdShimmer{to{background-position:-200% 0;}}
+  /* Modal -- fixed to the viewport, above the CRM, below its toasts. */
+  .fd-modal-bg{position:fixed;inset:0;z-index:250;display:grid;place-items:center;padding:16px;
+    background:color-mix(in srgb,var(--ink-fixed) 38%,transparent);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);}
+  .fd-modal{width:min(520px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:20px 22px 18px;--fd-opacity:.9;}
+  .fd-modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .fd-modal-title{font-family:'Fraunces',serif;font-size:19px;font-weight:600;color:var(--ink);}
+  .fd-field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+  .fd-field > span{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-soft);}
+  .fd-field > span em{font-style:normal;font-weight:500;text-transform:none;letter-spacing:0;}
+  .fd-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .fd-note{display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.5;color:var(--ink-soft);padding:9px 11px;
+    border-radius:10px;background:var(--setup-blue-soft);margin-bottom:12px;}
+  .fd-err{font-size:12.5px;font-weight:600;color:var(--rust);margin-bottom:10px;}
+  .fd-confirm-text{font-size:13px;line-height:1.55;color:var(--ink-soft);margin:0 0 16px;}
+  .fd-modal-actions{display:flex;align-items:center;gap:8px;margin-top:6px;}
+  .fd-colors{display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
+  .fd-color{width:26px;height:26px;border-radius:8px;border:2px solid transparent;cursor:pointer;}
+  .fd-color[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 2px var(--surface) inset;}
+  .fd-colors input[type=color]{width:34px;height:28px;padding:2px;border:1px solid var(--border);border-radius:8px;background:none;cursor:pointer;}
+  /* Appearance popover */
+  .fd-pop{position:absolute;right:0;top:calc(100% + 8px);width:290px;z-index:40;padding:16px;--fd-opacity:.88;}
+  .fd-pop-head{display:flex;align-items:center;justify-content:space-between;font-size:14px;color:var(--ink);}
+  .fd-pop-sub{font-size:11.5px;color:var(--ink-soft);margin:2px 0 12px;}
+  .fd-presets{display:flex;gap:5px;margin-bottom:6px;}
+  .fd-presets button{flex:1;padding:6px 0;border:1px solid var(--border);border-radius:8px;background:none;color:var(--ink);
+    font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;}
+  .fd-presets button:hover{border-color:var(--fd-accent);}
+  .fd-range{display:block;margin:12px 0 0;}
+  .fd-range > span{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--ink);}
+  .fd-range output{font-size:11px;color:var(--ink-soft);font-weight:500;}
+  .fd-range input[type=range]{width:100%;accent-color:var(--fd-accent);margin:6px 0 0;cursor:pointer;}
+  .fd-range.tint{display:flex;align-items:center;justify-content:space-between;}
+  .fd-range.tint input{width:42px;height:28px;padding:2px;border:1px solid var(--border);border-radius:7px;background:none;cursor:pointer;}
+  /* Responsive, by the island's own width (the sidebar can collapse), not
+     the window's. The CRM caps its content column near 1080px, so the island
+     tops out around 1050px -- breakpoints are set against that, not against
+     typical full-window widths. */
+  @container fd (max-width: 900px){
+    .fd-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .fd-grid,.fd-grid.even{grid-template-columns:minmax(0,1fr);}
+    .fd-cmp-grid{grid-template-columns:minmax(0,1fr);}
+  }
+  @container fd (max-width: 640px){
+    .fd-kpis{grid-template-columns:minmax(0,1fr);}
+    .fd-tab span{display:none;} .fd-tab{padding:9px 12px;}
+    .fd-actions .fd-btn span{display:none;}
+    .fd-table-wrap{display:none;} .fd-cards{display:block;}
+    .fd-root .fd-table-wrap:has(.compact){display:block;}
+    .fd-kpi-val{font-size:25px;}
+    .fd-profit-col span{font-size:8.5px;}
+  }
+  @media (max-width: 560px){ .fd-row2{grid-template-columns:1fr;} .fd-app{padding:10px;border-radius:18px;} }
+  @media (prefers-reduced-motion: reduce){
+    .fd-spinner,.fd-skel{animation:none;}
+    .fd-tab,.fd-btn{transition:none;}
+  }
+  /* =====================================================================
+     GLOBAL GLASS DESIGN SYSTEM
+     One visual language for the whole CRM, taken from the Finance
+     Dashboard: translucent panels with a light edge and a soft shadow,
+     floating over an ambient blue/violet light field.
+
+     Presentation only. Nothing below changes markup, behaviour, data,
+     event wiring or which element is on screen.
+
+     How it works -- read before adding to it:
+     1. Tokens (--g-*) are declared once on :root. Most are written in
+        terms of the palette (--surface, --ink, --setup-blue ...) so they
+        follow light/dark by themselves; the few that can't are re-declared
+        for dark in the same two places the palette uses.
+     2. Inside the app shell and its overlays, the base palette tokens are
+        remapped to glass: --surface becomes translucent, --border a soft
+        hairline, --cream/--parchment light tints, and every *-soft a
+        translucent wash of its own hue. Nearly every component already
+        paints with those tokens, so they all become glass together --
+        including markup built in JS -- without touching each component.
+     3. The opaque originals stay reachable as --g-solid* for the few
+        places that need a solid colour: knock-out rings, native option
+        lists, and the Finance Dashboard's own glass maths.
+     4. Real blur (backdrop-filter) is used only on layers that float over
+        content: modals, drawers, menus, the toast, the sticky save bar.
+        In-flow cards sit on the smooth ambient field, where blur makes no
+        visible difference -- and backdrop-filter would turn every card into
+        a containing block for position:fixed (the customer/order drawers
+        render inside #content) and a stacking context (menus opening out
+        of one card would slide under the next).
+     5. Everything is inside @media screen, so print output is unchanged.
+     ===================================================================== */
+  @media screen{
+  :root{
+    color-scheme:light;
+    /* Opaque originals, captured before the remap in step 2. */
+    --g-solid:var(--surface);
+    --g-solid-cream:var(--cream);
+    --g-solid-parchment:var(--parchment);
+    --g-solid-border:var(--border);
+
+    /* Per-theme knobs (re-declared for dark below). */
+    --g-hl:#ffffff;
+    --g-lift:100%;
+    --g-edge-a:70%;
+    --g-inset-a:80%;
+    --g-soft-mix:11%;
+    --g-base:color-mix(in srgb, var(--parchment) 35%, #F5F7FC);
+    --g-glow-a:24%;
+    /* Secondary text is pulled a little towards --ink: on glass it sits on
+       a lighter (dark mode) or tinted (light mode) surface than the solid
+       one it was chosen for, and would otherwise drop below 4.5:1. */
+    --g-ink-soft-a:85%;
+    --g-ink-soft:color-mix(in srgb, var(--ink-soft) var(--g-ink-soft-a), var(--ink));
+
+    /* Surfaces */
+    --g-glass:color-mix(in srgb, color-mix(in srgb, var(--surface) var(--g-lift), var(--g-hl)) 52%, transparent);
+    --g-glass-strong:color-mix(in srgb, color-mix(in srgb, var(--surface) var(--g-lift), var(--g-hl)) 84%, transparent);
+    --g-field:color-mix(in srgb, var(--surface) 74%, transparent);
+    --g-tint-1:color-mix(in srgb, var(--ink) 4%, transparent);
+    --g-tint-2:color-mix(in srgb, var(--ink) 6.5%, transparent);
+    --g-line:color-mix(in srgb, var(--ink) 10%, transparent);
+    --g-line-strong:color-mix(in srgb, var(--ink) 17%, transparent);
+    --g-edge:color-mix(in srgb, var(--g-hl) var(--g-edge-a), transparent);
+
+    /* Depth */
+    --g-inset:inset 0 1px 0 color-mix(in srgb, var(--g-hl) var(--g-inset-a), transparent);
+    --g-shadow-0:0 1px 2px rgba(34,31,26,.05), 0 6px 14px -10px rgba(34,31,26,.30);
+    --g-shadow-1:0 1px 2px rgba(34,31,26,.05), 0 14px 34px -20px rgba(34,31,26,.30);
+    --g-shadow-2:0 2px 6px rgba(34,31,26,.06), 0 22px 46px -22px rgba(34,31,26,.40);
+    --g-shadow-3:0 30px 80px -24px rgba(24,22,40,.45);
+    --g-scrim:color-mix(in srgb, #0b0f1c 34%, transparent);
+    --g-glow:0 0 0 1px color-mix(in srgb, var(--setup-blue) 20%, transparent), 0 12px 32px -14px color-mix(in srgb, var(--setup-blue) 45%, transparent);
+
+    /* Blur */
+    --g-blur:18px;
+    --g-blur-strong:28px;
+    --g-blur-scrim:5px;
+    --g-sat:1.35;
+
+    /* Shape, space, motion, type */
+    --g-r-xs:6px; --g-r-sm:10px; --g-r-md:12px; --g-r-lg:16px; --g-r-xl:20px; --g-r-pill:999px;
+    --g-s1:4px; --g-s2:8px; --g-s3:12px; --g-s4:16px; --g-s5:20px; --g-s6:24px;
+    --g-dur:.18s; --g-dur-slow:.28s; --g-ease:cubic-bezier(.2,.7,.2,1);
+    --g-font-display:'Fraunces',serif; --g-font-body:'Work Sans',sans-serif; --g-font-mono:'IBM Plex Mono',monospace;
+
+    /* Ambient light field behind everything */
+    --g-ambient:
+      radial-gradient(60% 50% at 6% 0%, color-mix(in srgb, var(--setup-blue) var(--g-glow-a), transparent), transparent 70%),
+      radial-gradient(50% 46% at 100% 4%, color-mix(in srgb, var(--violet) calc(var(--g-glow-a) * .85), transparent), transparent 70%),
+      radial-gradient(55% 50% at 90% 100%, color-mix(in srgb, var(--teal) calc(var(--g-glow-a) * .5), transparent), transparent 72%),
+      radial-gradient(45% 45% at 0% 100%, color-mix(in srgb, var(--rose) calc(var(--g-glow-a) * .4), transparent), transparent 72%),
+      var(--g-base);
+
+    scrollbar-color:color-mix(in srgb, var(--ink) 24%, transparent) transparent;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme:dark;
+      --g-hl:#cbd5e6; --g-lift:88%; --g-edge-a:15%; --g-inset-a:12%; --g-soft-mix:10%; --g-ink-soft-a:72%; --g-glow-a:20%;
+      --g-base:color-mix(in srgb, var(--cream) 70%, #060914);
+      --g-shadow-0:0 1px 2px rgba(0,0,0,.30), 0 8px 18px -10px rgba(0,0,0,.60);
+      --g-shadow-1:0 1px 2px rgba(0,0,0,.30), 0 18px 40px -20px rgba(0,0,0,.70);
+      --g-shadow-2:0 2px 8px rgba(0,0,0,.35), 0 26px 52px -22px rgba(0,0,0,.80);
+      --g-shadow-3:0 34px 90px -24px rgba(0,0,0,.80);
+      --g-scrim:color-mix(in srgb, #03050b 55%, transparent);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --g-hl:#cbd5e6; --g-lift:88%; --g-edge-a:15%; --g-inset-a:12%; --g-soft-mix:10%; --g-ink-soft-a:72%; --g-glow-a:20%;
+    --g-base:color-mix(in srgb, var(--cream) 70%, #060914);
+    --g-shadow-0:0 1px 2px rgba(0,0,0,.30), 0 8px 18px -10px rgba(0,0,0,.60);
+    --g-shadow-1:0 1px 2px rgba(0,0,0,.30), 0 18px 40px -20px rgba(0,0,0,.70);
+    --g-shadow-2:0 2px 8px rgba(0,0,0,.35), 0 26px 52px -22px rgba(0,0,0,.80);
+    --g-shadow-3:0 34px 90px -24px rgba(0,0,0,.80);
+    --g-scrim:color-mix(in srgb, #03050b 55%, transparent);
+  }
+
+  /* --- Step 2: palette remap inside the app shell and its overlays ---- */
+  #app, .overlay, .eml-prev-overlay, .qs-panel{
+    --ink-soft:var(--g-ink-soft);
+    --surface:var(--g-glass);
+    --cream:var(--g-tint-1);
+    --parchment:var(--g-tint-2);
+    --border:var(--g-line);
+    --amber-soft:color-mix(in srgb, var(--amber) var(--g-soft-mix), transparent);
+    --sage-soft:color-mix(in srgb, var(--sage) var(--g-soft-mix), transparent);
+    --clay-soft:color-mix(in srgb, var(--clay) var(--g-soft-mix), transparent);
+    --ochre-soft:color-mix(in srgb, var(--ochre) var(--g-soft-mix), transparent);
+    --umber-soft:color-mix(in srgb, var(--umber) var(--g-soft-mix), transparent);
+    --olive-soft:color-mix(in srgb, var(--olive) var(--g-soft-mix), transparent);
+    --rust-soft:color-mix(in srgb, var(--rust) var(--g-soft-mix), transparent);
+    --setup-blue-soft:color-mix(in srgb, var(--setup-blue) var(--g-soft-mix), transparent);
+    --violet-soft:color-mix(in srgb, var(--violet) var(--g-soft-mix), transparent);
+    --teal-soft:color-mix(in srgb, var(--teal) var(--g-soft-mix), transparent);
+    --rose-soft:color-mix(in srgb, var(--rose) var(--g-soft-mix), transparent);
+    --magenta-soft:color-mix(in srgb, var(--magenta) var(--g-soft-mix), transparent);
+    --rev-oils-soft:color-mix(in srgb, var(--rev-oils) var(--g-soft-mix), transparent);
+    --rev-yoga-soft:color-mix(in srgb, var(--rev-yoga) var(--g-soft-mix), transparent);
+  }
+  /* The Finance Dashboard computes its own glass from an opaque --surface;
+     give it the original back so its look (the benchmark) is unchanged. */
+  .fd-root{--surface:var(--g-solid);}
+  /* Customer 360 had a fixed light palette that stayed white in dark mode;
+     point it at the shared tokens so it follows the theme like every
+     other screen. Its warm accent maps to the palette's amber. */
+  .cp-page{
+    --cp-bg:var(--g-tint-1); --cp-surface:var(--surface); --cp-border:var(--border); --cp-border-soft:var(--g-tint-2);
+    --cp-text:var(--ink); --cp-text-soft:var(--ink-soft); --cp-text-faint:var(--ink-soft);
+    --cp-accent:var(--amber); --cp-accent-soft:var(--amber-soft);
+    --cp-danger:var(--clay); --cp-danger-soft:var(--clay-soft);
+    --cp-good:var(--sage); --cp-good-soft:var(--sage-soft);
+    --cp-radius:var(--g-r-lg); --cp-shadow:var(--g-inset), var(--g-shadow-1);
+  }
+
+  /* --- Ambient field ---------------------------------------------------- */
+  body{background:var(--g-ambient);background-attachment:fixed;}
+  .welcome-screen{background:var(--g-ambient);}
+  *{scrollbar-width:thin;}
+
+  /* --- Navigation: a floating glass rail --------------------------------- */
+  .sidebar{background:var(--g-glass);border:1px solid var(--g-edge);border-radius:var(--g-r-xl);
+    margin:12px 0 12px 12px;box-shadow:var(--g-inset), var(--g-shadow-1);
+    position:sticky;top:12px;align-self:flex-start;height:calc(100vh - 24px);}
+  .navlink{border-radius:var(--g-r-sm);
+    transition:background var(--g-dur) var(--g-ease), color var(--g-dur) var(--g-ease), box-shadow var(--g-dur) var(--g-ease);}
+  /* Label a shade deeper than the accent so it keeps 4.5:1 on the tinted pill. */
+  .navlink.active{color:color-mix(in srgb, var(--nav-accent) 86%, var(--ink));
+    box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--nav-accent) 22%, transparent),
+    0 8px 20px -14px color-mix(in srgb, var(--nav-accent) 80%, transparent);}
+  .navlink.active::before{box-shadow:0 0 10px 1px color-mix(in srgb, var(--nav-accent) 55%, transparent);}
+  .setup-gear{border-radius:var(--g-r-sm);}
+  .setup-nav-item,.setup-nav-group{border-radius:var(--g-r-sm);}
+
+  /* --- Header ------------------------------------------------------------ */
+  .topbar{align-items:center;padding:14px 18px;border-radius:var(--g-r-lg);background:var(--g-glass);
+    border:1px solid var(--g-edge);box-shadow:var(--g-inset), var(--g-shadow-1);}
+  .topbar h1 .accent-dot{box-shadow:0 0 12px 1px color-mix(in srgb, var(--accent, var(--ink)) 55%, transparent);}
+
+  /* --- Cards and panels -------------------------------------------------- */
+  :is(.panel,.stat-card,.team-card,.tkt-card,.eml-card,.donut-wrap,.fc-metric,.om-head-card,.om-shell,
+      .fte-head,.fte-card,.adm-head,.adm-card,.tpl-card,.lp-card,.io-card,.io-choice-card,.cp-card,
+      .rep-stat,.ac-step,.search-hit,.fte-opt,.fd-fail){
+    border-color:var(--g-edge);box-shadow:var(--g-inset), var(--g-shadow-1);
+    transition:box-shadow var(--g-dur) var(--g-ease), border-color var(--g-dur) var(--g-ease), transform var(--g-dur) var(--g-ease);}
+  :is(.panel,.donut-wrap,.fc-metric,.om-head-card,.om-shell,.fte-head,.adm-head,.lp-card,.io-card,
+      .io-choice-card,.stat-card,.team-card,.tkt-card,.eml-card,.fte-card,.adm-card,.tpl-card,.fd-fail){border-radius:var(--g-r-lg);}
+  :is(.rep-stat,.ac-step,.search-hit,.fte-opt,.lay-section,.lp-stat,.cp-stat){border-radius:var(--g-r-md);}
+  .lay-section-head{border-radius:var(--g-r-md) var(--g-r-md) 0 0;}
+  :is(.panel,.stat-card,.team-card,.tkt-card,.eml-card,.donut-wrap,.fc-metric,.om-head-card,
+      .fte-head,.fte-card,.adm-head,.adm-card,.tpl-card,.lp-card,.io-card,.cp-card,.rep-stat,.ac-step):hover{
+    box-shadow:var(--g-inset), var(--g-shadow-2);}
+  /* Tiles that are themselves one click lift and catch the light. */
+  :is(.io-choice-card,.search-hit,.fte-opt,.tpl-card):hover{transform:translateY(-2px);
+    box-shadow:var(--g-inset), var(--g-shadow-2), var(--g-glow);}
+  /* Borderless sections nested inside a pane stay flat. */
+  .om-pane .io-card,.om-pane .io-card:hover{box-shadow:none;}
+  .empty{border-radius:var(--g-r-lg);}
+  .tpl-preview{border-radius:var(--g-r-md);box-shadow:var(--g-shadow-0);}
+
+  /* --- Kanban ------------------------------------------------------------ */
+  .kcol,.fc-kanban .kcol{border-radius:var(--g-r-md);box-shadow:var(--g-inset);}
+  .kcard{border-color:var(--g-edge);border-radius:var(--g-r-md);box-shadow:var(--g-inset), var(--g-shadow-0);
+    transition:box-shadow var(--g-dur) var(--g-ease), border-color var(--g-dur) var(--g-ease);}
+  .kcard:hover{box-shadow:var(--g-inset), var(--g-shadow-2);}
+
+  /* --- Tables ------------------------------------------------------------ */
+  table,.fc-page table{border-color:var(--g-edge);border-radius:var(--g-r-md);}
+  td{transition:background-color var(--g-dur) var(--g-ease);}
+  tbody tr:hover > td{background-color:var(--g-tint-1);}
+
+  /* --- Buttons ----------------------------------------------------------- */
+  .btn{border-radius:var(--g-r-sm);
+    background-image:linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 62%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.24), 0 8px 20px -11px color-mix(in srgb, var(--accent, var(--amber)) 80%, transparent);
+    transition:filter var(--g-dur) var(--g-ease), box-shadow var(--g-dur) var(--g-ease), transform var(--g-dur) var(--g-ease), opacity var(--g-dur);}
+  .btn:hover{opacity:1;filter:brightness(1.07) saturate(1.05);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 0 10px 26px -10px color-mix(in srgb, var(--accent, var(--amber)) 95%, transparent);}
+  .btn:active{transform:translateY(1px);}
+  .btn.danger{background-image:linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 62%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.24), 0 8px 20px -11px color-mix(in srgb, var(--clay) 80%, transparent);}
+  .btn.secondary{background:var(--g-glass);border-color:var(--g-line-strong);box-shadow:var(--g-inset);}
+  .btn.secondary:hover{color:var(--ink);filter:none;box-shadow:var(--g-inset), var(--g-glow);}
+  :is(.fc-icon-btn,.eml-btn,.fin-export-btn,.cp-btn,.fc-pager button,.cp-pager button,.setup-back-btn,.qs-advanced,
+      .guide-tool,.fw-chip,.fte-step){box-shadow:var(--g-inset);
+    transition:background var(--g-dur) var(--g-ease), border-color var(--g-dur) var(--g-ease), color var(--g-dur) var(--g-ease), box-shadow var(--g-dur) var(--g-ease);}
+  :is(.fc-icon-btn,.eml-btn,.fin-export-btn,.cp-btn:not(.primary),.fc-pager button:not(:disabled),.cp-pager button:not(:disabled),
+      .setup-back-btn,.qs-advanced,.fw-chip):hover{box-shadow:var(--g-inset), var(--g-glow);}
+  :is(.fc-icon-btn,.eml-btn,.fin-export-btn,.cp-btn,.setup-back-btn){border-radius:var(--g-r-sm);}
+  .cp-btn.primary{box-shadow:inset 0 1px 0 rgba(255,255,255,.24), 0 8px 20px -11px color-mix(in srgb, var(--cp-accent) 80%, transparent);}
+
+  /* --- Chips, tabs, segmented controls ----------------------------------- */
+  :is(.filter-chip,.dash-tab,.fc-tab,.chart-toggle-btn,.io-source-tab){box-shadow:var(--g-inset);
+    transition:background var(--g-dur) var(--g-ease), border-color var(--g-dur) var(--g-ease), color var(--g-dur) var(--g-ease), box-shadow var(--g-dur) var(--g-ease);}
+  :is(.filter-chip,.dash-tab,.fc-tab,.chart-toggle-btn,.io-source-tab):not(.active):not(:disabled):hover{
+    color:var(--ink);border-color:var(--g-line-strong);}
+  :is(.filter-chip,.dash-tab,.fc-tab,.chart-toggle-btn,.io-source-tab).active{
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 6px 16px -8px rgba(0,0,0,.45);}
+  .badge,.cp-badge,.om-pill,.cs-pill{box-shadow:inset 0 0 0 1px color-mix(in srgb, currentColor 16%, transparent);}
+
+  /* --- Forms ------------------------------------------------------------- */
+  :is(.field input,.field select,.field textarea,.search-bar-wrap input,.om-quickfind,.cs-day input[type=time],
+      .ms-trigger,.cp-select,.map-row select,.map-table-head select,.flow-step-row select,.flow-step-row input,
+      .ac-who select,select#viewingAs,.kcard select,.fc-kanban .fc-ship-input,.fc-kanban .fc-carrier-select,
+      .fc-kanban .fc-carrier-other,#tpl_body,#vr_formula){
+    background-color:var(--g-field);border-color:var(--g-line-strong);
+    transition:border-color var(--g-dur) var(--g-ease), box-shadow var(--g-dur) var(--g-ease), background-color var(--g-dur) var(--g-ease);}
+  :is(.field input,.field select,.field textarea,.search-bar-wrap input,.om-quickfind,.ms-trigger,.cp-select,#tpl_body,#vr_formula){
+    border-radius:var(--g-r-sm);}
+  /* Zero-specificity focus ring: any component that already styles its
+     own focus keeps it; everything else gets the same accent ring. */
+  :where(#app, .overlay, .eml-prev-overlay, .qs-panel, .agent-panel) :where(input, select, textarea):focus-visible{
+    outline:none;border-color:color-mix(in srgb, var(--accent, var(--setup-blue)) 65%, transparent);
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--accent, var(--setup-blue)) 24%, transparent);}
+  :where(#app, .overlay, .eml-prev-overlay, .qs-panel, .agent-panel) :where(button, a, [tabindex], .navlink):focus-visible{
+    outline:2px solid color-mix(in srgb, var(--accent, var(--setup-blue)) 70%, transparent);outline-offset:2px;}
+  /* Native option lists are drawn by the OS from these colours; a
+     translucent fill there would come out unreadable. */
+  option,optgroup{background-color:var(--g-solid);color:var(--ink);}
+
+  /* --- Floating layers: real frosted glass ------------------------------- */
+  .overlay,.eml-prev-overlay{background:var(--g-scrim);
+    -webkit-backdrop-filter:blur(var(--g-blur-scrim)) saturate(1.1);backdrop-filter:blur(var(--g-blur-scrim)) saturate(1.1);}
+  .overlay.show,.eml-prev-overlay.show{animation:g-fade var(--g-dur) ease-out;}
+  .modal,.eml-prev-shell{background:var(--g-glass-strong);border:1px solid var(--g-edge);border-radius:var(--g-r-xl);
+    box-shadow:var(--g-inset), var(--g-shadow-3);}
+  .overlay.show .modal,.eml-prev-overlay.show .eml-prev-shell{animation:g-pop var(--g-dur-slow) var(--g-ease);}
+  .fc-drawer-backdrop,.qs-backdrop{background:var(--g-scrim);
+    -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);}
+  .fc-drawer,.qs-panel{background:var(--g-glass-strong);border-left:1px solid var(--g-edge);
+    -webkit-backdrop-filter:blur(var(--g-blur-strong)) saturate(var(--g-sat));backdrop-filter:blur(var(--g-blur-strong)) saturate(var(--g-sat));
+    box-shadow:var(--g-inset);transition:transform var(--g-dur-slow) var(--g-ease), box-shadow var(--g-dur-slow) var(--g-ease);}
+  /* The deep shadow only while open: parked off-screen to the right, it
+     would spill a grey band onto the right edge of every screen. */
+  .fc-drawer.show,.qs-panel.show{box-shadow:var(--g-inset), -26px 0 70px -30px rgba(0,0,0,.5);}
+  .ms-dropdown,.cp-kebab-menu{background:var(--g-glass-strong);border:1px solid var(--g-edge);border-radius:var(--g-r-md);
+    -webkit-backdrop-filter:blur(var(--g-blur)) saturate(var(--g-sat));backdrop-filter:blur(var(--g-blur)) saturate(var(--g-sat));
+    box-shadow:var(--g-inset), var(--g-shadow-3);}
+  .cp-kebab-menu button{color:var(--ink);}
+  .cp-kebab-menu button:hover{background:var(--g-tint-2);}
+  .cp-kebab-menu button.danger{color:var(--clay);}
+  .cp-kebab-menu button.danger:hover{background:var(--clay-soft);}
+  .cp-kebab-btn:hover{background:var(--g-tint-2);}
+  .setup-savebar-top{background-color:var(--g-glass-strong);background-image:linear-gradient(var(--setup-blue-soft), var(--setup-blue-soft));
+    -webkit-backdrop-filter:blur(var(--g-blur)) saturate(var(--g-sat));backdrop-filter:blur(var(--g-blur)) saturate(var(--g-sat));
+    box-shadow:var(--g-shadow-1);}
+  .toast{background:color-mix(in srgb, var(--ink-fixed) 80%, transparent);border:1px solid rgba(255,255,255,.12);border-radius:var(--g-r-md);
+    -webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 18px 40px -14px rgba(0,0,0,.5);}
+  .agent-panel{background:var(--g-glass-strong);border-color:var(--g-edge);border-radius:var(--g-r-xl);
+    -webkit-backdrop-filter:blur(var(--g-blur-strong)) saturate(var(--g-sat));backdrop-filter:blur(var(--g-blur-strong)) saturate(var(--g-sat));
+    box-shadow:var(--g-inset), var(--g-shadow-3);}
+  .agent-head,.agent-form{border-color:var(--g-line);}
+  .agent-msg.bot{background:var(--g-tint-1);border-color:var(--g-line);}
+  .agent-form input{background:var(--g-field);border-color:var(--g-line-strong);}
+  .agent-fab{box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 10px 26px -8px color-mix(in srgb, var(--setup-blue) 55%, transparent);}
+
+  /* --- Charts ------------------------------------------------------------ */
+  :is(.bar-fill,.hbar-fill,.vbar-stack,.split-seg,.om-bar span){box-shadow:inset 0 1px 0 rgba(255,255,255,.26);}
+  /* The donut hole floats over the ring as a frosted lens. */
+  .donut-hole{background:color-mix(in srgb, var(--g-solid) 72%, transparent);
+    -webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);
+    box-shadow:var(--g-inset), 0 8px 22px -12px rgba(0,0,0,.4);}
+
+  /* --- Knock-out rings keep a solid colour (see step 3) ------------------ */
+  .dpipe-dot{background:var(--g-solid);}
+  .dpipe-step.reached .dpipe-dot{background:var(--stepcolor);}
+  .dpipe-step.current .dpipe-dot{box-shadow:0 0 0 2px var(--g-solid), 0 0 0 4px var(--stepcolor);}
+  .lp-timeline li::before{box-shadow:0 0 0 3px var(--g-solid);}
+  .fc-timeline-dot{border-color:var(--g-solid);}
+  .dept-colors input:checked + span{border-color:var(--g-solid);}
+  [fill="var(--surface)"]{fill:var(--g-solid);}
+  [stroke="var(--surface)"]{stroke:var(--g-solid);}
+
+  /* --- Readability fixes the new theme surfaced --------------------------- */
+  /* White text on --ink was unreadable in dark mode, where --ink is light. */
+  .eml-lang button.on{color:var(--g-solid);}
+  /* Hard-coded light pink stayed light in dark mode. */
+  .fw-test-result.err{background:var(--clay-soft);color:var(--clay);}
+
+  /* --- Finance Dashboard: sits on the shared field ----------------------- */
+  /* Its own backdrop duplicated the ambient light now behind every screen. */
+  .fd-backdrop{background:transparent;}
+  .fd-blob{opacity:.3;}
+
+  /* --- Login ------------------------------------------------------------- */
+  /* Always dark, whatever the theme: a near-black field with blue and violet
+     light, and the same glass card and controls as the screens behind it.
+     The tokens are re-declared here so the card, fields and lines below
+     compute from this dark palette rather than the page theme. */
+  .login-screen{color-scheme:dark;
+    --ink:#EEF2FA; --ink-soft:#9AA6BD; --clay:#FF8A6B; --setup-blue:#4F8CFF;
+    --surface:#141A28;
+    --g-hl:#cbd5e6; --g-lift:90%; --g-edge-a:16%; --g-inset-a:12%;
+    --g-glass-strong:color-mix(in srgb, color-mix(in srgb, var(--surface) var(--g-lift), var(--g-hl)) 70%, transparent);
+    --g-field:color-mix(in srgb, #0A0E18 72%, transparent);
+    --g-tint-2:color-mix(in srgb, var(--ink) 7%, transparent);
+    --g-line-strong:color-mix(in srgb, var(--ink) 16%, transparent);
+    --g-edge:color-mix(in srgb, var(--g-hl) var(--g-edge-a), transparent);
+    --g-inset:inset 0 1px 0 color-mix(in srgb, var(--g-hl) var(--g-inset-a), transparent);
+    --g-shadow-3:0 34px 90px -24px rgba(0,0,0,.85);
+    --g-glow:0 0 0 1px rgba(79,140,255,.22), 0 0 46px -6px rgba(47,111,237,.40);
+    background:
+      radial-gradient(30% 28% at 50% 50%, rgba(47,111,237,.22), transparent 72%),
+      radial-gradient(50% 44% at 8% 0%, rgba(47,111,237,.20), transparent 70%),
+      radial-gradient(44% 40% at 100% 100%, rgba(124,58,237,.16), transparent 70%),
+      radial-gradient(40% 36% at 100% 0%, rgba(124,58,237,.08), transparent 70%),
+      #05070D;}
+  .login-wordmark{font-family:var(--g-font-display);color:var(--ink);animation:g-wordmark 3.6s ease-in-out infinite;}
+  @keyframes g-wordmark{
+    0%,100%{text-shadow:0 0 16px color-mix(in srgb, var(--setup-blue) 32%, transparent), 0 0 38px color-mix(in srgb, var(--setup-blue) 16%, transparent);}
+    50%{text-shadow:0 0 26px color-mix(in srgb, var(--setup-blue) 52%, transparent), 0 0 60px color-mix(in srgb, var(--setup-blue) 26%, transparent);}
+  }
+  .login-card{--accent:#2F6FED;width:340px;max-width:calc(100vw - 32px);padding:30px 28px 26px;
+    background:var(--g-glass-strong);border:1px solid var(--g-edge);border-radius:var(--g-r-xl);
+    box-shadow:var(--g-inset), var(--g-glow), var(--g-shadow-3);
+    -webkit-backdrop-filter:blur(var(--g-blur-strong)) saturate(var(--g-sat));backdrop-filter:blur(var(--g-blur-strong)) saturate(var(--g-sat));
+    animation:g-pop var(--g-dur-slow) var(--g-ease) both;}
+  .login-card .field{margin-bottom:16px;}
+  .login-card .field label{color:var(--ink-soft);}
+  .login-card .field input{color:var(--ink);padding:10px 12px;font-size:14px;}
+  .login-card .field input::placeholder{color:color-mix(in srgb, var(--ink-soft) 70%, transparent);}
+  /* ID-weighted: the shared field rule above carries an ID in its :is() list. */
+  #loginScreen .field input:focus{outline:none;border-color:color-mix(in srgb, var(--accent) 65%, transparent);
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 24%, transparent);}
+  .login-card .btn{background-color:var(--accent);
+    background-image:linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 62%);
+    padding:11px 16px;font-size:14px;font-weight:600;border-radius:var(--g-r-sm);}
+  .login-card .btn:focus-visible{outline:2px solid color-mix(in srgb, var(--accent) 70%, transparent);outline-offset:2px;}
+  .login-error{color:var(--clay);background:color-mix(in srgb, var(--clay) 12%, transparent);
+    border-radius:var(--g-r-xs);padding:7px 10px;margin:-4px 0 12px;}
+
+  /* Show / hide password */
+  .login-pass{position:relative;}
+  .login-card .field .login-pass input{padding-right:44px;}
+  #loginPassword::-ms-reveal{display:none;}
+  .login-eye{position:absolute;top:50%;right:5px;transform:translateY(-50%);
+    width:32px;height:32px;display:grid;place-items:center;padding:0;border:0;border-radius:var(--g-r-xs);
+    background:transparent;color:var(--ink-soft);cursor:pointer;
+    transition:color var(--g-dur) var(--g-ease), background-color var(--g-dur) var(--g-ease);}
+  .login-eye:hover{color:var(--ink);background-color:var(--g-tint-2);}
+  .login-eye:focus-visible{outline:2px solid color-mix(in srgb, var(--accent) 70%, transparent);outline-offset:1px;}
+  .login-eye svg{width:18px;height:18px;display:block;}
+  .login-eye .ico-hide{display:none;}
+  .login-eye[aria-pressed="true"] .ico-show{display:none;}
+  .login-eye[aria-pressed="true"] .ico-hide{display:block;}
+
+  /* --- Screen changes ----------------------------------------------------- */
+  /* Opacity only: a transform on #content would make it the containing
+     block for the drawers inside it for the length of the animation. */
+  #content.g-screen-enter{animation:g-fade .24s var(--g-ease);}
+  @keyframes g-fade{from{opacity:0;}to{opacity:1;}}
+  @keyframes g-pop{from{opacity:0;transform:translateY(10px) scale(.985);}to{opacity:1;transform:none;}}
+
+  /* --- Fallbacks ----------------------------------------------------------- */
+  @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+    .modal,.eml-prev-shell,.fc-drawer,.qs-panel,.ms-dropdown,.cp-kebab-menu,.agent-panel,.donut-hole,.login-card{background:var(--g-solid);}
+    .setup-savebar-top{background-color:var(--g-solid);}
+    .toast{background:var(--ink-fixed);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    #content.g-screen-enter,.overlay.show,.eml-prev-overlay.show,.overlay.show .modal,.eml-prev-overlay.show .eml-prev-shell,
+    .login-wordmark,.login-card{animation:none;}
+    .login-eye{transition:none;}
+    .fc-drawer,.qs-panel{transition:none;}
+    :is(.io-choice-card,.search-hit,.fte-opt,.tpl-card):hover,.btn:active{transform:none;}
+    :is(.navlink,.btn,.kcard,td,.panel,.stat-card,.fc-metric,.io-choice-card,.search-hit,.fte-opt,.tpl-card,
+        .filter-chip,.dash-tab,.fc-tab,.chart-toggle-btn,.io-source-tab){transition:none;}
+  }
+  }
 </style>
 </head>
 <body>
@@ -1467,12 +2148,18 @@
   <div class="login-wordmark">SWG</div>
   <div class="login-card">
     <div class="field">
-      <label>Username</label>
+      <label for="loginEmail">Username</label>
       <input id="loginEmail" type="email" placeholder="your username" autocomplete="username">
     </div>
     <div class="field">
-      <label>Password</label>
-      <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password">
+      <label for="loginPassword">Password</label>
+      <div class="login-pass">
+        <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password">
+        <button type="button" class="login-eye" id="loginEye" aria-controls="loginPassword" aria-pressed="false" aria-label="Show password" title="Show password">
+          <svg class="ico-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="ico-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+        </button>
+      </div>
     </div>
     <div class="login-error" id="loginError" style="display:none;">Incorrect username or password.</div>
     <button class="btn" id="loginBtn" style="width:100%;margin-top:6px;">Log in</button>
@@ -1519,6 +2206,7 @@
     <div class="navlink" data-view="invoices" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Invoices</span></div>
     <div class="navlink" data-view="payments" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Payments</span></div>
     <div class="navlink" data-view="finance" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Finance</span></div>
+    <div class="navlink" data-view="financeDashboard" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Finance Dashboard</span></div>
     <div class="navlink" data-view="reports" data-nav-group="operations"><span class="nav-ico"></span><span class="nav-label">Reports</span></div>
     <div class="nav-group-label" data-nav-group="support">Support</div>
     <div class="navlink" data-view="emails" data-nav-group="support"><span class="nav-ico"></span><span class="nav-label">Emails</span></div>
@@ -1735,6 +2423,7 @@ const NAV_ICONS = {
   tasks:`<path d="M9 4.2H7.2A1.7 1.7 0 0 0 5.5 5.9v13.4a1.7 1.7 0 0 0 1.7 1.7h9.6a1.7 1.7 0 0 0 1.7-1.7V5.9a1.7 1.7 0 0 0-1.7-1.7H15"/><rect x="9" y="2.6" width="6" height="3.4" rx="1.2"/><path d="M8.9 13.4l2.1 2.1 4.1-4.3"/>`,
   invoices:`<path d="M14 3.2H7.4A1.9 1.9 0 0 0 5.5 5.1v13.8a1.9 1.9 0 0 0 1.9 1.9h9.2a1.9 1.9 0 0 0 1.9-1.9V8.2z"/><path d="M13.8 3.3v4.9h4.7"/><path d="M8.8 13h6.4M8.8 16.6h4.3"/>`,
   payments:`<rect x="2.6" y="5.4" width="18.8" height="13.2" rx="2.2"/><path d="M2.6 10.2h18.8"/><path d="M6.4 14.8h3.4"/>`,
+  financeDashboard:`<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>`,
   finance:`<path d="M3.4 20.6h17.2"/><rect x="5.4" y="12" width="3.4" height="6.4" rx="1"/><rect x="10.6" y="7.6" width="3.4" height="10.8" rx="1"/><rect x="15.8" y="10" width="3.4" height="8.4" rx="1"/>`,
   emails:`<rect x="2.8" y="5" width="18.4" height="14" rx="2.2"/><path d="M3.4 6.6 12 13l8.6-6.4"/>`,
   tickets:`<circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="3.4"/><path d="M6 6l3.6 3.6M14.4 14.4 18 18M18 6l-3.6 3.6M9.6 14.4 6 18"/>`,
@@ -1767,7 +2456,7 @@ const ACCENTS = {
   distributors:'var(--magenta)', suppliers:'var(--rose)', deals:'var(--teal)', orders:'var(--violet)',
   tasks:'var(--setup-blue)', invoices:'var(--setup-blue)', payments:'var(--setup-blue)', team:'var(--ink)', finance:'var(--setup-blue)',
   emails:'var(--rust)', tickets:'var(--rust)', search:'var(--ink)', rickroll:'var(--ink)',
-  reports:'var(--setup-blue)', administration:'var(--setup-blue)'
+  reports:'var(--setup-blue)', administration:'var(--setup-blue)', financeDashboard:'var(--setup-blue)'
 };
 const CONTINENTS = ['Africa','Asia','Europe','North America','South America','Oceania','Middle East'];
 const SUBREGIONS = {
@@ -1825,6 +2514,12 @@ const PRIVILEGED = ['Ariel','Daniel'];
 const FULL_ADMIN = 'Ariel';
 const CO_ADMINS = ['David'];
 function isPrivileged(){ return PRIVILEGED.includes(state.viewingAs) || systemPermGranted('viewFinance'); }
+/* Finance Dashboard viewers: the Finance page's two plus David (Ariel's
+   call). Honours the same viewFinance system permission isPrivileged()
+   does, so granting finance access through a profile or permission set
+   opens both finance screens together rather than one of them. */
+const FINANCE_DASHBOARD_VIEWERS = ['Ariel','Daniel','David'];
+function canSeeFinanceDashboard(){ return FINANCE_DASHBOARD_VIEWERS.includes(state.viewingAs) || systemPermGranted('viewFinance'); }
 function isAdmin(){ return state.currentUser === FULL_ADMIN || CO_ADMINS.includes(state.currentUser); }
 function canDeleteUsers(){ return state.currentUser === FULL_ADMIN; }
 function canSeeLeads(){
@@ -1946,6 +2641,7 @@ const FIELD_MAP = {
   attnWaitingFulfillment:'attn_waiting_fulfillment', attnMissingAddress:'attn_missing_address',
   attnShippedStale:'attn_shipped_stale', attnOpenTickets:'attn_open_tickets',
   stageHistory:'stage_history',
+  occurredOn:'occurred_on', categoryId:'category_id', sourceId:'source_id', groupName:'group_name',
 };
 const FIELD_MAP_REV = Object.fromEntries(Object.entries(FIELD_MAP).map(([a,b])=>[b,a]));
 /* Columns Postgres types as `date`. An empty date input yields '', which
@@ -2293,6 +2989,7 @@ function setActiveNav(){
    actually reveal the link again, not just leave a stale class behind. */
 function navLinkHidden(entity){
   if((entity==='invoices' || entity==='payments' || entity==='finance') && !isPrivileged()) return true;
+  if(entity==='financeDashboard' && !canSeeFinanceDashboard()) return true;
   if(entity==='team' && !isAdmin()) return true;
   if(entity==='administration' && !canAccessAdministration()) return true;
   if(entity==='leads' && !canSeeLeads()) return true;
@@ -2306,7 +3003,7 @@ function updateNavVisibility(){
     setupGear.style.display = canAccessSetup() ? 'flex' : 'none';
     setupGear.classList.toggle('active', state.view==='setup');
   }
-  const gatedEntities = Array.from(new Set(['invoices','payments','finance','team','administration', ...SETUP_ENTITIES]));
+  const gatedEntities = Array.from(new Set(['invoices','payments','finance','financeDashboard','team','administration', ...SETUP_ENTITIES]));
   gatedEntities.forEach(entity=>{
     const link = document.querySelector(`.navlink[data-view="${entity}"]`);
     if(link) link.classList.toggle('hidden-role', navLinkHidden(entity));
@@ -2324,6 +3021,7 @@ function render(){
   if(state.view==='invoices' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='payments' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='finance' && !isPrivileged()) state.view = 'dashboard';
+  if(state.view==='financeDashboard' && !canSeeFinanceDashboard()) state.view = 'dashboard';
   if(state.view==='team' && !isAdmin()) state.view = 'dashboard';
   if(state.view==='administration' && !canAccessAdministration()) state.view = 'dashboard';
   if(state.view==='setup' && !canAccessSetup()) state.view = 'dashboard';
@@ -2331,6 +3029,7 @@ function render(){
   if(SETUP_ENTITIES.includes(state.view) && isObjectHidden(state.view) && !personaIsAdmin()) state.view = 'dashboard';
   if(SETUP_ENTITIES.includes(state.view) && !canObject(state.view, 'read')) state.view = 'dashboard';
   if(state.view==='leadProfile' && !canSeeLeads()) state.view = 'dashboard';
+  if(state.view!=='financeDashboard') fdUnmount();
   const isSetupPage = state.view==='setup';
   const isSubPage = isSetupPage || state.view==='customerProfile' || state.view==='leadProfile';
   document.querySelector('.sidebar').style.display = isSubPage ? 'none' : 'flex';
@@ -2351,6 +3050,7 @@ function render(){
     invoices:['Invoices','Billing, linked to orders or standalone'],
     payments:['Payments','Track what SWG owes and pays out'],
     finance:['Finance','Revenue vs. payments, by source and over time'],
+    financeDashboard:['Finance Dashboard','Income, expenses and cash flow in one ledger'],
     team:['Team','Manage who has access to the ledger'],
     emails:['Emails','Automated messages the CRM sends on your behalf'],
     tickets:['Tickets','Customer enquiries from the website and elsewhere'],
@@ -2376,7 +3076,7 @@ function render(){
   document.getElementById('mainArea').style.setProperty('--accent', ACCENTS[state.view] || 'var(--amber)');
   const addLabels = {contacts:'contact', leads:'lead', customers:'customer', distributors:'distributor', suppliers:'supplier', deals:'deal', tasks:'task', invoices:'invoice', payments:'payment', team:'team member'};
   const addBtn = document.getElementById('addBtn');
-  const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets','setup','reports','customerProfile','leadProfile','administration'];
+  const noAdd = ['dashboard','home','search','rickroll','finance','financeDashboard','emails','tickets','setup','reports','customerProfile','leadProfile','administration'];
   addBtn.style.display = (noAdd.includes(state.view) || (SETUP_ENTITIES.includes(state.view) && !canObject(state.view, 'create'))) ? 'none' : 'inline-block';
   addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
   // Import / Export lives on every list the engine actually supports
@@ -2405,6 +3105,7 @@ function render(){
   if(state.view==='invoices') c.innerHTML = renderInvoices();
   if(state.view==='payments') c.innerHTML = renderPayments();
   if(state.view==='finance') c.innerHTML = renderFinance();
+  if(state.view==='financeDashboard') fdMount(c);
   if(state.view==='emails') c.innerHTML = renderEmails();
   if(state.view==='tickets') c.innerHTML = renderTickets();
   if(state.view==='team') c.innerHTML = renderTeam();
@@ -11408,6 +12109,1053 @@ async function saveModal(table, id){
   if(table!=='team') await runFlows(table, savedObj, wasNew ? 'created' : 'updated');
 }
 
+/* ===== Finance Dashboard (React island) =====================================
+   The one screen in this file that renders with React. Everything else is
+   vanilla. The island is confined to #fdRoot inside #content: it is created
+   when the view opens and unmounted -- by the hook near the top of render()
+   -- before any other view overwrites #content, so a detached React tree is
+   never left behind. Every name it adds starts with fd/FD. */
+/* Libraries, pinned. Loaded on first open of this view only, never at boot,
+   so no other screen pays for them and none can be broken by them. Each
+   integrity hash was computed from the served bytes and matched against the
+   CDN's own published value (cdnjs SHA-512; jsdelivr's hash for htm).
+   React 18.3.1 because React 19 no longer ships a UMD build -- this is the
+   newest React that runs without a bundler. htm gives JSX-like templates
+   without a compile step (~1 KB), instead of Babel-in-the-browser (~3 MB). */
+const FD_LIBS = {
+  react:    { global:'React',    src:'https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js',
+              integrity:'sha512-QVs8Lo43F9lSuBykadDb0oSXDL/BbZ588urWVCRwSIoewQv/Ewg1f84mK3U790bZ0FfhFa1YSQUmIhG+pIRKeg==' },
+  reactDom: { global:'ReactDOM', src:'https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js',
+              integrity:'sha512-6a1107rTlA4gYpgHAqbwLAtxmWipBdJFcq8y5S/aTge3Bp+VAklABm2LO+Kg51vOWR9JMZq1Ovjl5tpluNpTeQ==' },
+  htm:      { global:'htm',      src:'https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.umd.js',
+              integrity:'sha512-SJZI6YKKvXIbCZAHZAilRcE3HMe+Xjf3dsZ612Qeu1L80KhDucjCIuea3ceEvzTu8HjY4sByeKh6Qam1SsMggg==' },
+  gsap:     { global:'gsap',     src:'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js',
+              integrity:'sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg==' },
+};
+const FD_LOAD_TIMEOUT_MS = 15000;
+let fdLibsPromise = null;
+function fdLoadScript(lib){
+  if(window[lib.global]) return Promise.resolve();
+  return new Promise((resolve, reject)=>{
+    const el = document.createElement('script');
+    el.src = lib.src; el.integrity = lib.integrity; el.crossOrigin = 'anonymous';
+    el.onload = ()=> window[lib.global] ? resolve() : reject(new Error(`${lib.global} loaded but did not initialise`));
+    el.onerror = ()=>{ el.remove(); reject(new Error(`Could not load ${lib.global}`)); };
+    document.head.appendChild(el);
+  });
+}
+/* Cached, so reopening the view never injects a second copy; cleared on
+   failure, so Retry genuinely tries again. ReactDOM's UMD build reads
+   window.React as it executes, hence React first; the rest in parallel. */
+function fdLoadLibs(){
+  if(fdLibsPromise) return fdLibsPromise;
+  const all = Promise.all([
+    fdLoadScript(FD_LIBS.react).then(()=>fdLoadScript(FD_LIBS.reactDom)),
+    fdLoadScript(FD_LIBS.htm),
+    fdLoadScript(FD_LIBS.gsap),
+  ]);
+  const timeout = new Promise((_, reject)=>setTimeout(()=>reject(new Error('Timed out loading the interface libraries')), FD_LOAD_TIMEOUT_MS));
+  fdLibsPromise = Promise.race([all, timeout]);
+  fdLibsPromise.catch(()=>{ fdLibsPromise = null; });
+  return fdLibsPromise;
+}
+
+let fdReactRoot = null;
+/* Bumped on every mount and unmount. A load that finishes after the user
+   has already left the view sees a stale token and does nothing, instead
+   of mounting React into a screen that is no longer there. */
+let fdMountToken = 0;
+function fdUnmount(){
+  fdMountToken++;
+  if(!fdReactRoot) return;
+  try{ fdReactRoot.unmount(); }catch(e){ console.warn('fd unmount', e); }
+  fdReactRoot = null;
+}
+/* Called by render() whenever this view is showing -- which, in this app,
+   is on almost any state change anywhere. If the island is already mounted
+   it only receives fresh props, so its own state (tab, filters, open modal,
+   half-typed form) survives a global re-render. */
+function fdMount(c){
+  if(fdReactRoot && document.getElementById('fdRoot')){ fdReactRoot.render(fdElement()); return; }
+  fdUnmount();
+  const token = fdMountToken;
+  c.innerHTML = `<div id="fdRoot" class="fd-root"><div class="fd-boot"><span class="fd-spinner"></span>Loading Finance Dashboard…</div></div>`;
+  fdLoadLibs().then(()=>{
+    const host = document.getElementById('fdRoot');
+    if(token!==fdMountToken || state.view!=='financeDashboard' || !host) return;
+    if(!fdApp) fdDefineApp();
+    host.innerHTML = '';
+    fdReactRoot = ReactDOM.createRoot(host);
+    fdReactRoot.render(fdElement());
+  }).catch(err=>{
+    const host = document.getElementById('fdRoot');
+    if(token!==fdMountToken || !host) return;
+    console.error('Finance Dashboard failed to start', err);
+    host.innerHTML = `<div class="fd-fail">
+        <div class="fd-fail-title">The Finance Dashboard couldn't load its interface</div>
+        <div class="fd-fail-sub">${esc(err.message||String(err))}. Nothing was saved or changed, and the rest of the CRM is unaffected.</div>
+        <button type="button" class="btn" id="fdRetry">Try again</button>
+      </div>`;
+    document.getElementById('fdRetry').onclick = ()=>{ fdUnmount(); render(); };
+  });
+}
+
+/* Components are defined once, after the libraries exist (they need React
+   and htm at definition time). `fdApp` is the root component. */
+let fdApp = null;
+let fdRenderTick = 0;
+function fdElement(){
+  fdRenderTick++;
+  return React.createElement(fdErrorBoundary, null,
+    React.createElement(fdApp, { viewer: state.viewingAs, tick: fdRenderTick }));
+}
+let fdErrorBoundary = null;
+/* Last parity result between this screen's CRM-derived money and the
+   Finance page's financeData(): read by the audit, and logged on mismatch. */
+let fdLastParity = null;
+function fdDiagnostics(){
+  return { mounted:!!fdReactRoot, parity:fdLastParity, libs:['React','ReactDOM','htm','gsap'].filter(g=>!!window[g]) };
+}
+function fdDefineApp(){
+  const h = htm.bind(React.createElement);
+  /* A render error inside the island stops at this boundary: the island
+     shows a contained message and the rest of the CRM keeps running. */
+  fdErrorBoundary = class extends React.Component {
+    constructor(p){ super(p); this.state = { error:null }; }
+    static getDerivedStateFromError(error){ return { error }; }
+    componentDidCatch(error, info){ console.error('Finance Dashboard render error', error, info); }
+    render(){
+      if(!this.state.error) return this.props.children;
+      return h`<div class="fd-fail">
+        <div class="fd-fail-title">Something went wrong in the Finance Dashboard</div>
+        <div class="fd-fail-sub">${String(this.state.error.message||this.state.error)}. Nothing was saved; the rest of the CRM is unaffected.</div>
+        <button type="button" class="btn" onClick=${()=>this.setState({error:null})}>Try again</button>
+      </div>`;
+    }
+  };
+  /* ---------------------------------------------------------------------
+     Everything below lives inside this closure, so none of it becomes a
+     global. `ui` and `cache` outlive a single mount: leaving the view and
+     coming back keeps your tab, filters and data instead of starting over.
+     --------------------------------------------------------------------- */
+  const { useState, useEffect, useMemo, useRef, useLayoutEffect } = React;
+  const TX = 'finance_transactions', CAT = 'finance_categories', OB_KEY = 'financeOpeningBalance';
+  const PAGE_SIZE = 25;
+  const GLASS_KEY = 'crm_fd_glass';
+  const GLASS_DEFAULT = { blur:22, opacity:0.42, saturation:1.25, edge:0.6, tint:'#ffffff' };
+  const GLASS_PRESETS = [
+    { name:'Clear',   v:{ blur:10, opacity:0.22, saturation:1.15, edge:0.8 } },
+    { name:'Frosted', v:GLASS_DEFAULT },
+    { name:'Solid',   v:{ blur:30, opacity:0.88, saturation:1, edge:0.35 } },
+  ];
+  const CAT_COLORS = ['#16805A','#0F766E','#2563EB','#7C3AED','#BE185D','#C4670F','#B58205','#C7422C','#6E6759'];
+  const ui = { tab:'overview', period:'monthly', reportMode:'monthly',
+    tx:{ q:'', kind:'all', cat:'all', status:'all', source:'all', from:'', to:'', sort:'date', dir:'desc', page:0 } };
+  let cache = null;
+
+  /* Lucide icon artwork (ISC licence), only the glyphs this screen uses,
+     inlined the same way NAV_ICONS is rather than pulling in the full set. */
+  const ICONS = {
+    plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
+    search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+    download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+    x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+    pencil:'<path d="M21.17 6.81a1 1 0 0 0-3.99-3.99L3.84 16.17a2 2 0 0 0-.5.83l-1.32 4.35a.5.5 0 0 0 .62.62l4.35-1.32a2 2 0 0 0 .83-.5z"/><path d="m15 5 4 4"/>',
+    trash:'<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+    sliders:'<path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>',
+    up:'<path d="M22 7 13.5 15.5 8.5 10.5 2 17"/><path d="M16 7h6v6"/>',
+    down:'<path d="M22 17 13.5 8.5 8.5 13.5 2 7"/><path d="M16 17h6v-6"/>',
+    income:'<path d="M17 7 7 17"/><path d="M17 17H7V7"/>',
+    expense:'<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
+    wallet:'<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+    scale:'<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
+    archive:'<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+    link:'<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+    left:'<path d="m15 18-6-6 6-6"/>',
+    right:'<path d="m9 18 6-6-6-6"/>',
+    sort:'<path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/>',
+    dashboard:'<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
+    list:'<path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/>',
+    tag:'<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>',
+    chart:'<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+    info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+    reset:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+    refresh:'<path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/>',
+  };
+  function Icon({ n, s }){
+    return h`<svg className="fd-ico" width=${s||16} height=${s||16} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+      dangerouslySetInnerHTML=${{ __html: ICONS[n] || '' }} />`;
+  }
+
+  /* ---- Glass appearance: per device, the same as the theme preference. -- */
+  const clamp = (v, lo, hi, fb)=> Number.isFinite(+v) ? Math.min(hi, Math.max(lo, +v)) : fb;
+  function normGlass(g){
+    g = g || {};
+    return {
+      blur: clamp(g.blur, 0, 40, GLASS_DEFAULT.blur),
+      opacity: clamp(g.opacity, 0.08, 0.95, GLASS_DEFAULT.opacity),
+      saturation: clamp(g.saturation, 0.5, 2, GLASS_DEFAULT.saturation),
+      edge: clamp(g.edge, 0, 1, GLASS_DEFAULT.edge),
+      tint: /^#[0-9a-f]{6}$/i.test(g.tint || '') ? g.tint : GLASS_DEFAULT.tint,
+    };
+  }
+  function loadGlass(){ try{ return normGlass(JSON.parse(localStorage.getItem(GLASS_KEY) || 'null')); }catch(e){ return normGlass(null); } }
+  function saveGlass(g){ try{ localStorage.setItem(GLASS_KEY, JSON.stringify(g)); }catch(e){} }
+
+  /* ---- Money and dates ------------------------------------------------ */
+  const usd0 = new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', maximumFractionDigits:0 });
+  const usd2 = new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', minimumFractionDigits:2, maximumFractionDigits:2 });
+  const usdCompact = new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', notation:'compact', maximumFractionDigits:1 });
+  const money = (v, cents)=> (cents ? usd2 : usd0).format(Number.isFinite(v) ? v : 0);
+  function nativeMoney(a, c){
+    try{ return new Intl.NumberFormat('en-US', { style:'currency', currency:c || 'USD' }).format(Number(a) || 0); }
+    catch(e){ return (c || '') + ' ' + (Number(a) || 0).toFixed(2); }
+  }
+  const dkey = d=> fcLocalDateKey(d);
+  const todayKey = ()=> dkey(new Date());
+  const kdate = k=> new Date(k + 'T00:00:00');
+  const addDays = (d, n)=>{ const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  const fmtDay = k=> k ? kdate(k).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '';
+  const tsKey = ts=> dkey(new Date(Number(ts) || 0));
+
+  /* ---- Data: reads and writes through the app's own client -------------
+     The same `sb` client and the same toRow/fromRow mappers as the rest of
+     the CRM -- no second client. Not loadTable(), though: it returns [] on
+     error, so "nothing recorded" and "the load failed" would look the same,
+     and a finance screen must not claim a ledger is empty when it just
+     couldn't read it. Writes go through writeWithColumnFallback(), which,
+     unlike dbInsert/dbUpdate, hands the error back instead of only logging
+     it -- so a failed save is rolled back and said out loud, never shown
+     as saved. */
+  async function fdLoad(){
+    const [tx, cats, ob] = await Promise.all([
+      sb.from(TX).select('*').order('occurred_on', { ascending:false }),
+      sb.from(CAT).select('*').order('created_at', { ascending:true }),
+      sb.from('settings').select('value').eq('key', OB_KEY).maybeSingle(),
+    ]);
+    for(const r of [tx, cats, ob]) if(r.error) throw new Error(r.error.message || 'Could not read the ledger');
+    return { tx:(tx.data || []).map(fromRow), cats:(cats.data || []).map(fromRow), opening: ob.data ? ob.data.value : null };
+  }
+  function friendly(e){
+    const code = (e && e.code) || '';
+    if(code === '23505') return new Error('A category with that name already exists');
+    if(code === '23503') return new Error('Transactions are still filed under that category — archive it instead');
+    if(code === '23514') return new Error('That value is not allowed here');
+    return new Error((e && e.message) || 'The database rejected the change');
+  }
+  async function fdSave(table, rec, isNew){
+    const error = await writeWithColumnFallback(table, [toRow(rec)],
+      rows=> isNew ? sb.from(table).insert(rows[0]) : sb.from(table).update(rows[0]).eq('id', rec.id));
+    if(error) throw friendly(error);
+  }
+  async function fdRemove(table, id){
+    const { error } = await sb.from(table).delete().eq('id', id);
+    if(error) throw friendly(error);
+  }
+  async function fdSaveOpening(val){
+    const r = val
+      ? await sb.from('settings').upsert({ key:OB_KEY, value:val, updated_at:Date.now() }, { onConflict:'key' })
+      : await sb.from('settings').delete().eq('key', OB_KEY);
+    if(r.error) throw friendly(r.error);
+  }
+
+  /* ---- Money the CRM already records, shown read-only ------------------
+     Exactly the inclusion rules of financeData() -- paid invoices and paid
+     storefront orders as income, paid payments as expenses, same currency
+     helpers, same dates -- so this screen and the Finance page can never
+     disagree about what was earned. Kept as a mirror rather than shared
+     code so financeData() stays untouched; parity() below checks the two
+     agree on every render and says so in the console if they ever drift. */
+  const CRM_CATS = [
+    { id:'crm:invoice', name:'Invoiced sales',   kind:'income',  groupName:'Revenue', color:'#16805A', virtual:true },
+    { id:'crm:order',   name:'Storefront sales', kind:'income',  groupName:'Revenue', color:'#0F766E', virtual:true },
+    { id:'crm:payment', name:'CRM payments',     kind:'expense', groupName:'Other',   color:'#6E6759', virtual:true },
+  ];
+  const SOURCE_LABEL = { manual:'Manual', invoice:'Invoices', order:'Orders', payment:'Payments' };
+  function crmRows(){
+    const out = [];
+    (state.invoices || []).filter(i=>i.status==='Paid').forEach(i=>{
+      const cur = invoiceCurrency(i), who = invoiceSubjectLabel(i);
+      out.push({ id:'crm-invoice-'+i.id, readonly:true, source:'invoice', sourceId:i.id, kind:'income',
+        amount:Number(i.amount)||0, currency:cur, usd:toUSD(i.amount, cur), occurredOn:tsKey(i.createdAt), createdAt:i.createdAt,
+        description:'Paid invoice', counterparty: who==='—' ? '' : who, categoryId:'crm:invoice', status:'cleared' });
+    });
+    (state.orders || []).filter(o=>o.source && o.paymentStatus==='paid').forEach(o=>{
+      const cur = orderCurrency(o), who = o.contactId ? contactName(o.contactId) : '';
+      out.push({ id:'crm-order-'+o.id, readonly:true, source:'order', sourceId:o.id, kind:'income',
+        amount:Number(o.amount)||0, currency:cur, usd:toUSD(o.amount, cur), occurredOn:tsKey(o.createdAt), createdAt:o.createdAt,
+        description:'Order ' + orderDisplayNumber(o) + (o.product ? ' · ' + o.product : ''), counterparty: who==='—' ? '' : who,
+        categoryId:'crm:order', status:'cleared' });
+    });
+    (state.payments || []).filter(p=>p.status==='Paid').forEach(p=>{
+      const cur = (p.currencies && p.currencies[0]) || 'USD';
+      out.push({ id:'crm-payment-'+p.id, readonly:true, source:'payment', sourceId:p.id, kind:'expense',
+        amount:Number(p.amount)||0, currency:cur, usd:toUSD(p.amount, cur), occurredOn:tsKey(p.createdAt), createdAt:p.createdAt,
+        description:p.purpose || 'Paid payment', counterparty:p.payee || '', categoryId:'crm:payment', status:'cleared' });
+    });
+    return out;
+  }
+  function parity(derived){
+    if(state.financeDemo){ fdLastParity = { skipped:'the Finance page is showing its sample data' }; return fdLastParity; }
+    const f = financeData();
+    const inc = derived.filter(r=>r.kind==='income').reduce((s,r)=>s+r.usd, 0);
+    const exp = derived.filter(r=>r.kind==='expense').reduce((s,r)=>s+r.usd, 0);
+    const ok = Math.abs(inc - f.totalRevenue) < 0.005 && Math.abs(exp - f.totalExpenses) < 0.005;
+    fdLastParity = { ok, derivedIncome:inc, financeRevenue:f.totalRevenue, derivedExpenses:exp, financeExpenses:f.totalExpenses };
+    if(!ok) console.warn('Finance Dashboard disagrees with financeData()', fdLastParity);
+    return fdLastParity;
+  }
+  function manualRow(t){
+    const amt = Number(t.amount) || 0, cur = t.currency || 'USD';
+    return { ...t, amount:amt, currency:cur, usd:toUSD(amt, cur), readonly:false, source:t.source || 'manual' };
+  }
+
+  /* ---- Periods ----------------------------------------------------------
+     A chart period is a run of buckets ending at today. offset=1 is the
+     run of the same length immediately before it, which is what every
+     "vs previous period" figure compares against. */
+  const PERIODS = [
+    { id:'daily',   label:'Daily',   span:'last 30 days' },
+    { id:'weekly',  label:'Weekly',  span:'last 12 weeks' },
+    { id:'monthly', label:'Monthly', span:'last 12 months' },
+    { id:'yearly',  label:'Yearly',  span:'last 5 years' },
+  ];
+  function buckets(period, offset){
+    const now = new Date(); now.setHours(0,0,0,0);
+    const out = [];
+    if(period === 'daily'){
+      const n = 30, end = addDays(now, -n * offset);
+      for(let i = n-1; i >= 0; i--){ const d = addDays(end, -i), k = dkey(d);
+        out.push({ from:k, to:k, label:d.toLocaleDateString('en-US', { month:'short', day:'numeric' }) }); }
+    } else if(period === 'weekly'){
+      const n = 12, mon = addDays(now, -((now.getDay()+6)%7)), end = addDays(mon, -7*n*offset);
+      for(let i = n-1; i >= 0; i--){ const s = addDays(end, -7*i);
+        out.push({ from:dkey(s), to:dkey(addDays(s, 6)), label:s.toLocaleDateString('en-US', { month:'short', day:'numeric' }) }); }
+    } else if(period === 'monthly'){
+      const n = 12;
+      for(let i = n-1; i >= 0; i--){ const s = new Date(now.getFullYear(), now.getMonth()-i-n*offset, 1);
+        out.push({ from:dkey(s), to:dkey(new Date(s.getFullYear(), s.getMonth()+1, 0)),
+          label:s.toLocaleDateString('en-US', { month:'short', year:'2-digit' }) }); }
+    } else {
+      const n = 5;
+      for(let i = n-1; i >= 0; i--){ const y = now.getFullYear()-i-n*offset; out.push({ from:`${y}-01-01`, to:`${y}-12-31`, label:String(y) }); }
+    }
+    return out;
+  }
+  function sumWin(rows, from, to){
+    let inc = 0, exp = 0;
+    for(const r of rows){
+      if(r.occurredOn < from || r.occurredOn > to) continue;
+      if(r.kind === 'income') inc += r.usd; else exp += r.usd;
+    }
+    return { inc, exp, net:inc-exp };
+  }
+  /* goodWhenDown: for expenses a rise is the bad direction, so the colour
+     inverts while the arrow still points the way the number moved. */
+  function deltaOf(cur, prev, goodWhenDown){
+    if(!cur && !prev) return { text:'No activity in either period', tone:'flat' };
+    if(!prev) return { text:'Nothing in the previous period', tone:'flat' };
+    const p = Math.round((cur - prev) / Math.abs(prev) * 100);
+    if(p === 0) return { text:'Flat vs previous period', tone:'flat' };
+    const up = p > 0;
+    return { text:(up ? '+' : '') + p + '% vs previous period', tone:(up !== !!goodWhenDown) ? 'good' : 'bad', up };
+  }
+
+  /* ---- CSV: Excel-safe (BOM for Hebrew names) and formula-injection safe:
+     a text cell that starts with = + - @ is prefixed so a spreadsheet never
+     executes it. Numbers are written as numbers, minus sign intact. */
+  function csvCell(v){
+    if(typeof v === 'number') return String(Math.round(v*100)/100);
+    let s = v == null ? '' : String(v);
+    if(/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  function downloadCsv(name, header, lines){
+    const csv = [header.map(csvCell).join(','), ...lines.map(l=>l.map(csvCell).join(','))].join('\r\n');
+    const url = URL.createObjectURL(new Blob(['﻿' + csv], { type:'text/csv;charset=utf-8;' }));
+    const a = document.createElement('a'); a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  }
+  /* The CRM's own lists, reached through render() like any nav click.
+     Invoices and Payments are only offered to people who can open them. */
+  function canOpenSource(src){ return src === 'order' || ((src === 'invoice' || src === 'payment') && isPrivileged()); }
+  function openSource(src){ state.view = src === 'order' ? 'orders' : src === 'invoice' ? 'invoices' : 'payments'; render(); }
+
+  /* ======================================================================
+     Components
+     ====================================================================== */
+  const TABS = [
+    { id:'overview', label:'Overview', icon:'dashboard' },
+    { id:'transactions', label:'Transactions', icon:'list' },
+    { id:'categories', label:'Categories', icon:'tag' },
+    { id:'reports', label:'Reports', icon:'chart' },
+  ];
+
+  function FinanceDashboard({ tick }){
+    const [tab, setTabState] = useState(ui.tab);
+    const setTab = t=>{ ui.tab = t; setTabState(t); };
+    const [data, setData] = useState(cache || { status:'loading', tx:[], cats:[], opening:null });
+    const dataRef = useRef(data); dataRef.current = data;
+    const [glass, setGlassState] = useState(loadGlass);
+    const setGlass = g=>{ const n = normGlass(g); saveGlass(n); setGlassState(n); };
+    const [modal, setModal] = useState(null);
+    const [showGlass, setShowGlass] = useState(false);
+    const viewRef = useRef(null);
+
+    function reload(){
+      setData(d=>({ ...d, status: d.status === 'ready' ? 'ready' : 'loading', error:null }));
+      return fdLoad()
+        .then(d=>{ const next = { ...d, status:'ready' }; cache = next; setData(next); })
+        .catch(e=>setData(d=>({ ...d, status:'error', error:e.message })));
+    }
+    useEffect(()=>{ reload(); }, []);
+
+    const derived = useMemo(()=>crmRows(), [tick]);
+    useEffect(()=>{ parity(derived); }, [derived]);
+    const manual = useMemo(()=>data.tx.map(manualRow), [data.tx]);
+    const rows = useMemo(()=>[...manual, ...derived].sort((a,b)=>
+      a.occurredOn < b.occurredOn ? 1 : a.occurredOn > b.occurredOn ? -1 : (b.createdAt||0) - (a.createdAt||0)), [manual, derived]);
+    const cats = useMemo(()=>[...data.cats.map(c=>({ ...c, virtual:false })), ...CRM_CATS], [data.cats]);
+    const catById = useMemo(()=>Object.fromEntries(cats.map(c=>[c.id, c])), [cats]);
+
+    /* Optimistic, then confirmed: the screen updates at once, and if the
+       database refuses, the previous state comes back and a toast says why. */
+    async function mutate(local, remote, okMsg){
+      const prev = dataRef.current;
+      setData(d=>local(d));
+      try{ await remote(); cache = { ...dataRef.current }; if(okMsg) toast(okMsg); return true; }
+      catch(e){ setData(prev); cache = prev; toast('⚠️ Not saved — ' + e.message); return false; }
+    }
+    const api = {
+      saveTx:(rec, isNew)=>mutate(d=>({ ...d, tx:isNew ? [rec, ...d.tx] : d.tx.map(t=>t.id===rec.id ? rec : t) }),
+        ()=>fdSave(TX, rec, isNew), isNew ? 'Transaction added' : 'Transaction updated'),
+      deleteTx:id=>mutate(d=>({ ...d, tx:d.tx.filter(t=>t.id!==id) }), ()=>fdRemove(TX, id), 'Transaction deleted'),
+      saveCat:(rec, isNew)=>mutate(d=>({ ...d, cats:isNew ? [...d.cats, rec] : d.cats.map(c=>c.id===rec.id ? rec : c) }),
+        ()=>fdSave(CAT, rec, isNew), isNew ? 'Category added' : 'Category saved'),
+      deleteCat:id=>mutate(d=>({ ...d, cats:d.cats.filter(c=>c.id!==id) }), ()=>fdRemove(CAT, id), 'Category deleted'),
+      saveOpening:val=>mutate(d=>({ ...d, opening:val }), ()=>fdSaveOpening(val), val ? 'Opening balance saved' : 'Opening balance removed'),
+    };
+
+    /* Reveal on tab change. gsap.matchMedia skips it entirely for anyone
+       who asked the OS for reduced motion, and revert() on cleanup leaves
+       no inline styles behind. */
+    useLayoutEffect(()=>{
+      const el = viewRef.current;
+      if(!el || !window.gsap) return;
+      const mm = gsap.matchMedia();
+      mm.add('(prefers-reduced-motion: no-preference)', ()=>{
+        const targets = el.querySelectorAll('.fd-reveal');
+        if(targets.length) gsap.fromTo(targets, { y:14, opacity:0 },
+          { y:0, opacity:1, duration:0.45, stagger:0.05, ease:'power3.out', clearProps:'transform,opacity' });
+      });
+      return ()=>mm.revert();
+    }, [tab, data.status]);
+
+    /* Escape is handled here and stopped here, so it closes this screen's
+       own modal or panel without also reaching the CRM's document-level
+       Escape handler. */
+    function onKey(e){
+      if(e.key !== 'Escape') return;
+      if(modal){ setModal(null); e.stopPropagation(); }
+      else if(showGlass){ setShowGlass(false); e.stopPropagation(); }
+    }
+    function onTabKey(e){
+      const i = TABS.findIndex(t=>t.id===tab);
+      let n = null;
+      if(e.key === 'ArrowRight') n = (i+1) % TABS.length;
+      if(e.key === 'ArrowLeft') n = (i-1+TABS.length) % TABS.length;
+      if(e.key === 'Home') n = 0;
+      if(e.key === 'End') n = TABS.length-1;
+      if(n === null) return;
+      e.preventDefault(); setTab(TABS[n].id);
+      const btn = e.currentTarget.querySelectorAll('[role="tab"]')[n]; if(btn) btn.focus();
+    }
+    function onAppMouseDown(e){
+      if(showGlass && !e.target.closest('.fd-pop') && !e.target.closest('.fd-pop-toggle')) setShowGlass(false);
+    }
+
+    const appStyle = { '--fd-blur':glass.blur + 'px', '--fd-opacity':glass.opacity, '--fd-sat':glass.saturation,
+      '--fd-edge':glass.edge, '--fd-tint':glass.tint };
+    const ready = data.status === 'ready';
+    const props = { rows, cats, catById, data, api, setModal, setTab };
+
+    let body;
+    if(data.status === 'loading') body = h`<${Skeleton} />`;
+    else if(data.status === 'error') body = h`<div className="fd-panel fd-glass fd-reveal fd-state">
+        <div className="fd-state-title">The ledger couldn't be read</div>
+        <div className="fd-state-sub">${data.error}. Nothing is shown rather than an empty ledger that isn't really empty.</div>
+        <button type="button" className="fd-btn" onClick=${reload}><${Icon} n="refresh" /> Try again</button>
+      </div>`;
+    else if(tab === 'overview') body = h`<${OverviewTab} ...${props} />`;
+    else if(tab === 'transactions') body = h`<${TransactionsTab} ...${props} />`;
+    else if(tab === 'categories') body = h`<${CategoriesTab} ...${props} />`;
+    else body = h`<${ReportsTab} ...${props} />`;
+
+    return h`<div className="fd-app" style=${appStyle} onKeyDown=${onKey} onMouseDown=${onAppMouseDown}>
+      <div className="fd-backdrop" aria-hidden="true"><i className="fd-blob b1"></i><i className="fd-blob b2"></i><i className="fd-blob b3"></i></div>
+      <div className="fd-layer">
+        <header className="fd-head">
+          <div className="fd-tabs fd-glass" role="tablist" aria-label="Finance Dashboard sections" onKeyDown=${onTabKey}>
+            ${TABS.map(t=>h`<button key=${t.id} type="button" role="tab" className="fd-tab" aria-label=${t.label} aria-selected=${tab===t.id}
+                tabIndex=${tab===t.id ? 0 : -1} onClick=${()=>setTab(t.id)}><${Icon} n=${t.icon} /><span>${t.label}</span></button>`)}
+          </div>
+          <div className="fd-actions">
+            <button type="button" className="fd-btn fd-pop-toggle" aria-label="Appearance" aria-expanded=${showGlass} aria-haspopup="dialog"
+              onClick=${()=>setShowGlass(v=>!v)}><${Icon} n="sliders" /><span>Appearance</span></button>
+            <button type="button" className="fd-btn primary" aria-label="Add transaction" disabled=${!ready}
+              onClick=${()=>setModal({ type:'tx' })}><${Icon} n="plus" /><span>Add transaction</span></button>
+            ${showGlass ? h`<${GlassPanel} glass=${glass} setGlass=${setGlass} onClose=${()=>setShowGlass(false)} />` : null}
+          </div>
+        </header>
+        <div ref=${viewRef} key=${tab} className="fd-view">${body}</div>
+      </div>
+      ${modal && modal.type === 'tx' ? h`<${TxModal} row=${modal.row} cats=${cats} api=${api} onClose=${()=>setModal(null)} />` : null}
+      ${modal && modal.type === 'cat' ? h`<${CatModal} cat=${modal.cat} cats=${data.cats} usage=${modal.usage||0} api=${api} onClose=${()=>setModal(null)} />` : null}
+      ${modal && modal.type === 'opening' ? h`<${OpeningModal} opening=${data.opening} api=${api} onClose=${()=>setModal(null)} />` : null}
+    </div>`;
+  }
+
+  function Skeleton(){
+    return h`<div className="fd-skel-wrap" aria-busy="true" aria-label="Loading the ledger">
+      <div className="fd-kpis">${[0,1,2,3].map(i=>h`<div key=${i} className="fd-kpi fd-glass"><div className="fd-skel" style=${{ width:'40%' }}></div><div className="fd-skel big" style=${{ width:'70%' }}></div><div className="fd-skel" style=${{ width:'55%' }}></div></div>`)}</div>
+      <div className="fd-panel fd-glass"><div className="fd-skel chart"></div></div>
+    </div>`;
+  }
+
+  function Kpi({ label, value, icon, tone, delta, hint, action }){
+    return h`<div className=${'fd-kpi fd-glass fd-reveal tone-' + tone}>
+      <div className="fd-kpi-top"><span>${label}</span><span className="fd-kpi-ico"><${Icon} n=${icon} s=${15} /></span></div>
+      <div className="fd-kpi-val">${money(value)}</div>
+      ${delta ? h`<div className=${'fd-kpi-delta fd-' + delta.tone}>${delta.up === undefined ? null : h`<${Icon} n=${delta.up ? 'up' : 'down'} s=${13} />`}${delta.text}</div>` : null}
+      ${hint ? h`<div className="fd-kpi-hint">${hint}${action || null}</div>` : null}
+    </div>`;
+  }
+
+  function OverviewTab({ rows, catById, data, setModal, setTab }){
+    const [period, setP] = useState(ui.period);
+    const setPeriod = p=>{ ui.period = p; setP(p); };
+    const cur = buckets(period, 0), prev = buckets(period, 1);
+    const win = sumWin(rows, cur[0].from, cur[cur.length-1].to);
+    const pwin = sumWin(rows, prev[0].from, prev[prev.length-1].to);
+    const series = cur.map(b=>({ ...b, ...sumWin(rows, b.from, b.to) }));
+    const span = PERIODS.find(p=>p.id===period).span;
+
+    /* Balance = opening balance + everything recorded since its date. With
+       no opening balance the honest number is "net recorded", and the card
+       says so rather than calling it a balance. */
+    const ob = data.opening && Number.isFinite(+data.opening.amount) ? data.opening : null;
+    const all = sumWin(rows, ob ? ob.asOf : '0000-00-00', '9999-12-31');
+    const balance = (ob ? toUSD(ob.amount, ob.currency || 'USD') : 0) + all.net;
+    const setOb = h`<button type="button" className="fd-link" onClick=${()=>setModal({ type:'opening' })}>${ob ? 'Change' : 'Set opening balance'}</button>`;
+
+    const expByCat = {};
+    rows.forEach(r=>{ if(r.kind==='expense' && r.occurredOn >= cur[0].from && r.occurredOn <= cur[cur.length-1].to) expByCat[r.categoryId] = (expByCat[r.categoryId]||0) + r.usd; });
+    const topExp = Object.entries(expByCat).sort((a,b)=>b[1]-a[1]).slice(0, 5);
+    const topMax = topExp.length ? topExp[0][1] : 1;
+
+    return h`<div>
+      <div className="fd-kpis">
+        <${Kpi} label=${ob ? 'Balance' : 'Net recorded'} value=${balance} icon="wallet" tone="blue"
+          delta=${ (win.net || pwin.net) ? { text:(win.net >= 0 ? '+' : '−') + money(Math.abs(win.net)) + ' ' + span, tone:win.net >= 0 ? 'good' : 'bad', up:win.net >= 0 } : { text:'No activity ' + span, tone:'flat' } }
+          hint=${ob ? 'Opening ' + nativeMoney(ob.amount, ob.currency) + ' on ' + fmtDay(ob.asOf) + ' · ' : 'No opening balance set · '} action=${setOb} />
+        <${Kpi} label="Income" value=${win.inc} icon="income" tone="green" delta=${deltaOf(win.inc, pwin.inc, false)} />
+        <${Kpi} label="Expenses" value=${win.exp} icon="expense" tone="red" delta=${deltaOf(win.exp, pwin.exp, true)} />
+        <${Kpi} label="Net profit" value=${win.net} icon="scale" tone=${win.net >= 0 ? 'green' : 'red'} delta=${deltaOf(win.net, pwin.net, false)} />
+      </div>
+      <div className="fd-grid">
+        <section className="fd-panel fd-glass fd-reveal">
+          <div className="fd-panel-head">
+            <div><div className="fd-panel-title">Cash flow</div><div className="fd-panel-sub">Income vs expenses, ${span} · USD</div></div>
+            <div className="fd-seg" role="group" aria-label="Chart period">
+              ${PERIODS.map(p=>h`<button key=${p.id} type="button" aria-pressed=${period===p.id} onClick=${()=>setPeriod(p.id)}>${p.label}</button>`)}
+            </div>
+          </div>
+          <${CashFlowChart} series=${series} />
+        </section>
+        <section className="fd-panel fd-glass fd-reveal">
+          <div className="fd-panel-head">
+            <div><div className="fd-panel-title">Recent transactions</div><div className="fd-panel-sub">Manual entries and paid CRM records</div></div>
+            <button type="button" className="fd-link" onClick=${()=>setTab('transactions')}>View all</button>
+          </div>
+          ${rows.length ? h`<div className="fd-recent">${rows.slice(0, 7).map(r=>h`<${RecentRow} key=${r.id} r=${r} cat=${catById[r.categoryId]}
+              onOpen=${r.readonly ? null : ()=>setModal({ type:'tx', row:r })} />`)}</div>`
+            : h`<div className="fd-empty"><${Icon} n="list" s=${22} /><div className="fd-empty-title">No transactions recorded yet</div>
+                <div className="fd-empty-sub">Add an income or expense, or record a paid order in the CRM.</div></div>`}
+        </section>
+      </div>
+      <section className="fd-panel fd-glass fd-reveal fd-mt">
+        <div className="fd-panel-head"><div><div className="fd-panel-title">Where the money goes</div><div className="fd-panel-sub">Top expense categories, ${span}</div></div></div>
+        ${topExp.length ? topExp.map(([id, v])=>{ const c = catById[id] || { name:'Uncategorised', color:'#6E6759' };
+            return h`<div key=${id} className="fd-bar-row"><span className="fd-bar-label"><i className="fd-swatch" style=${{ background:c.color }}></i>${c.name}</span>
+              <strong>${money(v)}</strong><span className="fd-bar-track"><i className="fd-bar-fill" style=${{ width:(v/topMax*100)+'%', background:c.color }}></i></span></div>`; })
+          : h`<div className="fd-empty-sub">No expenses recorded ${span}.</div>`}
+      </section>
+    </div>`;
+  }
+
+  function RecentRow({ r, cat, onOpen }){
+    const inner = h`<span className=${'fd-rr-ico ' + r.kind}><${Icon} n=${r.kind==='income' ? 'income' : 'expense'} s=${15} /></span>
+      <span className="fd-rr-main"><strong>${r.description}</strong><span>${(cat ? cat.name : 'Uncategorised')} · ${fmtDay(r.occurredOn)}</span></span>
+      <span className=${'fd-amt ' + r.kind}>${r.kind==='income' ? '+' : '−'}${money(r.usd, true)}</span>`;
+    return onOpen ? h`<button type="button" className="fd-rr" onClick=${onOpen}>${inner}</button>` : h`<div className="fd-rr">${inner}</div>`;
+  }
+
+  function CashFlowChart({ series }){
+    const [hover, setHover] = useState(null);
+    const gid = 'fdg' + React.useId().replace(/[^a-zA-Z0-9]/g, '');
+    const W = 600, H = 200;
+    const hasData = series.some(s=>s.inc || s.exp);
+    if(!hasData) return h`<div className="fd-empty fd-chart-empty"><${Icon} n="chart" s=${22} /><div className="fd-empty-title">No cash flow in this period</div>
+      <div className="fd-empty-sub">Income and expenses appear here as they're recorded.</div></div>`;
+    const top = niceMax(Math.max(...series.map(s=>Math.max(s.inc, s.exp))));
+    const x = i=> series.length === 1 ? W/2 : i * W / (series.length - 1);
+    const y = v=> H - (v / top) * (H - 12);
+    const line = k=> series.map((s, i)=>x(i) + ',' + y(s[k])).join(' ');
+    const area = 'M' + x(0) + ',' + H + ' ' + series.map((s, i)=>'L' + x(i) + ',' + y(s.inc)).join(' ') + ' L' + x(series.length-1) + ',' + H + ' Z';
+    const every = Math.max(1, Math.ceil(series.length / 6));
+    const onMove = e=>{
+      const r = e.currentTarget.getBoundingClientRect();
+      setHover(Math.max(0, Math.min(series.length-1, Math.round((e.clientX - r.left) / r.width * (series.length-1)))));
+    };
+    const hs = hover === null ? null : series[hover];
+    return h`<div className="fd-chart">
+      <div className="fd-legend"><span><i className="fd-dot in"></i>Income</span><span><i className="fd-dot out"></i>Expenses</span></div>
+      <div className="fd-chart-body">
+        <div className="fd-yaxis"><span>${usdCompact.format(top)}</span><span>${usdCompact.format(top/2)}</span><span>$0</span></div>
+        <div className="fd-plot" onMouseMove=${onMove} onMouseLeave=${()=>setHover(null)}>
+          <svg viewBox=${'0 0 ' + W + ' ' + H} preserveAspectRatio="none" role="img"
+            aria-label=${'Cash flow: income ' + money(series.reduce((s,b)=>s+b.inc,0)) + ', expenses ' + money(series.reduce((s,b)=>s+b.exp,0))}>
+            <defs><linearGradient id=${gid} x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0" stopColor="var(--sage)" stopOpacity="0.28" /><stop offset="1" stopColor="var(--sage)" stopOpacity="0" />
+            </linearGradient></defs>
+            ${[0.5, 1].map(f=>h`<line key=${f} x1="0" x2=${W} y1=${y(top*f)} y2=${y(top*f)} className="fd-grid-line" />`)}
+            <path d=${area} fill=${'url(#' + gid + ')'} />
+            <polyline points=${line('inc')} className="fd-line in" />
+            <polyline points=${line('exp')} className="fd-line out" />
+            ${hs ? h`<line x1=${x(hover)} x2=${x(hover)} y1="0" y2=${H} className="fd-hover-line" />` : null}
+          </svg>
+          ${hs ? h`<div className="fd-tip fd-glass" style=${{ left:(x(hover)/W*100) + '%' }}>
+              <div className="fd-tip-title">${hs.from === hs.to ? fmtDay(hs.from) : fmtDay(hs.from) + ' – ' + fmtDay(hs.to)}</div>
+              <div><i className="fd-dot in"></i>Income <strong>${money(hs.inc, true)}</strong></div>
+              <div><i className="fd-dot out"></i>Expenses <strong>${money(hs.exp, true)}</strong></div>
+              <div className="fd-tip-net">Net <strong className=${hs.net >= 0 ? 'fd-good' : 'fd-bad'}>${money(hs.net, true)}</strong></div>
+            </div>` : null}
+        </div>
+      </div>
+      <div className="fd-xaxis">${series.map((s, i)=>{
+        /* Stepped labels plus the last one -- but a stepped label that would
+           sit right beside the last is dropped, so the two never collide. */
+        const last = series.length-1;
+        const show = i === last || (i % every === 0 && last - i >= every);
+        return show ? h`<span key=${i} style=${{ left:(x(i)/W*100) + '%' }}>${s.label}</span>` : null; })}</div>
+    </div>`;
+  }
+
+  function TransactionsTab({ rows, cats, catById, api, setModal }){
+    const [f, setF] = useState(ui.tx);
+    const set = patch=>setF(prev=>{ const next = { ...prev, ...patch, page:'page' in patch ? patch.page : 0 }; ui.tx = next; return next; });
+    const [confirmDel, setConfirmDel] = useState(null);
+    const q = f.q.trim().toLowerCase();
+    const filtered = rows.filter(r=>{
+      if(f.kind !== 'all' && r.kind !== f.kind) return false;
+      if(f.cat !== 'all' && r.categoryId !== f.cat) return false;
+      if(f.status !== 'all' && r.status !== f.status) return false;
+      if(f.source === 'manual' && r.readonly) return false;
+      if(f.source === 'crm' && !r.readonly) return false;
+      if(f.from && r.occurredOn < f.from) return false;
+      if(f.to && r.occurredOn > f.to) return false;
+      if(q){ const c = catById[r.categoryId];
+        if(!(r.description + ' ' + (r.counterparty||'') + ' ' + (c ? c.name : '') + ' ' + (r.notes||'')).toLowerCase().includes(q)) return false; }
+      return true;
+    });
+    const dir = f.dir === 'asc' ? 1 : -1;
+    const sorted = filtered.slice().sort((a,b)=> f.sort === 'amount'
+      ? (a.usd - b.usd) * dir
+      : (a.occurredOn < b.occurredOn ? -1 : a.occurredOn > b.occurredOn ? 1 : (a.createdAt||0) - (b.createdAt||0)) * dir);
+    const pages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+    const page = Math.min(f.page, pages-1);
+    const shown = sorted.slice(page*PAGE_SIZE, page*PAGE_SIZE + PAGE_SIZE);
+    const tot = sumWin(filtered, '0000-00-00', '9999-12-31');
+    const anyFilter = q || f.kind!=='all' || f.cat!=='all' || f.status!=='all' || f.source!=='all' || f.from || f.to;
+    const sortBy = k=> set(f.sort === k ? { dir:f.dir === 'asc' ? 'desc' : 'asc' } : { sort:k, dir:'desc' });
+
+    function exportCsv(){
+      downloadCsv('swg-finance-transactions-' + todayKey() + '.csv',
+        ['Date','Type','Description','Counterparty','Category','Group','Status','Source','Amount','Currency','Amount (USD)','Notes'],
+        sorted.map(r=>{ const c = catById[r.categoryId];
+          return [r.occurredOn, r.kind, r.description, r.counterparty||'', c ? c.name : '', c ? c.groupName : '', r.status,
+            SOURCE_LABEL[r.source] || r.source, r.kind==='expense' ? -r.amount : r.amount, r.currency,
+            r.kind==='expense' ? -r.usd : r.usd, r.notes||'']; }));
+      toast('Exported ' + sorted.length + ' transaction' + (sorted.length===1 ? '' : 's'));
+    }
+    const actions = r=> r.readonly
+      ? (canOpenSource(r.source) ? h`<button type="button" className="fd-icon-btn" title=${'Open ' + SOURCE_LABEL[r.source]} aria-label=${'Open in ' + SOURCE_LABEL[r.source]} onClick=${()=>openSource(r.source)}><${Icon} n="link" s=${15} /></button>` : null)
+      : h`<span className="fd-acts"><button type="button" className="fd-icon-btn" aria-label="Edit transaction" onClick=${()=>setModal({ type:'tx', row:r })}><${Icon} n="pencil" s=${15} /></button><button type="button" className="fd-icon-btn danger" aria-label="Delete transaction" onClick=${()=>setConfirmDel(r)}><${Icon} n="trash" s=${15} /></button></span>`;
+    const chip = r=>{ const c = catById[r.categoryId] || { name:'Uncategorised', color:'#6E6759' };
+      return h`<span className="fd-chip" style=${{ '--c':c.color }}>${c.name}</span>`; };
+    const amount = r=> h`<span className=${'fd-amt ' + r.kind}>${r.kind==='income' ? '+' : '−'}${nativeMoney(r.amount, r.currency)}</span>
+      ${r.currency !== 'USD' ? h`<span className="fd-sub">${money(r.usd, true)}</span>` : null}`;
+
+    return h`<section className="fd-panel fd-glass fd-reveal">
+      <div className="fd-toolbar">
+        <label className="fd-search"><${Icon} n="search" s=${15} />
+          <input type="search" placeholder="Search description, counterparty, category" aria-label="Search transactions" value=${f.q} onChange=${e=>set({ q:e.target.value })} /></label>
+        <div className="fd-seg" role="group" aria-label="Type">
+          ${[['all','All'],['income','Income'],['expense','Expenses']].map(([k,l])=>h`<button key=${k} type="button" aria-pressed=${f.kind===k} onClick=${()=>set({ kind:k })}>${l}</button>`)}
+        </div>
+        <select className="fd-select" aria-label="Category" value=${f.cat} onChange=${e=>set({ cat:e.target.value })}>
+          <option value="all">All categories</option>
+          ${cats.map(c=>h`<option key=${c.id} value=${c.id}>${c.name}${c.archived ? ' (archived)' : ''}</option>`)}
+        </select>
+        <select className="fd-select" aria-label="Status" value=${f.status} onChange=${e=>set({ status:e.target.value })}>
+          <option value="all">Any status</option><option value="cleared">Cleared</option><option value="pending">Pending</option>
+        </select>
+        <select className="fd-select" aria-label="Source" value=${f.source} onChange=${e=>set({ source:e.target.value })}>
+          <option value="all">All sources</option><option value="manual">Manual entries</option><option value="crm">From the CRM</option>
+        </select>
+        <input className="fd-input" type="date" aria-label="From date" value=${f.from} onChange=${e=>set({ from:e.target.value })} />
+        <input className="fd-input" type="date" aria-label="To date" value=${f.to} onChange=${e=>set({ to:e.target.value })} />
+        ${anyFilter ? h`<button type="button" className="fd-link" onClick=${()=>set({ q:'', kind:'all', cat:'all', status:'all', source:'all', from:'', to:'' })}>Clear filters</button>` : null}
+        <span className="fd-grow"></span>
+        <button type="button" className="fd-btn" onClick=${exportCsv} disabled=${!sorted.length}><${Icon} n="download" s=${15} />Export CSV</button>
+      </div>
+      <div className="fd-summary">
+        <span>${filtered.length} transaction${filtered.length===1 ? '' : 's'}</span>
+        <span>Income <strong className="fd-good">${money(tot.inc, true)}</strong></span>
+        <span>Expenses <strong className="fd-bad">${money(tot.exp, true)}</strong></span>
+        <span>Net <strong className=${tot.net >= 0 ? 'fd-good' : 'fd-bad'}>${money(tot.net, true)}</strong></span>
+      </div>
+      ${!sorted.length ? h`<div className="fd-empty"><${Icon} n=${anyFilter ? 'search' : 'list'} s=${22} />
+          <div className="fd-empty-title">${anyFilter ? 'No transactions match these filters' : 'No transactions recorded yet'}</div>
+          <div className="fd-empty-sub">${anyFilter ? 'Try a wider date range or another category.' : 'Use Add transaction to record income or an expense.'}</div></div>`
+      : h`<div>
+        <div className="fd-table-wrap"><table className="fd-table">
+          <thead><tr>
+            <th><button type="button" className="fd-th" onClick=${()=>sortBy('date')}>Date <${Icon} n="sort" s=${12} /></button></th>
+            <th>Description</th><th>Category</th><th>Source</th><th>Status</th>
+            <th className="num"><button type="button" className="fd-th" onClick=${()=>sortBy('amount')}>Amount <${Icon} n="sort" s=${12} /></button></th><th></th>
+          </tr></thead>
+          <tbody>${shown.map(r=>h`<tr key=${r.id}>
+            <td className="fd-nowrap">${fmtDay(r.occurredOn)}</td>
+            <td><div className="fd-desc">${r.description}</div>${r.counterparty ? h`<div className="fd-sub">${r.counterparty}</div>` : null}</td>
+            <td>${chip(r)}</td>
+            <td><span className=${'fd-src ' + (r.readonly ? 'crm' : 'manual')}>${SOURCE_LABEL[r.source] || r.source}</span></td>
+            <td><span className=${'fd-status ' + r.status}>${r.status === 'pending' ? 'Pending' : 'Cleared'}</span></td>
+            <td className="num">${amount(r)}</td>
+            <td className="fd-row-actions">${actions(r)}</td>
+          </tr>`)}</tbody>
+        </table></div>
+        <div className="fd-cards">${shown.map(r=>h`<div key=${r.id} className="fd-card">
+            <div className="fd-card-top"><div><div className="fd-desc">${r.description}</div><div className="fd-sub">${fmtDay(r.occurredOn)}${r.counterparty ? ' · ' + r.counterparty : ''}</div></div>
+              <div className="num">${amount(r)}</div></div>
+            <div className="fd-card-meta">${chip(r)}<span className=${'fd-src ' + (r.readonly ? 'crm' : 'manual')}>${SOURCE_LABEL[r.source] || r.source}</span>
+              <span className=${'fd-status ' + r.status}>${r.status === 'pending' ? 'Pending' : 'Cleared'}</span><span className="fd-grow"></span>${actions(r)}</div>
+          </div>`)}</div>
+        ${pages > 1 ? h`<div className="fd-pager">
+            <button type="button" className="fd-icon-btn" aria-label="Previous page" disabled=${page===0} onClick=${()=>set({ page:page-1 })}><${Icon} n="left" s=${15} /></button>
+            <span>Page ${page+1} of ${pages}</span>
+            <button type="button" className="fd-icon-btn" aria-label="Next page" disabled=${page>=pages-1} onClick=${()=>set({ page:page+1 })}><${Icon} n="right" s=${15} /></button>
+          </div>` : null}
+      </div>`}
+      ${confirmDel ? h`<${Confirm} title="Delete this transaction?"
+          text=${'“' + confirmDel.description + '” — ' + nativeMoney(confirmDel.amount, confirmDel.currency) + ' on ' + fmtDay(confirmDel.occurredOn) + '. This can’t be undone.'}
+          confirmLabel="Delete" onCancel=${()=>setConfirmDel(null)}
+          onConfirm=${async ()=>{ const id = confirmDel.id; setConfirmDel(null); await api.deleteTx(id); }} />` : null}
+    </section>`;
+  }
+
+  function CategoriesTab({ rows, cats, data, api, setModal }){
+    const [confirmDel, setConfirmDel] = useState(null);
+    const usage = {}, totals = {};
+    rows.forEach(r=>{ usage[r.categoryId] = (usage[r.categoryId]||0) + 1; totals[r.categoryId] = (totals[r.categoryId]||0) + r.usd; });
+    const manualUse = {}; data.tx.forEach(t=>{ manualUse[t.categoryId] = (manualUse[t.categoryId]||0) + 1; });
+    const column = kind=>{
+      const list = cats.filter(c=>c.kind===kind);
+      const groups = [...new Set(list.map(c=>c.groupName))];
+      return h`<section className="fd-panel fd-glass fd-reveal">
+        <div className="fd-panel-head"><div><div className="fd-panel-title">${kind==='income' ? 'Income categories' : 'Expense categories'}</div>
+          <div className="fd-panel-sub">${list.filter(c=>!c.archived).length} active</div></div>
+          <button type="button" className="fd-btn" onClick=${()=>setModal({ type:'cat', cat:{ kind } })}><${Icon} n="plus" s=${15} />New</button></div>
+        ${groups.map(g=>h`<div key=${g} className="fd-cat-group"><div className="fd-cat-group-name">${g}</div>
+          ${list.filter(c=>c.groupName===g).map(c=>h`<div key=${c.id} className=${'fd-cat' + (c.archived ? ' archived' : '')}>
+            <i className="fd-swatch" style=${{ background:c.color || '#6E6759' }}></i>
+            <div className="fd-cat-main"><strong>${c.name}</strong>
+              <span>${usage[c.id]||0} transaction${(usage[c.id]||0)===1 ? '' : 's'} · ${money(totals[c.id]||0)}${c.virtual ? ' · from the CRM, read-only' : ''}${c.archived ? ' · archived' : ''}</span></div>
+            ${c.virtual ? h`<span className="fd-src crm">CRM</span>` : h`<div className="fd-row-actions">
+              <button type="button" className="fd-icon-btn" aria-label=${'Edit ' + c.name} onClick=${()=>setModal({ type:'cat', cat:c, usage:manualUse[c.id]||0 })}><${Icon} n="pencil" s=${15} /></button>
+              <button type="button" className="fd-icon-btn" aria-label=${(c.archived ? 'Restore ' : 'Archive ') + c.name} title=${c.archived ? 'Restore' : 'Archive'}
+                onClick=${()=>api.saveCat({ ...stripCat(c), archived:!c.archived }, false)}><${Icon} n=${c.archived ? 'reset' : 'archive'} s=${15} /></button>
+              ${!manualUse[c.id] ? h`<button type="button" className="fd-icon-btn danger" aria-label=${'Delete ' + c.name} onClick=${()=>setConfirmDel(c)}><${Icon} n="trash" s=${15} /></button>` : null}
+            </div>`}
+          </div>`)}</div>`)}
+      </section>`;
+    };
+    return h`<div>
+      <div className="fd-grid even">${column('income')}${column('expense')}</div>
+      <div className="fd-footnote fd-reveal"><${Icon} n="info" s=${14} />A category with transactions filed under it can be archived but not deleted, so no report ever silently loses money to “uncategorised”.</div>
+      ${confirmDel ? h`<${Confirm} title=${'Delete “' + confirmDel.name + '”?'} text="Nothing is filed under it. This can’t be undone." confirmLabel="Delete"
+          onCancel=${()=>setConfirmDel(null)} onConfirm=${async ()=>{ const id = confirmDel.id; setConfirmDel(null); await api.deleteCat(id); }} />` : null}
+    </div>`;
+  }
+  /* Only the stored columns -- never the UI's computed extras. */
+  function stripCat(c){ return { id:c.id, createdAt:c.createdAt, owner:c.owner, name:c.name, kind:c.kind, groupName:c.groupName, color:c.color, archived:!!c.archived }; }
+
+  function ReportsTab({ rows, catById }){
+    const [mode, setM] = useState(ui.reportMode);
+    const setMode = m=>{ ui.reportMode = m; setM(m); };
+    const bs = buckets(mode === 'yearly' ? 'yearly' : 'monthly', 0);
+    const table = bs.map(b=>{ const s = sumWin(rows, b.from, b.to); return { ...b, ...s, margin:s.inc ? s.net / s.inc : null }; });
+    const tot = sumWin(rows, bs[0].from, bs[bs.length-1].to);
+    const netMax = Math.max(1, ...table.map(t=>Math.abs(t.net)));
+    const from = bs[0].from, to = bs[bs.length-1].to;
+    const byCat = kind=>{ const m = {}; rows.forEach(r=>{ if(r.kind===kind && r.occurredOn >= from && r.occurredOn <= to) m[r.categoryId] = (m[r.categoryId]||0) + r.usd; });
+      return Object.entries(m).sort((a,b)=>b[1]-a[1]); };
+    const inc = byCat('income'), exp = byCat('expense');
+
+    const now = new Date(); now.setHours(0,0,0,0);
+    const mWin = (y, mo, dayCap)=>{ const s = new Date(y, mo, 1), e = new Date(y, mo+1, 0);
+      if(dayCap) e.setDate(Math.min(dayCap, e.getDate())); return sumWin(rows, dkey(s), dkey(e)); };
+    const yWin = (y, capMonth, capDay)=> sumWin(rows, `${y}-01-01`, dkey(new Date(y, capMonth, Math.min(capDay, new Date(y, capMonth+1, 0).getDate()))));
+    const thisM = mWin(now.getFullYear(), now.getMonth()), lastM = mWin(now.getFullYear(), now.getMonth()-1);
+    const lyM = mWin(now.getFullYear()-1, now.getMonth());
+    const ytd = yWin(now.getFullYear(), now.getMonth(), now.getDate()), lytd = yWin(now.getFullYear()-1, now.getMonth(), now.getDate());
+    const monthName = now.toLocaleDateString('en-US', { month:'long' });
+
+    function exportCsv(){
+      downloadCsv('swg-finance-' + mode + '-summary-' + todayKey() + '.csv', ['Period','From','To','Income (USD)','Expenses (USD)','Net (USD)','Margin %'],
+        table.map(t=>[t.label, t.from, t.to, t.inc, t.exp, t.net, t.margin === null ? '' : Math.round(t.margin*1000)/10]));
+      toast('Exported the ' + mode + ' summary');
+    }
+    const breakdown = (title, list, total)=> h`<section className="fd-panel fd-glass fd-reveal">
+      <div className="fd-panel-head"><div><div className="fd-panel-title">${title}</div><div className="fd-panel-sub">${money(total)} across ${list.length} categor${list.length===1 ? 'y' : 'ies'}</div></div></div>
+      ${list.length ? list.map(([id, v])=>{ const c = catById[id] || { name:'Uncategorised', color:'#6E6759' };
+          return h`<div key=${id} className="fd-bar-row"><span className="fd-bar-label"><i className="fd-swatch" style=${{ background:c.color }}></i>${c.name}</span>
+            <strong>${money(v)} <span className="fd-sub">${total ? Math.round(v/total*100) : 0}%</span></strong>
+            <span className="fd-bar-track"><i className="fd-bar-fill" style=${{ width:(total ? v/total*100 : 0) + '%', background:c.color }}></i></span></div>`; })
+        : h`<div className="fd-empty-sub">Nothing recorded in this range.</div>`}
+    </section>`;
+
+    return h`<div>
+      <div className="fd-cmp-grid">
+        <${Compare} title=${monthName + ' vs last month'} a=${thisM} b=${lastM} />
+        <${Compare} title=${monthName + ' vs ' + monthName + ' last year'} a=${thisM} b=${lyM} />
+        <${Compare} title="Year to date vs same span last year" a=${ytd} b=${lytd} />
+      </div>
+      <section className="fd-panel fd-glass fd-reveal fd-mt">
+        <div className="fd-panel-head">
+          <div><div className="fd-panel-title">${mode === 'yearly' ? 'Yearly' : 'Monthly'} summary</div><div className="fd-panel-sub">Profitability by period · USD</div></div>
+          <div className="fd-head-tools">
+            <div className="fd-seg" role="group" aria-label="Summary period">
+              <button type="button" aria-pressed=${mode==='monthly'} onClick=${()=>setMode('monthly')}>Monthly</button>
+              <button type="button" aria-pressed=${mode==='yearly'} onClick=${()=>setMode('yearly')}>Yearly</button>
+            </div>
+            <button type="button" className="fd-btn" onClick=${exportCsv}><${Icon} n="download" s=${15} />Export CSV</button>
+          </div>
+        </div>
+        <div className="fd-profit" role="img" aria-label="Net profit per period">
+          ${table.map(t=>h`<div key=${t.from} className="fd-profit-col" title=${t.label + ': ' + money(t.net, true)}>
+            <div className="fd-profit-up">${t.net > 0 ? h`<i style=${{ height:(t.net/netMax*100) + '%' }}></i>` : null}</div>
+            <div className="fd-profit-down">${t.net < 0 ? h`<i style=${{ height:(-t.net/netMax*100) + '%' }}></i>` : null}</div>
+            <span>${t.label}</span></div>`)}
+        </div>
+        <div className="fd-table-wrap"><table className="fd-table compact">
+          <thead><tr><th>Period</th><th className="num">Income</th><th className="num">Expenses</th><th className="num">Net</th><th className="num">Margin</th></tr></thead>
+          <tbody>${table.slice().reverse().map(t=>h`<tr key=${t.from}>
+            <td>${t.label}</td><td className="num">${money(t.inc)}</td><td className="num">${money(t.exp)}</td>
+            <td className=${'num ' + (t.net > 0 ? 'fd-good' : t.net < 0 ? 'fd-bad' : '')}>${money(t.net)}</td>
+            <td className="num">${t.margin === null ? '—' : Math.round(t.margin*100) + '%'}</td></tr>`)}
+            <tr className="fd-total"><td>Total</td><td className="num">${money(tot.inc)}</td><td className="num">${money(tot.exp)}</td>
+              <td className=${'num ' + (tot.net >= 0 ? 'fd-good' : 'fd-bad')}>${money(tot.net)}</td>
+              <td className="num">${tot.inc ? Math.round(tot.net/tot.inc*100) + '%' : '—'}</td></tr>
+          </tbody></table></div>
+      </section>
+      <div className="fd-grid even fd-mt">${breakdown('Income by category', inc, tot.inc)}${breakdown('Expenses by category', exp, tot.exp)}</div>
+    </div>`;
+  }
+
+  function Compare({ title, a, b }){
+    const line = (label, cur, prev, goodWhenDown)=>{ const d = deltaOf(cur, prev, goodWhenDown);
+      return h`<div className="fd-cmp-line"><span>${label}</span><strong>${money(cur)}</strong><span className=${'fd-' + d.tone}>${d.text.replace(' vs previous period','').replace('Nothing in the previous period','— no prior').replace('No activity in either period','—')}</span></div>`; };
+    return h`<section className="fd-panel fd-glass fd-reveal fd-cmp">
+      <div className="fd-panel-title">${title}</div>
+      ${line('Income', a.inc, b.inc, false)}${line('Expenses', a.exp, b.exp, true)}${line('Net', a.net, b.net, false)}
+    </section>`;
+  }
+
+  /* ---- Modals: rendered inside the island, outside the container-query
+     layer, so position:fixed is relative to the viewport. ---------------- */
+  function Modal({ title, onClose, children }){
+    const ref = useRef(null);
+    useEffect(()=>{ const el = ref.current && ref.current.querySelector('input:not([type=hidden]),select,textarea'); if(el) el.focus(); }, []);
+    return h`<div className="fd-modal-bg" onMouseDown=${e=>{ if(e.target === e.currentTarget) onClose(); }}>
+      <div className="fd-modal fd-glass" role="dialog" aria-modal="true" aria-label=${title} ref=${ref}>
+        <div className="fd-modal-head"><div className="fd-modal-title">${title}</div>
+          <button type="button" className="fd-icon-btn" aria-label="Close" onClick=${onClose}><${Icon} n="x" /></button></div>
+        ${children}
+      </div></div>`;
+  }
+  function Confirm({ title, text, confirmLabel, onConfirm, onCancel }){
+    return h`<${Modal} title=${title} onClose=${onCancel}>
+      <p className="fd-confirm-text">${text}</p>
+      <div className="fd-modal-actions"><button type="button" className="fd-btn" onClick=${onCancel}>Cancel</button>
+        <button type="button" className="fd-btn danger" onClick=${onConfirm}>${confirmLabel}</button></div>
+    </${Modal}>`;
+  }
+
+  function TxModal({ row, cats, api, onClose }){
+    const isNew = !row;
+    const firstCat = kind=> (cats.find(c=>c.kind===kind && !c.archived && !c.virtual) || {}).id || '';
+    const [f, setF] = useState(()=> row
+      ? { kind:row.kind, occurredOn:row.occurredOn, amount:String(row.amount), currency:row.currency, categoryId:row.categoryId || '',
+          description:row.description || '', counterparty:row.counterparty || '', status:row.status || 'cleared', notes:row.notes || '' }
+      : { kind:'expense', occurredOn:todayKey(), amount:'', currency:'USD', categoryId:firstCat('expense'),
+          description:'', counterparty:'', status:'cleared', notes:'' });
+    const [err, setErr] = useState('');
+    const [busy, setBusy] = useState(false);
+    const [confirmDel, setConfirmDel] = useState(false);
+    const set = patch=>setF(p=>({ ...p, ...patch }));
+    const options = cats.filter(c=>c.kind===f.kind && !c.virtual && (!c.archived || c.id===f.categoryId));
+    function setKind(k){ set({ kind:k, categoryId: cats.some(c=>c.id===f.categoryId && c.kind===k && !c.virtual) ? f.categoryId : firstCat(k) }); }
+    async function save(){
+      const amt = Math.round(Number(f.amount) * 100) / 100;
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(f.occurredOn)) return setErr('Choose the date the money moved.');
+      if(!(amt > 0)) return setErr('Enter an amount above zero — choose Income or Expense for the direction.');
+      if(!f.description.trim()) return setErr('Describe what this was for.');
+      if(!f.categoryId) return setErr('Choose a category.');
+      setErr(''); setBusy(true);
+      const rec = { id:row ? row.id : uid(), createdAt:row ? row.createdAt : Date.now(), owner:row ? row.owner : state.viewingAs,
+        occurredOn:f.occurredOn, kind:f.kind, amount:amt, currency:f.currency, categoryId:f.categoryId,
+        description:f.description.trim(), counterparty:f.counterparty.trim() || null, status:f.status,
+        notes:f.notes.trim() || null, source:'manual', sourceId:null };
+      const ok = await api.saveTx(rec, isNew);
+      setBusy(false);
+      if(ok) onClose();
+    }
+    if(confirmDel) return h`<${Confirm} title="Delete this transaction?" text="It will be removed from every total and report. This can’t be undone."
+      confirmLabel="Delete" onCancel=${()=>setConfirmDel(false)} onConfirm=${async ()=>{ const ok = await api.deleteTx(row.id); if(ok) onClose(); else setConfirmDel(false); }} />`;
+    return h`<${Modal} title=${isNew ? 'Add transaction' : 'Edit transaction'} onClose=${onClose}>
+      <div className="fd-seg wide" role="group" aria-label="Type">
+        <button type="button" aria-pressed=${f.kind==='income'} onClick=${()=>setKind('income')}><${Icon} n="income" s=${14} />Income</button>
+        <button type="button" aria-pressed=${f.kind==='expense'} onClick=${()=>setKind('expense')}><${Icon} n="expense" s=${14} />Expense</button>
+      </div>
+      <div className="fd-row2">
+        <label className="fd-field"><span>Date</span><input className="fd-input" type="date" value=${f.occurredOn} onChange=${e=>set({ occurredOn:e.target.value })} /></label>
+        <label className="fd-field"><span>Status</span><select className="fd-select" value=${f.status} onChange=${e=>set({ status:e.target.value })}>
+          <option value="cleared">Cleared</option><option value="pending">Pending</option></select></label>
+      </div>
+      <div className="fd-row2">
+        <label className="fd-field"><span>Amount</span><input className="fd-input" type="number" min="0.01" step="0.01" inputMode="decimal" placeholder="0.00" value=${f.amount} onChange=${e=>set({ amount:e.target.value })} /></label>
+        <label className="fd-field"><span>Currency</span><select className="fd-select" value=${f.currency} onChange=${e=>set({ currency:e.target.value })}>
+          ${CURRENCIES.map(c=>h`<option key=${c} value=${c}>${c}</option>`)}</select></label>
+      </div>
+      <label className="fd-field"><span>Category</span><select className="fd-select" value=${f.categoryId} onChange=${e=>set({ categoryId:e.target.value })}>
+        ${options.length ? null : h`<option value="">No ${f.kind} categories — add one under Categories</option>`}
+        ${options.map(c=>h`<option key=${c.id} value=${c.id}>${c.groupName} · ${c.name}${c.archived ? ' (archived)' : ''}</option>`)}</select></label>
+      <label className="fd-field"><span>Description</span><input className="fd-input" maxLength="200" placeholder=${f.kind==='income' ? 'e.g. Workshop fee' : 'e.g. Instagram ads — October'} value=${f.description} onChange=${e=>set({ description:e.target.value })} /></label>
+      <label className="fd-field"><span>Counterparty <em>optional</em></span><input className="fd-input" maxLength="160" placeholder="Who paid, or who was paid" value=${f.counterparty} onChange=${e=>set({ counterparty:e.target.value })} /></label>
+      <label className="fd-field"><span>Notes <em>optional</em></span><textarea className="fd-input" rows="2" value=${f.notes} onChange=${e=>set({ notes:e.target.value })}></textarea></label>
+      ${isNew && f.kind==='income' ? h`<div className="fd-note"><${Icon} n="info" s=${14} />Paid invoices and paid storefront orders already appear here automatically — don’t enter them again, or they’ll be counted twice.</div>` : null}
+      ${err ? h`<div className="fd-err" role="alert">${err}</div>` : null}
+      <div className="fd-modal-actions">
+        ${isNew ? null : h`<button type="button" className="fd-btn danger ghost" onClick=${()=>setConfirmDel(true)}><${Icon} n="trash" s=${15} />Delete</button>`}
+        <span className="fd-grow"></span>
+        <button type="button" className="fd-btn" onClick=${onClose}>Cancel</button>
+        <button type="button" className="fd-btn primary" disabled=${busy} onClick=${save}>${busy ? 'Saving…' : isNew ? 'Add transaction' : 'Save changes'}</button>
+      </div>
+    </${Modal}>`;
+  }
+
+  function CatModal({ cat, cats, usage, api, onClose }){
+    const isNew = !cat.id;
+    const groups = [...new Set(cats.filter(c=>c.kind===(cat.kind||'expense')).map(c=>c.groupName))];
+    const [f, setF] = useState({ name:cat.name || '', kind:cat.kind || 'expense', groupName:cat.groupName || groups[0] || '', color:cat.color || CAT_COLORS[2] });
+    const [err, setErr] = useState('');
+    const [busy, setBusy] = useState(false);
+    const set = patch=>setF(p=>({ ...p, ...patch }));
+    const listId = 'fdgroups' + React.useId().replace(/[^a-zA-Z0-9]/g, '');
+    async function save(){
+      if(!f.name.trim()) return setErr('Give the category a name.');
+      if(!f.groupName.trim()) return setErr('Choose or type a reporting group.');
+      setErr(''); setBusy(true);
+      const rec = { id:cat.id || 'fcat_' + uid(), createdAt:cat.createdAt || Date.now(), owner:cat.owner || state.viewingAs,
+        name:f.name.trim(), kind:f.kind, groupName:f.groupName.trim(), color:f.color, archived:!!cat.archived };
+      const ok = await api.saveCat(rec, isNew);
+      setBusy(false);
+      if(ok) onClose();
+    }
+    return h`<${Modal} title=${isNew ? 'New category' : 'Edit category'} onClose=${onClose}>
+      <label className="fd-field"><span>Name</span><input className="fd-input" maxLength="60" value=${f.name} onChange=${e=>set({ name:e.target.value })} /></label>
+      <div className="fd-row2">
+        <label className="fd-field"><span>Type</span><select className="fd-select" value=${f.kind} disabled=${!isNew && usage > 0} onChange=${e=>set({ kind:e.target.value })}>
+          <option value="income">Income</option><option value="expense">Expense</option></select></label>
+        <label className="fd-field"><span>Reporting group</span><input className="fd-input" list=${listId} maxLength="60" value=${f.groupName} onChange=${e=>set({ groupName:e.target.value })} />
+          <datalist id=${listId}>${groups.map(g=>h`<option key=${g} value=${g} />`)}</datalist></label>
+      </div>
+      ${!isNew && usage > 0 ? h`<div className="fd-note"><${Icon} n="info" s=${14} />${usage} transaction${usage===1 ? ' is' : 's are'} filed here, so the type can’t change — it would move them between income and expenses.</div>` : null}
+      <div className="fd-field"><span>Colour</span><div className="fd-colors">
+        ${CAT_COLORS.map(c=>h`<button key=${c} type="button" className="fd-color" aria-label=${'Colour ' + c} aria-pressed=${f.color===c} style=${{ background:c }} onClick=${()=>set({ color:c })}></button>`)}
+        <input type="color" aria-label="Custom colour" value=${f.color} onChange=${e=>set({ color:e.target.value })} /></div></div>
+      ${err ? h`<div className="fd-err" role="alert">${err}</div>` : null}
+      <div className="fd-modal-actions"><span className="fd-grow"></span>
+        <button type="button" className="fd-btn" onClick=${onClose}>Cancel</button>
+        <button type="button" className="fd-btn primary" disabled=${busy} onClick=${save}>${busy ? 'Saving…' : isNew ? 'Add category' : 'Save'}</button></div>
+    </${Modal}>`;
+  }
+
+  function OpeningModal({ opening, api, onClose }){
+    const [f, setF] = useState({ amount:opening ? String(opening.amount) : '', currency:opening ? opening.currency : 'USD', asOf:opening ? opening.asOf : todayKey() });
+    const [err, setErr] = useState('');
+    const [busy, setBusy] = useState(false);
+    const set = patch=>setF(p=>({ ...p, ...patch }));
+    async function save(){
+      const amt = Number(f.amount);
+      if(f.amount === '' || !Number.isFinite(amt)) return setErr('Enter the balance as it stood on that date (it can be negative).');
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(f.asOf)) return setErr('Choose the date that balance was true on.');
+      setErr(''); setBusy(true);
+      const ok = await api.saveOpening({ amount:Math.round(amt*100)/100, currency:f.currency, asOf:f.asOf });
+      setBusy(false); if(ok) onClose();
+    }
+    async function remove(){ setBusy(true); const ok = await api.saveOpening(null); setBusy(false); if(ok) onClose(); }
+    return h`<${Modal} title="Opening balance" onClose=${onClose}>
+      <p className="fd-confirm-text">What the business held on a given date. The balance card adds everything recorded from that date on, so it reflects what’s actually available rather than only what this ledger has seen.</p>
+      <div className="fd-row2">
+        <label className="fd-field"><span>Balance</span><input className="fd-input" type="number" step="0.01" inputMode="decimal" value=${f.amount} onChange=${e=>set({ amount:e.target.value })} /></label>
+        <label className="fd-field"><span>Currency</span><select className="fd-select" value=${f.currency} onChange=${e=>set({ currency:e.target.value })}>${CURRENCIES.map(c=>h`<option key=${c} value=${c}>${c}</option>`)}</select></label>
+      </div>
+      <label className="fd-field"><span>As of</span><input className="fd-input" type="date" value=${f.asOf} onChange=${e=>set({ asOf:e.target.value })} /></label>
+      ${err ? h`<div className="fd-err" role="alert">${err}</div>` : null}
+      <div className="fd-modal-actions">
+        ${opening ? h`<button type="button" className="fd-btn danger ghost" disabled=${busy} onClick=${remove}>Remove</button>` : null}
+        <span className="fd-grow"></span>
+        <button type="button" className="fd-btn" onClick=${onClose}>Cancel</button>
+        <button type="button" className="fd-btn primary" disabled=${busy} onClick=${save}>${busy ? 'Saving…' : 'Save'}</button></div>
+    </${Modal}>`;
+  }
+
+  function GlassPanel({ glass, setGlass, onClose }){
+    const sliders = [
+      { k:'blur', label:'Blur', min:0, max:40, step:1, fmt:v=>Math.round(v) + ' px' },
+      { k:'opacity', label:'Opacity', min:0.08, max:0.95, step:0.01, fmt:v=>Math.round(v*100) + '%' },
+      { k:'saturation', label:'Saturation', min:0.5, max:2, step:0.05, fmt:v=>Math.round(v*100) + '%' },
+      { k:'edge', label:'Edge light', min:0, max:1, step:0.05, fmt:v=>Math.round(v*100) + '%' },
+    ];
+    return h`<div className="fd-pop fd-glass" role="dialog" aria-label="Glass appearance">
+      <div className="fd-pop-head"><strong>Glass appearance</strong>
+        <button type="button" className="fd-icon-btn" aria-label="Close appearance settings" onClick=${onClose}><${Icon} n="x" s=${15} /></button></div>
+      <div className="fd-pop-sub">Saved on this device only.</div>
+      <div className="fd-presets">${GLASS_PRESETS.map(p=>h`<button key=${p.name} type="button" onClick=${()=>setGlass({ ...glass, ...p.v })}>${p.name}</button>`)}</div>
+      ${sliders.map(s=>h`<label key=${s.k} className="fd-range"><span>${s.label}<output>${s.fmt(glass[s.k])}</output></span>
+        <input type="range" min=${s.min} max=${s.max} step=${s.step} value=${glass[s.k]} onChange=${e=>setGlass({ ...glass, [s.k]:Number(e.target.value) })} /></label>`)}
+      <label className="fd-range tint"><span>Tint</span><input type="color" value=${glass.tint} onChange=${e=>setGlass({ ...glass, tint:e.target.value })} /></label>
+      <button type="button" className="fd-btn wide" onClick=${()=>setGlass(GLASS_DEFAULT)}><${Icon} n="reset" s=${14} />Reset appearance</button>
+    </div>`;
+  }
+
+  fdApp = FinanceDashboard;
+}
+
 /* ---------- Init ---------- */
 document.querySelectorAll('.navlink').forEach(el=>{
   el.onclick = ()=>{
@@ -12895,6 +14643,68 @@ document.getElementById('logoutBtn').onclick = ()=>{
   document.getElementById('loginError').style.display = 'none';
 };
 
+</script>
+<script>
+/* ---------- Glass design system: screen-change fade ----------
+   Presentation only. render()
+   rewrites the page title on every pass; this watches it and fades
+   #content in when the title actually changes -- a real change of
+   screen -- and not on the frequent same-screen re-renders (typing in a
+   filter, ticking a box). It reads the title and toggles one CSS class
+   on #content; it does not touch state, data or any existing listener. */
+(function glassScreenTransitions(){
+  try{
+    var title = document.getElementById('pageTitle');
+    var content = document.getElementById('content');
+    if(!title || !content || !('MutationObserver' in window)) return;
+    var last = title.textContent;
+    new MutationObserver(function(){
+      var now = title.textContent;
+      if(now === last) return;
+      last = now;
+      content.classList.remove('g-screen-enter');
+      void content.offsetWidth; /* restart the animation if one is running */
+      content.classList.add('g-screen-enter');
+    }).observe(title, {childList:true, characterData:true, subtree:true});
+    content.addEventListener('animationend', function(e){
+      if(e.target === content) content.classList.remove('g-screen-enter');
+    });
+  }catch(_){}
+})();
+
+/* ---------- Login screen: show/hide password ----------
+   The eye button switches the password field between hidden and visible.
+   It only changes the field's type; attemptLogin() and the existing
+   Enter-key and click handlers are untouched. Logging out hides the
+   password again. */
+(function loginPasswordToggle(){
+  try{
+    var input = document.getElementById('loginPassword');
+    var eye = document.getElementById('loginEye');
+    if(!input || !eye) return;
+    var setShown = function(shown){
+      /* Switching the type rebuilds the field and moves the caret to the
+         start; let it rebuild, then put the caret back. */
+      var a = input.selectionStart, b = input.selectionEnd;
+      input.type = shown ? 'text' : 'password';
+      var restore = function(){
+        try{ if(document.activeElement === input && a != null) input.setSelectionRange(a, b); }catch(_){}
+      };
+      void input.offsetWidth;
+      restore();
+      if(window.requestAnimationFrame) requestAnimationFrame(restore);
+      var label = shown ? 'Hide password' : 'Show password';
+      eye.setAttribute('aria-pressed', shown ? 'true' : 'false');
+      eye.setAttribute('aria-label', label);
+      eye.title = label;
+    };
+    /* Keep the caret in the field when the eye is clicked with a mouse. */
+    eye.addEventListener('mousedown', function(e){ e.preventDefault(); });
+    eye.addEventListener('click', function(){ setShown(input.type === 'password'); });
+    var logout = document.getElementById('logoutBtn');
+    if(logout) logout.addEventListener('click', function(){ setShown(false); });
+  }catch(_){}
+})();
 </script>
 </body>
 </html>
