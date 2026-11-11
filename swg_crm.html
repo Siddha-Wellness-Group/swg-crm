@@ -230,7 +230,7 @@
   .navlink[data-view="distributors"]{--nav-accent:var(--magenta);--nav-accent-soft:var(--magenta-soft);}
   .navlink[data-view="suppliers"]{--nav-accent:var(--rose);--nav-accent-soft:var(--rose-soft);}
   .navlink[data-view="emails"],.navlink[data-view="tickets"]{--nav-accent:var(--rust);--nav-accent-soft:var(--rust-soft);}
-  .navlink[data-view="tasks"],.navlink[data-view="finance"],.navlink[data-view="reports"],.navlink[data-view="invoices"],.navlink[data-view="payments"]{--nav-accent:var(--setup-blue);--nav-accent-soft:var(--setup-blue-soft);}
+  .navlink[data-view="connectors"],.navlink[data-view="tasks"],.navlink[data-view="finance"],.navlink[data-view="reports"],.navlink[data-view="invoices"],.navlink[data-view="payments"]{--nav-accent:var(--setup-blue);--nav-accent-soft:var(--setup-blue-soft);}
   .navlink .nav-ico{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);transition:color .14s;}
   .navlink .nav-ico svg{width:100%;height:100%;display:block;}
   .navlink:hover{background:var(--nav-accent-soft);color:var(--ink);}
@@ -581,6 +581,37 @@
   .field input,.field select,.field textarea{width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);font-family:inherit;font-size:13px;background:var(--cream);color:var(--ink);}
   .field textarea{resize:vertical;min-height:56px;}
   .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
+  /* Connectors screen */
+  .cx-intro{font-size:13px;color:var(--ink-soft);max-width:680px;line-height:1.5;margin:0 0 20px;}
+  .cx-sec{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 10px;}
+  .cx-sec h3{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin:0;}
+  .cx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+  .cx-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px;}
+  .cx-card.off{opacity:.6;}
+  .cx-top{display:flex;align-items:center;gap:11px;}
+  .cx-mono{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;font-weight:700;font-size:15px;color:#fff;flex:none;}
+  .cx-name{font-size:14px;font-weight:600;color:var(--ink);line-height:1.2;}
+  .cx-sub{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .cx-blurb{font-size:12.5px;color:var(--ink-soft);line-height:1.45;flex:1;}
+  .cx-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .cx-status{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;background:var(--border);color:var(--ink-soft);}
+  .cx-status.ok{background:var(--sage-soft);color:var(--sage);}
+  .cx-status.err{background:var(--clay-soft);color:var(--clay);}
+  .cx-status.warn{background:var(--amber-soft);color:var(--amber);}
+  .cx-card.add{border-style:dashed;background:transparent;}
+  .cx-hint{font-size:12px;color:var(--ink-soft);line-height:1.45;margin:-4px 0 12px;}
+  .cx-err{background:var(--clay-soft);color:var(--clay);border-radius:6px;padding:8px 10px;font-size:12.5px;margin-top:12px;}
+  .cx-okmsg{background:var(--sage-soft);color:var(--sage);border-radius:6px;padding:8px 10px;font-size:12.5px;margin-top:12px;}
+  .cx-tools{width:100%;border-collapse:collapse;margin-top:6px;font-size:12.5px;}
+  .cx-tools td{padding:7px 6px;border-top:1px solid var(--border);vertical-align:top;}
+  .cx-tools td:last-child{width:156px;}
+  .cx-tools select{width:100%;padding:5px 6px;border-radius:6px;border:1px solid var(--border);background:var(--cream);color:var(--ink);font-family:inherit;font-size:12px;}
+  .cx-tool-name{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink);}
+  .cx-tool-desc{color:var(--ink-soft);font-size:11.5px;margin-top:2px;}
+  .cx-row2{display:flex;gap:10px;flex-wrap:wrap;}
+  .cx-row2 .field{flex:1;min-width:150px;}
+  .cx-check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);margin:4px 0 0;}
+  .cx-check input{width:auto;}
 
   .loading{padding:60px;text-align:center;color:var(--ink-soft);}
   .shared-note{font-size:11px;color:var(--ink-soft);margin-top:14px;line-height:1.5;}
@@ -1526,6 +1557,7 @@
     <div class="nav-group-label" data-nav-group="admin">Admin</div>
     <div class="navlink" data-view="team" data-nav-group="admin"><span class="nav-ico"></span><span class="nav-label">Team</span></div>
     <div class="navlink" data-view="administration" data-nav-group="admin"><span class="nav-ico"></span><span class="nav-label">Administration</span></div>
+    <div class="navlink" data-view="connectors" data-nav-group="admin"><span class="nav-ico"></span><span class="nav-label">Connectors</span></div>
     <div class="sidebar-foot">
       <div id="identityAdmin" style="display:none;">
         <div class="foot-label">Viewing as</div>
@@ -1602,7 +1634,7 @@
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let state = { view:'dashboard', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, companySettings:{}, companyNavOpen:true, setupTab:'automation', setupSection:'home', omObject:null, omTab:'details', omSection:'objects', omFilter:'', recordTypes:[], recordTypeAssignments:{}, compactLayouts:{}, reports:[], reportTypes:[], reportsTab:'reports', activeReportId:null, reportDraft:null, reportCollapsed:{}, pageLayouts:[], recordPages:[], relationships:[], profiles:[], permissionSets:[], permissionSetGroups:[], publicGroups:[], emailTemplates:[], adminTab:'profiles', adminReturnView:'dashboard', flowExplorer:false, flowWizard:null, emailTemplateFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, profileLeadId:null, departments:[], accessPolicy:{enforce:false, strictDepartments:false}, accessCheckUser:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], metricSnapshots:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0, ioEntity:null, ioMode:null, ioReturnView:null };
+let state = { view:'dashboard', connectors:[], connectorsError:'', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, companySettings:{}, companyNavOpen:true, setupTab:'automation', setupSection:'home', omObject:null, omTab:'details', omSection:'objects', omFilter:'', recordTypes:[], recordTypeAssignments:{}, compactLayouts:{}, reports:[], reportTypes:[], reportsTab:'reports', activeReportId:null, reportDraft:null, reportCollapsed:{}, pageLayouts:[], recordPages:[], relationships:[], profiles:[], permissionSets:[], permissionSetGroups:[], publicGroups:[], emailTemplates:[], adminTab:'profiles', adminReturnView:'dashboard', flowExplorer:false, flowWizard:null, emailTemplateFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, profileLeadId:null, departments:[], accessPolicy:{enforce:false, strictDepartments:false}, accessCheckUser:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], metricSnapshots:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0, ioEntity:null, ioMode:null, ioReturnView:null };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
 // completed yet -- so every dollar figure is always sane, never NaN. Everywhere money is
@@ -1740,6 +1772,7 @@ const NAV_ICONS = {
   tickets:`<circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="3.4"/><path d="M6 6l3.6 3.6M14.4 14.4 18 18M18 6l-3.6 3.6M9.6 14.4 6 18"/>`,
   reports:`<path d="M4.6 3.6h9.2l5.6 5.6v11.2a1.6 1.6 0 0 1-1.6 1.6H4.6A1.6 1.6 0 0 1 3 20.4V5.2a1.6 1.6 0 0 1 1.6-1.6Z"/><path d="M13.4 3.8v5.4h5.4"/><path d="M7.6 18v-3.6M11 18v-6M14.4 18v-2.2"/>`,
   administration:`<path d="M12 3.2 20 6.6v5.1c0 4.4-3.3 7.9-8 9.1-4.7-1.2-8-4.7-8-9.1V6.6z"/><path d="M9.2 11.9l2 2 3.6-3.8"/>`,
+  connectors:`<path d="M9 3.2v4.6M15 3.2v4.6"/><path d="M6.4 7.8h11.2v3.4a5.6 5.6 0 0 1-11.2 0z"/><path d="M12 16.8v4"/>`,
   team:`<circle cx="9.4" cy="8.4" r="3.5"/><path d="M2.8 20c.6-3.5 3.2-5.6 6.6-5.6S15.4 16.5 16 20"/><path d="M16.2 5.5a3.4 3.4 0 0 1 0 6.6"/><path d="M17.8 14.7c2 .7 3.3 2.4 3.7 5.3"/>`,
 };
 function navIconSVG(view){
@@ -1767,7 +1800,7 @@ const ACCENTS = {
   distributors:'var(--magenta)', suppliers:'var(--rose)', deals:'var(--teal)', orders:'var(--violet)',
   tasks:'var(--setup-blue)', invoices:'var(--setup-blue)', payments:'var(--setup-blue)', team:'var(--ink)', finance:'var(--setup-blue)',
   emails:'var(--rust)', tickets:'var(--rust)', search:'var(--ink)', rickroll:'var(--ink)',
-  reports:'var(--setup-blue)', administration:'var(--setup-blue)'
+  reports:'var(--setup-blue)', administration:'var(--setup-blue)', connectors:'var(--setup-blue)'
 };
 const CONTINENTS = ['Africa','Asia','Europe','North America','South America','Oceania','Middle East'];
 const SUBREGIONS = {
@@ -2113,13 +2146,14 @@ async function loadSettings(){
 }
 
 async function loadAll(){
-  const [c,d,o,cu,su,ta,inv,le,di,pa,,,,,oe,ms] = await Promise.all([
+  const [c,d,o,cu,su,ta,inv,le,di,pa,,,,,oe,ms,cx] = await Promise.all([
     loadTable('contacts'), loadTable('deals'), loadTable('orders'),
     loadTable('customers'), loadTable('suppliers'), loadTable('tasks'), loadTable('invoices'),
     loadTable('leads'), loadTable('distributors'), loadTable('payments'), loadFxRates(),
     loadEmailLog(), loadTickets(), loadSettings(), loadTable('order_events'),
-    loadTable('metric_snapshots')
+    loadTable('metric_snapshots'), loadConnectors()
   ]);
+  state.connectors = cx;
   state.contacts = c; state.deals = d; state.orders = o;
   state.customers = cu; state.suppliers = su; state.tasks = ta; state.invoices = inv;
   state.leads = le; state.distributors = di; state.payments = pa;
@@ -2295,6 +2329,7 @@ function navLinkHidden(entity){
   if((entity==='invoices' || entity==='payments' || entity==='finance') && !isPrivileged()) return true;
   if(entity==='team' && !isAdmin()) return true;
   if(entity==='administration' && !canAccessAdministration()) return true;
+  if(entity==='connectors' && !isAdmin()) return true;
   if(entity==='leads' && !canSeeLeads()) return true;
   if(SETUP_ENTITIES.includes(entity) && !canObject(entity, 'read')) return true;
   if(SETUP_ENTITIES.includes(entity) && isObjectHidden(entity) && !personaIsAdmin()) return true;
@@ -2306,7 +2341,7 @@ function updateNavVisibility(){
     setupGear.style.display = canAccessSetup() ? 'flex' : 'none';
     setupGear.classList.toggle('active', state.view==='setup');
   }
-  const gatedEntities = Array.from(new Set(['invoices','payments','finance','team','administration', ...SETUP_ENTITIES]));
+  const gatedEntities = Array.from(new Set(['invoices','payments','finance','team','administration','connectors', ...SETUP_ENTITIES]));
   gatedEntities.forEach(entity=>{
     const link = document.querySelector(`.navlink[data-view="${entity}"]`);
     if(link) link.classList.toggle('hidden-role', navLinkHidden(entity));
@@ -2326,6 +2361,7 @@ function render(){
   if(state.view==='finance' && !isPrivileged()) state.view = 'dashboard';
   if(state.view==='team' && !isAdmin()) state.view = 'dashboard';
   if(state.view==='administration' && !canAccessAdministration()) state.view = 'dashboard';
+  if(state.view==='connectors' && !isAdmin()) state.view = 'dashboard';
   if(state.view==='setup' && !canAccessSetup()) state.view = 'dashboard';
   if(state.view==='leads' && !canSeeLeads()) state.view = 'dashboard';
   if(SETUP_ENTITIES.includes(state.view) && isObjectHidden(state.view) && !personaIsAdmin()) state.view = 'dashboard';
@@ -2357,6 +2393,7 @@ function render(){
     reports:['Reports','Ask the ledger a question and save the answer'],
     setup:['Setup','Validation rules, automation, sharing and the Object Manager'],
     administration:['Administration','Profiles, roles, permission sets and public groups'],
+    connectors:['Connectors','Let the assistant use Gmail, WhatsApp, other AIs and custom MCP servers'],
     customerProfile:['Customer',''],
     leadProfile:['Lead',''],
     search:['Search','Find anything across all tabs'],
@@ -2376,7 +2413,7 @@ function render(){
   document.getElementById('mainArea').style.setProperty('--accent', ACCENTS[state.view] || 'var(--amber)');
   const addLabels = {contacts:'contact', leads:'lead', customers:'customer', distributors:'distributor', suppliers:'supplier', deals:'deal', tasks:'task', invoices:'invoice', payments:'payment', team:'team member'};
   const addBtn = document.getElementById('addBtn');
-  const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets','setup','reports','customerProfile','leadProfile','administration'];
+  const noAdd = ['dashboard','home','search','rickroll','finance','emails','tickets','setup','reports','customerProfile','leadProfile','administration','connectors'];
   addBtn.style.display = (noAdd.includes(state.view) || (SETUP_ENTITIES.includes(state.view) && !canObject(state.view, 'create'))) ? 'none' : 'inline-block';
   addBtn.textContent = '+ Add ' + (addLabels[state.view]||'');
   // Import / Export lives on every list the engine actually supports
@@ -2411,6 +2448,7 @@ function render(){
   if(state.view==='reports') c.innerHTML = renderReports();
   if(state.view==='setup') c.innerHTML = renderSetup();
   if(state.view==='administration'){ c.innerHTML = renderAdministration(); wireAdministration(); }
+  if(state.view==='connectors'){ c.innerHTML = renderConnectors(); wireConnectors(); }
   if(state.view==='search') c.innerHTML = renderSearchShell();
   if(state.view==='rickroll') c.innerHTML = renderImportExport();
   if(SETUP_ENTITIES.includes(state.view)){
@@ -12506,6 +12544,299 @@ function wireLeadExtras(){
 }
 
 /* ================================================================
+   CONNECTORS -- the CRM's version of Claude's connectors screen. An admin
+   adds a service (Gmail, WhatsApp, another AI, or any remote MCP server);
+   its tools then show up for the in-app assistant. Everything that touches
+   the outside world goes through the `connectors` Edge Function, which
+   keeps the tokens; the browser only ever sends a token in, never reads
+   one back. Tools marked "Needs approval" wait for the user's Approve
+   click in the assistant before they run.
+   ================================================================ */
+const CONNECTOR_CATALOG = [
+  { preset:'gmail', kind:'gmail', name:'Gmail', color:'#C7422C',
+    blurb:'Search, read and send email from the CRM mailbox.',
+    help:'Uses the same Google OAuth client and refresh token as the email service. Mint the refresh token with "npm run email:oauth-setup" (see src/services/email/README.md).',
+    secret:[{ key:'client_id', label:'OAuth client ID' }, { key:'client_secret', label:'OAuth client secret' }, { key:'refresh_token', label:'Refresh token' }], config:[] },
+  { preset:'claude', kind:'claude', name:'Claude', color:'#C4670F',
+    blurb:'Ask Claude for a second opinion, a draft or an analysis.',
+    help:'An Anthropic API key from console.anthropic.com. This is separate from the key the assistant itself uses.',
+    secret:[{ key:'api_key', label:'Anthropic API key' }], config:[{ key:'model', label:'Model', placeholder:'claude-sonnet-5-5' }] },
+  { preset:'gemini', kind:'gemini', name:'Google Gemini', color:'#2563EB',
+    blurb:'Ask Gemini for a second opinion, a draft or an analysis.',
+    help:'A Gemini API key from Google AI Studio.',
+    secret:[{ key:'api_key', label:'Gemini API key' }], config:[{ key:'model', label:'Model', placeholder:'gemini-2.5-flash' }] },
+  { preset:'chatgpt', kind:'openai', name:'ChatGPT', color:'#16805A',
+    blurb:'Ask ChatGPT for a second opinion, a draft or an analysis.',
+    help:'An OpenAI API key from platform.openai.com.',
+    secret:[{ key:'api_key', label:'OpenAI API key' }], config:[{ key:'model', label:'Model', placeholder:'gpt-4.1' }] },
+  { preset:'whatsapp', kind:'whatsapp', name:'WhatsApp', color:'#1FA855',
+    blurb:'Send WhatsApp messages and approved templates to customers.',
+    help:'WhatsApp Business Cloud API (Meta). You need a permanent access token and the Phone number ID from the WhatsApp section of your Meta app. Free-form text only reaches people who messaged you in the last 24 hours; otherwise use a template.',
+    secret:[{ key:'access_token', label:'Access token' }], config:[{ key:'phone_number_id', label:'Phone number ID', placeholder:'e.g. 109876543210987', required:true }] },
+  { preset:'base44', kind:'mcp', name:'Base44', color:'#7C3AED', needsUrl:true, authDefault:'bearer',
+    blurb:'Connect the Base44 storefront app over MCP.',
+    help:'Paste the MCP server URL from your Base44 app and, if it asks for one, its token or API key.',
+    secret:[], config:[] },
+];
+const CONNECTOR_PREF_LABELS = { ask:'Needs approval', allow:'Always allow', off:'Off' };
+
+function connectorSlug(s, max){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,max) || 'x'; }
+function connectorPreset(key){ return CONNECTOR_CATALOG.find(p=>p.preset===key) || null; }
+function connectorSpec(c){ return (c.preset && connectorPreset(c.preset)) || (c.kind!=='mcp' ? CONNECTOR_CATALOG.find(p=>p.kind===c.kind) : null) || null; }
+function connectorStatus(c){
+  if(!c.enabled) return ['Off',''];
+  if(c.status==='connected') return ['Connected','ok'];
+  if(c.status==='error') return ['Error','err'];
+  const ready = c.has_secret || (c.kind==='mcp' && c.auth_type==='none');
+  return [ready ? 'Not tested' : 'Needs setup','warn'];
+}
+function connectorToolPref(c, t){
+  const p = (c.tool_prefs||{})[t.name];
+  if(p==='ask' || p==='allow' || p==='off') return p;
+  // Built-in read-only tools are known to be safe. A custom server's own
+  // "read only" claim is not trusted, so its tools start at Needs approval.
+  return (c.kind!=='mcp' && t.read_only) ? 'allow' : 'ask';
+}
+function connectorMono(spec, c){
+  const name = (c && c.name) || (spec && spec.name) || '?';
+  return `<div class="cx-mono" style="background:${spec ? spec.color : '#475569'}">${esc(name.trim().charAt(0).toUpperCase())}</div>`;
+}
+
+async function loadConnectors(){
+  const { data, error } = await sb.from('connectors').select('*').order('created_at', { ascending:true });
+  if(error){
+    console.error('load failed', 'connectors', error);
+    state.connectorsError = (error.code==='42P01' || error.code==='PGRST205') ? 'missing' : 'error';
+    return [];
+  }
+  state.connectorsError = '';
+  return data || [];
+}
+async function connectorsInvoke(body){
+  try{
+    const { data, error } = await sb.functions.invoke('connectors', { body });
+    if(error) return { ok:false, error:'The connectors service could not be reached. Has the "connectors" function been deployed?' };
+    return (data && typeof data==='object') ? data : { ok:false, error:'The connectors service sent an empty reply.' };
+  }catch(e){
+    console.error('connectors invoke failed', e);
+    return { ok:false, error:'The connectors service could not be reached.' };
+  }
+}
+function upsertConnector(row){
+  const i = state.connectors.findIndex(x=>x.id===row.id);
+  if(i>=0) state.connectors[i] = row; else state.connectors.push(row);
+}
+
+function renderConnectors(){
+  if(!isAdmin()) return `<div class="panel">Only admins can manage connectors.</div>`;
+  const rows = state.connectors || [];
+  const banner = state.connectorsError==='missing'
+    ? `<div class="cx-err" style="margin:0 0 16px;">The connectors table does not exist yet. Apply the latest Supabase migration (20261111120000_connectors.sql), then reload.</div>`
+    : state.connectorsError ? `<div class="cx-err" style="margin:0 0 16px;">Could not load the connectors. Check the browser console.</div>` : '';
+  const existing = c=>{
+    const spec = connectorSpec(c);
+    const [label, cls] = connectorStatus(c);
+    const note = c.status==='error' ? c.status_detail : (c.status==='connected' ? c.status_detail : (spec ? spec.blurb : (c.url||'')));
+    return `<div class="cx-card ${c.enabled?'':'off'}">
+      <div class="cx-top">${connectorMono(spec, c)}<div><div class="cx-name">${esc(c.name)}</div><div class="cx-sub">${c.kind==='mcp' ? 'MCP server' : 'Built-in'}${c.audience==='everyone' ? ' · everyone' : ' · admins only'}</div></div></div>
+      <div class="cx-blurb">${esc(note||'')}</div>
+      <div class="cx-foot"><span class="cx-status ${cls}">${label}</span><button type="button" class="btn secondary sm" data-cx-edit="${esc(c.id)}">Manage</button></div>
+    </div>`;
+  };
+  const addCard = p=>`<div class="cx-card add">
+      <div class="cx-top">${connectorMono(p)}<div><div class="cx-name">${esc(p.name)}</div><div class="cx-sub">${p.kind==='mcp' ? 'MCP server' : 'Built-in'}</div></div></div>
+      <div class="cx-blurb">${esc(p.blurb)}</div>
+      <div class="cx-foot"><span></span><button type="button" class="btn sm" data-cx-add="${p.preset}">Add</button></div>
+    </div>`;
+  return `${banner}
+    <p class="cx-intro">Connectors let the assistant work with other services, the way connectors do in Claude. Anything it does through a connector asks for your approval first, unless you set that tool to <strong>Always allow</strong>. Add any remote MCP server as a custom connector.</p>
+    ${rows.length ? `<div class="cx-sec"><h3>Your connectors</h3></div><div class="cx-grid">${rows.map(existing).join('')}</div>` : ''}
+    <div class="cx-sec"><h3>Add a connector</h3></div>
+    <div class="cx-grid">
+      ${CONNECTOR_CATALOG.map(addCard).join('')}
+      <div class="cx-card add">
+        <div class="cx-top">${connectorMono(null, { name:'+' })}<div><div class="cx-name">Custom connector</div><div class="cx-sub">MCP server</div></div></div>
+        <div class="cx-blurb">Connect any remote MCP server by its URL, with an optional token or API key.</div>
+        <div class="cx-foot"><span></span><button type="button" class="btn sm" data-cx-add="custom">Add custom connector</button></div>
+      </div>
+    </div>`;
+}
+function wireConnectors(){
+  document.querySelectorAll('[data-cx-add]').forEach(b=>{ b.onclick = ()=>openConnectorModal(null, b.dataset.cxAdd); });
+  document.querySelectorAll('[data-cx-edit]').forEach(b=>{ b.onclick = ()=>openConnectorModal(b.dataset.cxEdit, null); });
+}
+
+function openConnectorModal(id, presetKey, flash){
+  if(!isAdmin()) return;
+  const c = id ? state.connectors.find(x=>x.id===id) : null;
+  if(id && !c) return;
+  const spec = c ? connectorSpec(c) : (presetKey==='custom' ? null : connectorPreset(presetKey));
+  const kind = c ? c.kind : (spec ? spec.kind : 'mcp');
+  const isMcp = kind==='mcp';
+  const title = c ? c.name : (spec ? spec.name : 'Custom connector');
+  const authType = c ? c.auth_type : (spec && spec.authDefault) || 'none';
+  const cfg = (c && c.config) || {};
+  const [stLabel, stCls] = c ? connectorStatus(c) : ['',''];
+  const tools = (c && c.tools) || [];
+  const keepHint = c && c.has_secret ? 'Saved. Leave blank to keep it' : '';
+
+  const secretFields = isMcp
+    ? `<div class="cx-row2">
+        <div class="field"><label>Sign-in</label><select id="cx_auth">
+          <option value="none" ${authType==='none'?'selected':''}>None</option>
+          <option value="bearer" ${authType==='bearer'?'selected':''}>Bearer token</option>
+          <option value="header" ${authType==='header'?'selected':''}>Custom header (API key)</option></select></div>
+        <div class="field" id="cx_headerWrap"><label>Header name</label><input id="cx_header" placeholder="x-api-key" value="${esc((c && c.auth_header)||'')}"></div>
+      </div>
+      <div class="field" id="cx_tokenWrap"><label>Token / API key</label><input id="cx_s_token" data-cx-secret="token" type="password" autocomplete="off" placeholder="${esc(keepHint)}"></div>`
+    : spec.secret.map(f=>`<div class="field"><label>${esc(f.label)}</label><input data-cx-secret="${f.key}" type="password" autocomplete="off" placeholder="${esc(keepHint)}"></div>`).join('');
+  const configFields = isMcp ? '' : spec.config.map(f=>`<div class="field"><label>${esc(f.label)}${f.required?'':' (optional)'}</label><input data-cx-config="${f.key}" placeholder="${esc(f.placeholder||'')}" value="${esc(cfg[f.key]||'')}"></div>`).join('');
+  const urlField = isMcp ? `<div class="field"><label>Server URL</label><input id="cx_url" placeholder="https://example.com/mcp" value="${esc((c && c.url)||'')}"></div>` : '';
+  const toolTable = tools.length ? `<div class="cx-sec" style="margin:18px 0 4px;"><h3>Tools (${tools.length})</h3></div>
+    <div class="cx-hint" style="margin:0;">Needs approval: you press Approve in the assistant each time. Always allow: runs straight away. Off: the assistant cannot see it.</div>
+    <table class="cx-tools"><tbody>${tools.map(t=>`<tr><td><div class="cx-tool-name">${esc(t.name)}</div><div class="cx-tool-desc">${esc((t.description||'').slice(0,160))}</div></td>
+      <td><select data-cx-tool="${esc(t.name)}">${['ask','allow','off'].map(v=>`<option value="${v}" ${connectorToolPref(c,t)===v?'selected':''}>${CONNECTOR_PREF_LABELS[v]}</option>`).join('')}</select></td></tr>`).join('')}</tbody></table>` : '';
+  const flashHtml = flash ? `<div class="${flash.ok?'cx-okmsg':'cx-err'}" id="cx_msg">${esc(flash.text)}</div>` : `<div id="cx_msg"></div>`;
+
+  const modal = document.getElementById('modalBody');
+  modal.className = 'modal wide';
+  modal.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">${connectorMono(spec, c || { name:title })}
+      <div style="flex:1;"><h3 style="margin:0;font-size:16px;">${c?'Manage':'Add'} ${esc(title)}</h3></div>
+      ${c ? `<span class="cx-status ${stCls}">${stLabel}</span>` : ''}</div>
+    <p class="cx-hint">${esc((spec && spec.help) || 'Any remote MCP server that speaks Streamable HTTP. Servers that need a browser sign-in (OAuth) are not supported yet; use one that accepts a token or API key.')}</p>
+    <div class="field"><label>Name</label><input id="cx_name" maxlength="60" value="${esc(c ? c.name : (spec ? spec.name : ''))}" placeholder="e.g. Orders database"></div>
+    ${urlField}${secretFields}${configFields}
+    <div class="cx-row2">
+      <div class="field"><label>Who can use it in the assistant</label><select id="cx_audience">
+        <option value="admins" ${!c || c.audience!=='everyone' ? 'selected':''}>Admins only</option>
+        <option value="everyone" ${c && c.audience==='everyone' ? 'selected':''}>Everyone</option></select></div>
+    </div>
+    <label class="cx-check"><input type="checkbox" id="cx_enabled" ${!c || c.enabled ? 'checked':''}> Turned on</label>
+    ${toolTable}
+    ${flashHtml}
+    <div class="modal-actions">
+      ${c ? `<button type="button" class="btn danger" id="cx_remove" style="margin-right:auto;">Remove</button>` : ''}
+      <button type="button" class="btn secondary" id="cancelBtn">Cancel</button>
+      <button type="button" class="btn secondary" id="cx_save">Save</button>
+      <button type="button" class="btn" id="cx_test">Save &amp; test connection</button>
+    </div>`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cancelBtn').onclick = closeModal;
+
+  const syncAuth = ()=>{
+    if(!isMcp) return;
+    const a = document.getElementById('cx_auth').value;
+    document.getElementById('cx_headerWrap').style.display = a==='header' ? '' : 'none';
+    document.getElementById('cx_tokenWrap').style.display = a==='none' ? 'none' : '';
+  };
+  if(isMcp){ document.getElementById('cx_auth').onchange = syncAuth; syncAuth(); }
+  document.getElementById('cx_save').onclick = ()=>saveConnectorForm(c, spec, kind, false);
+  document.getElementById('cx_test').onclick = ()=>saveConnectorForm(c, spec, kind, true);
+  const rm = document.getElementById('cx_remove');
+  if(rm) rm.onclick = async ()=>{
+    if(!confirm(`Remove ${c.name}? Its saved token is deleted too.`)) return;
+    const r = await connectorsInvoke({ action:'delete_connector', connector_id:c.id });
+    if(!r.ok){ connectorMsg(r.error, false); return; }
+    state.connectors = state.connectors.filter(x=>x.id!==c.id);
+    closeModal(); render(); toast('Connector removed.');
+  };
+}
+function connectorMsg(text, ok){
+  const el = document.getElementById('cx_msg');
+  if(!el) return;
+  el.className = text ? (ok ? 'cx-okmsg' : 'cx-err') : '';
+  el.textContent = text || '';
+}
+function connectorBusy(on){
+  ['cx_save','cx_test','cx_remove'].forEach(i=>{ const b = document.getElementById(i); if(b) b.disabled = on; });
+  const t = document.getElementById('cx_test'); if(t) t.textContent = on ? 'Working…' : 'Save & test connection';
+}
+
+async function saveConnectorForm(c, spec, kind, andTest){
+  const val = id=>{ const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const isMcp = kind==='mcp';
+  const payload = {
+    id: c ? c.id : undefined, kind, preset: c ? c.preset : (spec ? spec.preset : null),
+    name: val('cx_name'), audience: val('cx_audience'), enabled: document.getElementById('cx_enabled').checked,
+    config:{}, tool_prefs: { ...((c && c.tool_prefs) || {}) },
+  };
+  if(isMcp){ payload.url = val('cx_url'); payload.auth_type = val('cx_auth') || 'none'; payload.auth_header = val('cx_header'); }
+  document.querySelectorAll('[data-cx-config]').forEach(el=>{ if(el.value.trim()) payload.config[el.dataset.cxConfig] = el.value.trim(); });
+  document.querySelectorAll('[data-cx-tool]').forEach(el=>{ payload.tool_prefs[el.dataset.cxTool] = el.value; });
+
+  // Credentials are only sent when typed; blank means keep what is saved.
+  const secretInputs = [...document.querySelectorAll('[data-cx-secret]')].filter(el=>el.offsetParent!==null || !isMcp);
+  const secret = {}; secretInputs.forEach(el=>{ if(el.value.trim()) secret[el.dataset.cxSecret] = el.value.trim(); });
+  const typed = Object.keys(secret).length;
+  if(!payload.name){ connectorMsg('Give the connector a name.', false); return; }
+  if(!isMcp && spec.config.some(f=>f.required && !payload.config[f.key])){ connectorMsg('Fill in the required settings.', false); return; }
+  if(!isMcp && typed && typed < secretInputs.length){ connectorMsg('Fill in every credential field, or leave them all blank to keep the saved ones.', false); return; }
+  if(!isMcp && !typed && !(c && c.has_secret) && andTest){ connectorMsg('Enter the credentials first.', false); return; }
+
+  connectorBusy(true); connectorMsg('', true);
+  let r = await connectorsInvoke({ action:'save_connector', owner: state.currentUser, connector: payload });
+  if(!r.ok){ connectorBusy(false); connectorMsg(r.error, false); return; }
+  let row = r.connector; upsertConnector(row);
+  let problem = '';
+  if(typed){
+    r = await connectorsInvoke({ action:'save_secret', connector_id: row.id, secret });
+    if(r.ok){ row = r.connector; upsertConnector(row); } else problem = r.error;
+  } else if(c && c.has_secret && !row.has_secret){
+    problem = 'The saved token was cleared because the address or sign-in method changed. Enter it again.';
+  }
+  if(!problem && andTest){
+    r = await connectorsInvoke({ action:'discover', connector_id: row.id });
+    if(r.ok){ row = r.connector; upsertConnector(row); } else problem = r.error;
+  }
+  render();
+  if(problem){ openConnectorModal(row.id, null, { ok:false, text:problem }); return; }
+  if(andTest){
+    openConnectorModal(row.id, null, row.status==='connected'
+      ? { ok:true, text:`Connected. ${row.status_detail||''}`.trim() }
+      : { ok:false, text:row.status_detail || 'The connection test failed.' });
+    return;
+  }
+  closeModal(); toast('Connector saved.');
+}
+
+/* What the assistant can use right now: tools of enabled, tested connectors
+   this user is allowed to use, minus anything set to Off. Recomputed on
+   every model call, so changes on the Connectors screen apply at once. */
+function agentConnectorTools(){
+  const out = [], used = new Set();
+  (state.connectors||[]).forEach(c=>{
+    if(!c.enabled || c.status!=='connected') return;
+    if(c.audience!=='everyone' && !isAdmin()) return;
+    (c.tools||[]).forEach(t=>{
+      const pref = connectorToolPref(c, t);
+      if(pref==='off') return;
+      let name = ('conn_' + connectorSlug(c.name, 14) + '__' + String(t.name).replace(/[^a-zA-Z0-9_-]/g,'_')).slice(0, 60);
+      while(used.has(name)) name = name.slice(0, 56) + '_' + used.size;
+      used.add(name);
+      out.push({ name, description:`[${c.name}] ${t.description||''}`.slice(0,1000), input_schema:t.input_schema || { type:'object', properties:{} },
+        conn:c.id, connName:c.name, tool:t.name, pref });
+    });
+  });
+  return out.slice(0, 40);
+}
+function agentConnectorToolFor(name){
+  const ct = (agent.connTools||[]).find(t=>t.name===name);
+  if(!ct) return null;
+  const preview = input=>{ const s = JSON.stringify(input||{}); return s.length>600 ? s.slice(0,600)+'…' : s; };
+  return {
+    label: `${ct.connName}: ${ct.tool}`,
+    confirm: ct.pref==='ask' ? (input)=>`Use ${ct.connName} → ${ct.tool}\n${preview(input)}` : null,
+    run: async (input)=>{
+      const r = await connectorsInvoke({ action:'call', connector_id:ct.conn, tool:ct.tool, arguments:input });
+      if(!r.ok) return { error: r.error };
+      if(r.is_error) return { error: String(r.text||'The service reported an error.').slice(0, 2000) };
+      return { service: ct.connName, result: String(r.text||'').slice(0, 20000) };
+    },
+  };
+}
+
+/* ================================================================
    SUPPORT AGENT -- a small helper in the corner of every screen except
    Setup. It talks to the `support-agent` Edge Function (Claude), which
    can only *ask* for actions; the actions themselves run here, through
@@ -12513,7 +12844,7 @@ function wireLeadExtras(){
    waits for the user to approve it. If the function isn't deployed yet
    the panel falls back to a built-in helper for navigation and search.
    ================================================================ */
-const agent = { open:false, busy:false, messages:[], log:[], offline:false, pending:null };
+const agent = { open:false, busy:false, messages:[], log:[], offline:false, pending:null, connTools:[] };
 const AGENT_VIEWS = ['dashboard','home','contacts','leads','customers','distributors','suppliers','deals','orders','tasks','invoices','payments','finance','emails','tickets','reports','search'];
 const AGENT_MAX_STEPS = 6;
 
@@ -12695,7 +13026,7 @@ function renderAgentLog(){
     if(m.kind==='user') return `<div class="agent-msg user">${esc(m.text)}</div>`;
     if(m.kind==='bot') return `<div class="agent-msg bot">${agentLinkify(m.text)}</div>`;
     if(m.kind==='tool') return `<div class="agent-tool">${esc(m.text)}</div>`;
-    if(m.kind==='confirm') return `<div class="agent-confirm"><div>${esc(m.text)}</div>${m.state==='pending'
+    if(m.kind==='confirm') return `<div class="agent-confirm"><div style="white-space:pre-wrap;word-break:break-word;">${esc(m.text)}</div>${m.state==='pending'
       ? `<div class="agent-confirm-actions"><button type="button" class="btn secondary sm" data-agent-decline>Decline</button><button type="button" class="btn sm" data-agent-approve>Approve</button></div>`
       : `<div class="agent-confirm-done">${m.state==='approved'?'✓ Approved':'✕ Declined'}</div>`}</div>`;
     if(m.kind==='error') return `<div class="agent-msg err">${esc(m.text)}</div>`;
@@ -12710,7 +13041,12 @@ function renderAgentLog(){
 }
 
 async function agentCallModel(){
-  const { data, error } = await sb.functions.invoke('support-agent', { body: { messages: agent.messages } });
+  // Rebuilt each call so a change on the Connectors screen applies at once.
+  agent.connTools = agentConnectorTools();
+  const { data, error } = await sb.functions.invoke('support-agent', { body: {
+    messages: agent.messages,
+    connector_tools: agent.connTools.map(({ name, description, input_schema })=>({ name, description, input_schema })),
+  } });
   if(error) throw error;
   if(!data || !Array.isArray(data.content)) throw new Error((data && data.error) || 'Empty reply');
   return data;
@@ -12760,7 +13096,7 @@ async function agentLoop(){
 }
 
 async function agentRunTool(call){
-  const tool = AGENT_TOOLS[call.name];
+  const tool = AGENT_TOOLS[call.name] || agentConnectorToolFor(call.name);
   const input = (call.input && typeof call.input==='object') ? call.input : {};
   if(!tool) return { type:'tool_result', tool_use_id: call.id, content: JSON.stringify({ error:'Unknown tool' }), is_error:true };
   if(tool.confirm){
@@ -12777,7 +13113,7 @@ async function agentRunTool(call){
   }
   try{
     const out = await tool.run(input);
-    if(!tool.confirm && call.name!=='search_records' && call.name!=='pipeline_summary') agent.log.push({ kind:'tool', text: out && out.error ? `⚠ ${out.error}` : `→ ${call.name.replace(/_/g,' ')}` });
+    if(!tool.confirm && call.name!=='search_records' && call.name!=='pipeline_summary') agent.log.push({ kind:'tool', text: out && out.error ? `⚠ ${out.error}` : `→ ${tool.label || call.name.replace(/_/g,' ')}` });
     return { type:'tool_result', tool_use_id: call.id, content: JSON.stringify(out||{}), ...(out && out.error ? { is_error:true } : {}) };
   }catch(e){
     return { type:'tool_result', tool_use_id: call.id, content: JSON.stringify({ error: String(e && e.message || e) }), is_error:true };
