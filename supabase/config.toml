@@ -20,3 +20,9 @@ verify_jwt = false
 # checks AGENT_ALLOWED_ORIGINS itself and only ever returns model output.
 [functions.support-agent]
 verify_jwt = false
+
+# Gateway behind the CRM's Connectors screen. Called from the browser with the
+# publishable key (not a JWT), so gateway verification is off; the function
+# checks CONNECTORS_ALLOWED_ORIGINS itself and keeps every token server-side.
+[functions.connectors]
+verify_jwt = false
