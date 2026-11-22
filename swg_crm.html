@@ -2194,6 +2194,20 @@
     </div>
     <div class="login-error" id="loginError" style="display:none;">Incorrect username or password.</div>
     <button class="btn" id="loginBtn" style="width:100%;margin-top:6px;">Log in</button>
+    <button type="button" class="btn" id="loginReset" style="width:100%;margin-top:6px;background:transparent;color:inherit;border:1px solid currentColor;">Forgot / set password</button>
+    <div id="mfaPanel" style="display:none;margin-top:12px;">
+      <div class="field"><label for="mfaCode">Two-step verification code</label>
+        <p id="mfaHint" style="font-size:13px;opacity:.8;margin:4px 0 8px;">Enter the 6-digit code from your authenticator app.</p>
+        <img id="mfaQr" alt="QR code for your authenticator app" style="display:none;width:180px;height:180px;background:#fff;padding:6px;border-radius:8px;margin:6px auto;">
+        <code id="mfaSecret" style="display:none;font-size:12px;word-break:break-all;"></code>
+        <input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"></div>
+      <button class="btn" id="mfaBtn" style="width:100%;margin-top:6px;">Verify</button>
+    </div>
+    <div id="setPassPanel" style="display:none;margin-top:12px;">
+      <div class="field"><label for="newPassword">New password (at least 12 characters)</label>
+        <input id="newPassword" type="password" autocomplete="new-password" minlength="12"></div>
+      <button class="btn" id="setPassBtn" style="width:100%;margin-top:6px;">Save password</button>
+    </div>
   </div>
 </div>
 
@@ -2317,11 +2331,13 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" integrity="sha384-2zrRDgDHSYB/GN3nFW3fsZXoxEhKIr3N2h63Tc6DEOB9JJdFIu8xMJT2Cph/gBil" crossorigin="anonymous"></script>
 <script>
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Real identity: Supabase Auth of swg-crm + two-step verification (aal2). Every read/write is decided by
+// Row Level Security (crm_is_staff / crm_staff_role). The publishable key identifies the project only.
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'implicit' } });
 let state = { view:'dashboard', connectors:[], connectorsError:'', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, companySettings:{}, companyNavOpen:true, setupTab:'automation', setupSection:'home', omObject:null, omTab:'details', omSection:'objects', omFilter:'', recordTypes:[], recordTypeAssignments:{}, compactLayouts:{}, reports:[], reportTypes:[], reportsTab:'reports', activeReportId:null, reportDraft:null, reportCollapsed:{}, pageLayouts:[], recordPages:[], relationships:[], profiles:[], permissionSets:[], permissionSetGroups:[], publicGroups:[], emailTemplates:[], adminTab:'profiles', adminReturnView:'dashboard', flowExplorer:false, flowWizard:null, emailTemplateFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, profileLeadId:null, departments:[], accessPolicy:{enforce:false, strictDepartments:false}, accessCheckUser:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], metricSnapshots:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0, ioEntity:null, ioMode:null, ioReturnView:null };
 
 // Fallback rates (units of that currency per 1 USD) in case the live fetch fails or hasn't
@@ -2640,7 +2656,7 @@ const DEFAULT_TEAM = [
   {name:'David', email:'david@siddhayogaweb.com'},
   {name:'Nishant', email:'nishant@siddhayogaweb.com'},
 ];
-const APP_PASSWORD = 'siddhayoga';
+/* APP_PASSWORD removed 2026-11-22: sign-in is Supabase Auth + TOTP, access is enforced by RLS. */
 let teamLoadPromise = null;
 async function loadTeamData(){
   let t = await loadTable('team');
@@ -14941,33 +14957,116 @@ async function boot(){
   }, 2000);
 }
 
+function loginError(msg){
+  const errEl = document.getElementById('loginError');
+  if(!msg){ errEl.style.display = 'none'; return; }
+  errEl.textContent = msg; errEl.style.display = 'block';
+}
+function loginStep(step){
+  // step: 'credentials' | 'mfa' | 'setpass'
+  const cred = step === 'credentials';
+  ['loginEmail','loginPassword'].forEach(id=>{ const f = document.getElementById(id).closest('.field'); if(f) f.style.display = cred ? '' : 'none'; });
+  document.getElementById('loginBtn').style.display = cred ? '' : 'none';
+  document.getElementById('loginReset').style.display = cred ? '' : 'none';
+  document.getElementById('mfaPanel').style.display = step === 'mfa' ? '' : 'none';
+  document.getElementById('setPassPanel').style.display = step === 'setpass' ? '' : 'none';
+}
+let mfaFactorId = null;
 async function attemptLogin(){
   const emailEl = document.getElementById('loginEmail');
   const passEl = document.getElementById('loginPassword');
-  const errEl = document.getElementById('loginError');
   const email = emailEl.value.trim().toLowerCase();
   const pass = passEl.value;
-  await ensureTeamLoaded();
-  const name = teamEmailMap()[email];
-  if(!name || pass !== APP_PASSWORD){
-    errEl.textContent = 'Incorrect username or password.';
-    errEl.style.display = 'block';
-    return;
+  loginError('');
+  if(!email || !pass){ loginError('Enter your email and password.'); return; }
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  passEl.value = '';
+  if(error){ loginError('Incorrect username or password.'); return; }
+  await continueAuth();
+}
+async function showMfaStep(){
+  loginStep('mfa');
+  const qr = document.getElementById('mfaQr'), secret = document.getElementById('mfaSecret'), hint = document.getElementById('mfaHint');
+  qr.style.display = 'none'; secret.style.display = 'none';
+  const { data: factors, error } = await sb.auth.mfa.listFactors();
+  if(error){ loginStep('credentials'); loginError('Could not check two-step verification. Please sign in again.'); return; }
+  const verified = (factors.totp||[]).find(f=>f.status==='verified');
+  if(verified){ mfaFactorId = verified.id; hint.textContent = 'Enter the 6-digit code from your authenticator app.'; }
+  else {
+    for(const f of (factors.all||[])) if(f.status!=='verified') await sb.auth.mfa.unenroll({ factorId: f.id });
+    const { data: enr, error: enrErr } = await sb.auth.mfa.enroll({ factorType:'totp', friendlyName:'SWG CRM ' + new Date().toISOString().slice(0,10) });
+    if(enrErr){ loginStep('credentials'); loginError('Could not start two-step verification setup.'); return; }
+    mfaFactorId = enr.id;
+    hint.textContent = 'First sign-in: scan this QR code with an authenticator app (Google/Microsoft Authenticator), then enter the 6-digit code.';
+    qr.src = enr.totp.qr_code; qr.style.display = 'block';
+    secret.textContent = enr.totp.secret; secret.style.display = 'block';
   }
-  errEl.style.display = 'none';
+  document.getElementById('mfaCode').focus();
+}
+async function verifyMfa(){
+  const codeEl = document.getElementById('mfaCode');
+  const code = codeEl.value.trim(); codeEl.value = '';
+  loginError('');
+  const { error } = await sb.auth.mfa.challengeAndVerify({ factorId: mfaFactorId, code });
+  if(error){ loginError('The code is wrong or expired.'); return; }
+  await continueAuth();
+}
+async function saveNewPassword(){
+  const el = document.getElementById('newPassword');
+  const pw = el.value; el.value = '';
+  if(pw.length < 12){ loginError('At least 12 characters.'); return; }
+  const { error } = await sb.auth.updateUser({ password: pw });
+  if(error){ loginError('Could not save the password. Try again.'); return; }
+  sessionStorage.removeItem('swg-crm-set-password');
+  loginError('');
+  await continueAuth();
+}
+async function continueAuth(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ loginStep('credentials'); return; }
+  if(sessionStorage.getItem('swg-crm-set-password') === '1'){ loginStep('setpass'); return; }
+  const { data: aal } = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
+  if(!aal || aal.currentLevel !== 'aal2'){ await showMfaStep(); return; }
+  const { data: staff, error } = await sb.from('crm_staff').select('role, active').maybeSingle();
+  if(error || !staff || !staff.active){
+    await sb.auth.signOut(); loginStep('credentials');
+    loginError('This account has no CRM access. Ask Ariel or David.'); return;
+  }
+  teamLoadPromise = null;
+  await ensureTeamLoaded();
+  const name = teamEmailMap()[String(session.user.email||'').toLowerCase()];
+  if(!name){
+    await sb.auth.signOut(); loginStep('credentials');
+    loginError('Your email is not on the CRM team list. Ask Ariel or David.'); return;
+  }
+  loginError('');
   state.currentUser = name;
   state.viewingAs = name;
+  state.crmRole = staff.role;
   state.view = 'dashboard';
   boot();
 }
 
 document.getElementById('loginBtn').onclick = attemptLogin;
-ensureTeamLoaded();
+document.getElementById('mfaBtn').onclick = verifyMfa;
+document.getElementById('mfaCode').onkeydown = (e)=>{ if(e.key==='Enter') verifyMfa(); };
+document.getElementById('setPassBtn').onclick = saveNewPassword;
+document.getElementById('loginReset').onclick = async ()=>{
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  if(!email){ loginError('Enter your email first.'); return; }
+  await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+  loginError('If this email is registered, a link to set the password was sent.');
+};
+sb.auth.onAuthStateChange((event)=>{ if(event==='PASSWORD_RECOVERY'){ sessionStorage.setItem('swg-crm-set-password','1'); loginStep('setpass'); } });
+if(/type=(invite|recovery)/.test(location.hash + location.search)) sessionStorage.setItem('swg-crm-set-password','1');
+continueAuth();
 loadChartPref();
 paintNavIcons();
 document.getElementById('loginPassword').onkeydown = (e)=>{ if(e.key==='Enter') attemptLogin(); };
 document.getElementById('loginEmail').onkeydown = (e)=>{ if(e.key==='Enter') document.getElementById('loginPassword').focus(); };
 document.getElementById('logoutBtn').onclick = ()=>{
+  sb.auth.signOut();
+  loginStep('credentials');
   state.currentUser = null;
   agent.open = false; agent.messages = []; agent.log = []; agent.pending = null; agent.offline = false;
   syncAgent();
