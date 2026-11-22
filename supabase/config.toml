@@ -26,3 +26,11 @@ verify_jwt = true
 # checks CONNECTORS_ALLOWED_ORIGINS itself and keeps every token server-side.
 [functions.connectors]
 verify_jwt = false
+
+# Auth Send-Email hook: called by Supabase Auth with a Standard Webhooks signature (verified in code), not a user JWT.
+[functions.auth-send-email]
+verify_jwt = false
+
+# Admin-only staff invitations by team member name (role taken server-side from public.team).
+[functions.crm-invite-staff]
+verify_jwt = true
