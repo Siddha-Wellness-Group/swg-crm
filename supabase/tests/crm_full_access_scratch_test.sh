@@ -28,6 +28,7 @@ INSERT INTO auth.users VALUES ('a0000000-0000-0000-0000-000000000001'),('b000000
 SQL
 psqlc < "$DIR/migrations/20261122200000_crm_staff_read_and_micha_summary.sql" >/dev/null 2>&1
 psqlc < "$DIR/migrations/20261122230000_crm_full_app_staff_access.sql" >/dev/null 2>&1
+psqlc < "$DIR/migrations/20261123000000_crm_remove_mfa_requirement.sql" >/dev/null 2>&1
 psqlc -c "INSERT INTO public.crm_staff(user_id, role) VALUES ('a0000000-0000-0000-0000-000000000001','admin'),('b0000000-0000-0000-0000-000000000002','manager'),('c0000000-0000-0000-0000-000000000003','viewer')"
 
 claims() { echo "{\"sub\":\"$1\",\"aal\":\"$2\",\"role\":\"authenticated\"}"; }
@@ -61,8 +62,8 @@ check "manager cannot write settings" "$(run authenticated "$MGR" "$(ins setting
 check "manager cannot write team"     "$(run authenticated "$MGR" "UPDATE public.team SET name='x' WHERE id='seed' RETURNING id")" "OK:"
 check "admin deletes contact"         "$(run authenticated "$ADMIN" "WITH d AS (DELETE FROM public.contacts WHERE id='seed' RETURNING 1) SELECT count(*) FROM d")" "OK:1"
 check "admin writes settings"         "$(run authenticated "$ADMIN" "$(ins settings)")" "OK:t1"
-check "admin aal1 reads nothing"      "$(run authenticated "$ADMIN1" 'SELECT count(*) FROM public.leads')" "OK:0"
-check "admin aal1 cannot insert"      "$(run authenticated "$ADMIN1" "$(ins leads)")" "DENIED"
+check "admin aal1 reads (no MFA required)" "$(run authenticated "$ADMIN1" 'SELECT count(*) FROM public.leads')" "OK:1"
+check "admin aal1 inserts (no MFA required)" "$(run authenticated "$ADMIN1" "$(ins leads)")" "OK:t1"
 check "non-staff reads nothing"       "$(run authenticated "$NOSTAFF" 'SELECT count(*) FROM public.orders')" "OK:0"
 check "non-staff cannot insert"       "$(run authenticated "$NOSTAFF" "$(ins orders)")" "DENIED"
 check "order_events append ok"        "$(run authenticated "$MGR" "$(ins order_events)")" "OK:t1"
@@ -70,8 +71,10 @@ check "order_events no update"        "$(run authenticated "$ADMIN" "UPDATE publ
 check "email_log read-only"           "$(run authenticated "$ADMIN" "$(ins email_log)")" "DENIED"
 check "anon denied"                   "$(run anon '{}' 'SELECT count(*) FROM public.leads')" "DENIED"
 check "anon cannot insert lead"       "$(run anon '{}' "$(ins leads)")" "DENIED"
+psqlc < "$DIR/rollback/20261123000001_rollback_crm_remove_mfa_requirement.sql" >/dev/null 2>&1
+check "mfa rollback: aal1 reads nothing again" "$(run authenticated "$ADMIN1" 'SELECT count(*) FROM public.leads')" "OK:0"
 psqlc < "$DIR/rollback/20261122230001_rollback_crm_full_app_staff_access.sql" >/dev/null 2>&1
-check "rollback: tasks unreadable"    "$(run authenticated "$ADMIN" 'SELECT count(*) FROM public.tasks')" "DENIED"
+check "rollback(23000001 then 230001): tasks unreadable"    "$(run authenticated "$ADMIN" 'SELECT count(*) FROM public.tasks')" "DENIED"
 check "rollback: leads still readable" "$(run authenticated "$ADMIN" 'SELECT count(*) FROM public.leads')" "OK:1"
 check "rollback: manager cannot insert" "$(run authenticated "$MGR" "$(ins leads)")" "DENIED"
 exit $fail

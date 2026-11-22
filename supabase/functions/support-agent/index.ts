@@ -173,8 +173,8 @@ function isValidMessages(v: unknown): v is Msg[] {
    own history, so every request is an append-only extension of the last
    one (required for thinking blocks to stay valid, and good for caching). */
 
-// 2026-11-22 hardening: the assistant answers only signed-in CRM staff with a two-step-verified session.
-// The gateway verifies the JWT (verify_jwt = true); this re-checks staff + aal2 through the database's own rule.
+// 2026-11-22 hardening: the assistant answers only signed-in, active CRM staff.
+// The gateway verifies the JWT (verify_jwt = true); this re-checks staff through the database's own rule (crm_is_staff).
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
 async function isCrmStaff(req: Request): Promise<boolean> {
@@ -193,7 +193,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(origin) });
   if (req.method !== 'POST') return json({ error: 'method not allowed' }, 405, origin);
   if (ALLOWED_ORIGINS.length && (!origin || !ALLOWED_ORIGINS.includes(origin))) return json({ error: 'origin not allowed' }, 403, origin);
-  if (!(await isCrmStaff(req))) return json({ error: 'sign in to the CRM with two-step verification' }, 401, origin);
+  if (!(await isCrmStaff(req))) return json({ error: 'sign in to the CRM as an active staff member' }, 401, origin);
   if (!Deno.env.get('ANTHROPIC_API_KEY')) return json({ error: 'ANTHROPIC_API_KEY is not set for this function' }, 500, origin);
 
   const raw = await req.text();

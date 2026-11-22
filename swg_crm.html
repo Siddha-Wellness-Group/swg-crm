@@ -2335,8 +2335,8 @@
 <script>
 const SUPABASE_URL = 'https://jrsefbwmumoadncygjsz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TOqcmHJtLJ2ux9-ch0GEyQ_rwQVFjbz';
-// Real identity: Supabase Auth of swg-crm + two-step verification (aal2). Every read/write is decided by
-// Row Level Security (crm_is_staff / crm_staff_role). The publishable key identifies the project only.
+// Real identity: Supabase Auth of swg-crm (email + password). Every read/write is decided by
+// Row Level Security (crm_is_staff / crm_staff_role: active staff row, role-based). The publishable key identifies the project only.
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'implicit' } });
 let state = { view:'dashboard', connectors:[], connectorsError:'', contacts:[], deals:[], orders:[], customers:[], suppliers:[], tasks:[], invoices:[], leads:[], distributors:[], payments:[], team:[], dashboards:[], activeDashboardId:'', validationRules:[], automations:[], sharingRules:{}, guideEntries:[], bigDealAlert:{enabled:false, threshold:10000, currency:'USD'}, bigDealAlerts:[], guideDismissed:{}, dependentFields:[], flows:[], schemaLayout:{}, objectVisibility:{}, fieldVisibility:{}, companySettings:{}, companyNavOpen:true, setupTab:'automation', setupSection:'home', omObject:null, omTab:'details', omSection:'objects', omFilter:'', recordTypes:[], recordTypeAssignments:{}, compactLayouts:{}, reports:[], reportTypes:[], reportsTab:'reports', activeReportId:null, reportDraft:null, reportCollapsed:{}, pageLayouts:[], recordPages:[], relationships:[], profiles:[], permissionSets:[], permissionSetGroups:[], publicGroups:[], emailTemplates:[], adminTab:'profiles', adminReturnView:'dashboard', flowExplorer:false, flowWizard:null, emailTemplateFilter:'', contactFilter:'all', viewingAs:'Ariel', currentUser:null, loaded:false, chartType:'donut', returnView:'dashboard', emailLog:[], emailPreview:null, emailPreviewLocale:'he', tickets:[], profileCustomerId:null, profileLeadId:null, departments:[], accessPolicy:{enforce:false, strictDepartments:false}, accessCheckUser:null, cpOrderPage:0, cpOrderStatusFilter:'all', orderEvents:[], metricSnapshots:[], fcFilters:{search:'', customerStatus:'all', orderStatus:'all', fulfillmentStatus:'all', source:'all', dateRange:'7d'}, fcDrawerCustomerId:null, fcDrawerTab:'overview', fcOrderDrawerId:null, fcTablePage:0, ioEntity:null, ioMode:null, ioReturnView:null };
 
@@ -15025,8 +15025,7 @@ async function continueAuth(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ loginStep('credentials'); return; }
   if(sessionStorage.getItem('swg-crm-set-password') === '1'){ loginStep('setpass'); return; }
-  const { data: aal } = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
-  if(!aal || aal.currentLevel !== 'aal2'){ await showMfaStep(); return; }
+  // Owner decision 2026-11-22: no mandatory MFA/TOTP in the CRM. Access = signed-in Supabase Auth user + active crm_staff row (RLS).
   const { data: staff, error } = await sb.from('crm_staff').select('role, active').maybeSingle();
   if(error || !staff || !staff.active){
     await sb.auth.signOut(); loginStep('credentials');
