@@ -15,8 +15,8 @@ const EMAIL_USER = Deno.env.get('EMAIL_USER') ?? '';
 const EMAIL_PASS = Deno.env.get('EMAIL_PASS') ?? '';
 const EMAIL_FROM_NAME = Deno.env.get('EMAIL_FROM_NAME') ?? 'SWG CRM';
 const EMAIL_REPLY_TO = Deno.env.get('EMAIL_REPLY_TO') ?? EMAIL_USER;
-const ALLOWED_SITES = ['https://crm.micha-ai.com', 'https://full.swg-crm.pages.dev'];
-const DEFAULT_SITE = 'https://full.swg-crm.pages.dev';
+const ALLOWED_SITES = ['https://crm.micha-ai.com', 'https://swg-crm.pages.dev', 'https://full.swg-crm.pages.dev'];
+const DEFAULT_SITE = 'https://swg-crm.pages.dev';
 
 const transport = nodemailer.createTransport({ host: EMAIL_HOST, port: EMAIL_PORT, secure: EMAIL_PORT === 465, auth: { user: EMAIL_USER, pass: EMAIL_PASS } });
 

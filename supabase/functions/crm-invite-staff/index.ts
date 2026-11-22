@@ -9,8 +9,8 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 const URL_ = Deno.env.get('SUPABASE_URL')!;
 const ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const ALLOWED_ORIGINS = ['https://crm.micha-ai.com', 'https://full.swg-crm.pages.dev'];
-const REDIRECT = 'https://full.swg-crm.pages.dev/';
+const ALLOWED_ORIGINS = ['https://crm.micha-ai.com', 'https://swg-crm.pages.dev', 'https://full.swg-crm.pages.dev'];
+const REDIRECT = 'https://swg-crm.pages.dev/';
 const ROLE_MAP: Record<string, string> = { Admin: 'admin', Manager: 'manager', 'Sales Rep': 'sales_rep', Marketing: 'marketing', Support: 'support', 'Read Only': 'viewer' };
 
 function cors(origin: string | null) {
