@@ -2203,6 +2203,10 @@
         <input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"></div>
       <button class="btn" id="mfaBtn" style="width:100%;margin-top:6px;">Verify</button>
     </div>
+    <div id="activatePanel" style="display:none;margin-top:12px;">
+      <p style="font-size:13px;opacity:.85;margin:0 0 8px;">Activate your CRM account, then choose your password.</p>
+      <button class="btn" id="activateBtn" style="width:100%;margin-top:6px;">Activate account</button>
+    </div>
     <div id="setPassPanel" style="display:none;margin-top:12px;">
       <div class="field"><label for="newPassword">New password (at least 12 characters)</label>
         <input id="newPassword" type="password" autocomplete="new-password" minlength="12"></div>
@@ -14970,6 +14974,20 @@ function loginStep(step){
   document.getElementById('loginReset').style.display = cred ? '' : 'none';
   document.getElementById('mfaPanel').style.display = step === 'mfa' ? '' : 'none';
   document.getElementById('setPassPanel').style.display = step === 'setpass' ? '' : 'none';
+  document.getElementById('activatePanel').style.display = step === 'activate' ? '' : 'none';
+}
+// Scanner-safe activation: the email link carries token_hash + type and is only redeemed on an explicit click,
+// so a mail security scanner that merely opens the link cannot consume the one-time token.
+async function activateFromLink(){
+  const q = new URLSearchParams(location.search);
+  const token_hash = q.get('token_hash'), type = q.get('type');
+  if(!token_hash || !['invite','recovery','signup','magiclink'].includes(type)){ loginStep('credentials'); return; }
+  loginError('');
+  const { error } = await sb.auth.verifyOtp({ token_hash, type });
+  history.replaceState(null, '', location.pathname);
+  if(error){ loginStep('credentials'); loginError('This link was already used or has expired. Use "Forgot / set password" to get a new one.'); return; }
+  sessionStorage.setItem('swg-crm-set-password','1');
+  await continueAuth();
 }
 let mfaFactorId = null;
 async function attemptLogin(){
@@ -15057,8 +15075,12 @@ document.getElementById('loginReset').onclick = async ()=>{
   loginError('If this email is registered, a link to set the password was sent.');
 };
 sb.auth.onAuthStateChange((event)=>{ if(event==='PASSWORD_RECOVERY'){ sessionStorage.setItem('swg-crm-set-password','1'); loginStep('setpass'); } });
-if(/type=(invite|recovery)/.test(location.hash + location.search)) sessionStorage.setItem('swg-crm-set-password','1');
-continueAuth();
+document.getElementById('activateBtn').onclick = activateFromLink;
+if(new URLSearchParams(location.search).get('token_hash')){ loginStep('activate'); }
+else {
+  if(/type=(invite|recovery)/.test(location.hash + location.search)) sessionStorage.setItem('swg-crm-set-password','1');
+  continueAuth();
+}
 loadChartPref();
 paintNavIcons();
 document.getElementById('loginPassword').onkeydown = (e)=>{ if(e.key==='Enter') attemptLogin(); };
