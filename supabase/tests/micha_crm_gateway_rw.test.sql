@@ -1,0 +1,30 @@
+\set ON_ERROR_STOP 1
+CREATE OR REPLACE FUNCTION pg_temp.gw(op text, who text, args jsonb, key text DEFAULT 'TESTKEY_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') RETURNS jsonb LANGUAGE plpgsql AS $$
+BEGIN PERFORM set_config('request.headers', jsonb_build_object('x-micha-gateway-key', key)::text, true); RETURN public.micha_crm_gateway(op, who, args); END $$;
+SELECT 'bad key', pg_temp.gw('whoami','admin@x.test','{}','WRONGKEY_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')->>'error' = 'unauthorized';
+SELECT 'not staff', pg_temp.gw('whoami','nobody@x.test','{}')->>'error' = 'not_crm_staff';
+SELECT 'inactive staff', pg_temp.gw('whoami','gone@x.test','{}')->>'error' = 'not_crm_staff';
+SELECT 'whoami role', pg_temp.gw('whoami','ADMIN@x.test','{}')->>'role' = 'admin';
+SELECT 'recent 1h newest first, excludes old', (SELECT string_agg(x->>'reference', ',') FROM jsonb_array_elements(pg_temp.gw('recent_enquiries','admin@x.test','{"hours":1}')->'items') x) = 'TCK-NEW001,edu_abc';
+SELECT 'recent includes full fields', pg_temp.gw('recent_enquiries','admin@x.test','{"hours":1}')->'items'->0->>'email' = 'dana@example.com';
+SELECT 'get by reference', pg_temp.gw('get_record','admin@x.test','{"entity":"tickets","reference":"tck-new001"}')->'record'->>'message' = 'Hello lavender';
+SELECT 'unknown entity refused', pg_temp.gw('get_record','admin@x.test','{"entity":"auth.users","id":"x"}')->>'error' = 'unknown_entity';
+SELECT 'search', jsonb_array_length(pg_temp.gw('search','admin@x.test','{"entity":"tickets","q":"lavender"}')->'items') = 1;
+SELECT 'marketing cannot edit tickets', pg_temp.gw('update','mkt@x.test','{"entity":"tickets","reference":"TCK-NEW001","patch":{"status":"open"}}')->>'error' = 'forbidden_for_role';
+SELECT 'field not editable', pg_temp.gw('update','admin@x.test','{"entity":"tickets","reference":"TCK-NEW001","patch":{"email":"x@y"}}')->>'error' = 'field_not_editable';
+SELECT 'invalid value', pg_temp.gw('update','admin@x.test','{"entity":"tickets","reference":"TCK-NEW001","patch":{"status":"banana"}}')->>'error' = 'invalid_value';
+CREATE TEMP TABLE w AS SELECT pg_temp.gw('update','admin@x.test','{"entity":"tickets","reference":"TCK-NEW001","patch":{"status":"open","notes":"called back"}}') r;
+SELECT 'update ok + before/after', (SELECT r->'before'->>'status' = 'new' AND r->'after'->>'status' = 'open' FROM w) AND (SELECT status FROM tickets WHERE id='t1') = 'open';
+SELECT 'marketing cannot undo admin write', pg_temp.gw('undo','mkt@x.test', jsonb_build_object('write_id',(SELECT r->>'write_id' FROM w)))->>'error' = 'forbidden_for_role';
+SELECT 'undo call ok', pg_temp.gw('undo','admin@x.test', jsonb_build_object('write_id',(SELECT r->>'write_id' FROM w))) ? 'undone';
+SELECT 'undo restored row', (SELECT status || '|' || coalesce(notes,'none') FROM tickets WHERE id='t1') = 'new|none';
+SELECT 'undo twice refused', pg_temp.gw('undo','admin@x.test', jsonb_build_object('write_id',(SELECT r->>'write_id' FROM w)))->>'error' = 'not_undoable';
+CREATE TEMP TABLE w2 AS SELECT pg_temp.gw('update','admin@x.test','{"entity":"tickets","reference":"TCK-NEW001","patch":{"status":"resolved"}}') r;
+UPDATE tickets SET status='closed' WHERE id='t1';
+SELECT 'undo refuses when changed since', pg_temp.gw('undo','admin@x.test', jsonb_build_object('write_id',(SELECT r->>'write_id' FROM w2)))->>'error' = 'changed_since' AND (SELECT status FROM tickets WHERE id='t1')='closed';
+CREATE TEMP TABLE w3 AS SELECT pg_temp.gw('create_task','mkt@x.test','{"title":"Call Dana back","link_type":"ticket","link_id":"t1"}') r;
+SELECT 'marketing creates task', (SELECT status FROM tasks WHERE id = (SELECT r->>'id' FROM w3)) = 'Open';
+SELECT 'undo task create call', pg_temp.gw('undo','mkt@x.test', jsonb_build_object('write_id',(SELECT r->>'write_id' FROM w3))) ? 'undone';
+SELECT 'task removed', NOT EXISTS (SELECT 1 FROM tasks);
+SELECT 'write log rows', (SELECT count(*) FROM micha_gateway.write_log) = 5;
+SELECT 'only anon may execute', has_function_privilege('anon','public.micha_crm_gateway(text,text,jsonb)','execute') AND NOT has_function_privilege('authenticated','public.micha_crm_gateway(text,text,jsonb)','execute');
